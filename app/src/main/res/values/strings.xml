@@ -3,4 +3,18 @@
 
     <string name="splash_title">Pickii</string>
     <string name="splash_subtitle">팀이 필요한 순간, Pickii</string>
+
+    <string name="login_brand">Pickii</string>
+    <string name="login_title">로그인하기</string>
+    <string name="login_label_email">이메일</string>
+    <string name="login_placeholder_email">example@google.com</string>
+    <string name="login_label_password">비밀번호</string>
+    <string name="login_placeholder_password">password@!</string>
+    <string name="login_reset_password">비밀번호 재설정하기</string>
+    <string name="login_button_submit">로그인하기</string>
+    <string name="login_auto_login">자동 로그인</string>
+    <string name="login_divider_or">또는</string>
+    <string name="login_button_signup">회원가입</string>
+    <string name="login_button_find_account">회원 찾기</string>
+    <string name="login_guest_browse">비회원으로 둘러보기 &gt;</string>
 </resources>
