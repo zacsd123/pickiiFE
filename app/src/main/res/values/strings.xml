@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Pickii</string>
+
+    <string name="splash_title">Pickii</string>
+    <string name="splash_subtitle">팀이 필요한 순간, Pickii</string>
 </resources>
