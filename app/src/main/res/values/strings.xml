@@ -17,4 +17,20 @@
     <string name="login_button_signup">회원가입</string>
     <string name="login_button_find_account">회원 찾기</string>
     <string name="login_guest_browse">비회원으로 둘러보기 &gt;</string>
+
+    <string name="nav_home">홈</string>
+    <string name="nav_calendar">캘린더</string>
+    <string name="nav_chat">채팅</string>
+    <string name="nav_mypage">마이페이지</string>
+
+    <string name="home_search_placeholder">공고 제목, 작성자 검색...</string>
+    <string name="home_button_filter">필터링</string>
+    <string name="home_filter_category_title">카테고리</string>
+    <string name="home_filter_topic_title">주제</string>
+    <string name="home_button_reset">초기화</string>
+    <string name="home_button_search">검색</string>
+    <string name="home_recruit_posts_title">모집 글 (%1$d)</string>
+    <string name="home_button_register_post">+ 공고 등록</string>
+    <string name="home_button_detail">상세보기</string>
+    <string name="home_button_apply">지원하기</string>
 </resources>
