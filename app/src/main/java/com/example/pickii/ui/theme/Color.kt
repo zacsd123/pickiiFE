@@ -15,3 +15,5 @@ val PickiiYellow = Color(0xFFF5F04B)
 val PickiiYellowLight = Color(0xFFFFFDE0)
 val PickiiTextGray = Color(0xFF9B9B9B)
 val PickiiFieldBackground = Color(0xFFF3F3EE)
+
+val PickiiNavYellow = Color(0xFFF9FCA8)

@@ -17,4 +17,9 @@
     <string name="login_button_signup">회원가입</string>
     <string name="login_button_find_account">회원 찾기</string>
     <string name="login_guest_browse">비회원으로 둘러보기 &gt;</string>
+
+    <string name="nav_home">홈</string>
+    <string name="nav_calendar">캘린더</string>
+    <string name="nav_chat">채팅</string>
+    <string name="nav_mypage">마이페이지</string>
 </resources>
