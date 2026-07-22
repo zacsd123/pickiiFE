@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
 import com.example.pickii.ui.splash.SplashScreen
 import com.example.pickii.ui.theme.PickiiTheme
@@ -20,7 +21,8 @@ import dagger.hilt.android.AndroidEntryPoint
 /** 앱이 현재 보여주고 있는 최상위 화면. */
 private enum class PickiiScreen {
     Splash,
-    Login
+    Login,
+    Home
 }
 
 @AndroidEntryPoint
@@ -42,7 +44,12 @@ class MainActivity : ComponentActivity() {
                             onTimeout = { currentScreen = PickiiScreen.Login }
                         )
 
-                        PickiiScreen.Login -> LoginScreen()
+                        PickiiScreen.Login -> LoginScreen(
+                            onLoginClick = { _, _ -> currentScreen = PickiiScreen.Home },
+                            onGuestClick = { currentScreen = PickiiScreen.Home }
+                        )
+
+                        PickiiScreen.Home -> HomeScreen()
                     }
                 }
             }
