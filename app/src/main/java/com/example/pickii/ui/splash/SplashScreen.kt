@@ -59,7 +59,7 @@ private fun SplashScreenContent() {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickiiYellow, PickiiYellowLight)
+                    colors = listOf(PickiiYellowLight, PickiiYellow)
                 )
             )
     ) {
