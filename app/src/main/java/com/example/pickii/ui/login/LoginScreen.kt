@@ -60,16 +60,17 @@ private val ActionButtonHeight = 52.dp
  * 이메일/비밀번호 로그인 화면.
  *
  * [LoginViewModel]에서 입력 상태를 받아와 [LoginScreenContent]에 전달한다.
+ * 실제 로그인/비회원 전환 처리는 [LoginViewModel]이 담당하며, 성공했을 때만 각 콜백이 호출된다.
  *
- * @param onLoginClick 로그인 버튼 클릭 시 입력된 이메일과 비밀번호를 전달하는 콜백
+ * @param onLoginClick 로그인에 성공했을 때 호출되는 콜백
  * @param onResetPasswordClick 비밀번호 재설정 링크 클릭 콜백
  * @param onSignUpClick 회원가입 버튼 클릭 콜백
  * @param onFindAccountClick 회원 찾기 버튼 클릭 콜백
- * @param onGuestClick 비회원으로 둘러보기 클릭 콜백
+ * @param onGuestClick 비회원으로 둘러보기를 완료했을 때 호출되는 콜백
  */
 @Composable
 fun LoginScreen(
-    onLoginClick: (email: String, password: String) -> Unit = { _, _ -> },
+    onLoginClick: () -> Unit = {},
     onResetPasswordClick: () -> Unit = {},
     onSignUpClick: () -> Unit = {},
     onFindAccountClick: () -> Unit = {},
@@ -84,11 +85,11 @@ fun LoginScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
         onToggleAutoLogin = viewModel::onToggleAutoLogin,
-        onLoginClick = { onLoginClick(uiState.email, uiState.password) },
+        onLoginClick = { viewModel.onLoginClick(onSuccess = onLoginClick) },
         onResetPasswordClick = onResetPasswordClick,
         onSignUpClick = onSignUpClick,
         onFindAccountClick = onFindAccountClick,
-        onGuestClick = onGuestClick
+        onGuestClick = { viewModel.onGuestClick(onComplete = onGuestClick) }
     )
 }
 
@@ -107,18 +108,20 @@ private fun LoginScreenContent(
     onGuestClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(PickiiYellowLight, Color.White)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(PickiiYellowLight, Color.White)
+                    )
                 )
-            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -156,19 +159,21 @@ private fun LoginScreenContent(
                 onValueChange = onPasswordChange,
                 placeholder = stringResource(R.string.login_placeholder_password),
                 keyboardType = KeyboardType.Password,
-                visualTransformation = if (uiState.isPasswordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
+                visualTransformation =
+                    if (uiState.isPasswordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
                 trailingIcon = {
                     IconButton(onClick = onTogglePasswordVisibility) {
                         Icon(
-                            imageVector = if (uiState.isPasswordVisible) {
-                                Icons.Filled.Visibility
-                            } else {
-                                Icons.Filled.VisibilityOff
-                            },
+                            imageVector =
+                                if (uiState.isPasswordVisible) {
+                                    Icons.Filled.Visibility
+                                } else {
+                                    Icons.Filled.VisibilityOff
+                                },
                             contentDescription = null,
                             tint = PickiiTextGray
                         )
@@ -182,21 +187,23 @@ private fun LoginScreenContent(
                 text = stringResource(R.string.login_reset_password),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onResetPasswordClick),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onResetPasswordClick),
                 textAlign = TextAlign.End
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ActionButtonHeight)
-                    .clip(RoundedCornerShape(FieldCornerRadius))
-                    .background(Color.Black)
-                    .clickable(onClick = onLoginClick),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(ActionButtonHeight)
+                        .clip(RoundedCornerShape(FieldCornerRadius))
+                        .background(Color.Black)
+                        .clickable(onClick = onLoginClick),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -210,23 +217,25 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onToggleAutoLogin),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onToggleAutoLogin),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(18.dp)
-                        .border(1.5.dp, PickiiTextGray, CircleShape)
-                        .then(
-                            if (uiState.isAutoLoginChecked) {
-                                Modifier.background(Color.Black, CircleShape)
-                            } else {
-                                Modifier
-                            }
-                        )
+                    modifier =
+                        Modifier
+                            .size(18.dp)
+                            .border(1.5.dp, PickiiTextGray, CircleShape)
+                            .then(
+                                if (uiState.isAutoLoginChecked) {
+                                    Modifier.background(Color.Black, CircleShape)
+                                } else {
+                                    Modifier
+                                }
+                            )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -266,10 +275,11 @@ private fun LoginScreenContent(
                 text = stringResource(R.string.login_guest_browse),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onGuestClick)
-                    .padding(bottom = 24.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onGuestClick)
+                        .padding(bottom = 24.dp),
                 textAlign = TextAlign.Center
             )
         }
@@ -308,25 +318,30 @@ private fun PickiiTextField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = visualTransformation,
         trailingIcon = trailingIcon,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = PickiiFieldBackground,
-            unfocusedContainerColor = PickiiFieldBackground,
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent
-        )
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = PickiiFieldBackground,
+                unfocusedContainerColor = PickiiFieldBackground,
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent
+            )
     )
 }
 
 /** 회원가입, 회원 찾기 등에 사용되는 화살표(`>`)가 붙은 보조 버튼. */
 @Composable
-private fun SecondaryButton(text: String, onClick: () -> Unit) {
+private fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit
+) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(ActionButtonHeight)
-            .clip(RoundedCornerShape(FieldCornerRadius))
-            .background(PickiiFieldBackground)
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(ActionButtonHeight)
+                .clip(RoundedCornerShape(FieldCornerRadius))
+                .background(PickiiFieldBackground)
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

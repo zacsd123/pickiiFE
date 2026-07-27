@@ -55,18 +55,20 @@ fun SplashScreen(
 @Composable
 private fun SplashScreenContent() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(PickiiYellow, PickiiYellowLight)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(PickiiYellowLight, PickiiYellow)
+                    )
                 )
-            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 80.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

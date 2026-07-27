@@ -1,0 +1,13 @@
+root = true
+
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+insert_final_newline = true
+charset = utf-8
+ij_kotlin_allow_trailing_comma = false
+ij_kotlin_allow_trailing_comma_on_call_site = false
+# Jetpack Compose 공식 컨벤션은 @Composable 함수를 PascalCase로 짓는다(컴포저블은 UI를 "방출"하는
+# 컴포넌트 취급). ktlint 기본 function-naming 규칙은 이를 모르므로 @Composable에 한해 예외 처리한다.
+ktlint_function_naming_ignore_when_annotated_with = Composable
