@@ -503,7 +503,7 @@ private fun RegisterPostButton(onClick: () -> Unit) {
     }
 }
 
-/** 모집 글 하나를 보여주는 카드. */
+/** 모집 글 하나를 보여주는 카드. 카드 영역을 누르면 상세보기와 동일하게 상세 화면으로 이동한다. */
 @Composable
 private fun PostCard(
     post: RecruitPost,
@@ -514,6 +514,7 @@ private fun PostCard(
     Column(
         modifier =
             modifier
+                .clickable(onClick = onDetailClick)
                 .clip(RoundedCornerShape(16.dp))
                 .background(PickiiPostCardBackground)
                 .padding(16.dp)
