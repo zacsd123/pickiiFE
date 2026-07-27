@@ -42,14 +42,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.domain.model.CampusScope
+import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.model.RecruitTopic
+import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.PickiiBottomNav
 import com.example.pickii.ui.common.PickiiBottomNavTab
+import com.example.pickii.ui.common.SelectableChip
 import com.example.pickii.ui.theme.PickiiBlue
-import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiPostCardBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import com.example.pickii.util.toCompactDisplayString
 
 /** 필드/칩/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val ChipCornerRadius = 20.dp
@@ -149,12 +155,13 @@ private fun HomeScreenContent(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(PickiiYellowLight)
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(PickiiYellowLight)
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -194,14 +201,17 @@ private fun HomeScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 0.dp, 0.dp, 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.home_recruit_posts_title, uiState.posts.size),
                     color = Color.Black,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 RegisterPostButton(onClick = onRegisterPostClick)
@@ -245,16 +255,21 @@ private fun HomeScreenContent(
 
 /** 상단의 Pickii 로고, 학교명, 알림 아이콘. */
 @Composable
-private fun HomeTopBar(schoolName: String, notificationCount: Int, onNotificationClick: () -> Unit) {
+private fun HomeTopBar(
+    schoolName: String,
+    notificationCount: Int,
+    onNotificationClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Black),
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
             Text(text = "P", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
@@ -274,11 +289,12 @@ private fun HomeTopBar(schoolName: String, notificationCount: Int, onNotificatio
         )
 
         Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(PickiiFieldBackground)
-                .clickable(onClick = onNotificationClick),
+            modifier =
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(PickiiFieldBackground)
+                    .clickable(onClick = onNotificationClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -290,14 +306,20 @@ private fun HomeTopBar(schoolName: String, notificationCount: Int, onNotificatio
 
             if (notificationCount > 0) {
                 Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(16.dp)
-                        .clip(CircleShape)
-                        .background(Color.Red),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(Color.Red),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = notificationCount.toString(), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = notificationCount.toString(),
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -306,7 +328,10 @@ private fun HomeTopBar(schoolName: String, notificationCount: Int, onNotificatio
 
 /** 공고 제목/작성자를 검색하는 입력창. */
 @Composable
-private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+private fun SearchField(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
@@ -317,12 +342,13 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         singleLine = true,
         shape = RoundedCornerShape(ChipCornerRadius),
         trailingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null, tint = PickiiTextGray) },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent
-        )
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent
+            )
     )
 }
 
@@ -330,46 +356,27 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 @Composable
 private fun FilterToggleButton(onClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(ChipCornerRadius))
-            .background(Color.Black)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(ChipCornerRadius))
+                .background(Color.Black)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = Icons.Filled.Menu, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+        Icon(
+            imageVector = Icons.Filled.Menu,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+        )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = stringResource(R.string.home_button_filter), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
-/** 교내/교외 모집 글 범위를 고르는 세그먼트 토글. */
-@Composable
-private fun CampusScopeToggle(selected: CampusScope, onSelect: (CampusScope) -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(ChipCornerRadius))
-            .background(PickiiFieldBackground)
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CampusScope.entries.forEach { scope ->
-            val isSelected = scope == selected
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(ChipCornerRadius))
-                    .background(if (isSelected) Color.Black else Color.Transparent)
-                    .clickable { onSelect(scope) }
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = scope.label,
-                    color = if (isSelected) Color.White else PickiiTextGray,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
+        Text(
+            text = stringResource(R.string.home_button_filter),
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -384,17 +391,23 @@ private fun FilterPanel(
     onSearchClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+                .padding(16.dp)
     ) {
-        Text(text = stringResource(R.string.home_filter_category_title), color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.home_filter_category_title),
+            color = Color.Black,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RecruitCategory.entries.forEach { category ->
-                FilterChip(
+                SelectableChip(
                     label = category.label,
                     selected = category == selectedCategory,
                     enabled = true,
@@ -405,12 +418,17 @@ private fun FilterPanel(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(text = stringResource(R.string.home_filter_topic_title), color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.home_filter_topic_title),
+            color = Color.Black,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(10.dp))
         RecruitTopic.entries.chunked(4).forEach { rowTopics ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 rowTopics.forEach { topic ->
-                    FilterChip(
+                    SelectableChip(
                         label = topic.label,
                         selected = topic in selectedTopics,
                         enabled = topic.isEnabled,
@@ -428,48 +446,40 @@ private fun FilterPanel(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(PickiiFieldBackground)
-                    .clickable(onClick = onResetFilters)
-                    .padding(vertical = 12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PickiiFieldBackground)
+                        .clickable(onClick = onResetFilters)
+                        .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.home_button_reset), color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = stringResource(R.string.home_button_reset),
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(PickiiBlue)
-                    .clickable(onClick = onSearchClick)
-                    .padding(vertical = 12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PickiiBlue)
+                        .clickable(onClick = onSearchClick)
+                        .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.home_button_search), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = stringResource(R.string.home_button_search),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
-    }
-}
-
-/** 카테고리/주제 필터에 사용되는 선택 가능한 칩. */
-@Composable
-private fun FilterChip(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(ChipCornerRadius))
-            .background(
-                when {
-                    !enabled -> PickiiDisabledGray
-                    selected -> PickiiBlue
-                    else -> Color.Black
-                }
-            )
-            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
-    ) {
-        Text(text = label, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -477,25 +487,44 @@ private fun FilterChip(label: String, selected: Boolean, enabled: Boolean, onCli
 @Composable
 private fun RegisterPostButton(onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(ChipCornerRadius))
-            .background(Color.Black)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(ChipCornerRadius))
+                .background(Color.Black)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
-        Text(text = stringResource(R.string.home_button_register_post), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        Text(
+            text = stringResource(R.string.home_button_register_post),
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
-/** 모집 글 하나를 보여주는 카드. */
+/** 모집 글 하나를 보여주는 카드. 카드 영역을 누르면 상세보기와 동일하게 상세 화면으로 이동한다. */
 @Composable
-private fun PostCard(post: RecruitPost, onDetailClick: () -> Unit, onApplyClick: () -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+private fun PostCard(
+    post: RecruitPost,
+    onDetailClick: () -> Unit,
+    onApplyClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier =
+            modifier
+                .clickable(onClick = onDetailClick)
+                .clip(RoundedCornerShape(16.dp))
+                .background(PickiiPostCardBackground)
+                .padding(16.dp)
+    ) {
         Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(PickiiFieldBackground),
+            modifier =
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(PickiiFieldBackground),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -512,7 +541,11 @@ private fun PostCard(post: RecruitPost, onDetailClick: () -> Unit, onApplyClick:
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "${post.authorName}, ${post.date}", color = PickiiTextGray, fontSize = 12.sp)
+        Text(
+            text = "${post.authorNickname}, ${post.createdAt.toCompactDisplayString()}",
+            color = PickiiTextGray,
+            fontSize = 12.sp
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -527,26 +560,38 @@ private fun PostCard(post: RecruitPost, onDetailClick: () -> Unit, onApplyClick:
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(PostActionButtonHeight)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PickiiFieldBackground)
-                    .clickable(onClick = onDetailClick),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(PostActionButtonHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PickiiFieldBackground)
+                        .clickable(onClick = onDetailClick),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.home_button_detail), color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = stringResource(R.string.home_button_detail),
+                    color = Color.Black,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(PostActionButtonHeight)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PickiiBlue)
-                    .clickable(onClick = onApplyClick),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(PostActionButtonHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PickiiBlue)
+                        .clickable(onClick = onApplyClick),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.home_button_apply), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = stringResource(R.string.home_button_apply),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
@@ -582,11 +627,12 @@ private fun PaginationRow(
         visiblePageNumbers.forEach { page ->
             val isSelected = page == currentPage
             Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(if (isSelected) Color.Black else Color.Transparent)
-                    .clickable(enabled = !isSelected) { onPageClick(page) },
+                modifier =
+                    Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) Color.Black else Color.Transparent)
+                        .clickable(enabled = !isSelected) { onPageClick(page) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(

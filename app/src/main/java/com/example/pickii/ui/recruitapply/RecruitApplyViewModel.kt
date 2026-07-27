@@ -1,0 +1,182 @@
+package com.example.pickii.ui.recruitapply
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
+import com.example.pickii.domain.model.CurrentUser
+import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.ui.common.AiDialogState
+import com.example.pickii.ui.common.RecruitUiEvent
+import com.example.pickii.ui.navigation.ARG_POST_ID
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/** "전달 메시지"에 입력할 수 있는 최대 글자 수. */
+private const val MAX_MESSAGE_LENGTH = 300
+
+/** [RecruitApplyScreen]에 표시되는 상태. */
+data class RecruitApplyUiState(
+    val post: RecruitPost? = null,
+    val currentUser: CurrentUser? = null,
+    val message: String = "",
+    val aiDialogState: AiDialogState = AiDialogState.Hidden,
+    val isSubmitConfirmDialogVisible: Boolean = false,
+    val isCompletionDialogVisible: Boolean = false,
+    val isBackWarningDialogVisible: Boolean = false
+) {
+    /** 지원 가능 인원(모집 인원 - 현재 지원 인원). 게시글을 아직 불러오지 못했으면 0이다. */
+    val availableSlots: Int
+        get() = (post?.maxParticipants ?: 0) - (post?.currentParticipants ?: 0)
+
+    /** 현재 사용자가 프로필(Resume)을 보유하고 있는지 여부. */
+    val hasProfile: Boolean
+        get() = currentUser?.hasProfile == true
+}
+
+/**
+ * 공고 지원 화면의 상태를 보관하고, [RecruitRepository]/[SessionRepository]를 통해
+ * 지원 메시지 작성, AI 초안 생성, 지원 등록을 처리한다.
+ */
+@HiltViewModel
+class RecruitApplyViewModel
+    @Inject
+    constructor(
+        savedStateHandle: SavedStateHandle,
+        private val recruitRepository: RecruitRepository,
+        private val sessionRepository: SessionRepository
+    ) : ViewModel() {
+        private val postId: String = requireNotNull(savedStateHandle.get<String>(ARG_POST_ID)) { "postId가 필요합니다." }
+
+        private val _uiState = MutableStateFlow(RecruitApplyUiState())
+        val uiState: StateFlow<RecruitApplyUiState> = _uiState.asStateFlow()
+
+        private val _events = Channel<RecruitUiEvent>(Channel.BUFFERED)
+        val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
+
+        init {
+            observePost()
+            observeCurrentUser()
+        }
+
+        /** [RecruitRepository]에서 이 화면이 보여줄 게시글을 구독한다. */
+        private fun observePost() {
+            viewModelScope.launch {
+                recruitRepository.observePosts().collect { posts ->
+                    _uiState.update { it.copy(post = posts.firstOrNull { post -> post.id == postId }) }
+                }
+            }
+        }
+
+        /** [SessionRepository]에서 현재 로그인한 사용자를 구독해 프로필 보유 여부 등을 반영한다. */
+        private fun observeCurrentUser() {
+            viewModelScope.launch {
+                sessionRepository.currentUser.collect { user ->
+                    _uiState.update { it.copy(currentUser = user) }
+                }
+            }
+        }
+
+        /** 전달 메시지를 변경한다. 최대 글자 수를 넘는 입력은 무시한다. */
+        fun onMessageChange(value: String) {
+            if (value.length <= MAX_MESSAGE_LENGTH) {
+                _uiState.update { it.copy(message = value) }
+            }
+        }
+
+        /** "AI 도움받기" 버튼을 클릭해 지원 메시지 초안 생성을 시작한다. */
+        fun onAiHelpClick() {
+            generateAiDraft()
+        }
+
+        /** AI 초안 생성 실패 팝업에서 "다시 시도"를 클릭한다. */
+        fun onAiRetryClick() {
+            generateAiDraft()
+        }
+
+        /** AI 초안 생성 실패 팝업을 닫는다. */
+        fun onAiDialogDismiss() {
+            _uiState.update { it.copy(aiDialogState = AiDialogState.Hidden) }
+        }
+
+        /** 게시글 정보를 바탕으로 AI 지원 메시지 초안을 생성한다. */
+        private fun generateAiDraft() {
+            val post = _uiState.value.post ?: return
+            _uiState.update { it.copy(aiDialogState = AiDialogState.Loading) }
+            viewModelScope.launch {
+                val prompt = "${post.title} (${post.category.label}, ${post.topic.label})"
+                recruitRepository
+                    .generateAiDraft(prompt)
+                    .onSuccess { draft ->
+                        _uiState.update { it.copy(message = draft, aiDialogState = AiDialogState.Hidden) }
+                    }.onFailure {
+                        _uiState.update { it.copy(aiDialogState = AiDialogState.Failed) }
+                    }
+            }
+        }
+
+        /**
+         * "지원하기" 버튼을 클릭한다. 모집이 마감된 공고면 토스트만 보여주고,
+         * 그렇지 않으면 지원 확인 팝업을 연다.
+         */
+        fun onSubmitClick() {
+            val post = _uiState.value.post ?: return
+            if (post.status == RecruitStatus.CLOSED) {
+                viewModelScope.launch {
+                    _events.send(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_closed_recruiting))
+                }
+                return
+            }
+            _uiState.update { it.copy(isSubmitConfirmDialogVisible = true) }
+        }
+
+        /** 지원 확인 팝업에서 확인을 눌러 실제로 지원을 등록한다. */
+        fun onSubmitConfirm() {
+            val post = _uiState.value.post ?: return
+            val user = _uiState.value.currentUser ?: return
+            _uiState.update { it.copy(isSubmitConfirmDialogVisible = false) }
+            viewModelScope.launch {
+                recruitRepository
+                    .submitApplication(
+                        postId = post.id,
+                        applicantId = user.id,
+                        applicantNickname = user.nickname,
+                        message = _uiState.value.message
+                    ).onSuccess {
+                        _uiState.update { it.copy(isCompletionDialogVisible = true) }
+                    }
+            }
+        }
+
+        /** 지원 확인 팝업을 닫는다. */
+        fun onSubmitDialogDismiss() {
+            _uiState.update { it.copy(isSubmitConfirmDialogVisible = false) }
+        }
+
+        /** 뒤로가기를 시도한다. 작성 중인 내용이 저장되지 않는다는 경고 팝업을 먼저 보여준다. */
+        fun onBackRequested() {
+            _uiState.update { it.copy(isBackWarningDialogVisible = true) }
+        }
+
+        /** 뒤로가기 경고 팝업에서 확인을 눌러 실제로 화면을 나간다. */
+        fun onBackWarningConfirm(onConfirmed: () -> Unit) {
+            _uiState.update { it.copy(isBackWarningDialogVisible = false) }
+            onConfirmed()
+        }
+
+        /** 뒤로가기 경고 팝업을 닫고 화면에 남는다. */
+        fun onBackWarningDismiss() {
+            _uiState.update { it.copy(isBackWarningDialogVisible = false) }
+        }
+    }

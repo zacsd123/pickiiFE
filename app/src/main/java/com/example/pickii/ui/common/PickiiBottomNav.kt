@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
 import com.example.pickii.ui.theme.PickiiNavYellow
-import com.example.pickii.ui.theme.PickiiYellow
 
 /** 캡슐 모양 배경/인디케이터의 모서리 둥글기. */
 private val NavCapsuleCornerRadius = 20.dp
@@ -58,7 +57,11 @@ enum class PickiiBottomNavTab {
 }
 
 /** 탭의 위치/크기를 [PickiiBottomNav]의 슬라이딩 인디케이터 애니메이션에 사용하기 위해 기록해둔 값. */
-private data class NavTabBounds(val x: Dp, val width: Dp, val height: Dp)
+private data class NavTabBounds(
+    val x: Dp,
+    val width: Dp,
+    val height: Dp
+)
 
 /**
  * 인디케이터 이동과 탭/막대 크기 변화에 공통으로 사용하는 스프링 애니메이션.
@@ -67,24 +70,28 @@ private data class NavTabBounds(val x: Dp, val width: Dp, val height: Dp)
  * `tween`은 목표가 바뀔 때마다 처음부터 다시 보간해 끊겨 보인다. `spring`은 속도 기반이라
  * 목표가 계속 바뀌어도 자연스럽게 이어서 따라가므로 두 값 모두 스프링을 사용한다.
  */
-private val NavIndicatorAnimationSpec = spring<Dp>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-private val NavSizeAnimationSpec = spring<IntSize>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+private val NavIndicatorAnimationSpec =
+    spring<Dp>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+private val NavSizeAnimationSpec =
+    spring<IntSize>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
 
 /** 탭과 아이콘 목록. */
-private val PickiiBottomNavItems: List<Pair<PickiiBottomNavTab, ImageVector>> = listOf(
-    PickiiBottomNavTab.HOME to Icons.Filled.Home,
-    PickiiBottomNavTab.CALENDAR to Icons.Filled.DateRange,
-    PickiiBottomNavTab.CHAT to Icons.Filled.ChatBubbleOutline,
-    PickiiBottomNavTab.MY_PAGE to Icons.Filled.Person
-)
+private val PickiiBottomNavItems: List<Pair<PickiiBottomNavTab, ImageVector>> =
+    listOf(
+        PickiiBottomNavTab.HOME to Icons.Filled.Home,
+        PickiiBottomNavTab.CALENDAR to Icons.Filled.DateRange,
+        PickiiBottomNavTab.CHAT to Icons.Filled.ChatBubbleOutline,
+        PickiiBottomNavTab.MY_PAGE to Icons.Filled.Person
+    )
 
 /** 탭에 표시할 라벨 문자열 리소스. */
-private fun pickiiBottomNavLabelRes(tab: PickiiBottomNavTab): Int = when (tab) {
-    PickiiBottomNavTab.HOME -> R.string.nav_home
-    PickiiBottomNavTab.CALENDAR -> R.string.nav_calendar
-    PickiiBottomNavTab.CHAT -> R.string.nav_chat
-    PickiiBottomNavTab.MY_PAGE -> R.string.nav_mypage
-}
+private fun pickiiBottomNavLabelRes(tab: PickiiBottomNavTab): Int =
+    when (tab) {
+        PickiiBottomNavTab.HOME -> R.string.nav_home
+        PickiiBottomNavTab.CALENDAR -> R.string.nav_calendar
+        PickiiBottomNavTab.CHAT -> R.string.nav_chat
+        PickiiBottomNavTab.MY_PAGE -> R.string.nav_mypage
+    }
 
 /**
  * 여러 화면에서 공유하는 하단 탭 내비게이션 바.
@@ -96,7 +103,10 @@ private fun pickiiBottomNavLabelRes(tab: PickiiBottomNavTab): Int = when (tab) {
  * @param onTabSelect 탭 클릭 콜백
  */
 @Composable
-fun PickiiBottomNav(selectedTab: PickiiBottomNavTab, onTabSelect: (PickiiBottomNavTab) -> Unit) {
+fun PickiiBottomNav(
+    selectedTab: PickiiBottomNavTab,
+    onTabSelect: (PickiiBottomNavTab) -> Unit
+) {
     val density = LocalDensity.current
     val tabBounds = remember { mutableStateMapOf<PickiiBottomNavTab, NavTabBounds>() }
     val selectedBounds = tabBounds[selectedTab]
@@ -118,20 +128,22 @@ fun PickiiBottomNav(selectedTab: PickiiBottomNavTab, onTabSelect: (PickiiBottomN
     )
 
     Box(
-        modifier = Modifier
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color.Black)
-            .animateContentSize(animationSpec = NavSizeAnimationSpec)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+        modifier =
+            Modifier
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color.Black)
+                .animateContentSize(animationSpec = NavSizeAnimationSpec)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Box(
-            modifier = Modifier
-                .offset(x = indicatorX)
-                .width(indicatorWidth)
-                .height(indicatorHeight)
-                .clip(RoundedCornerShape(NavCapsuleCornerRadius))
-                .background(PickiiNavYellow)
+            modifier =
+                Modifier
+                    .offset(x = indicatorX)
+                    .width(indicatorWidth)
+                    .height(indicatorHeight)
+                    .clip(RoundedCornerShape(NavCapsuleCornerRadius))
+                    .background(PickiiNavYellow)
         )
 
         Row(
@@ -146,23 +158,29 @@ fun PickiiBottomNav(selectedTab: PickiiBottomNavTab, onTabSelect: (PickiiBottomN
                 )
 
                 Row(
-                    modifier = Modifier
-                        .onGloballyPositioned { coordinates ->
-                            tabBounds[tab] = with(density) {
-                                NavTabBounds(
-                                    x = coordinates.positionInParent().x.toDp(),
-                                    width = coordinates.size.width.toDp(),
-                                    height = coordinates.size.height.toDp()
-                                )
-                            }
-                        }
-                        .clip(RoundedCornerShape(NavCapsuleCornerRadius))
-                        .clickable(onClick = { onTabSelect(tab) })
-                        .animateContentSize(animationSpec = NavSizeAnimationSpec)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier =
+                        Modifier
+                            .onGloballyPositioned { coordinates ->
+                                tabBounds[tab] =
+                                    with(density) {
+                                        NavTabBounds(
+                                            x = coordinates.positionInParent().x.toDp(),
+                                            width = coordinates.size.width.toDp(),
+                                            height = coordinates.size.height.toDp()
+                                        )
+                                    }
+                            }.clip(RoundedCornerShape(NavCapsuleCornerRadius))
+                            .clickable(onClick = { onTabSelect(tab) })
+                            .animateContentSize(animationSpec = NavSizeAnimationSpec)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(18.dp)
+                    )
                     if (isSelected) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
