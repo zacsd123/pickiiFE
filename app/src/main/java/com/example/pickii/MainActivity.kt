@@ -1,5 +1,6 @@
 package com.example.pickii
 
+import com.example.pickii.ui.applicant.ApplicantRoute
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,46 +29,56 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+//        setContent {
+//            PickiiTheme {
+//                val chatListViewModel: ChatListViewModel = hiltViewModel()
+//
+//                var selectedChatRoom by remember {
+//                    mutableStateOf<ChatRoomPreviewUiModel?>(null)
+//                }
+//
+//                val currentChatRoom = selectedChatRoom
+//
+//                if (currentChatRoom == null) {
+//                    ChatListRoute(
+//                        viewModel = chatListViewModel,
+//                        onChatRoomClick = { chatRoom ->
+//                            selectedChatRoom = chatRoom
+//                        },
+//                    )
+//                } else {
+//                    ChatRoomRoute(
+//                        roomId = currentChatRoom.id,
+//                        roomTitle = if (
+//                            currentChatRoom.type == ChatRoomType.GROUP
+//                        ) {
+//                            currentChatRoom.participantSummary.orEmpty()
+//                        } else {
+//                            currentChatRoom.senderName
+//                        },
+//                        roomType = currentChatRoom.type,
+//                        onBackClick = {
+//                            selectedChatRoom = null
+//                        },
+//                        onLeaveChatRoom = {
+//                            chatListViewModel.removeChatRoom(
+//                                roomId = currentChatRoom.id,
+//                            )
+//
+//                            selectedChatRoom = null
+//                        },
+//                    )
+//                }
+//            }
+//        }
+
         setContent {
             PickiiTheme {
-                val chatListViewModel: ChatListViewModel = hiltViewModel()
-
-                var selectedChatRoom by remember {
-                    mutableStateOf<ChatRoomPreviewUiModel?>(null)
-                }
-
-                val currentChatRoom = selectedChatRoom
-
-                if (currentChatRoom == null) {
-                    ChatListRoute(
-                        viewModel = chatListViewModel,
-                        onChatRoomClick = { chatRoom ->
-                            selectedChatRoom = chatRoom
-                        },
-                    )
-                } else {
-                    ChatRoomRoute(
-                        roomId = currentChatRoom.id,
-                        roomTitle = if (
-                            currentChatRoom.type == ChatRoomType.GROUP
-                        ) {
-                            currentChatRoom.participantSummary.orEmpty()
-                        } else {
-                            currentChatRoom.senderName
-                        },
-                        roomType = currentChatRoom.type,
-                        onBackClick = {
-                            selectedChatRoom = null
-                        },
-                        onLeaveChatRoom = {
-                            chatListViewModel.removeChatRoom(
-                                roomId = currentChatRoom.id,
-                            )
-
-                            selectedChatRoom = null
-                        },
-                    )
-                }
+                ApplicantRoute(
+                    onBackClick = {
+                        finish()
+                    },
+                )
             }
         }
     }
