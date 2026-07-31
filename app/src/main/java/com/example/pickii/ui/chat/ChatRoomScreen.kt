@@ -60,7 +60,7 @@ private val MyMessageColor = Color(0xFF111111)
 private val OtherMessageColor = Color(0xFFF0F1F4)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
 private val SecondaryTextColor = Color(0xFF9CA3AF)
-private val PickiiYellowColor = Color(0xFFF4FFA3)
+private val PickiiYellowColor = Color(0xFFF9FCA8)
 private const val MEETING_DURATION_MILLIS = 2 * 60 * 60 * 1000L
 
 /**

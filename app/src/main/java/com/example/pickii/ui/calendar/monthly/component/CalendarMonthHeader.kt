@@ -1,9 +1,7 @@
 package com.example.pickii.ui.calendar.monthly.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,13 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,13 +24,12 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val PreviousMonthButtonColor = Color(0xFFC5AAFF)
-private val NextMonthButtonColor = Color(0xFFF2D5A4)
 private val CalendarTextColor = Color(0xFF171717)
 private val CalendarYearColor = Color(0xFF7D7D70)
 
 /**
- * 월간 캘린더 상단의 연도, 월 이름, 이전·다음 달 버튼을 표시한다.
+ * 월간 캘린더 상단의 연도, 월 이름,
+ * 이전·다음 달 이동 버튼을 표시한다.
  *
  * 화살표 문자는 추후 SVG 리소스로 교체한다.
  */
@@ -60,41 +58,16 @@ fun CalendarMonthHeader(
             modifier = Modifier.height(8.dp),
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = monthName,
-                color = CalendarTextColor,
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Black,
-                lineHeight = 68.sp,
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CalendarMonthMoveButton(
-                    arrowText = "‹",
-                    backgroundColor = PreviousMonthButtonColor,
-                    onClick = onPreviousMonthClick,
-                )
-
-                CalendarMonthMoveButton(
-                    arrowText = "›",
-                    backgroundColor = NextMonthButtonColor,
-                    onClick = onNextMonthClick,
-                )
-            }
-        }
+        CalendarMonthSelector(
+            monthName = monthName,
+            onPreviousMonthClick = onPreviousMonthClick,
+            onNextMonthClick = onNextMonthClick,
+        )
     }
 }
 
 /**
- * 연도와 작은 월 이동 화살표를 표시한다.
+ * 연도와 이전·다음 달 이동 화살표를 표시한다.
  */
 @Composable
 private fun CalendarYearSelector(
@@ -104,7 +77,9 @@ private fun CalendarYearSelector(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 28.dp),   // << 값은 24~36dp 정도
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -138,31 +113,54 @@ private fun CalendarYearSelector(
 }
 
 /**
- * 월 이동용 원형 버튼을 표시한다.
+ * 월 이름과 이전·다음 달 이동 화살표를 표시한다.
  */
 @Composable
-private fun CalendarMonthMoveButton(
-    arrowText: String,
-    backgroundColor: Color,
-    onClick: () -> Unit,
+private fun CalendarMonthSelector(
+    monthName: String,
+    onPreviousMonthClick: () -> Unit,
+    onNextMonthClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(58.dp)
-            .background(
-                color = backgroundColor,
-                shape = CircleShape,
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = arrowText,
+            text = "‹",
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(onClick = onPreviousMonthClick),
             color = CalendarTextColor,
-            fontSize = 40.sp,
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 40.sp,
+            lineHeight = 44.sp,
+        )
+
+        Text(
+            text = monthName,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            color = CalendarTextColor,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontSize = 37.sp,
+            fontWeight = FontWeight.ExtraBold,
+        )
+
+        Text(
+            text = "›",
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(onClick = onNextMonthClick),
+            color = CalendarTextColor,
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Medium,
+            lineHeight = 44.sp,
         )
     }
 }
@@ -174,7 +172,7 @@ private fun CalendarMonthMoveButton(
 @Composable
 private fun CalendarMonthHeaderPreview() {
     CalendarMonthHeader(
-        displayedYearMonth = YearMonth.of(2026, 7),
+        displayedYearMonth = YearMonth.of(2026, 12),
         onPreviousMonthClick = {},
         onNextMonthClick = {},
         modifier = Modifier
