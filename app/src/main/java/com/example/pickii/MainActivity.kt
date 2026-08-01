@@ -1,122 +1,136 @@
 package com.example.pickii
 
-import com.example.pickii.ui.calendar.CalendarRoute
-import com.example.pickii.ui.calendar.daily.DailyCalendarRoute
-import com.example.pickii.ui.calendar.monthly.MonthlyCalendarRoute
-import com.example.pickii.ui.applicant.ApplicantRoute
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.pickii.ui.chat.ChatListRoute
-import com.example.pickii.ui.chat.ChatListViewModel
-import com.example.pickii.ui.chat.ChatRoomPreviewUiModel
-import com.example.pickii.ui.chat.ChatRoomRoute
-import com.example.pickii.ui.chat.ChatRoomType
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.pickii.ui.home.HomeScreen
+import com.example.pickii.ui.login.LoginScreen
+import com.example.pickii.ui.navigation.ARG_POST_ID
+import com.example.pickii.ui.navigation.PickiiDestination
+import com.example.pickii.ui.recruitapply.RecruitApplyScreen
+import com.example.pickii.ui.recruitdetail.RecruitDetailScreen
+import com.example.pickii.ui.recruitform.RecruitFormScreen
+import com.example.pickii.ui.splash.SplashScreen
 import com.example.pickii.ui.theme.PickiiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Pickii 애플리케이션의 시작 Activity다.
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    /** 스플래시 화면을 먼저 띄우고, [PickiiNavHost]로 이후 화면 전환을 구성한다. */
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
 
-//        setContent {
-//            PickiiTheme {
-//                val chatListViewModel: ChatListViewModel = hiltViewModel()
-//
-//                var selectedChatRoom by remember {
-//                    mutableStateOf<ChatRoomPreviewUiModel?>(null)
-//                }
-//
-//                val currentChatRoom = selectedChatRoom
-//
-//                if (currentChatRoom == null) {
-//                    ChatListRoute(
-//                        viewModel = chatListViewModel,
-//                        onChatRoomClick = { chatRoom ->
-//                            selectedChatRoom = chatRoom
-//                        },
-//                    )
-//                } else {
-//                    ChatRoomRoute(
-//                        roomId = currentChatRoom.id,
-//                        roomTitle = if (
-//                            currentChatRoom.type == ChatRoomType.GROUP
-//                        ) {
-//                            currentChatRoom.participantSummary.orEmpty()
-//                        } else {
-//                            currentChatRoom.senderName
-//                        },
-//                        roomType = currentChatRoom.type,
-//                        onBackClick = {
-//                            selectedChatRoom = null
-//                        },
-//                        onLeaveChatRoom = {
-//                            chatListViewModel.removeChatRoom(
-//                                roomId = currentChatRoom.id,
-//                            )
-//
-//                            selectedChatRoom = null
-//                        },
-//                    )
-//                }
-//            }
-//        }
-
-//        setContent {
-//            PickiiTheme {
-//                ApplicantRoute(
-//                    onBackClick = {
-//                        finish()
-//                    },
-//                )
-//            }
-//        }
-
-//        setContent {
-//            PickiiTheme {
-//                DailyCalendarRoute(
-//                    onMenuClick = {},
-//                    onAddScheduleClick = {},
-//                    onScheduleClick = {},
-//                )
-//            }
-//        }
-
         setContent {
             PickiiTheme {
-                CalendarRoute(
-                    onScheduleClick = { },
-                )
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    PickiiNavHost()
+                }
             }
         }
+    }
+}
 
-//        setContent {
-//            PickiiTheme {
-//                DailyCalendarRoute(
-//                    onMenuClick = {
-//                        // TODO 메뉴 또는 캘린더 보기 선택 화면
-//                    },
-//                    onAddScheduleClick = {
-//                        // TODO 일정 등록 화면으로 이동
-//                    },
-//                    onScheduleClick = { scheduleId ->
-//                        // TODO scheduleId를 가지고 일정 상세 화면으로 이동
-//                    },
-//                )
-//            }
-//        }
+/** 앱의 전체 화면 전환을 담당하는 내비게이션 그래프. */
+@Composable
+private fun PickiiNavHost() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = PickiiDestination.Splash.route) {
+        composable(PickiiDestination.Splash.route) {
+            SplashScreen(
+                onTimeout = {
+                    navController.navigate(PickiiDestination.Login.route) {
+                        popUpTo(PickiiDestination.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(PickiiDestination.Login.route) {
+            LoginScreen(
+                onLoginClick = { navController.navigateToHomeClearingBackStack() },
+                onGuestClick = { navController.navigateToHomeClearingBackStack() }
+            )
+        }
+
+        composable(PickiiDestination.Home.route) {
+            HomeScreen(
+                onRegisterPostClick = { navController.navigate(PickiiDestination.RecruitCreate.route) },
+                onPostDetailClick = { postId -> navController.navigate(PickiiDestination.RecruitDetail(postId).route) },
+                onPostApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) }
+            )
+        }
+
+        composable(
+            route = PickiiDestination.RecruitDetail.ROUTE,
+            arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+        ) {
+            RecruitDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) },
+                onEditClick = { postId -> navController.navigate(PickiiDestination.RecruitEdit(postId).route) },
+                onDeletedNavigateHome = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+            )
+        }
+
+        composable(
+            route = PickiiDestination.RecruitApply.ROUTE,
+            arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+        ) {
+            RecruitApplyScreen(
+                onBackClick = { navController.popBackStack() },
+                onGoHomeClick = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+            )
+        }
+
+        composable(PickiiDestination.RecruitCreate.route) {
+            RecruitFormScreen(
+                onBackClick = { navController.popBackStack() },
+                onSubmitComplete = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+            )
+        }
+
+        composable(
+            route = PickiiDestination.RecruitEdit.ROUTE,
+            arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+        ) {
+            RecruitFormScreen(
+                onBackClick = { navController.popBackStack() },
+                onSubmitComplete = { navController.popBackStack() },
+                onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+            )
+        }
+    }
+}
+
+/** 로그인/비회원 전환 후 홈으로 이동하며, 스플래시·로그인 화면은 백스택에서 제거한다. */
+private fun NavHostController.navigateToHomeClearingBackStack() {
+    navigate(PickiiDestination.Home.route) {
+        popUpTo(PickiiDestination.Login.route) { inclusive = true }
+    }
+}
+
+/** 로그인이 필요한 동작을 시도했을 때 백스택을 모두 비우고 로그인 화면으로 이동한다. */
+private fun NavHostController.navigateToLoginClearingBackStack() {
+    navigate(PickiiDestination.Login.route) {
+        popUpTo(graph.startDestinationId) { inclusive = true }
     }
 }

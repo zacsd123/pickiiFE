@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.Pickii" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- 앱 시작 시 OS가 강제로 보여주는 시스템 스플래시 화면. 배경색을 SplashScreen 컴포저블과
+         동일하게 맞춰 두 화면이 이어지는 것처럼 보이게 한다. -->
+    <style name="Theme.Pickii.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/pickii_yellow</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Pickii</item>
+    </style>
 </resources>
