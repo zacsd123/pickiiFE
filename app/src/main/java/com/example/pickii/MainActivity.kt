@@ -35,6 +35,7 @@ import com.example.pickii.ui.login.LoginScreen
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.PickiiDestination
 import com.example.pickii.ui.onboarding.OnboardingScreen
+import com.example.pickii.ui.passwordreset.PasswordResetScreen
 import com.example.pickii.ui.recruitapply.RecruitApplyScreen
 import com.example.pickii.ui.recruitdetail.RecruitDetailScreen
 import com.example.pickii.ui.recruitform.RecruitFormScreen
@@ -153,8 +154,16 @@ private fun PickiiNavHost() {
                     onNavigateOnboarding = {
                         navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
                     },
+                    onNavigateToPasswordReset = { navController.navigate(PickiiDestination.PasswordReset.route) },
                     onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
                     onGuestClick = { navController.navigateToHomeClearingBackStack() }
+                )
+            }
+
+            composable(PickiiDestination.PasswordReset.route) {
+                PasswordResetScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onComplete = { navController.popBackStack() }
                 )
             }
 

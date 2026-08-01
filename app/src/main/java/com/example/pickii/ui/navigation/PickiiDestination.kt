@@ -19,6 +19,9 @@ sealed class PickiiDestination(
     /** 최초 로그인 시 이력서(프로필)를 입력받는 온보딩 화면. */
     data object Onboarding : PickiiDestination("onboarding")
 
+    /** 비로그인 상태 비밀번호 재설정 화면. */
+    data object PasswordReset : PickiiDestination("password-reset")
+
     /** 홈 화면. */
     data object Home : PickiiDestination("home")
 

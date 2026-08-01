@@ -208,4 +208,9 @@
     <string name="account_recovery_button_find_id">아이디 찾기</string>
     <string name="account_recovery_button_reset_password">비밀번호 재설정</string>
     <string name="account_recovery_toast_find_id_unavailable">준비 중인 기능입니다</string>
+
+    <string name="password_reset_title">비밀번호\n재설정하기</string>
+    <string name="password_reset_button_submit">비밀번호 재설정</string>
+    <string name="password_reset_dialog_complete_title">비밀번호가 재설정되었습니다</string>
+    <string name="password_reset_button_go_login">로그인하러 가기</string>
 </resources>
