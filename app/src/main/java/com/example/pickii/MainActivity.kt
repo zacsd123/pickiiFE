@@ -34,9 +34,11 @@ import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.PickiiDestination
+import com.example.pickii.ui.onboarding.OnboardingScreen
 import com.example.pickii.ui.recruitapply.RecruitApplyScreen
 import com.example.pickii.ui.recruitdetail.RecruitDetailScreen
 import com.example.pickii.ui.recruitform.RecruitFormScreen
+import com.example.pickii.ui.signup.SignupScreen
 import com.example.pickii.ui.splash.SplashScreen
 import com.example.pickii.ui.theme.PickiiTheme
 import com.example.pickii.ui.theme.PickiiYellowLight
@@ -147,8 +149,28 @@ private fun PickiiNavHost() {
 
             composable(PickiiDestination.Login.route) {
                 LoginScreen(
-                    onLoginClick = { navController.navigateToHomeClearingBackStack() },
+                    onNavigateHome = { navController.navigateToHomeClearingBackStack() },
+                    onNavigateOnboarding = {
+                        navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
+                    },
+                    onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
                     onGuestClick = { navController.navigateToHomeClearingBackStack() }
+                )
+            }
+
+            composable(PickiiDestination.Signup.route) {
+                SignupScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateHome = { navController.navigateClearingBackStack(PickiiDestination.Home.route) },
+                    onNavigateOnboarding = {
+                        navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
+                    }
+                )
+            }
+
+            composable(PickiiDestination.Onboarding.route) {
+                OnboardingScreen(
+                    onFinished = { navController.navigateClearingBackStack(PickiiDestination.Home.route) }
                 )
             }
 
@@ -229,6 +251,16 @@ private fun NavHostController.navigateToHomeClearingBackStack() {
 /** 로그인이 필요한 동작을 시도했을 때 백스택을 모두 비우고 로그인 화면으로 이동한다. */
 private fun NavHostController.navigateToLoginClearingBackStack() {
     navigate(PickiiDestination.Login.route) {
+        popUpTo(graph.startDestinationId) { inclusive = true }
+    }
+}
+
+/**
+ * [route]로 이동하며 백스택을 전부 비운다. 회원가입/온보딩처럼 그 전 화면이 백스택에서 이미 제거되었을 수도
+ * 있는 지점에서 홈/온보딩으로 이동할 때 쓴다(대상이 백스택에 없어도 안전하게 동작한다).
+ */
+private fun NavHostController.navigateClearingBackStack(route: String) {
+    navigate(route) {
         popUpTo(graph.startDestinationId) { inclusive = true }
     }
 }

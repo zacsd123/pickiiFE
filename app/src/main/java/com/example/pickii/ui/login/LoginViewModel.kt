@@ -2,6 +2,7 @@ package com.example.pickii.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,8 @@ data class LoginUiState(
 class LoginViewModel
     @Inject
     constructor(
-        private val sessionRepository: SessionRepository
+        private val sessionRepository: SessionRepository,
+        private val profileRepository: ProfileRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -46,14 +48,21 @@ class LoginViewModel
         }
 
         /**
-         * 입력된 이메일/비밀번호로 로그인을 시도하고, 성공했을 때만 [onSuccess]를 호출한다.
+         * 입력된 이메일/비밀번호로 로그인을 시도하고, 성공하면 프로필(이력서) 보유 여부에 따라
+         * [onNavigateHome] 또는 [onNavigateOnboarding]을 호출한다.
          *
-         * @param onSuccess 로그인 성공 시 호출되는 콜백(화면 전환 등 내비게이션 용도)
+         * @param onNavigateHome 로그인 성공 + 프로필 보유 시 호출되는 콜백
+         * @param onNavigateOnboarding 로그인 성공 + 프로필 미보유 시 호출되는 콜백(최초 로그인 온보딩)
          */
-        fun onLoginClick(onSuccess: () -> Unit) {
+        fun onLoginClick(
+            onNavigateHome: () -> Unit,
+            onNavigateOnboarding: () -> Unit
+        ) {
             viewModelScope.launch {
                 val state = _uiState.value
-                sessionRepository.login(state.email, state.password).onSuccess { onSuccess() }
+                sessionRepository.login(state.email, state.password).onSuccess {
+                    if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
+                }
             }
         }
 
