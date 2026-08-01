@@ -209,6 +209,20 @@
     <string name="account_recovery_button_reset_password">비밀번호 재설정</string>
     <string name="account_recovery_toast_find_id_unavailable">준비 중인 기능입니다</string>
 
+    <string name="find_id_title">아이디\n찾기</string>
+    <string name="find_id_label_name">이름</string>
+    <string name="find_id_placeholder_name">이름을 입력해주세요</string>
+    <string name="find_id_label_email">이메일</string>
+    <string name="find_id_placeholder_email">이메일을 입력해주세요</string>
+    <string name="find_id_label_code">인증코드</string>
+    <string name="find_id_message_code_sent">인증코드가 발송되었습니다.</string>
+    <string name="find_id_message_email_verified">이메일 인증이 완료되었습니다.</string>
+    <string name="find_id_button_submit">아이디 찾기</string>
+    <string name="find_id_result_title">아이디를\n확인해주세요</string>
+    <string name="find_id_result_label_email">이메일</string>
+    <string name="find_id_result_label_id">아이디</string>
+    <string name="find_id_result_button_login">로그인하기</string>
+
     <string name="password_reset_title">비밀번호\n재설정하기</string>
     <string name="password_reset_button_submit">비밀번호 재설정</string>
     <string name="password_reset_dialog_complete_title">비밀번호가 재설정되었습니다</string>

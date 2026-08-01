@@ -37,6 +37,7 @@ import com.example.pickii.ui.calendar.CalendarRoute
 import com.example.pickii.ui.chat.ChatRoute
 import com.example.pickii.ui.common.PickiiBottomNav
 import com.example.pickii.ui.common.PickiiBottomNavTab
+import com.example.pickii.ui.findid.FindIdScreen
 import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
 import com.example.pickii.ui.navigation.ARG_POST_ID
@@ -196,6 +197,7 @@ private fun PickiiNavHost() {
                         navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
                     },
                     onNavigateToPasswordReset = { navController.navigate(PickiiDestination.PasswordReset.route) },
+                    onNavigateToFindId = { navController.navigate(PickiiDestination.FindId.route) },
                     onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
                     onGuestClick = { navController.navigateToHomeClearingBackStack() }
                 )
@@ -205,6 +207,12 @@ private fun PickiiNavHost() {
                 PasswordResetScreen(
                     onBackClick = { navController.popBackStack() },
                     onComplete = { navController.popBackStack() }
+                )
+            }
+
+            composable(PickiiDestination.FindId.route) {
+                FindIdScreen(
+                    onBackClick = { navController.popBackStack() }
                 )
             }
 
