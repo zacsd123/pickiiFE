@@ -1,5 +1,6 @@
 package com.example.pickii
 
+import com.example.pickii.ui.calendar.monthly.MonthlyCalendarRoute
 import com.example.pickii.ui.applicant.ApplicantRoute
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -72,13 +73,24 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 
-        setContent {
+//        setContent {
+//            PickiiTheme {
+//                ApplicantRoute(
+//                    onBackClick = {
+//                        finish()
+//                    },
+//                )
+//            }
+//        }
+
+            setContent {
             PickiiTheme {
-                ApplicantRoute(
-                    onBackClick = {
-                        finish()
-                    },
+
+                MonthlyCalendarRoute(
+                    onScheduleEditClick = {},
+                    onAddScheduleClick = {},
                 )
+
             }
         }
     }
