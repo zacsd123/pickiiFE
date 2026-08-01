@@ -1,32 +1,27 @@
 package com.example.pickii.ui.calendar.monthly
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-/**
- * 월간 캘린더의 ViewModel 상태와 화면을 연결한다.
- */
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.LocalDate
+
 @Composable
 fun MonthlyCalendarRoute(
-    onScheduleEditClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    onDailyCalendarClick: (LocalDate) -> Unit,
     viewModel: MonthlyCalendarViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsState()
 
     MonthlyCalendarScreen(
         uiState = uiState,
         onPreviousMonthClick = viewModel::moveToPreviousMonth,
         onNextMonthClick = viewModel::moveToNextMonth,
         onDateClick = viewModel::selectDate,
-        onScheduleClick = viewModel::toggleScheduleDetail,
-        onScheduleDetailCloseClick = viewModel::closeScheduleDetail,
-        onScheduleEditClick = onScheduleEditClick,
+        onScheduleClick = viewModel::toggleSchedule,
         onAddScheduleClick = onAddScheduleClick,
-        modifier = modifier,
+        onDailyCalendarClick = onDailyCalendarClick,
     )
 }
