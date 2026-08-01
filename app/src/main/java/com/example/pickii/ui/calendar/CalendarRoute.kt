@@ -1,6 +1,7 @@
 package com.example.pickii.ui.calendar
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,10 +22,14 @@ private enum class CalendarScreenType {
 
 /**
  * 캘린더 내부 화면 전환을 관리한다.
+ *
+ * @param onTopLevelScreenChange 월간 화면(최상위)인지 여부가 바뀔 때마다 호출된다. 바깥의 공유 바텀 내비게이션을
+ * 언제 보여줄지 결정하는 데 쓰인다.
  */
 @Composable
 fun CalendarRoute(
     onScheduleClick: (Long) -> Unit,
+    onTopLevelScreenChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentScreen by rememberSaveable {
@@ -35,6 +40,10 @@ fun CalendarRoute(
         mutableStateOf(
             LocalDate.of(2026, 7, 4).toString(),
         )
+    }
+
+    LaunchedEffect(currentScreen) {
+        onTopLevelScreenChange(currentScreen == CalendarScreenType.MONTHLY.name)
     }
 
     when (

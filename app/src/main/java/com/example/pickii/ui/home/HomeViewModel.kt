@@ -7,7 +7,6 @@ import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.domain.repository.RecruitRepository
-import com.example.pickii.ui.common.PickiiBottomNavTab
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,8 +31,7 @@ data class HomeUiState(
     val selectedCategory: RecruitCategory? = null,
     val selectedTopics: Set<RecruitTopic> = emptySet(),
     val posts: List<RecruitPost> = emptyList(),
-    val currentPage: Int = 1,
-    val selectedBottomNavTab: PickiiBottomNavTab = PickiiBottomNavTab.HOME
+    val currentPage: Int = 1
 ) {
     /** 전체 페이지 수. 모집 글이 없어도 최소 1페이지로 취급한다. */
     val totalPages: Int
@@ -127,10 +125,5 @@ class HomeViewModel
         /** 페이지 번호를 직접 클릭해 해당 페이지로 이동한다. */
         fun onPageClick(page: Int) {
             _uiState.update { it.copy(currentPage = page.coerceIn(1, it.totalPages)) }
-        }
-
-        /** 하단 내비게이션 탭의 선택 상태만 바꾼다. 대상 화면이 아직 없어 실제 이동은 하지 않는다. */
-        fun onBottomNavTabSelect(tab: PickiiBottomNavTab) {
-            _uiState.update { it.copy(selectedBottomNavTab = tab) }
         }
     }

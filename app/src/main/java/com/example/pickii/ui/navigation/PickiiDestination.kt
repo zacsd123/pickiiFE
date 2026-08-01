@@ -48,4 +48,10 @@ sealed class PickiiDestination(
             const val ROUTE = "recruit/{$ARG_POST_ID}/edit"
         }
     }
+
+    /** 캘린더 화면 **/
+    data object Calender : PickiiDestination("calender")
+
+    /** 채팅 화면 **/
+    data object Chat : PickiiDestination("chat")
 }
