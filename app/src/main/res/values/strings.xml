@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Pickii</string>
+
+    <string name="chat_title">Chat</string>
+    <string name="chat_group_tab">그룹</string>
+    <string name="chat_direct_tab">개인</string>
+    <string name="chat_notification_enabled">채팅방 알림 켜짐</string>
+    <string name="chat_notification_disabled">채팅방 알림 꺼짐</string>
+    <string name="chat_user_name_format">%1$s 님</string>
+    <string name="chat_recruit_title_format">[%1$s]</string>
+    <string name="chat_empty_group">참여 중인 그룹 채팅방이 없습니다.</string>
+    <string name="chat_empty_direct">아직 개인 채팅방이 없습니다.</string>
 </resources>
