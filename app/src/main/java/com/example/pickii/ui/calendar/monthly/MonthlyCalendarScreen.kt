@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthGrid
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthHeader
-import com.example.pickii.ui.calendar.monthly.component.ScheduleDetailCard
 import com.example.pickii.ui.calendar.monthly.component.ScheduleSummaryCard
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -54,21 +52,14 @@ fun MonthlyCalendarScreen(
     onNextMonthClick: () -> Unit,
     onDateClick: (LocalDate) -> Unit,
     onScheduleClick: (Long) -> Unit,
-    onScheduleDetailCloseClick: () -> Unit,
-    onScheduleEditClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
+    onDailyCalendarClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val selectedDateSchedules = uiState.schedules
         .filter { schedule ->
             schedule.includesDate(uiState.selectedDate)
         }
-
-    val expandedSchedule = uiState.expandedScheduleId?.let { scheduleId ->
-        uiState.schedules.find { schedule ->
-            schedule.id == scheduleId
-        }
-    }
 
     Box(
         modifier = modifier
@@ -116,9 +107,7 @@ fun MonthlyCalendarScreen(
                 SelectedDateActionRow(
                     selectedDate = uiState.selectedDate,
                     onDetailClick = {
-                        selectedDateSchedules.firstOrNull()?.let { schedule ->
-                            onScheduleClick(schedule.id)
-                        }
+                        onDailyCalendarClick(uiState.selectedDate)
                     },
                     onAddScheduleClick = onAddScheduleClick,
                 )
@@ -135,26 +124,13 @@ fun MonthlyCalendarScreen(
                         schedule.id
                     },
                 ) { schedule ->
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        ScheduleSummaryCard(
-                            schedule = schedule,
-                            onClick = {
-                                onScheduleClick(schedule.id)
-                            },
-                        )
-
-                        if (expandedSchedule?.id == schedule.id) {
-                            ScheduleDetailCard(
-                                schedule = schedule,
-                                onCloseClick = onScheduleDetailCloseClick,
-                                onEditClick = {
-                                    onScheduleEditClick(schedule.id)
-                                },
-                            )
-                        }
-                    }
+                    ScheduleSummaryCard(
+                        schedule = schedule,
+                        isExpanded = uiState.expandedScheduleId == schedule.id,
+                        onClick = {
+                            onScheduleClick(schedule.id)
+                        },
+                    )
                 }
             }
         }

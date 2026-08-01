@@ -1,5 +1,7 @@
 package com.example.pickii
 
+import com.example.pickii.ui.calendar.CalendarRoute
+import com.example.pickii.ui.calendar.daily.DailyCalendarRoute
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarRoute
 import com.example.pickii.ui.applicant.ApplicantRoute
 import android.os.Bundle
@@ -83,15 +85,38 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 
-            setContent {
+//        setContent {
+//            PickiiTheme {
+//                DailyCalendarRoute(
+//                    onMenuClick = {},
+//                    onAddScheduleClick = {},
+//                    onScheduleClick = {},
+//                )
+//            }
+//        }
+
+        setContent {
             PickiiTheme {
-
-                MonthlyCalendarRoute(
-                    onScheduleEditClick = {},
-                    onAddScheduleClick = {},
+                CalendarRoute(
+                    onScheduleClick = { },
                 )
-
             }
         }
+
+//        setContent {
+//            PickiiTheme {
+//                DailyCalendarRoute(
+//                    onMenuClick = {
+//                        // TODO 메뉴 또는 캘린더 보기 선택 화면
+//                    },
+//                    onAddScheduleClick = {
+//                        // TODO 일정 등록 화면으로 이동
+//                    },
+//                    onScheduleClick = { scheduleId ->
+//                        // TODO scheduleId를 가지고 일정 상세 화면으로 이동
+//                    },
+//                )
+//            }
+//        }
     }
 }

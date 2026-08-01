@@ -26,11 +26,15 @@ import com.example.pickii.ui.calendar.monthly.ScheduleColorType
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val DetailCardBackgroundColor = Color(0xFF1D1D1B)
-private val DetailTitleColor = Color(0xFFFFFFFF)
-private val DetailDescriptionColor = Color(0xFFC8C8C1)
-private val DetailButtonBackgroundColor = Color(0xFFF2F2EC)
-private val DetailButtonTextColor = Color(0xFF1D1D1B)
+private val DetailCardBackgroundColor = Color(0xFFFFFEF2)
+
+private val DetailTitleColor = Color(0xFF202330)
+
+private val DetailDescriptionColor = Color(0xFF8D93A4)
+
+private val DetailButtonBackgroundColor = Color(0xFFF1F2F6)
+
+private val DetailButtonTextColor = Color(0xFF202330)
 
 private val DetailDateFormatter = DateTimeFormatter.ofPattern(
     "M월 d일 E요일",
