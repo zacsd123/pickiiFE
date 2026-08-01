@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -45,6 +52,9 @@ import com.example.pickii.ui.theme.PickiiTheme
 import com.example.pickii.ui.theme.PickiiYellowLight
 import dagger.hilt.android.AndroidEntryPoint
 
+/** 화면 전환 페이드 애니메이션 길이(ms). 기본 전환 애니메이션이 무거운 화면(홈 등)과 겹치면 끊겨 보여서 가벼운 페이드로 대체한다. */
+private const val NAV_TRANSITION_DURATION_MS = 200
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     /** 스플래시 화면을 먼저 띄우고, [PickiiNavHost]로 이후 화면 전환을 구성한다. */
@@ -53,6 +63,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+        hideSystemNavigationBar()
 
         setContent {
             PickiiTheme {
@@ -61,6 +72,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /** 카메라 등 다른 앱을 다녀오면 시스템 내비게이션 바가 다시 나타나므로, 돌아올 때마다 다시 숨긴다. */
+    override fun onResume() {
+        super.onResume()
+        hideSystemNavigationBar()
+    }
+
+    /**
+     * 시스템 내비게이션 바(뒤로/홈/최근 버튼)를 숨겨서 화면 하단이 가려지지 않게 한다.
+     * 화면 아래 끝에서 위로 스와이프하면 일시적으로 다시 나타난다(사라짐 방지 아님, 완전 차단 아님).
+     */
+    private fun hideSystemNavigationBar() {
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.navigationBars())
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
 }
 
@@ -80,13 +108,21 @@ private fun PickiiNavHost() {
         isMyPageSelected = false
     }
 
-    val currentTab =
+    val resolvedTab =
         when (currentRoute) {
             PickiiDestination.Home.route -> PickiiBottomNavTab.HOME
             PickiiDestination.Calender.route -> PickiiBottomNavTab.CALENDAR
             PickiiDestination.Chat.route -> PickiiBottomNavTab.CHAT
             else -> null
         }
+
+    // currentBackStackEntryAsState()가 탭 전환 도중 잠깐 다른 라우트를 거치면 currentTab이 null이 되는 순간이
+    // 생기는데, 그때 PickiiBottomNav가 조합에서 완전히 빠졌다가 다시 들어가면서 인디케이터 애니메이션 상태가
+    // 초기화돼 슬라이드 없이 바로 스냅해버린다. 마지막으로 확인된 탭을 계속 들고 있어서 이걸 막는다.
+    var currentTab by remember { mutableStateOf<PickiiBottomNavTab?>(resolvedTab) }
+    if (resolvedTab != null) {
+        currentTab = resolvedTab
+    }
 
     val isBottomNavVisible =
         when (currentRoute) {
@@ -99,10 +135,11 @@ private fun PickiiNavHost() {
     Scaffold(
         containerColor = PickiiYellowLight,
         bottomBar = {
-            if (isBottomNavVisible && currentTab != null) {
+            val tab = currentTab
+            if (isBottomNavVisible && tab != null) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     PickiiBottomNav(
-                        selectedTab = if (isMyPageSelected) PickiiBottomNavTab.MY_PAGE else currentTab,
+                        selectedTab = if (isMyPageSelected) PickiiBottomNavTab.MY_PAGE else tab,
                         onTabSelect = { tab ->
                             when (tab) {
                                 PickiiBottomNavTab.HOME -> {
@@ -137,6 +174,10 @@ private fun PickiiNavHost() {
             navController = navController,
             startDestination = PickiiDestination.Splash.route,
             modifier = Modifier.padding(innerPadding),
+            enterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+            exitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+            popExitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) }
         ) {
             composable(PickiiDestination.Splash.route) {
                 SplashScreen(
@@ -183,7 +224,13 @@ private fun PickiiNavHost() {
                 )
             }
 
-            composable(PickiiDestination.Home.route) {
+            composable(
+                route = PickiiDestination.Home.route,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
+            ) {
                 HomeScreen(
                     onRegisterPostClick = { navController.navigate(PickiiDestination.RecruitCreate.route) },
                     onPostDetailClick = { postId -> navController.navigate(PickiiDestination.RecruitDetail(postId).route) },
@@ -234,13 +281,25 @@ private fun PickiiNavHost() {
                 )
             }
 
-            composable(PickiiDestination.Chat.route) {
+            composable(
+                route = PickiiDestination.Chat.route,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
+            ) {
                 ChatRoute(
                     onTopLevelScreenChange = { isChatTopLevel = it },
                 )
             }
 
-            composable(PickiiDestination.Calender.route) {
+            composable(
+                route = PickiiDestination.Calender.route,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
+            ) {
                 CalendarRoute(
                     onScheduleClick = { },
                     onTopLevelScreenChange = { isCalendarTopLevel = it },
