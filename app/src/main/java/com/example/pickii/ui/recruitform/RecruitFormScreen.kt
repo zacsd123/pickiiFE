@@ -311,7 +311,7 @@ private fun FormBody(
         Text(text = stringResource(R.string.recruit_form_label_category), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RecruitCategory.entries.forEach { category ->
+            uiState.availableCategories.forEach { category ->
                 SelectableChip(
                     label = category.label,
                     selected = category == uiState.category,
@@ -325,13 +325,13 @@ private fun FormBody(
 
         Text(text = stringResource(R.string.recruit_form_label_topic), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        RecruitTopic.entries.chunked(4).forEach { rowTopics ->
+        uiState.availableTopics.chunked(4).forEach { rowTopics ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 rowTopics.forEach { topic ->
                     SelectableChip(
                         label = topic.label,
                         selected = topic == uiState.topic,
-                        enabled = topic.isEnabled,
+                        enabled = true,
                         onClick = { onTopicSelect(topic) }
                     )
                 }

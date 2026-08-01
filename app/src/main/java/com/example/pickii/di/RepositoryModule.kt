@@ -1,7 +1,9 @@
 package com.example.pickii.di
 
-import com.example.pickii.data.repository.MockRecruitRepository
-import com.example.pickii.data.repository.MockSessionRepository
+import com.example.pickii.data.repository.RecruitApiRepository
+import com.example.pickii.data.repository.RecruitAuthSessionRepository
+import com.example.pickii.data.repository.RecruitMasterDataRepository
+import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
 import dagger.Binds
@@ -10,17 +12,22 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** Repository 인터페이스와 목업 구현체를 연결하는 Hilt 모듈. */
+/** Repository 인터페이스와 실제(백엔드 연동) 구현체를 연결하는 Hilt 모듈. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    /** [SessionRepository]를 [MockSessionRepository]로 바인딩한다. */
+    /** [SessionRepository]를 [RecruitAuthSessionRepository]로 바인딩한다. */
     @Binds
     @Singleton
-    abstract fun bindSessionRepository(impl: MockSessionRepository): SessionRepository
+    abstract fun bindSessionRepository(impl: RecruitAuthSessionRepository): SessionRepository
 
-    /** [RecruitRepository]를 [MockRecruitRepository]로 바인딩한다. */
+    /** [RecruitRepository]를 [RecruitApiRepository]로 바인딩한다. */
     @Binds
     @Singleton
-    abstract fun bindRecruitRepository(impl: MockRecruitRepository): RecruitRepository
+    abstract fun bindRecruitRepository(impl: RecruitApiRepository): RecruitRepository
+
+    /** [MasterDataRepository]를 [RecruitMasterDataRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindMasterDataRepository(impl: RecruitMasterDataRepository): MasterDataRepository
 }

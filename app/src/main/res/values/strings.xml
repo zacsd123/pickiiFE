@@ -62,6 +62,8 @@
     <string name="recruit_detail_dialog_delete_post_body">삭제하면 되돌릴 수 없습니다.</string>
     <string name="recruit_detail_dialog_close_post_title">모집을 마감할까요?</string>
     <string name="recruit_detail_dialog_close_post_body">마감 후에는 지원을 받을 수 없습니다.</string>
+    <string name="recruit_detail_dialog_reopen_post_title">추가 모집을 시작할까요?</string>
+    <string name="recruit_detail_dialog_reopen_post_body">추가 모집을 시작하면 다시 지원을 받을 수 있습니다.</string>
     <string name="recruit_detail_toast_already_applied">이미 지원한 글입니다</string>
 
     <string name="recruit_comment_header_title">댓글</string>
@@ -83,6 +85,7 @@
     <string name="recruit_apply_banner_tip_title">⏱ 시간 절약 꿀 TIP!</string>
     <string name="recruit_apply_banner_tip_subtitle">AI가 지원 메시지 생성을 도와줄 수 있어요!</string>
     <string name="recruit_apply_button_ai_help">AI 도움받기</string>
+    <string name="recruit_apply_toast_ai_draft_message_required">전달 메시지를 먼저 입력해주세요</string>
     <string name="recruit_apply_label_no_profile_guidance">지원하려면 프로필이 필요해요</string>
     <string name="recruit_apply_button_create_profile">프로필 만들러 가기</string>
     <string name="recruit_apply_button_submit">지원하기</string>
@@ -116,6 +119,7 @@
     <string name="recruit_form_banner_ai_draft_title">이렇게 쓸 지 막막하신가요?</string>
     <string name="recruit_form_banner_ai_draft_subtitle">AI가 초안 생성을 도와줄 수 있어요!</string>
     <string name="recruit_form_button_ai_draft">AI 초안 생성</string>
+    <string name="recruit_form_toast_ai_draft_content_required">상세 사항을 먼저 입력해주세요</string>
     <string name="recruit_form_button_submit_create">등록</string>
     <string name="recruit_form_button_submit_edit">수정 완료</string>
     <string name="recruit_form_dialog_submit_create_title">등록하시겠어요?</string>
