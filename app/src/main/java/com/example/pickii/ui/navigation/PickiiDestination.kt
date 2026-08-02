@@ -66,4 +66,20 @@ sealed class PickiiDestination(
 
     /** 채팅 화면 **/
     data object Chat : PickiiDestination("chat")
+
+    /** 마이페이지 화면(내부적으로 여러 하위 화면을 자체 상태로 전환한다). */
+    data object MyPage : PickiiDestination("mypage")
+
+    /** 마이페이지 "프로필을 만들어보세요"에서 진입하는 온보딩(이력서 생성) 화면. */
+    data object OnboardingFromMyPage : PickiiDestination("mypage/onboarding")
+
+    /** 공고 지원자 목록 화면(마이페이지의 "작성 공고"에서 진입). */
+    data class ApplicantList(
+        val postId: String
+    ) : PickiiDestination("recruit/$postId/applicants") {
+        companion object {
+            /** [androidx.navigation.compose.NavHost]에 등록할 경로 템플릿. */
+            const val ROUTE = "recruit/{$ARG_POST_ID}/applicants"
+        }
+    }
 }
