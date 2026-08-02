@@ -3,6 +3,7 @@ package com.example.pickii.ui.calendar.editor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.CalendarSchedule
+import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +64,16 @@ class ScheduleEditorViewModel
                     updateEndDate(event.date)
                 }
 
+                is ScheduleEditorUiEvent.DateRangeSelected -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            startDate = event.startDate,
+                            endDate = event.endDate,
+                            isSaved = false
+                        )
+                    }
+                }
+
                 is ScheduleEditorUiEvent.StartTimeChanged -> {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -103,6 +114,27 @@ class ScheduleEditorViewModel
                     _uiState.update { currentState ->
                         currentState.copy(
                             repeatType = event.repeatType,
+                            repeatWeekdays =
+                                if (event.repeatType == ScheduleRepeatType.WEEKLY) {
+                                    currentState.repeatWeekdays
+                                } else {
+                                    emptySet()
+                                },
+                            isSaved = false
+                        )
+                    }
+                }
+
+                is ScheduleEditorUiEvent.RepeatWeekdayToggled -> {
+                    _uiState.update { currentState ->
+                        val weekdays = currentState.repeatWeekdays
+                        currentState.copy(
+                            repeatWeekdays =
+                                if (event.dayOfWeek in weekdays) {
+                                    weekdays - event.dayOfWeek
+                                } else {
+                                    weekdays + event.dayOfWeek
+                                },
                             isSaved = false
                         )
                     }
@@ -205,6 +237,7 @@ class ScheduleEditorViewModel
                         },
                     location = currentState.location.trim(),
                     repeatType = currentState.repeatType,
+                    repeatWeekdays = currentState.repeatWeekdays,
                     memo = currentState.memo.trim(),
                     isAllDay = currentState.isAllDay
                 )

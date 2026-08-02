@@ -79,6 +79,8 @@ class MonthlyCalendarViewModel
                                 ?.format(ScheduleTimeFormatter)
                                 .orEmpty(),
                         location = schedule.location,
+                        repeatType = schedule.repeatType,
+                        repeatWeekdays = schedule.repeatWeekdays,
                         repeatText =
                             createRepeatText(
                                 repeatType = schedule.repeatType,

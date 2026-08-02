@@ -1,6 +1,7 @@
 package com.example.pickii.ui.calendar.editor
 
 import com.example.pickii.domain.model.ScheduleRepeatType
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -24,6 +25,11 @@ sealed interface ScheduleEditorUiEvent {
         val date: LocalDate
     ) : ScheduleEditorUiEvent
 
+    data class DateRangeSelected(
+        val startDate: LocalDate,
+        val endDate: LocalDate
+    ) : ScheduleEditorUiEvent
+
     data class StartTimeChanged(
         val time: LocalTime
     ) : ScheduleEditorUiEvent
@@ -42,6 +48,10 @@ sealed interface ScheduleEditorUiEvent {
 
     data class RepeatTypeChanged(
         val repeatType: ScheduleRepeatType
+    ) : ScheduleEditorUiEvent
+
+    data class RepeatWeekdayToggled(
+        val dayOfWeek: DayOfWeek
     ) : ScheduleEditorUiEvent
 
     data class MemoChanged(
