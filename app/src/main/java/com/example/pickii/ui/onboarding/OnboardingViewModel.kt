@@ -16,6 +16,10 @@ import com.example.pickii.domain.model.University
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.ui.common.AiDialogState
+import com.example.pickii.ui.common.entrydraft.ExperienceDraft
+import com.example.pickii.ui.common.entrydraft.LicenseDraft
+import com.example.pickii.ui.common.entrydraft.LinkDraft
+import com.example.pickii.ui.common.entrydraft.SkillToolDraft
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,7 +29,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.YearMonth
-import java.util.UUID
 import javax.inject.Inject
 
 /** 온보딩 전체 단계 수. */
@@ -39,37 +42,6 @@ internal const val MAX_STRENGTH_LENGTH = 300
 
 /** 학교 검색 디바운스 간격(ms). */
 private const val UNIVERSITY_SEARCH_DEBOUNCE_MS = 300L
-
-/** "사용 가능 Skill & Tool" 항목 하나의 입력 중 상태. [level]은 1(하)~3(상). */
-data class SkillToolDraft(
-    val id: String = UUID.randomUUID().toString(),
-    val techStackName: String = "",
-    val level: Int = 2
-)
-
-/** "자격증" 항목 하나의 입력 중 상태. */
-data class LicenseDraft(
-    val id: String = UUID.randomUUID().toString(),
-    val licenseName: String = "",
-    val acquiredDate: YearMonth? = null
-)
-
-/** "수상 및 경험" 항목 하나의 입력 중 상태. */
-data class ExperienceDraft(
-    val id: String = UUID.randomUUID().toString(),
-    val startDate: YearMonth? = null,
-    val endDate: YearMonth? = null,
-    val title: String = "",
-    val organization: String = "",
-    val description: String = ""
-)
-
-/** "외부 링크" 항목 하나의 입력 중 상태. */
-data class LinkDraft(
-    val id: String = UUID.randomUUID().toString(),
-    val linkName: String = "",
-    val url: String = ""
-)
 
 /** [OnboardingScreen]에 표시되는 상태. */
 data class OnboardingUiState(
