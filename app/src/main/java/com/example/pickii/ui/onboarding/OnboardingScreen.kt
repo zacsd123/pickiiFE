@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -342,24 +343,25 @@ private fun SchoolInfoStep(
     )
 }
 
-/** 2단계: 관심 분야(주제) 다중 선택. */
+/** 2단계: 관심 분야(주제) 다중 선택. 칩 길이가 제각각이라 고정 3열 대신 [FlowRow]로 자연스럽게 줄바꿈한다. */
 @Composable
 private fun InterestTopicStep(
     uiState: OnboardingUiState,
     onTopicToggle: (Int) -> Unit
 ) {
-    uiState.availableTopics.chunked(3).forEach { rowTopics ->
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            rowTopics.forEach { topic ->
-                SelectableChip(
-                    label = topic.label,
-                    selected = topic.id in uiState.selectedTopicIds,
-                    enabled = true,
-                    onClick = { onTopicToggle(topic.id) }
-                )
-            }
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        uiState.availableTopics.forEach { topic ->
+            SelectableChip(
+                label = topic.label,
+                selected = topic.id in uiState.selectedTopicIds,
+                enabled = true,
+                onClick = { onTopicToggle(topic.id) }
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
