@@ -33,14 +33,15 @@ fun CalendarDayCell(
     isSelected: Boolean,
     scheduleColors: List<ScheduleColorType>,
     onDateClick: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     if (date == null) {
         Box(
-            modifier = modifier.size(
-                width = 42.dp,
-                height = 58.dp,
-            ),
+            modifier =
+                modifier.size(
+                    width = 42.dp,
+                    height = 58.dp
+                )
         )
 
         return
@@ -57,40 +58,42 @@ fun CalendarDayCell(
         }
 
     Column(
-        modifier = modifier
-            .size(
-                width = 42.dp,
-                height = 58.dp,
-            )
-            .clickable {
-                onDateClick(date)
-            },
+        modifier =
+            modifier
+                .size(
+                    width = 42.dp,
+                    height = 58.dp
+                ).clickable {
+                    onDateClick(date)
+                },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.Top
     ) {
         Box(
-            modifier = Modifier
-                .size(42.dp)
-                .background(
-                    color = if (isSelected) {
-                        SelectedDateBackgroundColor
-                    } else {
-                        EmptyDateColor
-                    },
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(42.dp)
+                    .background(
+                        color =
+                            if (isSelected) {
+                                SelectedDateBackgroundColor
+                            } else {
+                                EmptyDateColor
+                            },
+                        shape = CircleShape
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = date.dayOfMonth.toString(),
                 color = dateTextColor,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
 
         ScheduleColorDots(
-            scheduleColors = scheduleColors,
+            scheduleColors = scheduleColors
         )
     }
 }
@@ -103,25 +106,27 @@ fun CalendarDayCell(
 @Composable
 private fun ScheduleColorDots(
     scheduleColors: List<ScheduleColorType>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    val visibleColors = scheduleColors
-        .distinct()
-        .take(MAX_VISIBLE_DOT_COUNT)
+    val visibleColors =
+        scheduleColors
+            .distinct()
+            .take(MAX_VISIBLE_DOT_COUNT)
 
     androidx.compose.foundation.layout.Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         visibleColors.forEach { colorType ->
             Box(
-                modifier = Modifier
-                    .size(5.dp)
-                    .background(
-                        color = colorType.toComposeColor(),
-                        shape = CircleShape,
-                    ),
+                modifier =
+                    Modifier
+                        .size(5.dp)
+                        .background(
+                            color = colorType.toComposeColor(),
+                            shape = CircleShape
+                        )
             )
         }
     }
@@ -130,8 +135,8 @@ private fun ScheduleColorDots(
 /**
  * 일정 색상 종류를 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
+private fun ScheduleColorType.toComposeColor(): Color =
+    when (this) {
         ScheduleColorType.RED -> Color(0xFFE86F73)
         ScheduleColorType.ORANGE -> Color(0xFFED9A53)
         ScheduleColorType.YELLOW -> Color(0xFFF1D354)
@@ -142,6 +147,5 @@ private fun ScheduleColorType.toComposeColor(): Color {
         ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
         ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
     }
-}
 
 private const val MAX_VISIBLE_DOT_COUNT = 3

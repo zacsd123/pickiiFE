@@ -52,72 +52,76 @@ private val MemberRemovalDisabledButtonColor = Color(0xFFE2E3E7)
 fun ChatMemberRemovalPanel(
     members: List<ChatRoomMemberUiModel>,
     onBackClick: () -> Unit,
-    onRemoveClick: (Long) -> Unit,
+    onRemoveClick: (Long) -> Unit
 ) {
     var selectedMemberId by rememberSaveable {
         mutableStateOf<Long?>(null)
     }
 
-    val removableMembers = members.filterNot { member ->
-        member.isLeader
-    }
+    val removableMembers =
+        members.filterNot { member ->
+            member.isLeader
+        }
 
     BackHandler(
         enabled = true,
-        onBack = onBackClick,
+        onBack = onBackClick
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MemberRemovalPanelScrimColor)
-                .clickable(onClick = onBackClick),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MemberRemovalPanelScrimColor)
+                    .clickable(onClick = onBackClick)
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.79f)
-                .align(Alignment.CenterEnd)
-                .background(MemberRemovalPanelBackgroundColor),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.79f)
+                    .align(Alignment.CenterEnd)
+                    .background(MemberRemovalPanelBackgroundColor)
         ) {
             MemberRemovalHeader(
-                onBackClick = onBackClick,
+                onBackClick = onBackClick
             )
 
             HorizontalDivider(
-                color = MemberRemovalDividerColor,
+                color = MemberRemovalDividerColor
             )
 
             Text(
                 text = "내보낼 팀원을 선택하세요",
-                modifier = Modifier.padding(
-                    start = 24.dp,
-                    top = 18.dp,
-                    bottom = 8.dp,
-                ),
+                modifier =
+                    Modifier.padding(
+                        start = 24.dp,
+                        top = 18.dp,
+                        bottom = 8.dp
+                    ),
                 color = MemberRemovalSecondaryTextColor,
-                fontSize = 13.sp,
+                fontSize = 13.sp
             )
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             ) {
                 items(
                     items = removableMembers,
                     key = { member ->
                         member.memberId
-                    },
+                    }
                 ) { member ->
                     MemberRemovalItem(
                         member = member,
                         isSelected = selectedMemberId == member.memberId,
                         onClick = {
                             selectedMemberId = member.memberId
-                        },
+                        }
                     )
                 }
             }
@@ -126,7 +130,7 @@ fun ChatMemberRemovalPanel(
                 isEnabled = selectedMemberId != null,
                 onClick = {
                     selectedMemberId?.let(onRemoveClick)
-                },
+                }
             )
         }
     }
@@ -136,42 +140,43 @@ fun ChatMemberRemovalPanel(
  * 팀원 내보내기 패널의 상단 영역을 표시한다.
  */
 @Composable
-private fun MemberRemovalHeader(
-    onBackClick: () -> Unit,
-) {
+private fun MemberRemovalHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onBackClick),
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = R.drawable.ic_back,
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_back
+                    ),
                 contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp),
+            modifier = Modifier.width(8.dp)
         )
 
         Text(
             text = "팀원 내보내기",
             color = MemberRemovalPrimaryTextColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -183,52 +188,56 @@ private fun MemberRemovalHeader(
 private fun MemberRemovalItem(
     member: ChatRoomMemberUiModel,
     isSelected: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = if (isSelected) {
-                        MemberRemovalSelectedColor
-                    } else {
-                        Color.Transparent
-                    },
-                )
-                .clickable(onClick = onClick)
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 14.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color =
+                            if (isSelected) {
+                                MemberRemovalSelectedColor
+                            } else {
+                                Color.Transparent
+                            }
+                    ).clickable(onClick = onClick)
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 14.dp
+                    ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        color = createRemovalProfileColor(
-                            memberId = member.memberId,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            color =
+                                createRemovalProfileColor(
+                                    memberId = member.memberId
+                                )
                         ),
-                    ),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = member.name
-                        .firstOrNull()
-                        ?.toString()
-                        .orEmpty(),
+                    text =
+                        member.name
+                            .firstOrNull()
+                            ?.toString()
+                            .orEmpty(),
                     color = MemberRemovalPrimaryTextColor,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.width(14.dp)
             )
 
             Text(
@@ -236,29 +245,30 @@ private fun MemberRemovalItem(
                 modifier = Modifier.weight(1f),
                 color = MemberRemovalPrimaryTextColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             if (isSelected) {
                 Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(MemberRemovalButtonColor),
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(MemberRemovalButtonColor),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "✓",
                         color = Color.White,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
 
         HorizontalDivider(
-            color = MemberRemovalDividerColor,
+            color = MemberRemovalDividerColor
         )
     }
 }
@@ -269,36 +279,35 @@ private fun MemberRemovalItem(
 @Composable
 private fun MemberRemovalButton(
     isEnabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(
-                horizontal = 24.dp,
-                vertical = 18.dp,
-            )
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                color = if (isEnabled) {
-                    MemberRemovalButtonColor
-                } else {
-                    MemberRemovalDisabledButtonColor
-                },
-            )
-            .clickable(
-                enabled = isEnabled,
-                onClick = onClick,
-            )
-            .padding(vertical = 18.dp),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(
+                    horizontal = 24.dp,
+                    vertical = 18.dp
+                ).clip(RoundedCornerShape(18.dp))
+                .background(
+                    color =
+                        if (isEnabled) {
+                            MemberRemovalButtonColor
+                        } else {
+                            MemberRemovalDisabledButtonColor
+                        }
+                ).clickable(
+                    enabled = isEnabled,
+                    onClick = onClick
+                ).padding(vertical = 18.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "내보내기",
             color = Color.White,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -306,16 +315,15 @@ private fun MemberRemovalButton(
 /**
  * 팀원별 임시 프로필 배경색을 반환한다.
  */
-private fun createRemovalProfileColor(
-    memberId: Long,
-): Color {
-    val colors = listOf(
-        Color(0xFFC9B7FF),
-        Color(0xFFF0B3C6),
-        Color(0xFFF2C58F),
-        Color(0xFFB8E3D1),
-        Color(0xFFB9D7FA),
-    )
+private fun createRemovalProfileColor(memberId: Long): Color {
+    val colors =
+        listOf(
+            Color(0xFFC9B7FF),
+            Color(0xFFF0B3C6),
+            Color(0xFFF2C58F),
+            Color(0xFFB8E3D1),
+            Color(0xFFB9D7FA)
+        )
 
     return colors[(memberId % colors.size).toInt()]
 }

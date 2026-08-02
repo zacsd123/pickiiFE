@@ -35,13 +35,15 @@ private val DateTimeDividerColor = Color(0xFFE7E7E1)
 private val SwitchCheckedColor = Color(0xFF1B1B1B)
 private val SwitchUncheckedColor = Color(0xFFD2D2CC)
 
-private val DateFormatter = DateTimeFormatter.ofPattern(
-    "yyyy.MM.dd",
-)
+private val DateFormatter =
+    DateTimeFormatter.ofPattern(
+        "yyyy.MM.dd"
+    )
 
-private val TimeFormatter = DateTimeFormatter.ofPattern(
-    "HH:mm",
-)
+private val TimeFormatter =
+    DateTimeFormatter.ofPattern(
+        "HH:mm"
+    )
 
 /**
  * 일정 시작일, 종료일, 시간 및 하루 종일 설정 영역이다.
@@ -58,40 +60,40 @@ fun ScheduleDateTimeSection(
     onStartTimeChange: (LocalTime) -> Unit,
     onEndTimeChange: (LocalTime) -> Unit,
     onAllDayChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = DateTimeSectionBackgroundColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
-            ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = DateTimeSectionBackgroundColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp
+                ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "◷",
                 color = DateTimeLabelColor,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(
-                modifier = Modifier.width(8.dp),
+                modifier = Modifier.width(8.dp)
             )
 
             Text(
                 text = "날짜 및 시간",
                 color = DateTimeLabelColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
 
@@ -103,7 +105,7 @@ fun ScheduleDateTimeSection(
             time = startTime,
             isAllDay = isAllDay,
             onDateChange = onStartDateChange,
-            onTimeChange = onStartTimeChange,
+            onTimeChange = onStartTimeChange
         )
 
         DateTimeDivider()
@@ -114,7 +116,7 @@ fun ScheduleDateTimeSection(
             time = endTime,
             isAllDay = isAllDay,
             onDateChange = onEndDateChange,
-            onTimeChange = onEndTimeChange,
+            onTimeChange = onEndTimeChange
         )
 
         DateTimeDivider()
@@ -122,25 +124,26 @@ fun ScheduleDateTimeSection(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "하루 종일",
                 color = DateTimeValueColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
 
             Switch(
                 checked = isAllDay,
                 onCheckedChange = onAllDayChange,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = SwitchCheckedColor,
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = SwitchUncheckedColor,
-                    uncheckedBorderColor = Color.Transparent,
-                ),
+                colors =
+                    SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = SwitchCheckedColor,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = SwitchUncheckedColor,
+                        uncheckedBorderColor = Color.Transparent
+                    )
             )
         }
     }
@@ -157,78 +160,78 @@ private fun DateTimePickerRow(
     isAllDay: Boolean,
     onDateChange: (LocalDate) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             modifier = Modifier.width(44.dp),
             color = DateTimeLabelColor,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
 
         Text(
             text = date.format(DateFormatter),
-            modifier = Modifier
-                .weight(1f)
-                .clickable {
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            onDateChange(
-                                LocalDate.of(
-                                    year,
-                                    month + 1,
-                                    dayOfMonth,
-                                ),
-                            )
-                        },
-                        date.year,
-                        date.monthValue - 1,
-                        date.dayOfMonth,
-                    ).show()
-                }
-                .padding(
-                    vertical = 8.dp,
-                ),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .clickable {
+                        DatePickerDialog(
+                            context,
+                            { _, year, month, dayOfMonth ->
+                                onDateChange(
+                                    LocalDate.of(
+                                        year,
+                                        month + 1,
+                                        dayOfMonth
+                                    )
+                                )
+                            },
+                            date.year,
+                            date.monthValue - 1,
+                            date.dayOfMonth
+                        ).show()
+                    }.padding(
+                        vertical = 8.dp
+                    ),
             color = DateTimeValueColor,
             fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
 
         if (!isAllDay) {
             Text(
                 text = time.format(TimeFormatter),
-                modifier = Modifier
-                    .clickable {
-                        TimePickerDialog(
-                            context,
-                            { _, hourOfDay, minute ->
-                                onTimeChange(
-                                    LocalTime.of(
-                                        hourOfDay,
-                                        minute,
-                                    ),
-                                )
-                            },
-                            time.hour,
-                            time.minute,
-                            true,
-                        ).show()
-                    }
-                    .padding(
-                        horizontal = 8.dp,
-                        vertical = 8.dp,
-                    ),
+                modifier =
+                    Modifier
+                        .clickable {
+                            TimePickerDialog(
+                                context,
+                                { _, hourOfDay, minute ->
+                                    onTimeChange(
+                                        LocalTime.of(
+                                            hourOfDay,
+                                            minute
+                                        )
+                                    )
+                                },
+                                time.hour,
+                                time.minute,
+                                true
+                            ).show()
+                        }.padding(
+                            horizontal = 8.dp,
+                            vertical = 8.dp
+                        ),
                 color = DateTimeValueColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -238,13 +241,12 @@ private fun DateTimePickerRow(
  * 날짜 및 시간 설정 항목 사이 구분선이다.
  */
 @Composable
-private fun DateTimeDivider(
-    modifier: Modifier = Modifier,
-) {
+private fun DateTimeDivider(modifier: Modifier = Modifier) {
     androidx.compose.foundation.layout.Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(DateTimeDividerColor)
-            .padding(top = 1.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(DateTimeDividerColor)
+                .padding(top = 1.dp)
     )
 }

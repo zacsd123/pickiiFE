@@ -1,6 +1,5 @@
 package com.example.pickii.ui.chat
 
-
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,51 +45,54 @@ private val LeaderBadgeTextColor = Color(0xFF4A4F00)
 @Composable
 fun ChatMemberListPanel(
     members: List<ChatRoomMemberUiModel>,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     BackHandler(
         enabled = true,
-        onBack = onBackClick,
+        onBack = onBackClick
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MemberListPanelScrimColor)
-                .clickable(onClick = onBackClick),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MemberListPanelScrimColor)
+                    .clickable(onClick = onBackClick)
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.79f)
-                .align(Alignment.CenterEnd)
-                .background(MemberListPanelBackgroundColor),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.79f)
+                    .align(Alignment.CenterEnd)
+                    .background(MemberListPanelBackgroundColor)
         ) {
             MemberListHeader(
-                onBackClick = onBackClick,
+                onBackClick = onBackClick
             )
 
             HorizontalDivider(
-                color = MemberListDividerColor,
+                color = MemberListDividerColor
             )
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(
-                    items = members.sortedByDescending { member ->
-                        member.isLeader
-                    },
+                    items =
+                        members.sortedByDescending { member ->
+                            member.isLeader
+                        },
                     key = { member ->
                         member.memberId
-                    },
+                    }
                 ) { member ->
                     ChatMemberListItem(
-                        member = member,
+                        member = member
                     )
                 }
             }
@@ -102,42 +104,43 @@ fun ChatMemberListPanel(
  * 팀원 목록 화면의 상단 헤더를 표시한다.
  */
 @Composable
-private fun MemberListHeader(
-    onBackClick: () -> Unit,
-) {
+private fun MemberListHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onBackClick),
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = R.drawable.ic_back,
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_back
+                    ),
                 contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp),
+            modifier = Modifier.width(8.dp)
         )
 
         Text(
             text = "팀원 목록",
             color = MemberListPrimaryTextColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -146,75 +149,75 @@ private fun MemberListHeader(
  * 팀원 한 명의 정보를 세로 목록 행으로 표시한다.
  */
 @Composable
-private fun ChatMemberListItem(
-    member: ChatRoomMemberUiModel,
-) {
+private fun ChatMemberListItem(member: ChatRoomMemberUiModel) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 14.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 14.dp
+                    ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             MemberProfileImage(
-                member = member,
+                member = member
             )
 
             Spacer(
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.width(14.dp)
             )
 
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = member.name,
                     color = MemberListPrimaryTextColor,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.size(3.dp),
+                    modifier = Modifier.size(3.dp)
                 )
 
                 Text(
-                    text = if (member.isLeader) {
-                        "팀장"
-                    } else {
-                        "팀원"
-                    },
+                    text =
+                        if (member.isLeader) {
+                            "팀장"
+                        } else {
+                            "팀원"
+                        },
                     color = MemberListSecondaryTextColor,
-                    fontSize = 12.sp,
+                    fontSize = 12.sp
                 )
             }
 
             if (member.isLeader) {
                 Text(
                     text = "팀장",
-                    modifier = Modifier
-                        .background(
-                            color = LeaderBadgeBackgroundColor,
-                            shape = RoundedCornerShape(20.dp),
-                        )
-                        .padding(
-                            horizontal = 12.dp,
-                            vertical = 6.dp,
-                        ),
+                    modifier =
+                        Modifier
+                            .background(
+                                color = LeaderBadgeBackgroundColor,
+                                shape = RoundedCornerShape(20.dp)
+                            ).padding(
+                                horizontal = 12.dp,
+                                vertical = 6.dp
+                            ),
                     color = LeaderBadgeTextColor,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
 
         HorizontalDivider(
-            color = MemberListDividerColor,
+            color = MemberListDividerColor
         )
     }
 }
@@ -223,32 +226,33 @@ private fun ChatMemberListItem(
  * 팀원 프로필 이미지를 표시한다.
  */
 @Composable
-private fun MemberProfileImage(
-    member: ChatRoomMemberUiModel,
-) {
+private fun MemberProfileImage(member: ChatRoomMemberUiModel) {
     Box(
         modifier = Modifier.size(52.dp),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    color = createMemberProfileColor(
-                        memberId = member.memberId,
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        color =
+                            createMemberProfileColor(
+                                memberId = member.memberId
+                            )
                     ),
-                ),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             Text(
-                text = member.name
-                    .firstOrNull()
-                    ?.toString()
-                    .orEmpty(),
+                text =
+                    member.name
+                        .firstOrNull()
+                        ?.toString()
+                        .orEmpty(),
                 color = MemberListPrimaryTextColor,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -256,7 +260,7 @@ private fun MemberProfileImage(
             Text(
                 text = "👑",
                 modifier = Modifier.align(Alignment.TopEnd),
-                fontSize = 14.sp,
+                fontSize = 14.sp
             )
         }
     }
@@ -265,20 +269,20 @@ private fun MemberProfileImage(
 /**
  * 팀원별 임시 프로필 색상을 생성한다.
  */
-private fun createMemberProfileColor(
-    memberId: Long,
-): Color {
-    val colors = listOf(
-        Color(0xFFC9B7FF),
-        Color(0xFFF0B3C6),
-        Color(0xFFF2C58F),
-        Color(0xFFB8E3D1),
-        Color(0xFFB9D7FA),
-    )
+private fun createMemberProfileColor(memberId: Long): Color {
+    val colors =
+        listOf(
+            Color(0xFFC9B7FF),
+            Color(0xFFF0B3C6),
+            Color(0xFFF2C58F),
+            Color(0xFFB8E3D1),
+            Color(0xFFB9D7FA)
+        )
 
-    val colorIndex = (memberId % colors.size)
-        .toInt()
-        .coerceAtLeast(0)
+    val colorIndex =
+        (memberId % colors.size)
+            .toInt()
+            .coerceAtLeast(0)
 
     return colors[colorIndex]
 }

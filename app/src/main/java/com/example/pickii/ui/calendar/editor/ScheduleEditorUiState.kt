@@ -20,9 +20,8 @@ data class ScheduleEditorUiState(
     val location: String = "",
     val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
     val memo: String = "",
-    val isSaved: Boolean = false,
+    val isSaved: Boolean = false
 ) {
-
     val canSave: Boolean
         get() {
             if (title.isBlank()) {

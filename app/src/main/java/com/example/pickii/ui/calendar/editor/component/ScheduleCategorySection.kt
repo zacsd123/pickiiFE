@@ -45,47 +45,47 @@ fun ScheduleCategorySection(
     selectedCategoryId: Long?,
     onCategoryClick: (Long?) -> Unit,
     onManageClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = CategorySectionBackgroundColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
-            ),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = CategorySectionBackgroundColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp
+                ),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "◇",
                 color = CategoryTitleColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
 
             Spacer(
-                modifier = Modifier.width(8.dp),
+                modifier = Modifier.width(8.dp)
             )
 
             Text(
                 text = "태그",
                 color = CategoryTitleColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ScheduleCategoryChip(
                 text = "없음",
@@ -93,7 +93,7 @@ fun ScheduleCategorySection(
                 isSelected = selectedCategoryId == null,
                 onClick = {
                     onCategoryClick(null)
-                },
+                }
             )
 
             categories.forEach { category ->
@@ -103,7 +103,7 @@ fun ScheduleCategorySection(
                     isSelected = selectedCategoryId == category.id,
                     onClick = {
                         onCategoryClick(category.id)
-                    },
+                    }
                 )
             }
 
@@ -111,7 +111,7 @@ fun ScheduleCategorySection(
                 text = "+ 관리",
                 color = null,
                 isSelected = false,
-                onClick = onManageClick,
+                onClick = onManageClick
             )
         }
     }
@@ -126,52 +126,54 @@ private fun ScheduleCategoryChip(
     color: Color?,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .background(
-                color = if (isSelected) {
-                    SelectedCategoryBackgroundColor
-                } else {
-                    UnselectedCategoryBackgroundColor
-                },
-                shape = RoundedCornerShape(50),
-            )
-            .clickable(
-                onClick = onClick,
-            )
-            .padding(
-                horizontal = 14.dp,
-                vertical = 9.dp,
-            ),
+        modifier =
+            modifier
+                .background(
+                    color =
+                        if (isSelected) {
+                            SelectedCategoryBackgroundColor
+                        } else {
+                            UnselectedCategoryBackgroundColor
+                        },
+                    shape = RoundedCornerShape(50)
+                ).clickable(
+                    onClick = onClick
+                ).padding(
+                    horizontal = 14.dp,
+                    vertical = 9.dp
+                ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Center
     ) {
         if (color != null) {
             Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(
-                        color = color,
-                        shape = CircleShape,
-                    ),
+                modifier =
+                    Modifier
+                        .size(8.dp)
+                        .background(
+                            color = color,
+                            shape = CircleShape
+                        )
             )
 
             Spacer(
-                modifier = Modifier.width(7.dp),
+                modifier = Modifier.width(7.dp)
             )
         }
 
         Text(
             text = text,
-            color = if (isSelected) {
-                SelectedCategoryTextColor
-            } else {
-                UnselectedCategoryTextColor
-            },
+            color =
+                if (isSelected) {
+                    SelectedCategoryTextColor
+                } else {
+                    UnselectedCategoryTextColor
+                },
             fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -179,8 +181,8 @@ private fun ScheduleCategoryChip(
 /**
  * 도메인 색상 타입을 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
+private fun ScheduleColorType.toComposeColor(): Color =
+    when (this) {
         ScheduleColorType.RED -> Color(0xFFE86F73)
         ScheduleColorType.ORANGE -> Color(0xFFED9A53)
         ScheduleColorType.YELLOW -> Color(0xFFF1D354)
@@ -191,4 +193,3 @@ private fun ScheduleColorType.toComposeColor(): Color {
         ScheduleColorType.GRAY -> Color(0xFF90959D)
         ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
     }
-}

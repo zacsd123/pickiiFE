@@ -36,15 +36,16 @@ import androidx.compose.ui.unit.sp
 fun NoticeRegistrationBottomSheet(
     initialContent: String = "",
     onDismiss: () -> Unit,
-    onCompleteClick: (String) -> Unit,
+    onCompleteClick: (String) -> Unit
 ) {
     var noticeContent by remember(initialContent) {
         mutableStateOf(initialContent)
     }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     val isCompleteEnabled = noticeContent.isNotBlank()
 
@@ -52,31 +53,33 @@ fun NoticeRegistrationBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = Color.White,
-        shape = RoundedCornerShape(
-            topStart = 28.dp,
-            topEnd = 28.dp,
-        ),
-        dragHandle = null,
+        shape =
+            RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp
+            ),
+        dragHandle = null
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp,
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .navigationBarsPadding()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "취소",
                     modifier = Modifier.clickable(onClick = onDismiss),
                     color = Color(0xFF6B7280),
-                    fontSize = 15.sp,
+                    fontSize = 15.sp
                 )
 
                 Text(
@@ -85,23 +88,25 @@ fun NoticeRegistrationBottomSheet(
                     color = Color(0xFF111827),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "완료",
-                    modifier = Modifier.clickable(
-                        enabled = isCompleteEnabled,
-                    ) {
-                        onCompleteClick(noticeContent.trim())
-                    },
-                    color = if (isCompleteEnabled) {
-                        Color(0xFF111827)
-                    } else {
-                        Color(0xFFBFC3C9)
-                    },
+                    modifier =
+                        Modifier.clickable(
+                            enabled = isCompleteEnabled
+                        ) {
+                            onCompleteClick(noticeContent.trim())
+                        },
+                    color =
+                        if (isCompleteEnabled) {
+                            Color(0xFF111827)
+                        } else {
+                            Color(0xFFBFC3C9)
+                        },
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -112,36 +117,37 @@ fun NoticeRegistrationBottomSheet(
                 onValueChange = { newContent ->
                     noticeContent = newContent
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .background(
-                        color = Color(0xFFF4F5F7),
-                        shape = RoundedCornerShape(18.dp),
-                    )
-                    .padding(18.dp),
-                textStyle = TextStyle(
-                    color = Color(0xFF111827),
-                    fontSize = 15.sp,
-                    lineHeight = 22.sp,
-                ),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .background(
+                            color = Color(0xFFF4F5F7),
+                            shape = RoundedCornerShape(18.dp)
+                        ).padding(18.dp),
+                textStyle =
+                    TextStyle(
+                        color = Color(0xFF111827),
+                        fontSize = 15.sp,
+                        lineHeight = 22.sp
+                    ),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.TopStart,
+                        contentAlignment = Alignment.TopStart
                     ) {
                         if (noticeContent.isEmpty()) {
                             Text(
                                 text = "멤버들과 공유하고 싶은 소식을 남겨보세요.",
                                 color = Color(0xFF9CA3AF),
                                 fontSize = 15.sp,
-                                lineHeight = 22.sp,
+                                lineHeight = 22.sp
                             )
                         }
 
                         innerTextField()
                     }
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(20.dp))

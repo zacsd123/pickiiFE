@@ -16,7 +16,7 @@ fun ScheduleEditorRoute(
     onManageCategoryClick: () -> Unit,
     onScheduleSaved: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ScheduleEditorViewModel = hiltViewModel(),
+    viewModel: ScheduleEditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -25,7 +25,7 @@ fun ScheduleEditorRoute(
             onScheduleSaved()
 
             viewModel.onEvent(
-                ScheduleEditorUiEvent.SavedStateConsumed,
+                ScheduleEditorUiEvent.SavedStateConsumed
             )
         }
     }
@@ -35,6 +35,6 @@ fun ScheduleEditorRoute(
         onBackClick = onBackClick,
         onManageCategoryClick = onManageCategoryClick,
         onEvent = viewModel::onEvent,
-        modifier = modifier,
+        modifier = modifier
     )
 }

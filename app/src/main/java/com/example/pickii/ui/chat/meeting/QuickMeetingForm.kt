@@ -6,5 +6,5 @@ data class QuickMeetingForm(
     val startDateMillis: Long,
     val endDateMillis: Long,
     val candidateCount: Int,
-    val memo: String,
+    val memo: String
 )

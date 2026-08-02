@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 
 private enum class ChatScreenType {
     LIST,
-    ROOM,
+    ROOM
 }
 
 /**
@@ -22,7 +22,7 @@ private enum class ChatScreenType {
 @Composable
 fun ChatRoute(
     onTopLevelScreenChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var currentScreen by rememberSaveable {
         mutableStateOf(ChatScreenType.LIST.name)
@@ -54,7 +54,7 @@ fun ChatRoute(
                     selectedRoomTitle = chatRoom.roomName
                     selectedRoomType = chatRoom.type.name
                     currentScreen = ChatScreenType.ROOM.name
-                },
+                }
             )
         }
 
@@ -69,7 +69,7 @@ fun ChatRoute(
                 onLeaveChatRoom = {
                     currentScreen = ChatScreenType.LIST.name
                 },
-                modifier = modifier,
+                modifier = modifier
             )
         }
     }

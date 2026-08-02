@@ -74,12 +74,13 @@ private val GalleryGridHeight = 420.dp
 @Composable
 fun GalleryPickerBottomSheet(
     onDismiss: () -> Unit,
-    onConfirm: (List<Uri>) -> Unit,
+    onConfirm: (List<Uri>) -> Unit
 ) {
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     var hasPermission by remember {
         mutableStateOf(hasGalleryReadPermission(context))
@@ -89,14 +90,15 @@ fun GalleryPickerBottomSheet(
         mutableStateOf(false)
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        hasPermission = granted
-        if (!granted) {
-            permissionDenied = true
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            hasPermission = granted
+            if (!granted) {
+                permissionDenied = true
+            }
         }
-    }
 
     var photoUris by remember {
         mutableStateOf<List<Uri>>(emptyList())
@@ -106,16 +108,18 @@ fun GalleryPickerBottomSheet(
         mutableStateOf(false)
     }
 
-    val selectedUris = remember {
-        mutableStateListOf<Uri>()
-    }
+    val selectedUris =
+        remember {
+            mutableStateListOf<Uri>()
+        }
 
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
             isLoading = true
-            photoUris = withContext(Dispatchers.IO) {
-                queryDeviceImages(context)
-            }
+            photoUris =
+                withContext(Dispatchers.IO) {
+                    queryDeviceImages(context)
+                }
             isLoading = false
         }
     }
@@ -127,26 +131,28 @@ fun GalleryPickerBottomSheet(
         dragHandle = {
             BottomSheetDefaults.DragHandle(
                 width = 36.dp,
-                height = 4.dp,
+                height = 4.dp
             )
         },
-        shape = RoundedCornerShape(
-            topStart = 28.dp,
-            topEnd = 28.dp,
-        ),
+        shape =
+            RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp
+            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(bottom = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp)
         ) {
             GalleryPickerHeader(
                 selectedCount = selectedUris.size,
                 onCloseClick = onDismiss,
                 onConfirmClick = {
                     onConfirm(selectedUris.toList())
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -157,16 +163,17 @@ fun GalleryPickerBottomSheet(
                         denied = permissionDenied,
                         onRequestClick = {
                             permissionLauncher.launch(galleryReadPermission())
-                        },
+                        }
                     )
                 }
 
                 isLoading -> {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(GalleryGridHeight),
-                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(GalleryGridHeight),
+                        contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = Color(0xFF171714))
                     }
@@ -174,15 +181,16 @@ fun GalleryPickerBottomSheet(
 
                 photoUris.isEmpty() -> {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(GalleryGridHeight),
-                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(GalleryGridHeight),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "표시할 사진이 없습니다",
                             color = Color(0xFF9CA3AF),
-                            fontSize = 14.sp,
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -190,16 +198,17 @@ fun GalleryPickerBottomSheet(
                 else -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(GalleryGridHeight),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(GalleryGridHeight),
                         contentPadding = PaddingValues(2.dp),
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         items(
                             items = photoUris,
-                            key = { it.toString() },
+                            key = { it.toString() }
                         ) { uri ->
                             GalleryPhotoCell(
                                 uri = uri,
@@ -210,7 +219,7 @@ fun GalleryPickerBottomSheet(
                                     } else {
                                         selectedUris.add(uri)
                                     }
-                                },
+                                }
                             )
                         }
                     }
@@ -227,51 +236,53 @@ fun GalleryPickerBottomSheet(
 private fun GalleryPickerHeader(
     selectedCount: Int,
     onCloseClick: () -> Unit,
-    onConfirmClick: () -> Unit,
+    onConfirmClick: () -> Unit
 ) {
     val hasSelection = selectedCount > 0
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 24.dp,
-                end = 24.dp,
-                top = 4.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 4.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "사진 선택",
             modifier = Modifier.weight(1f),
             color = Color(0xFF18181B),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(
-                    if (hasSelection) {
-                        Color(0xFF171714)
-                    } else {
-                        Color(0xFFF2F3F6)
-                    },
-                )
-                .clickable(
-                    onClick = if (hasSelection) onConfirmClick else onCloseClick,
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (hasSelection) {
+                            Color(0xFF171714)
+                        } else {
+                            Color(0xFFF2F3F6)
+                        }
+                    ).clickable(
+                        onClick = if (hasSelection) onConfirmClick else onCloseClick
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(
-                    id = if (hasSelection) R.drawable.ic_check else R.drawable.ic_close,
-                ),
+                painter =
+                    painterResource(
+                        id = if (hasSelection) R.drawable.ic_check else R.drawable.ic_close
+                    ),
                 contentDescription = if (hasSelection) "완료" else "닫기",
                 tint = if (hasSelection) Color.White else Color(0xFF4B5563),
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(16.dp)
             )
         }
     }
@@ -283,25 +294,27 @@ private fun GalleryPickerHeader(
 @Composable
 private fun GalleryPermissionRequest(
     denied: Boolean,
-    onRequestClick: () -> Unit,
+    onRequestClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(GalleryGridHeight)
-            .padding(horizontal = 32.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(GalleryGridHeight)
+                .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = if (denied) {
-                "설정에서 사진 접근 권한을 허용해주세요"
-            } else {
-                "사진을 보려면 접근 권한이 필요해요"
-            },
+            text =
+                if (denied) {
+                    "설정에서 사진 접근 권한을 허용해주세요"
+                } else {
+                    "사진을 보려면 접근 권한이 필요해요"
+                },
             color = Color(0xFF667085),
             fontSize = 14.sp,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -309,10 +322,11 @@ private fun GalleryPermissionRequest(
         Button(
             onClick = onRequestClick,
             shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF171714),
-                contentColor = Color.White,
-            ),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF171714),
+                    contentColor = Color.White
+                )
         ) {
             Text(text = "권한 허용하기")
         }
@@ -326,45 +340,48 @@ private fun GalleryPermissionRequest(
 private fun GalleryPhotoCell(
     uri: Uri,
     selected: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .aspectRatio(1f)
+                .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = uri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         )
 
         if (selected) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.35f)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
             )
         }
 
         Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(
-                    if (selected) Color(0xFF171714) else Color.White.copy(alpha = 0.7f),
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (selected) Color(0xFF171714) else Color.White.copy(alpha = 0.7f)
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             if (selected) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_check),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(12.dp),
+                    modifier = Modifier.size(12.dp)
                 )
             }
         }
@@ -381,12 +398,11 @@ private fun galleryReadPermission(): String =
         Manifest.permission.READ_EXTERNAL_STORAGE
     }
 
-private fun hasGalleryReadPermission(context: Context): Boolean {
-    return ContextCompat.checkSelfPermission(
+private fun hasGalleryReadPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(
         context,
-        galleryReadPermission(),
+        galleryReadPermission()
     ) == PackageManager.PERMISSION_GRANTED
-}
 
 /**
  * MediaStore에서 기기에 저장된 사진을 최신순으로 최대 [GALLERY_QUERY_LIMIT]장까지 가져온다.
@@ -397,20 +413,21 @@ private fun queryDeviceImages(context: Context): List<Uri> {
     val projection = arrayOf(MediaStore.Images.Media._ID)
     val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-    context.contentResolver.query(
-        collection,
-        projection,
-        null,
-        null,
-        sortOrder,
-    )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+    context.contentResolver
+        .query(
+            collection,
+            projection,
+            null,
+            null,
+            sortOrder
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
 
-        while (cursor.moveToNext() && uris.size < GALLERY_QUERY_LIMIT) {
-            val id = cursor.getLong(idColumn)
-            uris.add(ContentUris.withAppendedId(collection, id))
+            while (cursor.moveToNext() && uris.size < GALLERY_QUERY_LIMIT) {
+                val id = cursor.getLong(idColumn)
+                uris.add(ContentUris.withAppendedId(collection, id))
+            }
         }
-    }
 
     return uris
 }

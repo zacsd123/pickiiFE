@@ -45,65 +45,68 @@ private val ProjectInfoProgressColor = Color(0xFF202020)
 @Composable
 fun ChatProjectInfoPanel(
     projectInfo: ChatProjectInfoUiModel,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     BackHandler(
         enabled = true,
-        onBack = onBackClick,
+        onBack = onBackClick
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ProjectInfoPanelScrimColor)
-                .clickable(onClick = onBackClick),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(ProjectInfoPanelScrimColor)
+                    .clickable(onClick = onBackClick)
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.79f)
-                .align(Alignment.CenterEnd)
-                .background(ProjectInfoPanelBackgroundColor),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.79f)
+                    .align(Alignment.CenterEnd)
+                    .background(ProjectInfoPanelBackgroundColor)
         ) {
             ProjectInfoHeader(
-                onBackClick = onBackClick,
+                onBackClick = onBackClick
             )
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 20.dp,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = 20.dp,
+                            vertical = 20.dp
+                        ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 ProjectProgressCard(
-                    projectInfo = projectInfo,
+                    projectInfo = projectInfo
                 )
 
                 ProjectInfoItem(
                     label = "시작일",
-                    value = projectInfo.startDate,
+                    value = projectInfo.startDate
                 )
 
                 ProjectInfoItem(
                     label = "종료일",
-                    value = projectInfo.endDate,
+                    value = projectInfo.endDate
                 )
 
                 ProjectInfoItem(
                     label = "팀원 수",
-                    value = "${projectInfo.memberCount}명",
+                    value = "${projectInfo.memberCount}명"
                 )
 
                 ProjectInfoItem(
                     label = "팀장",
-                    value = projectInfo.leaderName,
+                    value = projectInfo.leaderName
                 )
             }
         }
@@ -114,42 +117,43 @@ fun ChatProjectInfoPanel(
  * 프로젝트 정보 화면의 상단 헤더를 표시한다.
  */
 @Composable
-private fun ProjectInfoHeader(
-    onBackClick: () -> Unit,
-) {
+private fun ProjectInfoHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onBackClick),
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = R.drawable.ic_back,
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_back
+                    ),
                 contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp),
+            modifier = Modifier.width(8.dp)
         )
 
         Text(
             text = "프로젝트 정보",
             color = ProjectInfoPrimaryTextColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -158,87 +162,87 @@ private fun ProjectInfoHeader(
  * 프로젝트 진행률 카드를 표시한다.
  */
 @Composable
-private fun ProjectProgressCard(
-    projectInfo: ChatProjectInfoUiModel,
-) {
-    val progressPercent = projectInfo.progressPercent
-        .coerceIn(0, 100)
+private fun ProjectProgressCard(projectInfo: ChatProjectInfoUiModel) {
+    val progressPercent =
+        projectInfo.progressPercent
+            .coerceIn(0, 100)
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = ProjectInfoHighlightColor,
-                shape = RoundedCornerShape(20.dp),
-            )
-            .padding(18.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = ProjectInfoHighlightColor,
+                    shape = RoundedCornerShape(20.dp)
+                ).padding(18.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = projectInfo.projectTitle,
                 modifier = Modifier.weight(1f),
                 color = ProjectInfoPrimaryTextColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = projectInfo.projectStatus.toDisplayText(),
-                modifier = Modifier
-                    .background(
-                        color = Color(0xFF1F1F1F),
-                        shape = RoundedCornerShape(20.dp),
-                    )
-                    .padding(
-                        horizontal = 12.dp,
-                        vertical = 6.dp,
-                    ),
+                modifier =
+                    Modifier
+                        .background(
+                            color = Color(0xFF1F1F1F),
+                            shape = RoundedCornerShape(20.dp)
+                        ).padding(
+                            horizontal = 12.dp,
+                            vertical = 6.dp
+                        ),
                 color = Color.White,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(
-            modifier = Modifier.height(16.dp),
+            modifier = Modifier.height(16.dp)
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "진행률",
                 modifier = Modifier.weight(1f),
                 color = ProjectInfoSecondaryTextColor,
-                fontSize = 12.sp,
+                fontSize = 12.sp
             )
 
             Text(
                 text = "$progressPercent%",
                 color = ProjectInfoPrimaryTextColor,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(
-            modifier = Modifier.height(8.dp),
+            modifier = Modifier.height(8.dp)
         )
 
         LinearProgressIndicator(
             progress = {
                 progressPercent / 100f
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(7.dp)
-                .clip(RoundedCornerShape(20.dp)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(7.dp)
+                    .clip(RoundedCornerShape(20.dp)),
             color = ProjectInfoProgressColor,
-            trackColor = ProjectInfoProgressTrackColor,
+            trackColor = ProjectInfoProgressTrackColor
         )
     }
 }
@@ -249,33 +253,33 @@ private fun ProjectProgressCard(
 @Composable
 private fun ProjectInfoItem(
     label: String,
-    value: String,
+    value: String
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = ProjectInfoCardColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 18.dp,
-                vertical = 18.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = ProjectInfoCardColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 18.dp,
+                    vertical = 18.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             modifier = Modifier.weight(1f),
             color = ProjectInfoSecondaryTextColor,
-            fontSize = 14.sp,
+            fontSize = 14.sp
         )
 
         Text(
             text = value,
             color = ProjectInfoPrimaryTextColor,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }

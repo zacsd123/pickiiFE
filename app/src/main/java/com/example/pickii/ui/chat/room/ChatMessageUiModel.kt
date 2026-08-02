@@ -19,18 +19,18 @@ data class ChatMessageUiModel(
     val unreadCount: Int = 0,
     val type: ChatMessageType = ChatMessageType.TEXT,
     val meetingNotice: MeetingNoticeUiModel? = null,
-    val imageUri: String? = null,
+    val imageUri: String? = null
 )
 
 enum class ChatMessageType {
     TEXT,
     MEETING_NOTICE,
-    IMAGE,
+    IMAGE
 }
 
 data class MeetingNoticeUiModel(
     val meetingTitle: String,
     val requesterName: String,
     val createdTimeMillis: Long,
-    val isRegistered: Boolean,
+    val isRegistered: Boolean
 )

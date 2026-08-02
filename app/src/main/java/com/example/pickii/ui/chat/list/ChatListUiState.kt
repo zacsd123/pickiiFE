@@ -5,7 +5,7 @@ package com.example.pickii.ui.chat
  */
 enum class ChatListTab {
     GROUP,
-    DIRECT,
+    DIRECT
 }
 
 /**
@@ -18,5 +18,5 @@ enum class ChatListTab {
 data class ChatListUiState(
     val selectedTab: ChatListTab = ChatListTab.DIRECT,
     val groupChatRooms: List<ChatRoomPreviewUiModel> = emptyList(),
-    val directChatRooms: List<ChatRoomPreviewUiModel> = emptyList(),
+    val directChatRooms: List<ChatRoomPreviewUiModel> = emptyList()
 )

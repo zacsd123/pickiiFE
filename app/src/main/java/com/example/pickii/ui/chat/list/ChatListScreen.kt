@@ -1,11 +1,8 @@
 package com.example.pickii.ui.chat
 
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +28,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,7 +54,7 @@ private val ChatUnselectedTabColor = Color(0xFFF1F2F6)
 @Composable
 fun ChatListRoute(
     onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit,
-    viewModel: ChatListViewModel = hiltViewModel(),
+    viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -66,7 +65,7 @@ fun ChatListRoute(
         onChatRoomClick = { chatRoom ->
             viewModel.markChatRoomAsRead(chatRoom.id)
             onChatRoomClick(chatRoom)
-        },
+        }
     )
 }
 
@@ -85,18 +84,20 @@ fun ChatListScreen(
     uiState: ChatListUiState,
     onTabSelected: (ChatListTab) -> Unit,
     onNotificationClick: (Long) -> Unit,
-    onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit,
+    onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit
 ) {
-    val chatRooms = when (uiState.selectedTab) {
-        ChatListTab.GROUP -> uiState.groupChatRooms
-        ChatListTab.DIRECT -> uiState.directChatRooms
-    }
+    val chatRooms =
+        when (uiState.selectedTab) {
+            ChatListTab.GROUP -> uiState.groupChatRooms
+            ChatListTab.DIRECT -> uiState.directChatRooms
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(ChatBackgroundColor)
-            .padding(horizontal = 28.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(ChatBackgroundColor)
+                .padding(horizontal = 28.dp)
     ) {
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -104,29 +105,29 @@ fun ChatListScreen(
             text = stringResource(R.string.chat_title),
             color = ChatPrimaryColor,
             fontSize = 52.sp,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.ExtraBold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         ChatTabSelector(
             selectedTab = uiState.selectedTab,
-            onTabSelected = onTabSelected,
+            onTabSelected = onTabSelected
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         if (chatRooms.isEmpty()) {
             EmptyChatContent(
-                selectedTab = uiState.selectedTab,
+                selectedTab = uiState.selectedTab
             )
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 items(
                     items = chatRooms,
-                    key = ChatRoomPreviewUiModel::id,
+                    key = ChatRoomPreviewUiModel::id
                 ) { chatRoom ->
                     ChatRoomPreviewCard(
                         chatRoom = chatRoom,
@@ -135,7 +136,7 @@ fun ChatListScreen(
                         },
                         onChatRoomClick = {
                             onChatRoomClick(chatRoom)
-                        },
+                        }
                     )
                 }
 
@@ -156,17 +157,17 @@ fun ChatListScreen(
 @Composable
 private fun ChatTabSelector(
     selectedTab: ChatListTab,
-    onTabSelected: (ChatListTab) -> Unit,
+    onTabSelected: (ChatListTab) -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ChatTabButton(
             text = stringResource(R.string.chat_group_tab),
             isSelected = selectedTab == ChatListTab.GROUP,
             onClick = {
                 onTabSelected(ChatListTab.GROUP)
-            },
+            }
         )
 
         ChatTabButton(
@@ -174,7 +175,7 @@ private fun ChatTabSelector(
             isSelected = selectedTab == ChatListTab.DIRECT,
             onClick = {
                 onTabSelected(ChatListTab.DIRECT)
-            },
+            }
         )
     }
 }
@@ -190,34 +191,36 @@ private fun ChatTabSelector(
 private fun ChatTabButton(
     text: String,
     isSelected: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .background(
-                color = if (isSelected) {
-                    ChatPrimaryColor
-                } else {
-                    ChatUnselectedTabColor
-                },
-                shape = RoundedCornerShape(30.dp),
-            )
-            .clickable(onClick = onClick)
-            .padding(
-                horizontal = 26.dp,
-                vertical = 13.dp,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .background(
+                    color =
+                        if (isSelected) {
+                            ChatPrimaryColor
+                        } else {
+                            ChatUnselectedTabColor
+                        },
+                    shape = RoundedCornerShape(30.dp)
+                ).clickable(onClick = onClick)
+                .padding(
+                    horizontal = 26.dp,
+                    vertical = 13.dp
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = if (isSelected) {
-                Color.White
-            } else {
-                ChatSecondaryTextColor
-            },
+            color =
+                if (isSelected) {
+                    Color.White
+                } else {
+                    ChatSecondaryTextColor
+                },
             fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -233,51 +236,53 @@ private fun ChatTabButton(
 private fun ChatRoomPreviewCard(
     chatRoom: ChatRoomPreviewUiModel,
     onNotificationClick: () -> Unit,
-    onChatRoomClick: () -> Unit,
+    onChatRoomClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 3.dp,
-                shape = RoundedCornerShape(24.dp),
-                clip = false,
-            )
-            .clickable(onClick = onChatRoomClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 3.dp,
+                    shape = RoundedCornerShape(24.dp),
+                    clip = false
+                ).clickable(onClick = onChatRoomClick),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = Color.White
+            )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 18.dp,
-                    vertical = 14.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 18.dp,
+                        vertical = 14.dp
+                    ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             ChatProfileImage(
-                roomType = chatRoom.type,
+                roomType = chatRoom.type
             )
 
             Spacer(
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.width(14.dp)
             )
 
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = chatRoom.lastMessageTime,
                     color = ChatSecondaryTextColor,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Medium
                 )
 
                 Spacer(
-                    modifier = Modifier.height(5.dp),
+                    modifier = Modifier.height(5.dp)
                 )
 
                 Text(
@@ -286,75 +291,80 @@ private fun ChatRoomPreviewCard(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(
-                    modifier = Modifier.height(13.dp),
+                    modifier = Modifier.height(13.dp)
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (chatRoom.type == ChatRoomType.GROUP) {
-                            chatRoom.participantSummary.orEmpty()
-                        } else {
-                            stringResource(
-                                R.string.chat_user_name_format,
-                                chatRoom.senderName,
-                            )
-                        },
+                        text =
+                            if (chatRoom.type == ChatRoomType.GROUP) {
+                                chatRoom.participantSummary.orEmpty()
+                            } else {
+                                stringResource(
+                                    R.string.chat_user_name_format,
+                                    chatRoom.senderName
+                                )
+                            },
                         modifier = Modifier.weight(1f),
                         color = ChatSecondaryTextColor,
                         fontSize = 13.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(
-                        modifier = Modifier.width(8.dp),
+                        modifier = Modifier.width(8.dp)
                     )
 
                     Text(
-                        text = stringResource(
-                            R.string.chat_recruit_title_format,
-                            chatRoom.recruitTitle,
-                        ),
+                        text =
+                            stringResource(
+                                R.string.chat_recruit_title_format,
+                                chatRoom.recruitTitle
+                            ),
                         color = ChatSecondaryTextColor,
                         fontSize = 11.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
             Spacer(
-                modifier = Modifier.width(10.dp),
+                modifier = Modifier.width(10.dp)
             )
 
             Column(
                 modifier = Modifier.height(68.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Image(
-                    painter = painterResource(
-                        id = if (chatRoom.isNotificationEnabled) {
-                            R.drawable.ic_notification_on
-                        } else {
-                            R.drawable.ic_notification_off
-                        },
-                    ),
+                    painter =
+                        painterResource(
+                            id =
+                                if (chatRoom.isNotificationEnabled) {
+                                    R.drawable.ic_notification_on
+                                } else {
+                                    R.drawable.ic_notification_off
+                                }
+                        ),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(18.dp)
-                        .clickable(onClick = onNotificationClick),
+                    modifier =
+                        Modifier
+                            .size(18.dp)
+                            .clickable(onClick = onNotificationClick)
                 )
 
                 UnreadMessageBadge(
-                    unreadCount = chatRoom.unreadCount,
+                    unreadCount = chatRoom.unreadCount
                 )
             }
         }
@@ -365,9 +375,7 @@ private fun ChatRoomPreviewCard(
  * 채팅 카드의 기본 프로필 이미지를 표시한다.
  */
 @Composable
-private fun ChatProfileImage(
-    roomType: ChatRoomType,
-) {
+private fun ChatProfileImage(roomType: ChatRoomType) {
     when (roomType) {
         ChatRoomType.GROUP -> {
             GroupChatProfileImage()
@@ -378,79 +386,83 @@ private fun ChatProfileImage(
         }
     }
 }
-/*개인채팅*/
+
+// 개인채팅
 @Composable
 private fun DirectChatProfileImage() {
     Box(
-        modifier = Modifier
-            .size(48.dp)
-            .background(
-                color = ChatProfileBackgroundColor,
-                shape = CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .size(48.dp)
+                .background(
+                    color = ChatProfileBackgroundColor,
+                    shape = CircleShape
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(
-                id = R.drawable.ic_profile,
-            ),
+            painter =
+                painterResource(
+                    id = R.drawable.ic_profile
+                ),
             contentDescription = null,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp)
         )
     }
 }
 
-/*그룹채팅*/
+// 그룹채팅
 @Composable
 private fun GroupChatProfileImage() {
     Box(
-        modifier = Modifier.size(
-            width = 52.dp,
-            height = 48.dp,
-        ),
+        modifier =
+            Modifier.size(
+                width = 52.dp,
+                height = 48.dp
+            )
     ) {
         ChatProfileCircle(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .size(32.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopStart)
+                    .size(32.dp)
         )
 
         ChatProfileCircle(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(32.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(32.dp)
         )
     }
 }
 
-/*공통 프로필 원*/
+// 공통 프로필 원
 @Composable
-private fun ChatProfileCircle(
-    modifier: Modifier = Modifier,
-) {
+private fun ChatProfileCircle(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .background(
-                color = ChatProfileBackgroundColor,
-                shape = CircleShape,
-            )
-            .border(
-                width = 2.dp,
-                color = Color.White,
-                shape = CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .background(
+                    color = ChatProfileBackgroundColor,
+                    shape = CircleShape
+                ).border(
+                    width = 2.dp,
+                    color = Color.White,
+                    shape = CircleShape
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(
-                id = R.drawable.ic_profile,
-            ),
+            painter =
+                painterResource(
+                    id = R.drawable.ic_profile
+                ),
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(16.dp)
         )
     }
 }
-
 
 /**
  * 읽지 않은 메시지 개수를 원형 배지로 표시한다.
@@ -458,23 +470,22 @@ private fun ChatProfileCircle(
  * @param unreadCount 읽지 않은 메시지 개수
  */
 @Composable
-private fun UnreadMessageBadge(
-    unreadCount: Int,
-) {
+private fun UnreadMessageBadge(unreadCount: Int) {
     Box(
-        modifier = Modifier
-            .size(26.dp)
-            .background(
-                color = ChatPrimaryColor,
-                shape = CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .size(26.dp)
+                .background(
+                    color = ChatPrimaryColor,
+                    shape = CircleShape
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = unreadCount.toString(),
             color = Color.White,
             fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -485,23 +496,23 @@ private fun UnreadMessageBadge(
  * @param selectedTab 현재 선택된 탭
  */
 @Composable
-private fun EmptyChatContent(
-    selectedTab: ChatListTab,
-) {
+private fun EmptyChatContent(selectedTab: ChatListTab) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 100.dp),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 100.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = when (selectedTab) {
-                ChatListTab.GROUP -> stringResource(R.string.chat_empty_group)
-                ChatListTab.DIRECT -> stringResource(R.string.chat_empty_direct)
-            },
+            text =
+                when (selectedTab) {
+                    ChatListTab.GROUP -> stringResource(R.string.chat_empty_group)
+                    ChatListTab.DIRECT -> stringResource(R.string.chat_empty_direct)
+                },
             color = ChatSecondaryTextColor,
             fontSize = 16.sp,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }

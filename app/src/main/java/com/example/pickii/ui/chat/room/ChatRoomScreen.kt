@@ -1,23 +1,11 @@
 package com.example.pickii.ui.chat
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
-import androidx.compose.runtime.remember
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import com.example.pickii.R
-import androidx.annotation.DrawableRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import coil3.compose.AsyncImage
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,13 +30,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,7 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
+import coil3.compose.AsyncImage
+import com.example.pickii.R
+import kotlinx.coroutines.delay
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val MyMessageColor = Color(0xFF111111)
@@ -77,7 +73,7 @@ fun ChatRoomRoute(
     onBackClick: () -> Unit,
     onLeaveChatRoom: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChatRoomViewModel = hiltViewModel(),
+    viewModel: ChatRoomViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -85,7 +81,7 @@ fun ChatRoomRoute(
         viewModel.initializeRoom(
             roomId = roomId,
             roomTitle = roomTitle,
-            roomType = roomType,
+            roomType = roomType
         )
     }
 
@@ -103,7 +99,7 @@ fun ChatRoomRoute(
         onDelegateLeader = viewModel::delegateLeader,
         onRemoveMember = viewModel::removeMember,
         onLeaveChatRoom = onLeaveChatRoom,
-        onDeleteMeeting = viewModel::deleteMeeting,
+        onDeleteMeeting = viewModel::deleteMeeting
     )
 }
 
@@ -208,25 +204,27 @@ private fun ChatRoomScreen(
 
     val context = LocalContext.current
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-    ) { isSaved ->
-        val capturedUri = pendingCameraUri
-        pendingCameraUri = null
+    val cameraLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.TakePicture()
+        ) { isSaved ->
+            val capturedUri = pendingCameraUri
+            pendingCameraUri = null
 
-        if (isSaved && capturedUri != null) {
-            onSendImages(listOf(capturedUri))
+            if (isSaved && capturedUri != null) {
+                onSendImages(listOf(capturedUri))
+            }
         }
-    }
 
     Box(
-        modifier = modifier.fillMaxSize(),
-    ){
+        modifier = modifier.fillMaxSize()
+    ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ChatBackgroundColor)
-                .imePadding(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(ChatBackgroundColor)
+                    .imePadding()
         ) {
             ChatRoomHeader(
                 roomTitle = uiState.roomTitle,
@@ -234,9 +232,8 @@ private fun ChatRoomScreen(
                 onBackClick = onBackClick,
                 onMenuClick = {
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
-
 
             ChatDateDivider()
 
@@ -245,23 +242,24 @@ private fun ChatRoomScreen(
                 noticeWriter = uiState.noticeWriter,
                 noticeRegisteredAt = uiState.noticeRegisteredAt,
                 isExpanded = uiState.isNoticeExpanded,
-                onClick = onNoticeClick,
+                onClick = onNoticeClick
             )
 
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(
                     count = uiState.messages.size,
-                    key = { index -> uiState.messages[index].id },
+                    key = { index -> uiState.messages[index].id }
                 ) { index ->
                     ChatMessageItem(
-                        message = uiState.messages[index],
+                        message = uiState.messages[index]
                     )
                 }
 
@@ -271,7 +269,7 @@ private fun ChatRoomScreen(
             }
 
             AnimatedVisibility(
-                visible = uiState.isActionMenuExpanded,
+                visible = uiState.isActionMenuExpanded
             ) {
                 ChatActionMenu(
                     onPhotoClick = {
@@ -285,7 +283,7 @@ private fun ChatRoomScreen(
                     },
                     onMeetingManagementClick = {
                         showMeetingManagementSheet = true
-                    },
+                    }
                 )
             }
 
@@ -294,7 +292,7 @@ private fun ChatRoomScreen(
                 isActionMenuExpanded = uiState.isActionMenuExpanded,
                 onMessageChange = onMessageChange,
                 onAddClick = onAddClick,
-                onSendClick = onSendClick,
+                onSendClick = onSendClick
             )
         }
 
@@ -327,7 +325,7 @@ private fun ChatRoomScreen(
                 onLeaveChatRoomClick = {
                     isChatRoomInfoPanelVisible = false
                     isLeavePanelVisible = true
-                },
+                }
             )
         }
 
@@ -337,7 +335,7 @@ private fun ChatRoomScreen(
                 onBackClick = {
                     isNotificationSettingPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
         }
 
@@ -347,7 +345,7 @@ private fun ChatRoomScreen(
                 onBackClick = {
                     isMemberListPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
         }
 
@@ -357,7 +355,7 @@ private fun ChatRoomScreen(
                 onBackClick = {
                     isProjectInfoPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
         }
 
@@ -372,7 +370,7 @@ private fun ChatRoomScreen(
                     onDelegateLeader(memberId)
                     isLeaderDelegationPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
         }
 
@@ -387,7 +385,7 @@ private fun ChatRoomScreen(
                     onRemoveMember(memberId)
                     isMemberRemovalPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                },
+                }
             )
         }
 
@@ -401,7 +399,7 @@ private fun ChatRoomScreen(
                 onLeaveClick = {
                     isLeavePanelVisible = false
                     onLeaveChatRoom()
-                },
+                }
             )
         }
 
@@ -417,7 +415,7 @@ private fun ChatRoomScreen(
                 },
                 onMoveToParticipant = { _, _ ->
                     // TODO: 불참자를 참여로 변경
-                },
+                }
             )
         }
 
@@ -430,7 +428,7 @@ private fun ChatRoomScreen(
                     meetingToConfirm = meeting
                     showQuickMeetingSheet = false
                     showMeetingConfirmSheet = true
-                },
+                }
             )
         }
 
@@ -443,27 +441,24 @@ private fun ChatRoomScreen(
                 onCompleteClick = { content ->
                     onNoticeRegister(content)
                     showNoticeRegistrationSheet = false
-                },
+                }
             )
         }
         meetingToConfirm?.let { meeting ->
             if (showMeetingConfirmSheet) {
                 MeetingConfirmBottomSheet(
                     meeting = meeting,
-
                     // < 버튼을 눌렀을 때
                     onPreviousClick = {
                         showMeetingConfirmSheet = false
                         showQuickMeetingSheet = true
                     },
-
                     // 취소 버튼 또는 바텀시트 바깥을 눌렀을 때
                     onCancelClick = {
                         showMeetingConfirmSheet = false
                         showQuickMeetingSheet = false
                         meetingToConfirm = null
                     },
-
                     // 팀원에게 전송하기 버튼을 눌렀을 때
                     onSendClick = {
                         onMeetingSend(meeting)
@@ -472,7 +467,7 @@ private fun ChatRoomScreen(
                         showQuickMeetingSheet = false
                         meetingToConfirm = null
                         sentMeetingBanner = meeting
-                    },
+                    }
                 )
             }
         }
@@ -491,7 +486,7 @@ private fun ChatRoomScreen(
                 },
                 onDismiss = {
                     showPhotoSourceSheet = false
-                },
+                }
             )
         }
 
@@ -503,11 +498,10 @@ private fun ChatRoomScreen(
                 onConfirm = { uris ->
                     showGalleryPickerSheet = false
                     onSendImages(uris)
-                },
+                }
             )
         }
     }
-
 }
 
 /**
@@ -518,54 +512,57 @@ private fun ChatRoomHeader(
     roomTitle: String,
     roomType: ChatRoomType,
     onBackClick: () -> Unit,
-    onMenuClick: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.White)
     ) {
-
         // 헤더 위쪽 여백 (필요하면 20~40.dp 사이에서 조절)
         Spacer(modifier = Modifier.height(28.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    end = 18.dp,
-                    top = 14.dp,
-                    bottom = 14.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 8.dp,
+                        end = 18.dp,
+                        top = 14.dp,
+                        bottom = 14.dp
+                    ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier
+                        .size(40.dp)
+                        .clickable(onClick = onBackClick),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "‹",
                     fontSize = 34.sp,
-                    color = Color(0xFF4B5563),
+                    color = Color(0xFF4B5563)
                 )
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
             Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE5E7EB)),
-                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE5E7EB)),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = if (roomType == ChatRoomType.GROUP) "G" else "P",
                     color = Color(0xFF6B7280),
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -578,21 +575,23 @@ private fun ChatRoomHeader(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onMenuClick),
-                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier
+                        .size(40.dp)
+                        .clickable(onClick = onMenuClick),
+                contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(
-                        id = R.drawable.ic_chat_room_menu,
-                    ),
+                    painter =
+                        painterResource(
+                            id = R.drawable.ic_chat_room_menu
+                        ),
                     contentDescription = "채팅방 정보 열기",
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -607,29 +606,30 @@ private fun ChatRoomHeader(
 @Composable
 private fun ChatDateDivider() {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 10.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 10.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE5E7EB),
+            color = Color(0xFFE5E7EB)
         )
 
         Text(
             text = "2026-05-22",
             modifier = Modifier.padding(horizontal = 14.dp),
             color = SecondaryTextColor,
-            fontSize = 11.sp,
+            fontSize = 11.sp
         )
 
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE5E7EB),
+            color = Color(0xFFE5E7EB)
         )
     }
 }
@@ -643,22 +643,23 @@ private fun ChatNotice(
     noticeWriter: String,
     noticeRegisteredAt: String,
     isExpanded: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .clickable(onClick = onClick)
-            .padding(
-                horizontal = 12.dp,
-                vertical = 10.dp,
-            ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White)
+                .clickable(onClick = onClick)
+                .padding(
+                    horizontal = 12.dp,
+                    vertical = 10.dp
+                )
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_notice),
@@ -672,45 +673,47 @@ private fun ChatNotice(
                 text = "공지",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4B5563),
+                color = Color(0xFF4B5563)
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = if (noticeContent.isBlank()) {
-                    "등록된 공지가 없습니다."
-                } else {
-                    noticeContent
-                },
+                text =
+                    if (noticeContent.isBlank()) {
+                        "등록된 공지가 없습니다."
+                    } else {
+                        noticeContent
+                    },
                 modifier = Modifier.weight(1f),
                 fontSize = 12.sp,
                 color = Color(0xFF6B7280),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
                 text = if (isExpanded) "⌃" else "⌄",
-                color = SecondaryTextColor,
+                color = SecondaryTextColor
             )
         }
 
         AnimatedVisibility(
-            visible = isExpanded && noticeContent.isNotBlank(),
+            visible = isExpanded && noticeContent.isNotBlank()
         ) {
             Column(
-                modifier = Modifier.padding(
-                    start = 40.dp,
-                    top = 10.dp,
-                    end = 8.dp,
-                ),
+                modifier =
+                    Modifier.padding(
+                        start = 40.dp,
+                        top = 10.dp,
+                        end = 8.dp
+                    )
             ) {
                 Text(
                     text = noticeContent,
                     color = Color(0xFF374151),
                     fontSize = 13.sp,
-                    lineHeight = 19.sp,
+                    lineHeight = 19.sp
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -718,7 +721,7 @@ private fun ChatNotice(
                 Text(
                     text = "작성자: $noticeWriter",
                     color = SecondaryTextColor,
-                    fontSize = 11.sp,
+                    fontSize = 11.sp
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
@@ -726,7 +729,7 @@ private fun ChatNotice(
                 Text(
                     text = "등록 일자: $noticeRegisteredAt",
                     color = SecondaryTextColor,
-                    fontSize = 11.sp,
+                    fontSize = 11.sp
                 )
             }
         }
@@ -739,19 +742,16 @@ private fun ChatNotice(
  * 메시지 작성자에 따라 말풍선을 좌우로 배치한다.
  */
 @Composable
-private fun ChatMessageItem(
-    message: ChatMessageUiModel,
-) {
+private fun ChatMessageItem(message: ChatMessageUiModel) {
     when (message.type) {
-
         ChatMessageType.TEXT -> {
             if (message.isMine) {
                 MyChatMessage(
-                    message = message,
+                    message = message
                 )
             } else {
                 OtherChatMessage(
-                    message = message,
+                    message = message
                 )
             }
         }
@@ -762,7 +762,7 @@ private fun ChatMessageItem(
                     meetingNotice = notice,
                     onRegisterClick = {
                         // TODO
-                    },
+                    }
                 )
             }
         }
@@ -772,12 +772,12 @@ private fun ChatMessageItem(
                 if (message.isMine) {
                     MyImageMessage(
                         message = message,
-                        imageUri = uri,
+                        imageUri = uri
                     )
                 } else {
                     OtherImageMessage(
                         message = message,
-                        imageUri = uri,
+                        imageUri = uri
                     )
                 }
             }
@@ -789,29 +789,27 @@ private fun ChatMessageItem(
  * 현재 사용자가 보낸 메시지를 표시한다.
  */
 @Composable
-private fun MyChatMessage(
-    message: ChatMessageUiModel,
-) {
+private fun MyChatMessage(message: ChatMessageUiModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.Bottom
     ) {
         Column(
-            horizontalAlignment = Alignment.End,
+            horizontalAlignment = Alignment.End
         ) {
             if (message.unreadCount > 0) {
                 Text(
                     text = message.unreadCount.toString(),
                     color = Color(0xFFB4B868),
-                    fontSize = 10.sp,
+                    fontSize = 10.sp
                 )
             }
 
             Text(
                 text = message.sentAt,
                 color = SecondaryTextColor,
-                fontSize = 10.sp,
+                fontSize = 10.sp
             )
         }
 
@@ -819,24 +817,24 @@ private fun MyChatMessage(
 
         Text(
             text = message.content,
-            modifier = Modifier
-                .fillMaxWidth(0.72f)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = 18.dp,
-                        bottomEnd = 4.dp,
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.72f)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 18.dp,
+                            bottomEnd = 4.dp
+                        )
+                    ).background(MyMessageColor)
+                    .padding(
+                        horizontal = 14.dp,
+                        vertical = 11.dp
                     ),
-                )
-                .background(MyMessageColor)
-                .padding(
-                    horizontal = 14.dp,
-                    vertical = 11.dp,
-                ),
             color = Color.White,
             fontSize = 14.sp,
-            lineHeight = 19.sp,
+            lineHeight = 19.sp
         )
     }
 }
@@ -845,25 +843,24 @@ private fun MyChatMessage(
  * 상대방이 보낸 메시지를 표시한다.
  */
 @Composable
-private fun OtherChatMessage(
-    message: ChatMessageUiModel,
-) {
+private fun OtherChatMessage(message: ChatMessageUiModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.Bottom
     ) {
         Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE5E7EB)),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE5E7EB)),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "P",
                 color = Color(0xFF9CA3AF),
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -871,24 +868,24 @@ private fun OtherChatMessage(
 
         Text(
             text = message.content,
-            modifier = Modifier
-                .fillMaxWidth(0.72f)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = 4.dp,
-                        bottomEnd = 18.dp,
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.72f)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 18.dp
+                        )
+                    ).background(OtherMessageColor)
+                    .padding(
+                        horizontal = 14.dp,
+                        vertical = 11.dp
                     ),
-                )
-                .background(OtherMessageColor)
-                .padding(
-                    horizontal = 14.dp,
-                    vertical = 11.dp,
-                ),
             color = Color(0xFF374151),
             fontSize = 14.sp,
-            lineHeight = 19.sp,
+            lineHeight = 19.sp
         )
 
         Spacer(modifier = Modifier.width(6.dp))
@@ -896,7 +893,7 @@ private fun OtherChatMessage(
         Text(
             text = message.sentAt,
             color = SecondaryTextColor,
-            fontSize = 10.sp,
+            fontSize = 10.sp
         )
     }
 }
@@ -909,28 +906,28 @@ private val ChatImageBubbleSize = 160.dp
 @Composable
 private fun MyImageMessage(
     message: ChatMessageUiModel,
-    imageUri: String,
+    imageUri: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.Bottom
     ) {
         Column(
-            horizontalAlignment = Alignment.End,
+            horizontalAlignment = Alignment.End
         ) {
             if (message.unreadCount > 0) {
                 Text(
                     text = message.unreadCount.toString(),
                     color = Color(0xFFB4B868),
-                    fontSize = 10.sp,
+                    fontSize = 10.sp
                 )
             }
 
             Text(
                 text = message.sentAt,
                 color = SecondaryTextColor,
-                fontSize = 10.sp,
+                fontSize = 10.sp
             )
         }
 
@@ -940,16 +937,17 @@ private fun MyImageMessage(
             model = imageUri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(ChatImageBubbleSize)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = 18.dp,
-                        bottomEnd = 4.dp,
-                    ),
-                ),
+            modifier =
+                Modifier
+                    .size(ChatImageBubbleSize)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 18.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
         )
     }
 }
@@ -960,24 +958,25 @@ private fun MyImageMessage(
 @Composable
 private fun OtherImageMessage(
     message: ChatMessageUiModel,
-    imageUri: String,
+    imageUri: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.Bottom
     ) {
         Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE5E7EB)),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE5E7EB)),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "P",
                 color = Color(0xFF9CA3AF),
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -987,16 +986,17 @@ private fun OtherImageMessage(
             model = imageUri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(ChatImageBubbleSize)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = 4.dp,
-                        bottomEnd = 18.dp,
-                    ),
-                ),
+            modifier =
+                Modifier
+                    .size(ChatImageBubbleSize)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 18.dp
+                        )
+                    )
         )
 
         Spacer(modifier = Modifier.width(6.dp))
@@ -1004,7 +1004,7 @@ private fun OtherImageMessage(
         Text(
             text = message.sentAt,
             color = SecondaryTextColor,
-            fontSize = 10.sp,
+            fontSize = 10.sp
         )
     }
 }
@@ -1014,7 +1014,7 @@ private fun OtherImageMessage(
  */
 data class ChatActionItem(
     @DrawableRes val iconRes: Int,
-    val label: String,
+    val label: String
 )
 
 @Composable
@@ -1022,67 +1022,71 @@ private fun ChatActionMenu(
     onPhotoClick: () -> Unit,
     onNoticeRegisterClick: () -> Unit,
     onQuickMeetingClick: () -> Unit,
-    onMeetingManagementClick: () -> Unit,
+    onMeetingManagementClick: () -> Unit
 ) {
-    val actionItems = listOf(
-        ChatActionItem(
-            iconRes = R.drawable.ic_file,
-            label = "사진/카메라",
-        ),
-        ChatActionItem(
-            iconRes = R.drawable.ic_notice,
-            label = "공지 등록",
-        ),
-        ChatActionItem(
-            iconRes = R.drawable.ic_quick_meeting,
-            label = "빠른 회의",
-        ),
-        ChatActionItem(
-            iconRes = R.drawable.ic_meeting_schedule,
-            label = "회의 조율",
-        ),
-        ChatActionItem(
-            iconRes = R.drawable.ic_meeting_manage,
-            label = "회의 관리",
-        ),
-    )
+    val actionItems =
+        listOf(
+            ChatActionItem(
+                iconRes = R.drawable.ic_file,
+                label = "사진/카메라"
+            ),
+            ChatActionItem(
+                iconRes = R.drawable.ic_notice,
+                label = "공지 등록"
+            ),
+            ChatActionItem(
+                iconRes = R.drawable.ic_quick_meeting,
+                label = "빠른 회의"
+            ),
+            ChatActionItem(
+                iconRes = R.drawable.ic_meeting_schedule,
+                label = "회의 조율"
+            ),
+            ChatActionItem(
+                iconRes = R.drawable.ic_meeting_manage,
+                label = "회의 관리"
+            )
+        )
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(
-                horizontal = 16.dp,
-                vertical = 14.dp,
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 14.dp
+                ),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         actionItems.forEachIndexed { index, item ->
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable {
-                        when (index) {
-                            0 -> onPhotoClick()
-                            1 -> onNoticeRegisterClick()
-                            2 -> onQuickMeetingClick()
-                            3 -> println("회의 조율 클릭")
-                            4 -> onMeetingManagementClick()
-                        }
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .clickable {
+                            when (index) {
+                                0 -> onPhotoClick()
+                                1 -> onNoticeRegisterClick()
+                                2 -> onQuickMeetingClick()
+                                3 -> println("회의 조율 클릭")
+                                4 -> onMeetingManagementClick()
+                            }
+                        },
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(54.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFFF2F3F6)),
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(54.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF2F3F6)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = item.iconRes),
                         contentDescription = item.label,
-                        modifier = Modifier.size(26.dp),
+                        modifier = Modifier.size(26.dp)
                     )
                 }
 
@@ -1092,7 +1096,7 @@ private fun ChatActionMenu(
                     text = item.label,
                     color = Color(0xFF6B7280),
                     fontSize = 10.sp,
-                    maxLines = 1,
+                    maxLines = 1
                 )
             }
         }
@@ -1110,38 +1114,39 @@ private fun ChatMessageInput(
     isActionMenuExpanded: Boolean,
     onMessageChange: (String) -> Unit,
     onAddClick: () -> Unit,
-    onSendClick: () -> Unit,
+    onSendClick: () -> Unit
 ) {
     val isSendEnabled = message.isNotBlank()
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(
-                horizontal = 16.dp,
-                vertical = 12.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 12.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isActionMenuExpanded) {
-                        PickiiYellowColor
-                    } else {
-                        Color.White
-                    },
-                )
-                .clickable(onClick = onAddClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isActionMenuExpanded) {
+                            PickiiYellowColor
+                        } else {
+                            Color.White
+                        }
+                    ).clickable(onClick = onAddClick),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (isActionMenuExpanded) "−" else "+",
                 color = Color(0xFF4B5563),
-                fontSize = 25.sp,
+                fontSize = 25.sp
             )
         }
 
@@ -1150,66 +1155,70 @@ private fun ChatMessageInput(
         BasicTextField(
             value = message,
             onValueChange = onMessageChange,
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(24.dp))
-                .background(InputBackgroundColor)
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp,
-                ),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(InputBackgroundColor)
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 12.dp
+                    ),
             singleLine = true,
-            textStyle = androidx.compose.ui.text.TextStyle(
-                color = Color(0xFF111827),
-                fontSize = 14.sp,
-            ),
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Send,
-            ),
-            keyboardActions = KeyboardActions(
-                onSend = {
-                    if (isSendEnabled) {
-                        onSendClick()
+            textStyle =
+                androidx.compose.ui.text.TextStyle(
+                    color = Color(0xFF111827),
+                    fontSize = 14.sp
+                ),
+            keyboardOptions =
+                KeyboardOptions(
+                    imeAction = ImeAction.Send
+                ),
+            keyboardActions =
+                KeyboardActions(
+                    onSend = {
+                        if (isSendEnabled) {
+                            onSendClick()
+                        }
                     }
-                },
-            ),
+                ),
             decorationBox = { innerTextField ->
                 if (message.isEmpty()) {
                     Text(
                         text = "메시지를 입력하세요",
                         color = SecondaryTextColor,
-                        fontSize = 14.sp,
+                        fontSize = 14.sp
                     )
                 }
 
                 innerTextField()
-            },
+            }
         )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isSendEnabled) {
-                        Color(0xFF202428)
-                    } else {
-                        Color(0xFFD1D5DB)
-                    },
-                )
-                .clickable(
-                    enabled = isSendEnabled,
-                    onClick = onSendClick,
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSendEnabled) {
+                            Color(0xFF202428)
+                        } else {
+                            Color(0xFFD1D5DB)
+                        }
+                    ).clickable(
+                        enabled = isSendEnabled,
+                        onClick = onSendClick
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "↑",
                 color = Color.White,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -1218,48 +1227,49 @@ private fun ChatMessageInput(
 @Composable
 private fun MeetingRegistrationNoticeCard(
     meetingNotice: MeetingNoticeUiModel,
-    onRegisterClick: () -> Unit,
+    onRegisterClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFFF9FCA8))
-            .padding(
-                horizontal = 24.dp,
-                vertical = 24.dp,
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color(0xFFF9FCA8))
+                .padding(
+                    horizontal = 24.dp,
+                    vertical = 24.dp
+                ),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "[회의 등록 공지]",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black,
+            color = Color.Black
         )
 
         Spacer(
-            modifier = Modifier.height(12.dp),
+            modifier = Modifier.height(12.dp)
         )
 
         Text(
             text = "${meetingNotice.requesterName}님이 회의를 요청했어요.",
             fontSize = 14.sp,
-            color = Color.Black,
+            color = Color.Black
         )
 
         Spacer(
-            modifier = Modifier.height(4.dp),
+            modifier = Modifier.height(4.dp)
         )
 
         Text(
             text = "캘린더에 개인 일정을 등록해 주세요.",
             fontSize = 14.sp,
-            color = Color.Black,
+            color = Color.Black
         )
 
         Spacer(
-            modifier = Modifier.height(16.dp),
+            modifier = Modifier.height(16.dp)
         )
 
         var remainingTime by remember {
@@ -1270,7 +1280,7 @@ private fun MeetingRegistrationNoticeCard(
             while (true) {
                 val remain =
                     MEETING_DURATION_MILLIS -
-                            (System.currentTimeMillis() - meetingNotice.createdTimeMillis)
+                        (System.currentTimeMillis() - meetingNotice.createdTimeMillis)
 
                 if (remain <= 0L) {
                     remainingTime = "00:00:00"
@@ -1291,33 +1301,35 @@ private fun MeetingRegistrationNoticeCard(
         Text(
             text = "남은 시간: $remainingTime",
             fontSize = 14.sp,
-            color = Color(0xFF7486D8),
+            color = Color(0xFF7486D8)
         )
 
         Spacer(
-            modifier = Modifier.height(20.dp),
+            modifier = Modifier.height(20.dp)
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color.White)
-                .clickable {
-                    onRegisterClick()
-                },
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White)
+                    .clickable {
+                        onRegisterClick()
+                    },
+            contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (meetingNotice.isRegistered) {
-                    "등록 완료"
-                } else {
-                    "등록했어요"
-                },
+                text =
+                    if (meetingNotice.isRegistered) {
+                        "등록 완료"
+                    } else {
+                        "등록했어요"
+                    },
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = Color.Black
             )
         }
     }
