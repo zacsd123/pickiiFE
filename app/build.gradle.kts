@@ -25,7 +25,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_BASE_URL", "\"https://hypnotic-elevate-heap.ngrok-free.dev/api/v1/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://pikiibackend-production.up.railway.app/api/v1/\"")
     }
 
     buildTypes {
