@@ -38,11 +38,16 @@ data class CalendarSchedule(
     val isAllDay: Boolean = false
 ) {
     /**
-     * 전달받은 날짜가 일정 기간 안에 포함되는지 확인한다.
+     * 전달받은 날짜가 일정 기간(반복 포함) 안에 포함되는지 확인한다.
      */
     fun includesDate(date: LocalDate): Boolean =
-        !date.isBefore(startDate) &&
-            !date.isAfter(endDate)
+        scheduleRecurrenceIncludesDate(
+            date = date,
+            startDate = startDate,
+            endDate = endDate,
+            repeatType = repeatType,
+            repeatWeekdays = repeatWeekdays
+        )
 
     /**
      * 여러 날짜에 걸쳐 진행되는 일정인지 확인한다.
