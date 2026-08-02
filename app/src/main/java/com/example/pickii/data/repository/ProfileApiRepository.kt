@@ -8,6 +8,7 @@ import com.example.pickii.data.remote.dto.ExperienceDto
 import com.example.pickii.data.remote.dto.LicenseDto
 import com.example.pickii.data.remote.dto.MemberProfileDto
 import com.example.pickii.data.remote.dto.SkillToolDto
+import com.example.pickii.data.remote.dto.UpdateResumeRequest
 import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.AdditionalLinkEntry
 import com.example.pickii.domain.model.CreateProfileInput
@@ -15,8 +16,10 @@ import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
+import com.example.pickii.domain.model.UpdateProfileInput
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.util.network.safeApiCall
+import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.serialization.json.Json
 import java.time.YearMonth
 import javax.inject.Inject
@@ -43,6 +46,34 @@ class ProfileApiRepository
 
         override suspend fun createProfile(input: CreateProfileInput): Result<Unit> =
             safeApiCall(json) { profileApiService.createResume(input.toRequest()) }.map { }
+
+        override suspend fun updateProfile(input: UpdateProfileInput): Result<Unit> =
+            safeApiCallUnit(json) { profileApiService.updateResume(input.toRequest()) }
+
+        private fun UpdateProfileInput.toRequest() =
+            UpdateResumeRequest(
+                univId = univId.toLong(),
+                major = major,
+                academicStatus = academicStatus.name,
+                hope = hope?.ifBlank { null },
+                strength = strength?.ifBlank { null },
+                aboutMe = aboutMe?.ifBlank { null },
+                contactEmail = contactEmail,
+                topic = topicIds,
+                skillTool = skillTools.map { SkillToolDto(techStackName = it.techStackName, level = it.level) },
+                license = licenses.map { LicenseDto(licenseName = it.licenseName, date = it.acquiredDate.toString()) },
+                experience =
+                    experiences.map {
+                        ExperienceDto(
+                            startDate = it.startDate.toString(),
+                            endDate = it.endDate?.toString(),
+                            title = it.title,
+                            organization = it.organization,
+                            description = it.description
+                        )
+                    },
+                additionalLink = additionalLinks.map { AdditionalLinkDto(linkName = it.linkName, url = it.url) }
+            )
 
         private fun CreateProfileInput.toRequest() =
             CreateResumeRequest(
@@ -78,6 +109,7 @@ class ProfileApiRepository
                 hope = hope,
                 strength = strength,
                 aboutMe = aboutMe,
+                contactEmail = contactEmail,
                 exp = exp,
                 topicIds = topic,
                 skillTools = skillTool.map { SkillToolEntry(techStackName = it.techStackName, level = it.level) },

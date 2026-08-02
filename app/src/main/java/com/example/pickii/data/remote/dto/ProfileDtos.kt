@@ -49,6 +49,23 @@ data class CreateResumeResponseDto(
     val message: String
 )
 
+/** `PATCH /users/me` 요청(4-3 프로필 수정). 생성 요청과 동일한 항목에 `aboutMe`/`contactEmail`을 직접 수정할 수 있다. */
+@Serializable
+data class UpdateResumeRequest(
+    val univId: Long,
+    val major: String,
+    val academicStatus: String,
+    val hope: String? = null,
+    val strength: String? = null,
+    val aboutMe: String? = null,
+    val contactEmail: String,
+    val topic: List<Int> = emptyList(),
+    val skillTool: List<SkillToolDto> = emptyList(),
+    val license: List<LicenseDto> = emptyList(),
+    val experience: List<ExperienceDto> = emptyList(),
+    val additionalLink: List<AdditionalLinkDto> = emptyList()
+)
+
 /** `GET /users/me` 응답. */
 @Serializable
 data class MemberProfileDto(
@@ -60,6 +77,7 @@ data class MemberProfileDto(
     val hope: String? = null,
     val strength: String? = null,
     val aboutMe: String? = null,
+    val contactEmail: String? = null,
     val exp: Int = 0,
     val topic: List<Int> = emptyList(),
     val skillTool: List<SkillToolDto> = emptyList(),

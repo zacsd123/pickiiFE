@@ -60,7 +60,7 @@ class LoginViewModel
         ) {
             viewModelScope.launch {
                 val state = _uiState.value
-                sessionRepository.login(state.email, state.password).onSuccess {
+                sessionRepository.login(state.email, state.password, state.isAutoLoginChecked).onSuccess {
                     if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
                 }
             }
