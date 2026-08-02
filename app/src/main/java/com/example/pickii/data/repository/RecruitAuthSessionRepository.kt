@@ -1,11 +1,14 @@
 package com.example.pickii.data.repository
 
+import com.example.pickii.data.local.DeviceIdProvider
 import com.example.pickii.data.local.TokenStore
 import com.example.pickii.data.remote.api.AuthApiService
 import com.example.pickii.data.remote.dto.LoginRequest
+import com.example.pickii.data.remote.dto.LogoutRequest
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.util.network.safeApiCall
+import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +31,7 @@ class RecruitAuthSessionRepository
     constructor(
         private val authApiService: AuthApiService,
         private val tokenStore: TokenStore,
+        private val deviceIdProvider: DeviceIdProvider,
         private val json: Json
     ) : SessionRepository {
         private val _currentUser = MutableStateFlow<CurrentUser?>(null)
@@ -38,25 +42,39 @@ class RecruitAuthSessionRepository
 
         override suspend fun login(
             email: String,
-            password: String
+            password: String,
+            autoLogin: Boolean
         ): Result<CurrentUser> =
-            safeApiCall(json) { authApiService.login(LoginRequest(email, password)) }
-                .map { envelope ->
-                    val body = envelope.data
-                    tokenStore.saveTokens(body.accessToken, body.refreshToken)
-                    val user =
-                        CurrentUser(
-                            id = body.memberId.toString(),
-                            nickname = body.nickname,
-                            experience = DEFAULT_EXPERIENCE,
-                            hasProfile = DEFAULT_HAS_PROFILE
-                        )
-                    _currentUser.value = user
-                    _isLoggedIn.value = true
-                    user
-                }
+            safeApiCall(json) {
+                val deviceId = deviceIdProvider.getDeviceId()
+                authApiService.login(LoginRequest(email, password, autoLogin, deviceId))
+            }.map { envelope ->
+                val body = envelope.data
+                tokenStore.saveTokens(body.accessToken, body.refreshToken)
+                val user =
+                    CurrentUser(
+                        id = body.memberId.toString(),
+                        nickname = body.nickname,
+                        experience = DEFAULT_EXPERIENCE,
+                        hasProfile = DEFAULT_HAS_PROFILE
+                    )
+                _currentUser.value = user
+                _isLoggedIn.value = true
+                user
+            }
 
         override suspend fun continueAsGuest() {
+            clearSession()
+        }
+
+        override suspend fun logout(): Result<Unit> {
+            val result =
+                safeApiCallUnit(json) { authApiService.logout(LogoutRequest(deviceIdProvider.getDeviceId())) }
+            clearSession()
+            return result
+        }
+
+        override suspend fun clearSession() {
             tokenStore.clear()
             _currentUser.value = null
             _isLoggedIn.value = false

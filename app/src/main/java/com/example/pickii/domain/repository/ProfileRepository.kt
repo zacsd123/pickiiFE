@@ -2,8 +2,9 @@ package com.example.pickii.domain.repository
 
 import com.example.pickii.domain.model.CreateProfileInput
 import com.example.pickii.domain.model.MemberProfile
+import com.example.pickii.domain.model.UpdateProfileInput
 
-/** 내 프로필(이력서) 조회/생성을 담당한다. */
+/** 내 프로필(이력서) 조회/생성/수정을 담당한다. */
 interface ProfileRepository {
     /** 내 프로필을 조회한다. 프로필이 없으면 [ApiException][com.example.pickii.data.remote.dto.ApiException]("RESUME_NOT_FOUND")로 실패한다. */
     suspend fun getMyProfile(): Result<MemberProfile>
@@ -13,4 +14,7 @@ interface ProfileRepository {
 
     /** 새 프로필(이력서)을 생성한다. 서버가 응답 중 AboutMe를 자동 생성한다. */
     suspend fun createProfile(input: CreateProfileInput): Result<Unit>
+
+    /** 기존 프로필(이력서)을 수정한다. 생성과 달리 AI 재생성은 수행하지 않는다. */
+    suspend fun updateProfile(input: UpdateProfileInput): Result<Unit>
 }

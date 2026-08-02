@@ -3,7 +3,10 @@ package com.example.pickii.di
 import com.example.pickii.BuildConfig
 import com.example.pickii.data.remote.AuthInterceptor
 import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
+import com.example.pickii.data.remote.api.MyPageActivityApiService
+import com.example.pickii.data.remote.api.NotificationSettingsApiService
 import com.example.pickii.data.remote.api.ProfileApiService
 import com.example.pickii.data.remote.api.RecruitApiService
 import dagger.Module
@@ -72,4 +75,19 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideProfileApiService(retrofit: Retrofit): ProfileApiService = retrofit.create(ProfileApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMyPageActivityApiService(retrofit: Retrofit): MyPageActivityApiService =
+        retrofit.create(MyPageActivityApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNotificationSettingsApiService(retrofit: Retrofit): NotificationSettingsApiService =
+        retrofit.create(NotificationSettingsApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFeedbackApiService(retrofit: Retrofit): FeedbackApiService =
+        retrofit.create(FeedbackApiService::class.java)
 }
