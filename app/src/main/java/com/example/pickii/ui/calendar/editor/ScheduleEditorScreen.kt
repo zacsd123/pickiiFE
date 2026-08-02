@@ -97,20 +97,34 @@ fun ScheduleEditorScreen(
             }
 
             item {
+                ScheduleRepeatSection(
+                    repeatType = uiState.repeatType,
+                    onRepeatTypeChange = { repeatType ->
+                        onEvent(
+                            ScheduleEditorUiEvent.RepeatTypeChanged(
+                                repeatType
+                            )
+                        )
+                    },
+                    selectedWeekdays = uiState.repeatWeekdays,
+                    onWeekdayToggle = { dayOfWeek ->
+                        onEvent(
+                            ScheduleEditorUiEvent.RepeatWeekdayToggled(dayOfWeek)
+                        )
+                    }
+                )
+            }
+
+            item {
                 ScheduleDateTimeSection(
                     startDate = uiState.startDate,
                     endDate = uiState.endDate,
                     startTime = uiState.startTime,
                     endTime = uiState.endTime,
                     isAllDay = uiState.isAllDay,
-                    onStartDateChange = { date ->
+                    onDateRangeChange = { startDate, endDate ->
                         onEvent(
-                            ScheduleEditorUiEvent.StartDateChanged(date)
-                        )
-                    },
-                    onEndDateChange = { date ->
-                        onEvent(
-                            ScheduleEditorUiEvent.EndDateChanged(date)
+                            ScheduleEditorUiEvent.DateRangeSelected(startDate, endDate)
                         )
                     },
                     onStartTimeChange = { time ->
@@ -137,19 +151,6 @@ fun ScheduleEditorScreen(
                     onLocationChange = { location ->
                         onEvent(
                             ScheduleEditorUiEvent.LocationChanged(location)
-                        )
-                    }
-                )
-            }
-
-            item {
-                ScheduleRepeatSection(
-                    repeatType = uiState.repeatType,
-                    onRepeatTypeChange = { repeatType ->
-                        onEvent(
-                            ScheduleEditorUiEvent.RepeatTypeChanged(
-                                repeatType
-                            )
                         )
                     }
                 )

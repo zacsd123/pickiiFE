@@ -1,6 +1,7 @@
 package com.example.pickii.ui.calendar.editor.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,18 +129,27 @@ private fun ScheduleCategoryChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isNoneChip = color == null
+    val chipShape = RoundedCornerShape(50)
+
     Row(
         modifier =
             modifier
                 .background(
                     color =
-                        if (isSelected) {
-                            SelectedCategoryBackgroundColor
-                        } else {
-                            UnselectedCategoryBackgroundColor
+                        when {
+                            isSelected && isNoneChip -> SelectedCategoryBackgroundColor
+                            isSelected -> Color.White
+                            else -> UnselectedCategoryBackgroundColor
                         },
-                    shape = RoundedCornerShape(50)
-                ).clickable(
+                    shape = chipShape
+                ).let {
+                    if (isSelected && color != null) {
+                        it.border(1.5.dp, color, chipShape)
+                    } else {
+                        it
+                    }
+                }.clickable(
                     onClick = onClick
                 ).padding(
                     horizontal = 14.dp,
@@ -167,10 +177,10 @@ private fun ScheduleCategoryChip(
         Text(
             text = text,
             color =
-                if (isSelected) {
-                    SelectedCategoryTextColor
-                } else {
-                    UnselectedCategoryTextColor
+                when {
+                    isSelected && isNoneChip -> SelectedCategoryTextColor
+                    isSelected && color != null -> color
+                    else -> UnselectedCategoryTextColor
                 },
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold

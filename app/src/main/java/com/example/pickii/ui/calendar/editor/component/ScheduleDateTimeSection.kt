@@ -1,6 +1,5 @@
 package com.example.pickii.ui.calendar.editor.component
 
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +15,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +40,7 @@ private val SwitchUncheckedColor = Color(0xFFD2D2CC)
 
 private val DateFormatter =
     DateTimeFormatter.ofPattern(
-        "yyyy.MM.dd"
+        "yyyy-MM-dd"
     )
 
 private val TimeFormatter =
@@ -46,7 +49,7 @@ private val TimeFormatter =
     )
 
 /**
- * 일정 시작일, 종료일, 시간 및 하루 종일 설정 영역이다.
+ * 일정 날짜(범위), 시작/종료 시간, 하루 종일 설정 영역이다.
  */
 @Composable
 fun ScheduleDateTimeSection(
@@ -55,13 +58,16 @@ fun ScheduleDateTimeSection(
     startTime: LocalTime,
     endTime: LocalTime,
     isAllDay: Boolean,
-    onStartDateChange: (LocalDate) -> Unit,
-    onEndDateChange: (LocalDate) -> Unit,
+    onDateRangeChange: (LocalDate, LocalDate) -> Unit,
     onStartTimeChange: (LocalTime) -> Unit,
     onEndTimeChange: (LocalTime) -> Unit,
     onAllDayChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier =
             modifier
@@ -90,7 +96,7 @@ fun ScheduleDateTimeSection(
             )
 
             Text(
-                text = "날짜 및 시간",
+                text = "날짜 / 시간",
                 color = DateTimeLabelColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
@@ -99,23 +105,29 @@ fun ScheduleDateTimeSection(
 
         DateTimeDivider()
 
-        DateTimePickerRow(
+        DateRangeRow(
+            startDate = startDate,
+            endDate = endDate,
+            onClick = {
+                showDatePicker = true
+            }
+        )
+
+        DateTimeDivider()
+
+        TimePickerRow(
             label = "시작",
-            date = startDate,
             time = startTime,
             isAllDay = isAllDay,
-            onDateChange = onStartDateChange,
             onTimeChange = onStartTimeChange
         )
 
         DateTimeDivider()
 
-        DateTimePickerRow(
+        TimePickerRow(
             label = "종료",
-            date = endDate,
             time = endTime,
             isAllDay = isAllDay,
-            onDateChange = onEndDateChange,
             onTimeChange = onEndTimeChange
         )
 
@@ -147,18 +159,75 @@ fun ScheduleDateTimeSection(
             )
         }
     }
+
+    if (showDatePicker) {
+        ScheduleDatePickerSheet(
+            initialStartDate = startDate,
+            initialEndDate = endDate,
+            onDismiss = {
+                showDatePicker = false
+            },
+            onConfirm = { newStartDate, newEndDate ->
+                onDateRangeChange(newStartDate, newEndDate)
+                showDatePicker = false
+            },
+            onClear = {
+                onDateRangeChange(startDate, startDate)
+                showDatePicker = false
+            }
+        )
+    }
 }
 
 /**
- * 시작 또는 종료 날짜와 시간을 선택하는 한 줄이다.
+ * 날짜(또는 날짜 범위)를 한 줄로 보여준다. 누르면 날짜 선택 바텀시트가 열린다.
  */
 @Composable
-private fun DateTimePickerRow(
+private fun DateRangeRow(
+    startDate: LocalDate,
+    endDate: LocalDate,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "날짜",
+            modifier = Modifier.width(44.dp),
+            color = DateTimeLabelColor,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Text(
+            text =
+                if (startDate == endDate) {
+                    startDate.format(DateFormatter)
+                } else {
+                    "${startDate.format(DateFormatter)} ~ ${endDate.format(DateFormatter)}"
+                },
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .clickable(onClick = onClick)
+                    .padding(vertical = 8.dp),
+            color = DateTimeValueColor,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+/**
+ * 시작 또는 종료 시간을 선택하는 한 줄이다.
+ */
+@Composable
+private fun TimePickerRow(
     label: String,
-    date: LocalDate,
     time: LocalTime,
     isAllDay: Boolean,
-    onDateChange: (LocalDate) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -176,36 +245,15 @@ private fun DateTimePickerRow(
             fontWeight = FontWeight.Medium
         )
 
-        Text(
-            text = date.format(DateFormatter),
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .clickable {
-                        DatePickerDialog(
-                            context,
-                            { _, year, month, dayOfMonth ->
-                                onDateChange(
-                                    LocalDate.of(
-                                        year,
-                                        month + 1,
-                                        dayOfMonth
-                                    )
-                                )
-                            },
-                            date.year,
-                            date.monthValue - 1,
-                            date.dayOfMonth
-                        ).show()
-                    }.padding(
-                        vertical = 8.dp
-                    ),
-            color = DateTimeValueColor,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        if (!isAllDay) {
+        if (isAllDay) {
+            Text(
+                text = "하루 종일",
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = DateTimeLabelColor,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            )
+        } else {
             Text(
                 text = time.format(TimeFormatter),
                 modifier =
@@ -226,7 +274,6 @@ private fun DateTimePickerRow(
                                 true
                             ).show()
                         }.padding(
-                            horizontal = 8.dp,
                             vertical = 8.dp
                         ),
                 color = DateTimeValueColor,
