@@ -10,6 +10,7 @@ data class MemberProfile(
     val hope: String?,
     val strength: String?,
     val aboutMe: String?,
+    val contactEmail: String?,
     val exp: Int,
     val topicIds: List<Int>,
     val skillTools: List<SkillToolEntry>,

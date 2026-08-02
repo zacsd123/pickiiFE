@@ -227,4 +227,145 @@
     <string name="password_reset_button_submit">비밀번호 재설정</string>
     <string name="password_reset_dialog_complete_title">비밀번호가 재설정되었습니다</string>
     <string name="password_reset_button_go_login">로그인하러 가기</string>
+
+    <string name="mypage_section_activity">활동 내역</string>
+    <string name="mypage_section_settings">설정</string>
+    <string name="mypage_menu_applications_title">지원 현황</string>
+    <string name="mypage_menu_applications_subtitle">내가 지원한 공고 결과 확인</string>
+    <string name="mypage_menu_my_recruits_title">작성 공고</string>
+    <string name="mypage_menu_my_recruits_subtitle">내가 등록한 모집 공고 관리</string>
+    <string name="mypage_menu_scraps_title">스크랩</string>
+    <string name="mypage_menu_scraps_subtitle">내가 스크랩한 공고 확인</string>
+    <string name="mypage_menu_my_comments_title">작성한 댓글</string>
+    <string name="mypage_menu_my_comments_subtitle">내가 남긴 댓글 확인</string>
+    <string name="mypage_menu_feedback_title">상호평가/피드백</string>
+    <string name="mypage_menu_feedback_subtitle">내가 참여한 프로젝트 평가</string>
+    <string name="mypage_menu_settings_title">설정</string>
+    <string name="mypage_contact_label">문의</string>
+    <string name="mypage_contact_email">이메일 | pickii@naver.com</string>
+    <string name="mypage_contact_instagram">인스타 | @pickii</string>
+    <string name="mypage_button_edit_profile">프로필 수정</string>
+    <string name="mypage_button_create_profile">프로필 만들기</string>
+    <string name="mypage_create_profile_prompt">프로필을 만들어보세요</string>
+    <string name="mypage_level_label">Lv.%1$d</string>
+
+    <string name="mypage_profile_title">내 프로필</string>
+    <string name="mypage_profile_button_edit">수정</string>
+    <string name="mypage_profile_label_about_me">자기소개</string>
+    <string name="mypage_profile_label_email">이메일</string>
+    <string name="mypage_profile_label_university">학교</string>
+    <string name="mypage_profile_label_major">전공</string>
+    <string name="mypage_profile_label_academic_status">학적 상태</string>
+    <string name="mypage_profile_label_social_accounts">소셜 계정 연결</string>
+    <string name="mypage_profile_social_kakao">카카오</string>
+    <string name="mypage_profile_social_linked">연결됨</string>
+    <string name="mypage_profile_social_not_linked">연결 안 됨</string>
+    <string name="mypage_profile_social_button_unlink">연결 해제</string>
+    <string name="mypage_profile_social_button_link">연동하기</string>
+    <string name="mypage_profile_social_link_coming_soon">카카오 로그인 연동은 곧 지원 예정이에요.</string>
+    <string name="mypage_profile_social_unlink_confirm_title">연결을 해제할까요?</string>
+    <string name="mypage_profile_social_unlink_confirm_body">해제해도 이메일과 비밀번호로 계속 로그인할 수 있어요.</string>
+    <string name="mypage_profile_label_links">외부 링크</string>
+    <string name="mypage_profile_label_skills">Skill &amp; Tool</string>
+    <string name="mypage_profile_label_licenses">자격증</string>
+    <string name="mypage_profile_label_experience">수상 및 경험</string>
+    <string name="mypage_profile_experience_ongoing">진행중</string>
+
+    <string name="mypage_profile_edit_title">프로필 수정</string>
+    <string name="mypage_profile_edit_label_about_me">자기소개</string>
+    <string name="mypage_profile_edit_label_contact_email">연락용 이메일</string>
+    <string name="mypage_profile_edit_button_save">저장</string>
+
+    <string name="mypage_settings_section_account">계정 설정</string>
+    <string name="mypage_settings_section_notification">알림 설정</string>
+    <string name="mypage_settings_password_change">비밀번호 바꾸기</string>
+    <string name="mypage_settings_kakao_link">카카오 연동</string>
+    <string name="mypage_settings_logout">로그아웃</string>
+    <string name="mypage_settings_withdraw">회원탈퇴</string>
+
+    <string name="mypage_notification_all">전체 알림</string>
+    <string name="mypage_notification_chat">채팅 알림</string>
+    <string name="mypage_notification_chat_desc">새 메시지 알림</string>
+    <string name="mypage_notification_applicant">지원자 알림</string>
+    <string name="mypage_notification_applicant_desc">내 공고에 새 지원자가 있을 때</string>
+    <string name="mypage_notification_comment">댓글 알림</string>
+    <string name="mypage_notification_comment_desc">내 글에 댓글이 달렸을 때</string>
+    <string name="mypage_notification_schedule">일정 알림</string>
+    <string name="mypage_notification_schedule_desc">팀 일정 · 회의 조율 알림</string>
+    <string name="mypage_notification_match">매칭 알림</string>
+    <string name="mypage_notification_match_desc">팀 합격/매칭 결과 알림</string>
+    <string name="mypage_notification_project">프로젝트 알림</string>
+    <string name="mypage_notification_project_desc">프로젝트 종료 확인 · 상호평가 요청</string>
+    <string name="mypage_notification_marketing">마케팅 수신 동의</string>
+    <string name="mypage_notification_marketing_desc">이벤트 및 혜택 안내</string>
+
+    <string name="mypage_logout_title">로그아웃 하시겠어요?</string>
+    <string name="mypage_logout_body">로그아웃 후에도 계정 정보는 유지돼요.</string>
+    <string name="mypage_logout_confirm">로그아웃</string>
+
+    <string name="mypage_password_change_title">비밀번호 바꾸기</string>
+    <string name="mypage_password_change_label_current">현재 비밀번호</string>
+    <string name="mypage_password_change_label_new">새 비밀번호</string>
+    <string name="mypage_password_change_hint_new">8자 이상 입력해주세요</string>
+    <string name="mypage_password_change_label_confirm">새 비밀번호 확인</string>
+    <string name="mypage_password_change_error_mismatch">비밀번호가 일치하지 않아요</string>
+    <string name="mypage_password_change_button_submit">변경하기</string>
+    <string name="mypage_password_change_success">비밀번호가 변경되었습니다.</string>
+
+    <string name="mypage_withdraw_title">회원탈퇴</string>
+    <string name="mypage_withdraw_placeholder_email">이메일 입력</string>
+    <string name="mypage_withdraw_placeholder_code">인증코드 입력</string>
+    <string name="mypage_withdraw_button_verify">인증하기</string>
+    <string name="mypage_withdraw_placeholder_password">비밀번호 입력</string>
+    <string name="mypage_withdraw_warning_title">탈퇴 전 꼭 확인하세요</string>
+    <string name="mypage_withdraw_warning_1">계정 · 프로필 · 지원 이력 · 작성 공고 등 모든 데이터가 삭제되며 복구할 수 없어요</string>
+    <string name="mypage_withdraw_warning_2">동일 이메일로 재가입은 가능하지만 기존 데이터는 복원되지 않아요</string>
+    <string name="mypage_withdraw_warning_3">작성한 공고와 댓글, 채팅 메시지는 삭제되지 않고 유지되며, 작성자 정보만 \'알 수 없음\'으로 표시돼요</string>
+    <string name="mypage_withdraw_agreement_1">(필수) 계정 정보가 삭제되며 복구할 수 없음에 동의해요</string>
+    <string name="mypage_withdraw_agreement_2">(필수) 재가입 시 기존 데이터가 복원되지 않음에 동의해요</string>
+    <string name="mypage_withdraw_button_cancel">취소</string>
+    <string name="mypage_withdraw_button_submit">탈퇴하기</string>
+    <string name="mypage_withdraw_complete">탈퇴가 완료되었습니다.</string>
+
+    <string name="mypage_applications_title">지원 현황</string>
+    <string name="mypage_applications_empty">아직 지원한 공고가 없습니다</string>
+    <string name="mypage_applications_label_date">지원 날짜: %1$s</string>
+    <string name="mypage_applications_button_cancel">지원 취소</string>
+    <string name="mypage_applications_button_chat">채팅방 바로가기</string>
+    <string name="mypage_applications_cancel_confirm_title">지원을 취소할까요?</string>
+    <string name="mypage_applications_cancel_confirm_body">취소하면 되돌릴 수 없어요.</string>
+    <string name="mypage_applications_cancel_toast">지원이 취소되었습니다</string>
+    <string name="mypage_apply_status_waiting">대기</string>
+    <string name="mypage_apply_status_accepted">수락</string>
+    <string name="mypage_apply_status_rejected">거절</string>
+
+    <string name="mypage_my_recruits_title">작성 공고</string>
+    <string name="mypage_my_recruits_empty">아직 등록한 공고가 없습니다</string>
+    <string name="mypage_my_recruits_label_date">등록 날짜: %1$s</string>
+    <string name="mypage_my_recruits_button_applicants">지원자 조회</string>
+    <string name="mypage_my_recruits_button_edit">공고 수정</string>
+    <string name="mypage_my_recruits_button_close">마감 처리</string>
+    <string name="mypage_my_recruits_button_reopen">추가 모집</string>
+    <string name="mypage_my_recruits_button_delete">삭제</string>
+    <string name="mypage_my_recruits_close_confirm_title">모집을 마감할까요?</string>
+    <string name="mypage_my_recruits_reopen_confirm_title">추가 모집을 시작할까요?</string>
+    <string name="mypage_my_recruits_delete_confirm_title">공고를 삭제할까요?</string>
+    <string name="mypage_my_recruits_delete_confirm_body">삭제하면 되돌릴 수 없어요.</string>
+
+    <string name="mypage_my_comments_title">작성한 댓글</string>
+    <string name="mypage_my_comments_empty">아직 작성한 댓글이 없습니다</string>
+    <string name="mypage_my_comments_label_date">댓글 작성일: %1$s</string>
+    <string name="mypage_my_comments_button_go_to_post">공고 글 바로가기</string>
+
+    <string name="mypage_scraps_title">스크랩한 공고</string>
+    <string name="mypage_scraps_empty">아직 스크랩한 공고가 없습니다</string>
+    <string name="mypage_scraps_label_date">스크랩한 날짜: %1$s</string>
+
+    <string name="mypage_feedback_title">상호평가/피드백</string>
+    <string name="mypage_feedback_empty">평가할 프로젝트가 없습니다</string>
+    <string name="mypage_feedback_progress">%1$d / %2$d명 평가 완료</string>
+    <string name="mypage_feedback_members_title">팀원 평가</string>
+    <string name="mypage_feedback_status_done">완료</string>
+    <string name="mypage_feedback_status_pending">미완료</string>
+    <string name="mypage_feedback_button_evaluate">평가하기</string>
 </resources>

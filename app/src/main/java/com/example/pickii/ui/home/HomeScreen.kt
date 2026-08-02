@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -49,6 +48,8 @@ import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
+import com.example.pickii.ui.common.PaginationRow
+import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.SelectableChip
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -133,10 +134,17 @@ private fun HomeScreenContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        HomeTopBar(
-            schoolName = uiState.schoolName,
+        PickiiTopBar(
             notificationCount = uiState.notificationCount,
-            onNotificationClick = onNotificationClick
+            onNotificationClick = onNotificationClick,
+            centerContent = {
+                Text(
+                    text = uiState.schoolName,
+                    color = PickiiTextGray,
+                    fontSize = 13.sp,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -219,79 +227,6 @@ private fun HomeScreenContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-    }
-}
-
-/** 상단의 Pickii 로고, 학교명, 알림 아이콘. */
-@Composable
-private fun HomeTopBar(
-    schoolName: String,
-    notificationCount: Int,
-    onNotificationClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Black),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "P", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(text = "Pickii", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Text(
-            text = schoolName,
-            color = PickiiTextGray,
-            fontSize = 13.sp,
-            modifier = Modifier.weight(1f)
-        )
-
-        Box(
-            modifier =
-                Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(PickiiFieldBackground)
-                    .clickable(onClick = onNotificationClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Notifications,
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(18.dp)
-            )
-
-            if (notificationCount > 0) {
-                Box(
-                    modifier =
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(Color.Red),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = notificationCount.toString(),
-                        color = Color.White,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -575,63 +510,6 @@ private fun PostCard(
                 )
             }
         }
-    }
-}
-
-/** 모집 글 목록의 페이지 번호. 현재 페이지는 검은 원으로 강조되고, 첫/마지막 페이지에서는 이전/다음 버튼이 비활성화된다. */
-@Composable
-private fun PaginationRow(
-    currentPage: Int,
-    totalPages: Int,
-    visiblePageNumbers: List<Int>,
-    onPageClick: (Int) -> Unit,
-    onPreviousClick: () -> Unit,
-    onNextClick: () -> Unit
-) {
-    val hasPreviousPage = currentPage > 1
-    val hasNextPage = currentPage < totalPages
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "<",
-            color = if (hasPreviousPage) Color.Black else PickiiTextGray,
-            fontSize = 14.sp,
-            modifier = Modifier.clickable(enabled = hasPreviousPage, onClick = onPreviousClick)
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        visiblePageNumbers.forEach { page ->
-            val isSelected = page == currentPage
-            Box(
-                modifier =
-                    Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(if (isSelected) Color.Black else Color.Transparent)
-                        .clickable(enabled = !isSelected) { onPageClick(page) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = page.toString(),
-                    color = if (isSelected) Color.White else PickiiTextGray,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        Text(
-            text = ">",
-            color = if (hasNextPage) Color.Black else PickiiTextGray,
-            fontSize = 14.sp,
-            modifier = Modifier.clickable(enabled = hasNextPage, onClick = onNextClick)
-        )
     }
 }
 

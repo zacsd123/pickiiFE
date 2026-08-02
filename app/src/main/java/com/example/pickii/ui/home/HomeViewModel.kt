@@ -8,6 +8,7 @@ import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.util.visiblePageNumbers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,11 +43,7 @@ data class HomeUiState(
 ) {
     /** 페이지네이션에 표시할 페이지 번호 목록. 전체 페이지가 적어도 그만큼만 보여준다. */
     val visiblePageNumbers: List<Int>
-        get() {
-            if (totalPages <= PAGE_WINDOW_SIZE) return (1..totalPages).toList()
-            val start = (currentPage - PAGE_WINDOW_SIZE / 2).coerceIn(1, totalPages - PAGE_WINDOW_SIZE + 1)
-            return (start until start + PAGE_WINDOW_SIZE).toList()
-        }
+        get() = visiblePageNumbers(currentPage, totalPages, PAGE_WINDOW_SIZE)
 }
 
 /** 홈 화면의 검색/필터 상태를 보관하고, [RecruitRepository]/[MasterDataRepository]로 서버에서 목록을 조회한다. */

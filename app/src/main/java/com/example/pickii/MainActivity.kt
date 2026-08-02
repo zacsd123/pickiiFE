@@ -16,16 +16,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,14 +35,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.pickii.ui.applicant.ApplicantRoute
 import com.example.pickii.ui.calendar.CalendarRoute
 import com.example.pickii.ui.chat.ChatRoute
+import com.example.pickii.ui.common.LoginRequiredDialog
 import com.example.pickii.ui.common.PickiiBottomNav
 import com.example.pickii.ui.common.PickiiBottomNavTab
 import com.example.pickii.ui.findid.FindIdScreen
 import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
+import com.example.pickii.ui.mypage.MyPageRoute
 import com.example.pickii.ui.navigation.ARG_POST_ID
+import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.navigation.PickiiDestination
 import com.example.pickii.ui.onboarding.OnboardingScreen
 import com.example.pickii.ui.passwordreset.PasswordResetScreen
@@ -104,21 +110,22 @@ private fun PickiiNavHost() {
             ?.destination
             ?.route
 
-    // 캘린더/채팅은 내부적으로 여러 하위 화면을 갖는데, 그중 최상위 화면(월간 캘린더/채팅 목록)일 때만 바텀 내비게이션을 보여준다.
+    // 캘린더/채팅/마이페이지는 내부적으로 여러 하위 화면을 갖는데, 그중 최상위 화면(월간 캘린더/채팅 목록/마이페이지 홈)일
+    // 때만 바텀 내비게이션을 보여준다.
     var isCalendarTopLevel by remember { mutableStateOf(true) }
     var isChatTopLevel by remember { mutableStateOf(true) }
+    var isMyPageTopLevel by remember { mutableStateOf(true) }
 
-    // 마이페이지는 아직 이동할 화면이 없어 선택 표시만 바꾼다. 실제 라우트가 바뀌면 이 표시는 초기화된다.
-    var isMyPageSelected by remember { mutableStateOf(false) }
-    LaunchedEffect(currentRoute) {
-        isMyPageSelected = false
-    }
+    val mainNavigationViewModel: MainNavigationViewModel = hiltViewModel()
+    val isLoggedIn by mainNavigationViewModel.isLoggedIn.collectAsStateWithLifecycle()
+    var showMyPageLoginPrompt by remember { mutableStateOf(false) }
 
     val resolvedTab =
         when (currentRoute) {
             PickiiDestination.Home.route -> PickiiBottomNavTab.HOME
             PickiiDestination.Calender.route -> PickiiBottomNavTab.CALENDAR
             PickiiDestination.Chat.route -> PickiiBottomNavTab.CHAT
+            PickiiDestination.MyPage.route -> PickiiBottomNavTab.MY_PAGE
             else -> null
         }
 
@@ -135,8 +142,19 @@ private fun PickiiNavHost() {
             PickiiDestination.Home.route -> true
             PickiiDestination.Calender.route -> isCalendarTopLevel
             PickiiDestination.Chat.route -> isChatTopLevel
+            PickiiDestination.MyPage.route -> isMyPageTopLevel
             else -> false
         }
+
+    if (showMyPageLoginPrompt) {
+        LoginRequiredDialog(
+            onLoginClick = {
+                showMyPageLoginPrompt = false
+                navController.navigateToLoginClearingBackStack()
+            },
+            onDismiss = { showMyPageLoginPrompt = false }
+        )
+    }
 
     Scaffold(
         containerColor = PickiiYellowLight,
@@ -145,29 +163,30 @@ private fun PickiiNavHost() {
             if (isBottomNavVisible && tab != null) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     PickiiBottomNav(
-                        selectedTab = if (isMyPageSelected) PickiiBottomNavTab.MY_PAGE else tab,
+                        selectedTab = tab,
                         onTabSelect = { tab ->
                             when (tab) {
                                 PickiiBottomNavTab.HOME -> {
-                                    isMyPageSelected = false
                                     if (currentRoute != PickiiDestination.Home.route) {
                                         navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
                                     }
                                 }
                                 PickiiBottomNavTab.CALENDAR -> {
-                                    isMyPageSelected = false
                                     if (currentRoute != PickiiDestination.Calender.route) {
                                         navController.navigateToTab(PickiiDestination.Calender.route)
                                     }
                                 }
                                 PickiiBottomNavTab.CHAT -> {
-                                    isMyPageSelected = false
                                     if (currentRoute != PickiiDestination.Chat.route) {
                                         navController.navigateToTab(PickiiDestination.Chat.route)
                                     }
                                 }
                                 PickiiBottomNavTab.MY_PAGE -> {
-                                    isMyPageSelected = true
+                                    if (!isLoggedIn) {
+                                        showMyPageLoginPrompt = true
+                                    } else if (currentRoute != PickiiDestination.MyPage.route) {
+                                        navController.navigateToTab(PickiiDestination.MyPage.route)
+                                    }
                                 }
                             }
                         }
@@ -327,6 +346,43 @@ private fun PickiiNavHost() {
                     onTopLevelScreenChange = { isCalendarTopLevel = it }
                 )
             }
+
+            composable(
+                route = PickiiDestination.MyPage.route,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
+            ) {
+                MyPageRoute(
+                    onTopLevelScreenChange = { isMyPageTopLevel = it },
+                    onCreateProfileClick = { navController.navigate(PickiiDestination.OnboardingFromMyPage.route) },
+                    onNavigateToApplicantList = { postId ->
+                        navController.navigate(PickiiDestination.ApplicantList(postId).route)
+                    },
+                    onNavigateToRecruitEdit = { postId ->
+                        navController.navigate(PickiiDestination.RecruitEdit(postId).route)
+                    },
+                    onNavigateToRecruitDetail = { postId ->
+                        navController.navigate(PickiiDestination.RecruitDetail(postId).route)
+                    },
+                    // TODO: 특정 채팅방으로 바로 이동하는 딥링크는 Phase 4(지원 현황 "채팅방 바로가기")에서 ChatRoute에
+                    // initialRoomId를 추가할 때 함께 연결한다. 지금은 채팅 탭으로만 이동한다.
+                    onNavigateToChatRoom = { navController.navigateToTab(PickiiDestination.Chat.route) },
+                    onLoggedOut = { navController.navigateToLoginClearingBackStack() }
+                )
+            }
+
+            composable(PickiiDestination.OnboardingFromMyPage.route) {
+                OnboardingScreen(onFinished = { navController.popBackStack() })
+            }
+
+            composable(
+                route = PickiiDestination.ApplicantList.ROUTE,
+                arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+            ) {
+                ApplicantRoute(onBackClick = { navController.popBackStack() })
+            }
         }
     }
 }
@@ -362,4 +418,14 @@ private fun NavHostController.navigateToTab(route: String) {
         popUpTo(PickiiDestination.Home.route) { saveState = true }
         restoreState = true
     }
+}
+
+@Preview
+@Composable
+fun MainActivityPre() {
+    PickiiTheme(
+        darkTheme = false,
+        dynamicColor = false,
+        content = { }
+    )
 }

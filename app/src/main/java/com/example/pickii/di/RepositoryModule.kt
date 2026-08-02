@@ -1,11 +1,19 @@
 package com.example.pickii.di
 
+import com.example.pickii.data.repository.AccountApiRepository
+import com.example.pickii.data.repository.FeedbackApiRepository
+import com.example.pickii.data.repository.MyPageActivityApiRepository
+import com.example.pickii.data.repository.NotificationSettingsApiRepository
 import com.example.pickii.data.repository.ProfileApiRepository
 import com.example.pickii.data.repository.RecruitApiRepository
 import com.example.pickii.data.repository.RecruitAuthSessionRepository
 import com.example.pickii.data.repository.RecruitMasterDataRepository
 import com.example.pickii.data.repository.SignupApiRepository
+import com.example.pickii.domain.repository.AccountRepository
+import com.example.pickii.domain.repository.FeedbackRepository
 import com.example.pickii.domain.repository.MasterDataRepository
+import com.example.pickii.domain.repository.MyPageActivityRepository
+import com.example.pickii.domain.repository.NotificationSettingsRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
@@ -44,4 +52,26 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProfileRepository(impl: ProfileApiRepository): ProfileRepository
+
+    /** [MyPageActivityRepository]를 [MyPageActivityApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindMyPageActivityRepository(impl: MyPageActivityApiRepository): MyPageActivityRepository
+
+    /** [AccountRepository]를 [AccountApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindAccountRepository(impl: AccountApiRepository): AccountRepository
+
+    /** [NotificationSettingsRepository]를 [NotificationSettingsApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindNotificationSettingsRepository(
+        impl: NotificationSettingsApiRepository
+    ): NotificationSettingsRepository
+
+    /** [FeedbackRepository]를 [FeedbackApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindFeedbackRepository(impl: FeedbackApiRepository): FeedbackRepository
 }
