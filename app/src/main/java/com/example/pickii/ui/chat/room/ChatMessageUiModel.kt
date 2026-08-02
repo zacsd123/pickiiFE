@@ -9,6 +9,7 @@ package com.example.pickii.ui.chat
  * @property sentAt 메시지 전송 시간
  * @property isMine 현재 사용자가 보낸 메시지인지 여부
  * @property unreadCount 아직 읽지 않은 참여자 수
+ * @property imageUri 이미지 메시지일 때 표시할 사진의 URI
  */
 data class ChatMessageUiModel(
     val id: Long,
@@ -18,11 +19,13 @@ data class ChatMessageUiModel(
     val unreadCount: Int = 0,
     val type: ChatMessageType = ChatMessageType.TEXT,
     val meetingNotice: MeetingNoticeUiModel? = null,
+    val imageUri: String? = null,
 )
 
 enum class ChatMessageType {
     TEXT,
     MEETING_NOTICE,
+    IMAGE,
 }
 
 data class MeetingNoticeUiModel(

@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -8,12 +9,14 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.pickii.R
 import androidx.annotation.DrawableRes
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import coil3.compose.AsyncImage
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -95,6 +98,7 @@ fun ChatRoomRoute(
         onNoticeClick = viewModel::toggleNotice,
         onNoticeRegister = viewModel::registerNotice,
         onMeetingSend = viewModel::sendMeetingNotice,
+        onSendImages = viewModel::sendImageMessages,
         modifier = modifier,
         onDelegateLeader = viewModel::delegateLeader,
         onRemoveMember = viewModel::removeMember,
@@ -116,6 +120,7 @@ private fun ChatRoomScreen(
     onNoticeClick: () -> Unit,
     onNoticeRegister: (String) -> Unit,
     onMeetingSend: (QuickMeetingForm) -> Unit,
+    onSendImages: (List<Uri>) -> Unit,
     modifier: Modifier = Modifier,
     onDelegateLeader: (Long) -> Unit,
     onRemoveMember: (Long) -> Unit,
@@ -176,6 +181,18 @@ private fun ChatRoomScreen(
         mutableStateOf(false)
     }
 
+    var showPhotoSourceSheet by remember {
+        mutableStateOf(false)
+    }
+
+    var showGalleryPickerSheet by remember {
+        mutableStateOf(false)
+    }
+
+    var pendingCameraUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
     LaunchedEffect(sentMeetingBanner) {
         if (sentMeetingBanner != null) {
             delay(3000)
@@ -189,11 +206,16 @@ private fun ChatRoomScreen(
         }
     }
 
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-        if (uri != null) {
-            Log.d("FILE", uri.toString())
+    val context = LocalContext.current
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { isSaved ->
+        val capturedUri = pendingCameraUri
+        pendingCameraUri = null
+
+        if (isSaved && capturedUri != null) {
+            onSendImages(listOf(capturedUri))
         }
     }
 
@@ -252,8 +274,8 @@ private fun ChatRoomScreen(
                 visible = uiState.isActionMenuExpanded,
             ) {
                 ChatActionMenu(
-                    onFileClick = {
-                        filePickerLauncher.launch(arrayOf("*/*"))
+                    onPhotoClick = {
+                        showPhotoSourceSheet = true
                     },
                     onNoticeRegisterClick = {
                         showNoticeRegistrationSheet = true
@@ -453,6 +475,36 @@ private fun ChatRoomScreen(
                     },
                 )
             }
+        }
+
+        if (showPhotoSourceSheet) {
+            PhotoSourceBottomSheet(
+                onGalleryClick = {
+                    showPhotoSourceSheet = false
+                    showGalleryPickerSheet = true
+                },
+                onCameraClick = {
+                    showPhotoSourceSheet = false
+                    val captureUri = createImageCaptureUri(context)
+                    pendingCameraUri = captureUri
+                    cameraLauncher.launch(captureUri)
+                },
+                onDismiss = {
+                    showPhotoSourceSheet = false
+                },
+            )
+        }
+
+        if (showGalleryPickerSheet) {
+            GalleryPickerBottomSheet(
+                onDismiss = {
+                    showGalleryPickerSheet = false
+                },
+                onConfirm = { uris ->
+                    showGalleryPickerSheet = false
+                    onSendImages(uris)
+                },
+            )
         }
     }
 
@@ -714,6 +766,22 @@ private fun ChatMessageItem(
                 )
             }
         }
+
+        ChatMessageType.IMAGE -> {
+            message.imageUri?.let { uri ->
+                if (message.isMine) {
+                    MyImageMessage(
+                        message = message,
+                        imageUri = uri,
+                    )
+                } else {
+                    OtherImageMessage(
+                        message = message,
+                        imageUri = uri,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -833,6 +901,114 @@ private fun OtherChatMessage(
     }
 }
 
+private val ChatImageBubbleSize = 160.dp
+
+/**
+ * 현재 사용자가 보낸 사진 메시지를 표시한다.
+ */
+@Composable
+private fun MyImageMessage(
+    message: ChatMessageUiModel,
+    imageUri: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+        ) {
+            if (message.unreadCount > 0) {
+                Text(
+                    text = message.unreadCount.toString(),
+                    color = Color(0xFFB4B868),
+                    fontSize = 10.sp,
+                )
+            }
+
+            Text(
+                text = message.sentAt,
+                color = SecondaryTextColor,
+                fontSize = 10.sp,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        AsyncImage(
+            model = imageUri,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(ChatImageBubbleSize)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = 18.dp,
+                        bottomEnd = 4.dp,
+                    ),
+                ),
+        )
+    }
+}
+
+/**
+ * 상대방이 보낸 사진 메시지를 표시한다.
+ */
+@Composable
+private fun OtherImageMessage(
+    message: ChatMessageUiModel,
+    imageUri: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFE5E7EB)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "P",
+                color = Color(0xFF9CA3AF),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        AsyncImage(
+            model = imageUri,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(ChatImageBubbleSize)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = 4.dp,
+                        bottomEnd = 18.dp,
+                    ),
+                ),
+        )
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        Text(
+            text = message.sentAt,
+            color = SecondaryTextColor,
+            fontSize = 10.sp,
+        )
+    }
+}
+
 /**
  * 파일 및 회의 관련 추가 기능을 표시한다.
  */
@@ -843,7 +1019,7 @@ data class ChatActionItem(
 
 @Composable
 private fun ChatActionMenu(
-    onFileClick: () -> Unit,
+    onPhotoClick: () -> Unit,
     onNoticeRegisterClick: () -> Unit,
     onQuickMeetingClick: () -> Unit,
     onMeetingManagementClick: () -> Unit,
@@ -851,7 +1027,7 @@ private fun ChatActionMenu(
     val actionItems = listOf(
         ChatActionItem(
             iconRes = R.drawable.ic_file,
-            label = "파일",
+            label = "사진/카메라",
         ),
         ChatActionItem(
             iconRes = R.drawable.ic_notice,
@@ -887,7 +1063,7 @@ private fun ChatActionMenu(
                     .weight(1f)
                     .clickable {
                         when (index) {
-                            0 -> onFileClick()
+                            0 -> onPhotoClick()
                             1 -> onNoticeRegisterClick()
                             2 -> onQuickMeetingClick()
                             3 -> println("회의 조율 클릭")

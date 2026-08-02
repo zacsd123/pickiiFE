@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -144,6 +145,51 @@ class ChatRoomViewModel @Inject constructor() : ViewModel() {
         )
     }
 
+
+    /**
+     * 갤러리에서 고르거나 카메라로 찍은 사진을 채팅방에 이미지 메시지로 추가한다. 사진마다 별도 메시지로 전송된다.
+     */
+    fun sendImageMessages(
+        uris: List<Uri>,
+    ) {
+        if (uris.isEmpty()) {
+            return
+        }
+
+        val currentState = _uiState.value
+
+        val unreadCount = when (currentState.roomType) {
+            ChatRoomType.PERSONAL -> 1
+            ChatRoomType.GROUP -> {
+                (currentState.memberCount - 1).coerceAtLeast(0)
+            }
+        }
+
+        val newMessages = uris.mapIndexed { index, uri ->
+            ChatMessageUiModel(
+                id = System.currentTimeMillis() + index,
+                content = "",
+                sentAt = getCurrentTimeText(),
+                isMine = true,
+                unreadCount = unreadCount,
+                type = ChatMessageType.IMAGE,
+                imageUri = uri.toString(),
+            )
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                messages = state.messages + newMessages,
+                isActionMenuExpanded = false,
+            )
+        }
+
+        newMessages.forEach { message ->
+            simulateMessageRead(
+                messageId = message.id,
+            )
+        }
+    }
 
     /**
      * 회의 등록 공지를 채팅방 메시지 목록에 추가한다.
