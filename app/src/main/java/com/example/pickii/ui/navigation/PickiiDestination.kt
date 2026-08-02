@@ -13,6 +13,18 @@ sealed class PickiiDestination(
     /** 로그인 화면. */
     data object Login : PickiiDestination("login")
 
+    /** 회원가입 화면(가입 폼 + 가입완료 화면을 한 화면에서 처리). */
+    data object Signup : PickiiDestination("signup")
+
+    /** 최초 로그인 시 이력서(프로필)를 입력받는 온보딩 화면. */
+    data object Onboarding : PickiiDestination("onboarding")
+
+    /** 비로그인 상태 비밀번호 재설정 화면. */
+    data object PasswordReset : PickiiDestination("password-reset")
+
+    /** 아이디 찾기 화면. */
+    data object FindId : PickiiDestination("find-id")
+
     /** 홈 화면. */
     data object Home : PickiiDestination("home")
 

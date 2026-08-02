@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
-import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.SelectableChip
@@ -83,6 +86,7 @@ fun HomeScreen(
     HomeScreenContent(
         uiState = uiState,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSearchSubmit = viewModel::onSearchClick,
         onToggleFilterPanel = viewModel::onToggleFilterPanel,
         onCampusScopeChange = viewModel::onCampusScopeChange,
         onCategorySelect = viewModel::onCategorySelect,
@@ -104,6 +108,7 @@ fun HomeScreen(
 private fun HomeScreenContent(
     uiState: HomeUiState,
     onSearchQueryChange: (String) -> Unit,
+    onSearchSubmit: () -> Unit,
     onToggleFilterPanel: () -> Unit,
     onCampusScopeChange: (CampusScope) -> Unit,
     onCategorySelect: (RecruitCategory) -> Unit,
@@ -136,7 +141,7 @@ private fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SearchField(query = uiState.searchQuery, onQueryChange = onSearchQueryChange)
+        SearchField(query = uiState.searchQuery, onQueryChange = onSearchQueryChange, onSubmit = onSearchSubmit)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -152,6 +157,8 @@ private fun HomeScreenContent(
         if (uiState.isFilterExpanded) {
             Spacer(modifier = Modifier.height(16.dp))
             FilterPanel(
+                categories = uiState.categories,
+                topics = uiState.topics,
                 selectedCategory = uiState.selectedCategory,
                 selectedTopics = uiState.selectedTopics,
                 onCategorySelect = onCategorySelect,
@@ -172,7 +179,7 @@ private fun HomeScreenContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.home_recruit_posts_title, uiState.posts.size),
+                text = stringResource(R.string.home_recruit_posts_title, uiState.totalElements),
                 color = Color.Black,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -182,7 +189,7 @@ private fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        uiState.currentPagePosts.chunked(2).forEach { rowPosts ->
+        uiState.posts.chunked(2).forEach { rowPosts ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -288,11 +295,12 @@ private fun HomeTopBar(
     }
 }
 
-/** 공고 제목/작성자를 검색하는 입력창. */
+/** 공고 제목/작성자를 검색하는 입력창. 검색 아이콘을 누르거나 키보드의 검색 버튼을 누르면 [onSubmit]이 호출된다. */
 @Composable
 private fun SearchField(
     query: String,
-    onQueryChange: (String) -> Unit
+    onQueryChange: (String) -> Unit,
+    onSubmit: () -> Unit
 ) {
     OutlinedTextField(
         value = query,
@@ -303,7 +311,16 @@ private fun SearchField(
         },
         singleLine = true,
         shape = RoundedCornerShape(ChipCornerRadius),
-        trailingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null, tint = PickiiTextGray) },
+        trailingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                tint = PickiiTextGray,
+                modifier = Modifier.clickable(onClick = onSubmit)
+            )
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
         colors =
             OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
@@ -345,6 +362,8 @@ private fun FilterToggleButton(onClick: () -> Unit) {
 /** 카테고리/주제를 고르는 필터 패널. */
 @Composable
 private fun FilterPanel(
+    categories: List<RecruitCategory>,
+    topics: List<RecruitTopic>,
     selectedCategory: RecruitCategory?,
     selectedTopics: Set<RecruitTopic>,
     onCategorySelect: (RecruitCategory) -> Unit,
@@ -368,7 +387,7 @@ private fun FilterPanel(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RecruitCategory.entries.forEach { category ->
+            categories.forEach { category ->
                 SelectableChip(
                     label = category.label,
                     selected = category == selectedCategory,
@@ -387,13 +406,13 @@ private fun FilterPanel(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(10.dp))
-        RecruitTopic.entries.chunked(4).forEach { rowTopics ->
+        topics.chunked(4).forEach { rowTopics ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 rowTopics.forEach { topic ->
                     SelectableChip(
                         label = topic.label,
                         selected = topic in selectedTopics,
-                        enabled = topic.isEnabled,
+                        enabled = true,
                         onClick = { onTopicToggle(topic) }
                     )
                 }
@@ -468,7 +487,7 @@ private fun RegisterPostButton(onClick: () -> Unit) {
 /** 모집 글 하나를 보여주는 카드. 카드 영역을 누르면 상세보기와 동일하게 상세 화면으로 이동한다. */
 @Composable
 private fun PostCard(
-    post: RecruitPost,
+    post: RecruitPostSummary,
     onDetailClick: () -> Unit,
     onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -624,6 +643,7 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             uiState = HomeUiState(),
             onSearchQueryChange = {},
+            onSearchSubmit = {},
             onToggleFilterPanel = {},
             onCampusScopeChange = {},
             onCategorySelect = {},
@@ -649,6 +669,7 @@ private fun HomeScreenFilterExpandedPreview() {
         HomeScreenContent(
             uiState = HomeUiState(isFilterExpanded = true),
             onSearchQueryChange = {},
+            onSearchSubmit = {},
             onToggleFilterPanel = {},
             onCampusScopeChange = {},
             onCategorySelect = {},

@@ -122,12 +122,12 @@ fun RecruitDetailScreen(
         onApplyClick = {
             when {
                 !uiState.isLoggedIn -> viewModel.onLoginPromptRequested()
-                uiState.hasApplied -> viewModel.onAlreadyAppliedNoticeRequested()
                 else -> uiState.post?.let { onApplyClick(it.id) }
             }
         },
         onEditClick = { uiState.post?.let { onEditClick(it.id) } },
         onCloseRecruitingClick = viewModel::onCloseRecruitingRequested,
+        onReopenRecruitingClick = viewModel::onReopenRecruitingRequested,
         onDeletePostClick = viewModel::onDeletePostRequested,
         onCommentDraftChange = viewModel::onCommentDraftChange,
         onReplyClick = viewModel::onReplyClick,
@@ -140,6 +140,8 @@ fun RecruitDetailScreen(
         onConfirmDeleteComment = viewModel::onConfirmDeleteComment,
         onDismissCloseRecruitingDialog = viewModel::onDismissCloseRecruitingDialog,
         onConfirmCloseRecruiting = viewModel::onConfirmCloseRecruiting,
+        onDismissReopenRecruitingDialog = viewModel::onDismissReopenRecruitingDialog,
+        onConfirmReopenRecruiting = viewModel::onConfirmReopenRecruiting,
         onDismissDeletePostDialog = viewModel::onDismissDeletePostDialog,
         onConfirmDeletePost = { viewModel.onConfirmDeletePost(onDeleted = onDeletedNavigateHome) }
     )
@@ -155,6 +157,7 @@ private fun RecruitDetailScreenContent(
     onApplyClick: () -> Unit,
     onEditClick: () -> Unit,
     onCloseRecruitingClick: () -> Unit,
+    onReopenRecruitingClick: () -> Unit,
     onDeletePostClick: () -> Unit,
     onCommentDraftChange: (String) -> Unit,
     onReplyClick: (RecruitComment) -> Unit,
@@ -167,6 +170,8 @@ private fun RecruitDetailScreenContent(
     onConfirmDeleteComment: () -> Unit,
     onDismissCloseRecruitingDialog: () -> Unit,
     onConfirmCloseRecruiting: () -> Unit,
+    onDismissReopenRecruitingDialog: () -> Unit,
+    onConfirmReopenRecruiting: () -> Unit,
     onDismissDeletePostDialog: () -> Unit,
     onConfirmDeletePost: () -> Unit
 ) {
@@ -206,6 +211,7 @@ private fun RecruitDetailScreenContent(
                             onApplyClick = onApplyClick,
                             onEditClick = onEditClick,
                             onCloseRecruitingClick = onCloseRecruitingClick,
+                            onReopenRecruitingClick = onReopenRecruitingClick,
                             onDeletePostClick = onDeletePostClick
                         )
                     }
@@ -251,6 +257,17 @@ private fun RecruitDetailScreenContent(
                 dismissLabel = stringResource(R.string.common_button_cancel),
                 onConfirm = onConfirmCloseRecruiting,
                 onDismiss = onDismissCloseRecruitingDialog
+            )
+        }
+
+        if (uiState.isReopenPostDialogVisible) {
+            ConfirmDialog(
+                title = stringResource(R.string.recruit_detail_dialog_reopen_post_title),
+                body = stringResource(R.string.recruit_detail_dialog_reopen_post_body),
+                confirmLabel = stringResource(R.string.common_button_confirm),
+                dismissLabel = stringResource(R.string.common_button_cancel),
+                onConfirm = onConfirmReopenRecruiting,
+                onDismiss = onDismissReopenRecruitingDialog
             )
         }
 
@@ -345,6 +362,7 @@ private fun PostInfoCard(
     onApplyClick: () -> Unit,
     onEditClick: () -> Unit,
     onCloseRecruitingClick: () -> Unit,
+    onReopenRecruitingClick: () -> Unit,
     onDeletePostClick: () -> Unit
 ) {
     Column(
@@ -421,8 +439,8 @@ private fun PostInfoCard(
 
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             InfoBadge(text = post.onCampus.label)
-            InfoBadge(text = post.category.label)
-            InfoBadge(text = post.topic.label)
+            post.category?.let { InfoBadge(text = it.label) }
+            post.topic?.let { InfoBadge(text = it.label) }
             InfoBadge(text = post.status.label)
         }
 
@@ -475,7 +493,7 @@ private fun PostInfoCard(
                 onViewApplicantsClick = {},
                 onEditClick = onEditClick,
                 onCloseRecruitingClick = onCloseRecruitingClick,
-                onReopenRecruitingClick = {},
+                onReopenRecruitingClick = onReopenRecruitingClick,
                 onDeletePostClick = onDeletePostClick
             )
         }
@@ -760,6 +778,7 @@ private fun RecruitDetailScreenPreview() {
             onApplyClick = {},
             onEditClick = {},
             onCloseRecruitingClick = {},
+            onReopenRecruitingClick = {},
             onDeletePostClick = {},
             onCommentDraftChange = {},
             onReplyClick = {},
@@ -772,6 +791,8 @@ private fun RecruitDetailScreenPreview() {
             onConfirmDeleteComment = {},
             onDismissCloseRecruitingDialog = {},
             onConfirmCloseRecruiting = {},
+            onDismissReopenRecruitingDialog = {},
+            onConfirmReopenRecruiting = {},
             onDismissDeletePostDialog = {},
             onConfirmDeletePost = {}
         )

@@ -18,22 +18,31 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -62,18 +71,20 @@ private val ActionButtonHeight = 52.dp
  * [LoginViewModel]에서 입력 상태를 받아와 [LoginScreenContent]에 전달한다.
  * 실제 로그인/비회원 전환 처리는 [LoginViewModel]이 담당하며, 성공했을 때만 각 콜백이 호출된다.
  *
- * @param onLoginClick 로그인에 성공했을 때 호출되는 콜백
- * @param onResetPasswordClick 비밀번호 재설정 링크 클릭 콜백
+ * @param onNavigateHome 로그인에 성공하고 프로필(이력서)이 있을 때 호출되는 콜백
+ * @param onNavigateOnboarding 로그인에 성공했지만 프로필이 없을 때(최초 로그인) 호출되는 콜백
+ * @param onNavigateToPasswordReset "아이디/비밀번호 찾기" 시트에서 "비밀번호 재설정"을 눌렀을 때 호출되는 콜백
+ * @param onNavigateToFindId "아이디/비밀번호 찾기" 시트에서 "아이디 찾기"를 눌렀을 때 호출되는 콜백
  * @param onSignUpClick 회원가입 버튼 클릭 콜백
- * @param onFindAccountClick 회원 찾기 버튼 클릭 콜백
  * @param onGuestClick 비회원으로 둘러보기를 완료했을 때 호출되는 콜백
  */
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit = {},
-    onResetPasswordClick: () -> Unit = {},
+    onNavigateHome: () -> Unit = {},
+    onNavigateOnboarding: () -> Unit = {},
+    onNavigateToPasswordReset: () -> Unit = {},
+    onNavigateToFindId: () -> Unit = {},
     onSignUpClick: () -> Unit = {},
-    onFindAccountClick: () -> Unit = {},
     onGuestClick: () -> Unit = {},
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -85,15 +96,18 @@ fun LoginScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
         onToggleAutoLogin = viewModel::onToggleAutoLogin,
-        onLoginClick = { viewModel.onLoginClick(onSuccess = onLoginClick) },
-        onResetPasswordClick = onResetPasswordClick,
+        onLoginClick = {
+            viewModel.onLoginClick(onNavigateHome = onNavigateHome, onNavigateOnboarding = onNavigateOnboarding)
+        },
+        onNavigateToPasswordReset = onNavigateToPasswordReset,
+        onNavigateToFindId = onNavigateToFindId,
         onSignUpClick = onSignUpClick,
-        onFindAccountClick = onFindAccountClick,
         onGuestClick = { viewModel.onGuestClick(onComplete = onGuestClick) }
     )
 }
 
 /** [LoginScreen]의 실제 UI. ViewModel 없이도 미리보기/테스트가 가능하도록 상태를 파라미터로 받는다. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LoginScreenContent(
     uiState: LoginUiState,
@@ -102,11 +116,13 @@ private fun LoginScreenContent(
     onTogglePasswordVisibility: () -> Unit,
     onToggleAutoLogin: () -> Unit,
     onLoginClick: () -> Unit,
-    onResetPasswordClick: () -> Unit,
+    onNavigateToPasswordReset: () -> Unit,
+    onNavigateToFindId: () -> Unit,
     onSignUpClick: () -> Unit,
-    onFindAccountClick: () -> Unit,
     onGuestClick: () -> Unit
 ) {
+    var isAccountRecoverySheetVisible by remember { mutableStateOf(false) }
+
     Box(
         modifier =
             Modifier
@@ -190,7 +206,7 @@ private fun LoginScreenContent(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = onResetPasswordClick),
+                        .clickable { isAccountRecoverySheetVisible = true },
                 textAlign = TextAlign.End
             )
 
@@ -267,7 +283,10 @@ private fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            SecondaryButton(text = stringResource(R.string.login_button_find_account), onClick = onFindAccountClick)
+            SecondaryButton(
+                text = stringResource(R.string.login_button_find_account),
+                onClick = { isAccountRecoverySheetVisible = true }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -283,6 +302,96 @@ private fun LoginScreenContent(
                 textAlign = TextAlign.Center
             )
         }
+
+        if (isAccountRecoverySheetVisible) {
+            AccountRecoveryBottomSheet(
+                onDismiss = { isAccountRecoverySheetVisible = false },
+                onFindIdClick = {
+                    isAccountRecoverySheetVisible = false
+                    onNavigateToFindId()
+                },
+                onResetPasswordClick = {
+                    isAccountRecoverySheetVisible = false
+                    onNavigateToPasswordReset()
+                }
+            )
+        }
+    }
+}
+
+/** "아이디/비밀번호 찾기" 바텀시트. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountRecoveryBottomSheet(
+    onDismiss: () -> Unit,
+    onFindIdClick: () -> Unit,
+    onResetPasswordClick: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.account_recovery_sheet_title),
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
+            )
+
+            RecoveryOptionButton(
+                icon = Icons.Filled.Person,
+                text = stringResource(R.string.account_recovery_button_find_id),
+                background = PickiiFieldBackground,
+                contentColor = Color.Black,
+                onClick = onFindIdClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            RecoveryOptionButton(
+                icon = Icons.Filled.Key,
+                text = stringResource(R.string.account_recovery_button_reset_password),
+                background = Color.Black,
+                contentColor = Color.White,
+                onClick = onResetPasswordClick
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun RecoveryOptionButton(
+    icon: ImageVector,
+    text: String,
+    background: Color,
+    contentColor: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(ActionButtonHeight)
+                .clip(RoundedCornerShape(FieldCornerRadius))
+                .background(background)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, color = contentColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -365,9 +474,9 @@ private fun LoginScreenPreview() {
             onTogglePasswordVisibility = {},
             onToggleAutoLogin = {},
             onLoginClick = {},
-            onResetPasswordClick = {},
+            onNavigateToPasswordReset = {},
+            onNavigateToFindId = {},
             onSignUpClick = {},
-            onFindAccountClick = {},
             onGuestClick = {}
         )
     }

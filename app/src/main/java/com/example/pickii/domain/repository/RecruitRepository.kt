@@ -1,79 +1,104 @@
 package com.example.pickii.domain.repository
 
-import com.example.pickii.domain.model.RecruitApplication
+import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitComment
+import com.example.pickii.domain.model.RecruitPage
 import com.example.pickii.domain.model.RecruitPost
-import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
 
 /** 모집 글, 댓글, 스크랩, 지원, AI 초안 생성을 담당한다. */
 interface RecruitRepository {
-    /** 전체 모집 글 목록을 관찰한다. */
-    fun observePosts(): StateFlow<List<RecruitPost>>
+    /** 검색/필터 조건에 맞는 모집 글 목록을 한 페이지 조회한다. [page]는 0부터 시작한다. */
+    suspend fun getPosts(
+        keyword: String? = null,
+        onCampus: Boolean? = null,
+        categoryIds: List<Int> = emptyList(),
+        topicIds: List<Int> = emptyList(),
+        page: Int = 0,
+        size: Int = 10
+    ): Result<RecruitPage>
 
-    /** [postId]에 해당하는 모집 글을 찾는다. 없으면 null이다. */
-    fun getPostById(postId: String): RecruitPost?
+    /** [postId]에 해당하는 모집 글 상세를 조회한다. */
+    suspend fun getPostById(postId: String): Result<RecruitPost>
 
-    /** 새 모집 글을 등록한다. */
-    suspend fun createPost(post: RecruitPost): Result<RecruitPost>
+    /** 새 모집 글을 등록하고, 성공하면 새로 생성된 글의 id를 반환한다. */
+    suspend fun createPost(
+        title: String,
+        maxParticipants: Int,
+        onCampus: CampusScope,
+        categoryIds: List<Int>,
+        topicIds: List<Int>,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        shortIntro: String,
+        detailContent: String
+    ): Result<String>
 
     /** 기존 모집 글을 수정한다. */
-    suspend fun updatePost(post: RecruitPost): Result<RecruitPost>
+    suspend fun updatePost(
+        postId: String,
+        title: String,
+        maxParticipants: Int,
+        onCampus: CampusScope,
+        categoryIds: List<Int>,
+        topicIds: List<Int>,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        shortIntro: String,
+        detailContent: String
+    ): Result<Unit>
 
     /** 모집 글을 마감(CLOSED) 상태로 바꾼다. */
     suspend fun closePost(postId: String): Result<Unit>
 
+    /** 마감된 모집 글을 추가 모집(ADDITIONAL) 상태로 바꾼다. */
+    suspend fun reopenAdditionalRecruiting(postId: String): Result<Unit>
+
     /** 모집 글을 삭제한다. */
     suspend fun deletePost(postId: String): Result<Unit>
 
-    /** [postId] 모집 글에 달린 댓글/답글 전체를 관찰한다. */
-    fun observeComments(postId: String): StateFlow<List<RecruitComment>>
+    /** [postId] 모집 글에 달린 댓글/답글 전체를 조회한다(계층 구조가 평탄화되지 않은 트리 그대로). */
+    suspend fun getComments(postId: String): Result<List<RecruitComment>>
 
     /**
-     * 댓글 또는 답글을 작성한다.
+     * 댓글 또는 답글을 작성하고, 성공하면 새로 생성된 댓글의 id를 반환한다.
      *
      * @param parentCommentId 답글이면 상위 댓글 id, 최상위 댓글이면 null
      */
     suspend fun addComment(
         postId: String,
-        authorId: String,
-        authorNickname: String,
         parentCommentId: String?,
         content: String
-    ): Result<RecruitComment>
+    ): Result<String>
 
     /** 댓글을 soft delete한다(내용은 유지하고 삭제 표시만 한다). */
     suspend fun deleteComment(commentId: String): Result<Unit>
 
-    /** [userId]가 [postId]를 스크랩했는지 여부. */
-    fun isScraped(
-        postId: String,
-        userId: String
-    ): Boolean
+    /** 모집 글을 스크랩하고, 성공하면 true를 반환한다. */
+    suspend fun scrapPost(postId: String): Result<Boolean>
 
-    /** 스크랩 여부를 토글하고, 토글 후 상태를 반환한다. */
-    suspend fun toggleScrap(
-        postId: String,
-        userId: String
-    ): Result<Boolean>
-
-    /** [userId]가 [postId]에 이미 지원했는지 여부. */
-    fun hasApplied(
-        postId: String,
-        userId: String
-    ): Boolean
+    /** 모집 글 스크랩을 취소한다. */
+    suspend fun unscrapPost(postId: String): Result<Unit>
 
     /** 모집 글에 지원한다. */
     suspend fun submitApplication(
         postId: String,
-        applicantId: String,
-        applicantNickname: String,
         message: String
-    ): Result<RecruitApplication>
+    ): Result<Unit>
 
     /**
-     * AI 초안을 생성한다. 백엔드가 없어 목업으로 동작하며, 일정 호출마다 결정적으로 실패한다.
+     * 공고 간단 소개/상세 내용 초안을 AI로 다듬는다. [content]는 필수(공란 불가)다.
      *
-     * @param prompt 초안 생성에 사용할 입력(제목/카테고리 등을 조합한 문자열)
+     * @return (간단 소개, 상세 내용) 쌍
      */
-    suspend fun generateAiDraft(prompt: String): Result<String>
+    suspend fun generateAiDraft(
+        simpleDesc: String?,
+        content: String
+    ): Result<Pair<String, String>>
+
+    /** 지원 메시지 초안을 공고 맥락에 맞게 AI로 다듬는다. */
+    suspend fun generateApplyAiDraft(
+        postId: String,
+        message: String
+    ): Result<String>
 }
