@@ -52,7 +52,12 @@ fun AddEntryButton(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = Icons.Filled.Add, contentDescription = null, tint = PickiiTextGray, modifier = Modifier.size(16.dp))
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = null,
+            tint = PickiiTextGray,
+            modifier = Modifier.size(16.dp)
+        )
         Spacer(modifier = Modifier.width(6.dp))
         Text(text = label, color = PickiiTextGray, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }
@@ -77,7 +82,12 @@ fun RemovableEntryCard(
             content()
         }
         IconButton(onClick = onRemove, modifier = Modifier.align(Alignment.TopEnd).size(28.dp)) {
-            Icon(imageVector = Icons.Filled.Close, contentDescription = null, tint = PickiiTextGray, modifier = Modifier.size(16.dp))
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = null,
+                tint = PickiiTextGray,
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }

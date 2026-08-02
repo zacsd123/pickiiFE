@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -48,129 +47,136 @@ private val LeaveCancelButtonColor = Color(0xFFF3F4F6)
 fun ChatRoomLeavePanel(
     isCurrentUserLeader: Boolean,
     onBackClick: () -> Unit,
-    onLeaveClick: () -> Unit,
+    onLeaveClick: () -> Unit
 ) {
     BackHandler(
         enabled = true,
-        onBack = onBackClick,
+        onBack = onBackClick
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LeavePanelScrimColor)
-                .clickable(onClick = onBackClick),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(LeavePanelScrimColor)
+                    .clickable(onClick = onBackClick)
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.79f)
-                .align(Alignment.CenterEnd)
-                .background(LeavePanelBackgroundColor),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.79f)
+                    .align(Alignment.CenterEnd)
+                    .background(LeavePanelBackgroundColor)
         ) {
             ChatRoomLeaveHeader(
-                onBackClick = onBackClick,
+                onBackClick = onBackClick
             )
 
             HorizontalDivider(
-                color = LeaveDividerColor,
+                color = LeaveDividerColor
             )
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
 
                 Image(
-                    painter = painterResource(
-                        id = R.drawable.ic_warning,
-                    ),
+                    painter =
+                        painterResource(
+                            id = R.drawable.ic_warning
+                        ),
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp),
+                    modifier = Modifier.size(100.dp)
                 )
 
-
                 Spacer(
-                    modifier = Modifier.height(26.dp),
+                    modifier = Modifier.height(26.dp)
                 )
 
                 Text(
                     text = "채팅방을 나가시겠어요?",
                     color = LeavePrimaryTextColor,
                     fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(16.dp),
+                    modifier = Modifier.height(16.dp)
                 )
 
                 Text(
-                    text = if (isCurrentUserLeader) {
-                        "팀장이 나가면 팀원 중 1명이 자동으로 팀장이 됩니다."
-                    } else {
-                        "채팅방을 나가면 더 이상 메시지를 확인할 수 없습니다."
-                    },
+                    text =
+                        if (isCurrentUserLeader) {
+                            "팀장이 나가면 팀원 중 1명이 자동으로 팀장이 됩니다."
+                        } else {
+                            "채팅방을 나가면 더 이상 메시지를 확인할 수 없습니다."
+                        },
                     color = LeaveSecondaryTextColor,
                     fontSize = 14.sp,
                     lineHeight = 21.sp,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(bottom = 18.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(bottom = 18.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(LeaveCancelButtonColor)
-                            .clickable(onClick = onBackClick)
-                            .padding(vertical = 18.dp),
-                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(LeaveCancelButtonColor)
+                                .clickable(onClick = onBackClick)
+                                .padding(vertical = 18.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "취소",
                             color = LeaveSecondaryTextColor,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
                     Spacer(
-                        modifier = Modifier.width(14.dp),
+                        modifier = Modifier.width(14.dp)
                     )
 
                     Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(LeaveButtonColor)
-                            .clickable(onClick = onLeaveClick)
-                            .padding(vertical = 18.dp),
-                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(LeaveButtonColor)
+                                .clickable(onClick = onLeaveClick)
+                                .padding(vertical = 18.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "나가기",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -183,42 +189,43 @@ fun ChatRoomLeavePanel(
  * 채팅방 나가기 화면의 헤더를 표시한다.
  */
 @Composable
-private fun ChatRoomLeaveHeader(
-    onBackClick: () -> Unit,
-) {
+private fun ChatRoomLeaveHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onBackClick),
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = R.drawable.ic_back,
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_back
+                    ),
                 contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp),
+            modifier = Modifier.width(8.dp)
         )
 
         Text(
             text = "채팅방 나가기",
             color = LeavePrimaryTextColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }

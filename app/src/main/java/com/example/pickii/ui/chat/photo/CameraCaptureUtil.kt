@@ -19,6 +19,6 @@ fun createImageCaptureUri(context: Context): Uri {
     return FileProvider.getUriForFile(
         context,
         "${context.packageName}.fileprovider",
-        file,
+        file
     )
 }

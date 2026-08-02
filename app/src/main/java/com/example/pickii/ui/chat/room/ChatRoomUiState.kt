@@ -5,7 +5,7 @@ package com.example.pickii.ui.chat
  */
 enum class ChatRoomType {
     GROUP,
-    PERSONAL,
+    PERSONAL
 }
 
 /**
@@ -14,20 +14,18 @@ enum class ChatRoomType {
 enum class ProjectStatus {
     BEFORE_START,
     IN_PROGRESS,
-    COMPLETED,
+    COMPLETED
 }
-
 
 /**
  * 프로젝트 상태를 화면 표시용 문구로 변환한다.
  */
-fun ProjectStatus.toDisplayText(): String {
-    return when (this) {
+fun ProjectStatus.toDisplayText(): String =
+    when (this) {
         ProjectStatus.BEFORE_START -> "진행 전"
         ProjectStatus.IN_PROGRESS -> "진행 중"
         ProjectStatus.COMPLETED -> "진행 완료"
     }
-}
 
 /**
  * 채팅방 화면 상태이다.
@@ -48,20 +46,17 @@ fun ProjectStatus.toDisplayText(): String {
  * @property isNoticeExpanded 공지 내용 표시 여부
  */
 
-
 data class ChatRoomUiState(
     val roomId: Long = 0L,
     val roomTitle: String = "",
     val roomType: ChatRoomType = ChatRoomType.PERSONAL,
     val memberCount: Int = 2,
-
     val members: List<ChatRoomMemberUiModel> = emptyList(),
     val leaderName: String = "",
     val personalChatMemberName: String = "",
     val isNotificationEnabled: Boolean = false,
     val projectStatus: ProjectStatus = ProjectStatus.IN_PROGRESS,
     val isCurrentUserLeader: Boolean = false,
-
     val messages: List<ChatMessageUiModel> = emptyList(),
     val messageInput: String = "",
     val isActionMenuExpanded: Boolean = false,
@@ -69,14 +64,15 @@ data class ChatRoomUiState(
     val noticeContent: String = "",
     val noticeWriter: String = "",
     val noticeRegisteredAt: String = "",
-    val projectInfo: ChatProjectInfoUiModel = ChatProjectInfoUiModel(
-        projectTitle = "캡스톤 디자인 프로젝트",
-        startDate = "2026.03.02",
-        endDate = "2026.08.31",
-        memberCount = 5,
-        leaderName = "민준",
-        progressPercent = 62,
-        projectStatus = ProjectStatus.IN_PROGRESS,
-    ),
-    val meetings: List<ManagedMeetingUiModel> = emptyList(),
+    val projectInfo: ChatProjectInfoUiModel =
+        ChatProjectInfoUiModel(
+            projectTitle = "캡스톤 디자인 프로젝트",
+            startDate = "2026.03.02",
+            endDate = "2026.08.31",
+            memberCount = 5,
+            leaderName = "민준",
+            progressPercent = 62,
+            projectStatus = ProjectStatus.IN_PROGRESS
+        ),
+    val meetings: List<ManagedMeetingUiModel> = emptyList()
 )

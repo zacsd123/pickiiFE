@@ -97,7 +97,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun PickiiNavHost() {
     val navController = rememberNavController()
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val currentRoute =
+        navController
+            .currentBackStackEntryAsState()
+            .value
+            ?.destination
+            ?.route
 
     // 캘린더/채팅은 내부적으로 여러 하위 화면을 갖는데, 그중 최상위 화면(월간 캘린더/채팅 목록)일 때만 바텀 내비게이션을 보여준다.
     var isCalendarTopLevel by remember { mutableStateOf(true) }
@@ -165,11 +170,11 @@ private fun PickiiNavHost() {
                                     isMyPageSelected = true
                                 }
                             }
-                        },
+                        }
                     )
                 }
             }
-        },
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -241,8 +246,12 @@ private fun PickiiNavHost() {
             ) {
                 HomeScreen(
                     onRegisterPostClick = { navController.navigate(PickiiDestination.RecruitCreate.route) },
-                    onPostDetailClick = { postId -> navController.navigate(PickiiDestination.RecruitDetail(postId).route) },
-                    onPostApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) }
+                    onPostDetailClick = { postId ->
+                        navController.navigate(PickiiDestination.RecruitDetail(postId).route)
+                    },
+                    onPostApplyClick = { postId ->
+                        navController.navigate(PickiiDestination.RecruitApply(postId).route)
+                    }
                 )
             }
 
@@ -254,7 +263,12 @@ private fun PickiiNavHost() {
                     onBackClick = { navController.popBackStack() },
                     onApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) },
                     onEditClick = { postId -> navController.navigate(PickiiDestination.RecruitEdit(postId).route) },
-                    onDeletedNavigateHome = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                    onDeletedNavigateHome = {
+                        navController.popBackStack(
+                            PickiiDestination.Home.route,
+                            inclusive = false
+                        )
+                    },
                     onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
                 )
             }
@@ -297,7 +311,7 @@ private fun PickiiNavHost() {
                 popExitTransition = { ExitTransition.None }
             ) {
                 ChatRoute(
-                    onTopLevelScreenChange = { isChatTopLevel = it },
+                    onTopLevelScreenChange = { isChatTopLevel = it }
                 )
             }
 
@@ -310,7 +324,7 @@ private fun PickiiNavHost() {
             ) {
                 CalendarRoute(
                     onScheduleClick = { },
-                    onTopLevelScreenChange = { isCalendarTopLevel = it },
+                    onTopLevelScreenChange = { isCalendarTopLevel = it }
                 )
             }
         }

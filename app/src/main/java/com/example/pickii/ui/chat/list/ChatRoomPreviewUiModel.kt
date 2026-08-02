@@ -1,14 +1,6 @@
 package com.example.pickii.ui.chat
 
 /**
- * 채팅방의 유형을 나타낸다.
- */
-//enum class ChatRoomType {
-//    GROUP,
-//    DIRECT,
-//}
-
-/**
  * 채팅 목록에 표시되는 채팅방 미리보기 정보다.
  *
  * @property id 채팅방 식별자
@@ -32,5 +24,5 @@ data class ChatRoomPreviewUiModel(
     val recruitTitle: String,
     val participantSummary: String? = null,
     val unreadCount: Int = 0,
-    val isNotificationEnabled: Boolean = true,
+    val isNotificationEnabled: Boolean = true
 )

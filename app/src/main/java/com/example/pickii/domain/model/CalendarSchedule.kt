@@ -35,18 +35,14 @@ data class CalendarSchedule(
     val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
     val repeatWeekdays: Set<DayOfWeek> = emptySet(),
     val memo: String = "",
-    val isAllDay: Boolean = false,
+    val isAllDay: Boolean = false
 ) {
-
     /**
      * 전달받은 날짜가 일정 기간 안에 포함되는지 확인한다.
      */
-    fun includesDate(
-        date: LocalDate,
-    ): Boolean {
-        return !date.isBefore(startDate) &&
-                !date.isAfter(endDate)
-    }
+    fun includesDate(date: LocalDate): Boolean =
+        !date.isBefore(startDate) &&
+            !date.isAfter(endDate)
 
     /**
      * 여러 날짜에 걸쳐 진행되는 일정인지 확인한다.

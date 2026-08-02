@@ -30,10 +30,11 @@ private val MenuButtonBackgroundColor = Color(0xFFFFFFFF)
 private val AddButtonBackgroundColor = Color(0xFF6D8DF5)
 private val AddButtonTextColor = Color(0xFFFFFFFF)
 
-private val HeaderDateFormatter = DateTimeFormatter.ofPattern(
-    "yyyy년 M월 d일",
-    Locale.KOREAN,
-)
+private val HeaderDateFormatter =
+    DateTimeFormatter.ofPattern(
+        "yyyy년 M월 d일",
+        Locale.KOREAN
+    )
 
 /**
  * 일일 캘린더 상단 날짜 이동 영역을 표시한다.
@@ -45,39 +46,40 @@ fun DailyCalendarHeader(
     onPreviousDateClick: () -> Unit,
     onNextDateClick: () -> Unit,
     onAddScheduleClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = HeaderBackgroundColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 8.dp,
-                vertical = 8.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = HeaderBackgroundColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 8.dp,
+                    vertical = 8.dp
+                ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         HeaderSquareButton(
             text = "☰",
             backgroundColor = MenuButtonBackgroundColor,
             textColor = HeaderTextColor,
-            onClick = onMenuClick,
+            onClick = onMenuClick
         )
 
         Text(
             text = "‹",
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onPreviousDateClick),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onPreviousDateClick),
             color = HeaderArrowColor,
             textAlign = TextAlign.Center,
             fontSize = 28.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 40.sp,
+            lineHeight = 40.sp
         )
 
         Text(
@@ -87,26 +89,27 @@ fun DailyCalendarHeader(
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            maxLines = 1,
+            maxLines = 1
         )
 
         Text(
             text = "›",
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onNextDateClick),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onNextDateClick),
             color = HeaderArrowColor,
             textAlign = TextAlign.Center,
             fontSize = 28.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 40.sp,
+            lineHeight = 40.sp
         )
 
         HeaderSquareButton(
             text = "+",
             backgroundColor = AddButtonBackgroundColor,
             textColor = AddButtonTextColor,
-            onClick = onAddScheduleClick,
+            onClick = onAddScheduleClick
         )
     }
 }
@@ -120,31 +123,31 @@ private fun HeaderSquareButton(
     backgroundColor: Color,
     textColor: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .size(44.dp)
-            .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(13.dp),
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .size(44.dp)
+                .background(
+                    color = backgroundColor,
+                    shape = RoundedCornerShape(13.dp)
+                ).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = textColor,
             fontSize = if (text == "+") 30.sp else 20.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 30.sp,
+            lineHeight = 30.sp
         )
     }
 }
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
+    backgroundColor = 0xFFFFFFFF
 )
 @Composable
 private fun DailyCalendarHeaderPreview() {
@@ -154,6 +157,6 @@ private fun DailyCalendarHeaderPreview() {
         onPreviousDateClick = {},
         onNextDateClick = {},
         onAddScheduleClick = {},
-        modifier = Modifier.padding(20.dp),
+        modifier = Modifier.padding(20.dp)
     )
 }

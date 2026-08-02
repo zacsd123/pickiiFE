@@ -41,11 +41,12 @@ import androidx.compose.ui.unit.sp
 fun PhotoSourceBottomSheet(
     onGalleryClick: () -> Unit,
     onCameraClick: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -54,29 +55,31 @@ fun PhotoSourceBottomSheet(
         dragHandle = {
             BottomSheetDefaults.DragHandle(
                 width = 36.dp,
-                height = 4.dp,
+                height = 4.dp
             )
         },
-        shape = RoundedCornerShape(
-            topStart = 28.dp,
-            topEnd = 28.dp,
-        ),
+        shape =
+            RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp
+            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 12.dp,
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 12.dp
+                    )
         ) {
             Text(
                 text = "사진 보내기",
                 color = Color(0xFF18181B),
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -84,7 +87,7 @@ fun PhotoSourceBottomSheet(
             PhotoSourceRow(
                 icon = Icons.Filled.PhotoLibrary,
                 label = "갤러리",
-                onClick = onGalleryClick,
+                onClick = onGalleryClick
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -92,7 +95,7 @@ fun PhotoSourceBottomSheet(
             PhotoSourceRow(
                 icon = Icons.Filled.PhotoCamera,
                 label = "카메라",
-                onClick = onCameraClick,
+                onClick = onCameraClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -107,28 +110,30 @@ fun PhotoSourceBottomSheet(
 private fun PhotoSourceRow(
     icon: ImageVector,
     label: String,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .clickable(onClick = onClick)
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFF2F3F6)),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF2F3F6)),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = Color(0xFF4B5563),
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(22.dp)
             )
         }
 
@@ -138,7 +143,7 @@ private fun PhotoSourceRow(
             text = label,
             color = Color(0xFF292D35),
             fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }

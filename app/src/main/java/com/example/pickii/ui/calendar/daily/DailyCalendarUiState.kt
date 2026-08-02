@@ -9,7 +9,7 @@ import java.time.LocalTime
  */
 data class DailyCalendarUiState(
     val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
-    val schedules: List<DailyScheduleUiModel> = emptyList(),
+    val schedules: List<DailyScheduleUiModel> = emptyList()
 )
 
 /**
@@ -21,23 +21,23 @@ data class DailyScheduleUiModel(
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,
-    val colorType: DailyScheduleColorType,
+    val colorType: DailyScheduleColorType
 ) {
     /**
      * 일정 진행 시간을 분 단위로 반환한다.
      */
     val durationMinutes: Long
-        get() = Duration.between(
-            startTime,
-            endTime,
-        ).toMinutes()
+        get() =
+            Duration
+                .between(
+                    startTime,
+                    endTime
+                ).toMinutes()
 
     /**
      * 일정이 선택한 날짜에 포함되는지 확인한다.
      */
-    fun includesDate(targetDate: LocalDate): Boolean {
-        return date == targetDate
-    }
+    fun includesDate(targetDate: LocalDate): Boolean = date == targetDate
 }
 
 /**
@@ -48,5 +48,5 @@ enum class DailyScheduleColorType {
     GREEN,
     PURPLE,
     BLUE,
-    YELLOW,
+    YELLOW
 }

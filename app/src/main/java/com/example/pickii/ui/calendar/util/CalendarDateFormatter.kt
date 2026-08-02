@@ -1,4 +1,3 @@
 package com.example.pickii.ui.calendar.util
 
-class CalendarDateFormatter {
-}
+class CalendarDateFormatter

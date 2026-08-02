@@ -36,15 +36,17 @@ private val DetailButtonBackgroundColor = Color(0xFFF1F2F6)
 
 private val DetailButtonTextColor = Color(0xFF202330)
 
-private val DetailDateFormatter = DateTimeFormatter.ofPattern(
-    "M월 d일 E요일",
-    Locale.KOREAN,
-)
+private val DetailDateFormatter =
+    DateTimeFormatter.ofPattern(
+        "M월 d일 E요일",
+        Locale.KOREAN
+    )
 
-private val DetailTimeFormatter = DateTimeFormatter.ofPattern(
-    "a h:mm",
-    Locale.KOREAN,
-)
+private val DetailTimeFormatter =
+    DateTimeFormatter.ofPattern(
+        "a h:mm",
+        Locale.KOREAN
+    )
 
 /**
  * 선택한 일정의 자세한 정보를 표시한다.
@@ -54,49 +56,49 @@ fun ScheduleDetailCard(
     schedule: MonthlyScheduleUiModel,
     onCloseClick: () -> Unit,
     onEditClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = DetailCardBackgroundColor,
-                shape = RoundedCornerShape(24.dp),
-            )
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = DetailCardBackgroundColor,
+                    shape = RoundedCornerShape(24.dp)
+                ).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         ScheduleDetailHeader(
             schedule = schedule,
-            onCloseClick = onCloseClick,
+            onCloseClick = onCloseClick
         )
 
         ScheduleDetailInformation(
             emoji = "📅",
-            label = createDateText(schedule),
+            label = createDateText(schedule)
         )
 
         ScheduleDetailInformation(
             emoji = "⏰",
-            label = createTimeText(schedule),
+            label = createTimeText(schedule)
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = DetailButtonBackgroundColor,
-                    shape = RoundedCornerShape(16.dp),
-                )
-                .clickable(onClick = onEditClick)
-                .padding(vertical = 14.dp),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = DetailButtonBackgroundColor,
+                        shape = RoundedCornerShape(16.dp)
+                    ).clickable(onClick = onEditClick)
+                    .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "일정 수정하기",
                 color = DetailButtonTextColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -109,24 +111,25 @@ fun ScheduleDetailCard(
 private fun ScheduleDetailHeader(
     schedule: MonthlyScheduleUiModel,
     onCloseClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.Top
     ) {
         Box(
-            modifier = Modifier
-                .padding(top = 5.dp)
-                .size(12.dp)
-                .background(
-                    color = schedule.categoryColor.toComposeColor(),
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .padding(top = 5.dp)
+                    .size(12.dp)
+                    .background(
+                        color = schedule.categoryColor.toComposeColor(),
+                        shape = CircleShape
+                    )
         )
 
         Spacer(
-            modifier = Modifier.width(12.dp),
+            modifier = Modifier.width(12.dp)
         )
 
         Text(
@@ -135,21 +138,22 @@ private fun ScheduleDetailHeader(
             color = DetailTitleColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 26.sp,
+            lineHeight = 26.sp
         )
 
         Text(
             text = "✕",
-            modifier = Modifier
-                .clickable(onClick = onCloseClick)
-                .padding(
-                    start = 12.dp,
-                    top = 2.dp,
-                    bottom = 8.dp,
-                ),
+            modifier =
+                Modifier
+                    .clickable(onClick = onCloseClick)
+                    .padding(
+                        start = 12.dp,
+                        top = 2.dp,
+                        bottom = 8.dp
+                    ),
             color = DetailDescriptionColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -163,19 +167,19 @@ private fun ScheduleDetailHeader(
 private fun ScheduleDetailInformation(
     emoji: String,
     label: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = emoji,
-            fontSize = 18.sp,
+            fontSize = 18.sp
         )
 
         Spacer(
-            modifier = Modifier.width(12.dp),
+            modifier = Modifier.width(12.dp)
         )
 
         Text(
@@ -183,7 +187,7 @@ private fun ScheduleDetailInformation(
             color = DetailDescriptionColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 20.sp,
+            lineHeight = 20.sp
         )
     }
 }
@@ -191,20 +195,20 @@ private fun ScheduleDetailInformation(
 /**
  * 일정 시작일과 종료일을 화면에 표시할 문자열로 만든다.
  */
-private fun createDateText(
-    schedule: MonthlyScheduleUiModel,
-): String {
-    val startDateText = schedule.startDate.format(
-        DetailDateFormatter,
-    )
+private fun createDateText(schedule: MonthlyScheduleUiModel): String {
+    val startDateText =
+        schedule.startDate.format(
+            DetailDateFormatter
+        )
 
     if (schedule.startDate == schedule.endDate) {
         return startDateText
     }
 
-    val endDateText = schedule.endDate.format(
-        DetailDateFormatter,
-    )
+    val endDateText =
+        schedule.endDate.format(
+            DetailDateFormatter
+        )
 
     return "$startDateText - $endDateText"
 }
@@ -212,20 +216,20 @@ private fun createDateText(
 /**
  * 일정 시간을 화면에 표시할 문자열로 만든다.
  */
-private fun createTimeText(
-    schedule: MonthlyScheduleUiModel,
-): String {
+private fun createTimeText(schedule: MonthlyScheduleUiModel): String {
     if (schedule.isAllDay) {
         return "하루 종일"
     }
 
-    val startTimeText = schedule.startTime?.format(
-        DetailTimeFormatter,
-    )
+    val startTimeText =
+        schedule.startTime?.format(
+            DetailTimeFormatter
+        )
 
-    val endTimeText = schedule.endTime?.format(
-        DetailTimeFormatter,
-    )
+    val endTimeText =
+        schedule.endTime?.format(
+            DetailTimeFormatter
+        )
 
     return when {
         startTimeText != null && endTimeText != null -> {
@@ -241,8 +245,8 @@ private fun createTimeText(
 /**
  * 일정 카테고리 색상을 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
+private fun ScheduleColorType.toComposeColor(): Color =
+    when (this) {
         ScheduleColorType.RED -> Color(0xFFE86F73)
         ScheduleColorType.ORANGE -> Color(0xFFED9A53)
         ScheduleColorType.YELLOW -> Color(0xFFF1D354)
@@ -253,4 +257,3 @@ private fun ScheduleColorType.toComposeColor(): Color {
         ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
         ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
     }
-}

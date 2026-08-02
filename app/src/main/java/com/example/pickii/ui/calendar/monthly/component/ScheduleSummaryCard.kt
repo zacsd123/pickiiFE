@@ -41,9 +41,10 @@ private val SummaryArrowBackgroundColor = Color(0xFFFFFFFF)
 private val SummaryDividerColor = Color(0xFFE5E5DE)
 private val SummaryIconBackgroundColor = Color(0xFFF1F2F6)
 
-private val ScheduleDateFormatter = DateTimeFormatter.ofPattern(
-    "yyyy.MM.dd",
-)
+private val ScheduleDateFormatter =
+    DateTimeFormatter.ofPattern(
+        "yyyy.MM.dd"
+    )
 
 /**
  * 선택한 날짜에 포함된 일정 카드를 표시한다.
@@ -55,38 +56,40 @@ fun ScheduleSummaryCard(
     schedule: MonthlyScheduleUiModel,
     isExpanded: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = SummaryCardBackgroundColor,
-                shape = RoundedCornerShape(20.dp),
-            )
-            .clickable(onClick = onClick)
-            .animateContentSize()
-            .padding(
-                horizontal = 18.dp,
-                vertical = 16.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = SummaryCardBackgroundColor,
+                    shape = RoundedCornerShape(20.dp)
+                ).clickable(onClick = onClick)
+                .animateContentSize()
+                .padding(
+                    horizontal = 18.dp,
+                    vertical = 16.dp
+                )
     ) {
         ScheduleSummaryHeader(
             schedule = schedule,
-            isExpanded = isExpanded,
+            isExpanded = isExpanded
         )
 
         AnimatedVisibility(
             visible = isExpanded,
-            enter = expandVertically(
-                expandFrom = Alignment.Top,
-            ) + fadeIn(),
-            exit = shrinkVertically(
-                shrinkTowards = Alignment.Top,
-            ) + fadeOut(),
+            enter =
+                expandVertically(
+                    expandFrom = Alignment.Top
+                ) + fadeIn(),
+            exit =
+                shrinkVertically(
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut()
         ) {
             ScheduleExpandedContent(
-                schedule = schedule,
+                schedule = schedule
             )
         }
     }
@@ -99,23 +102,24 @@ fun ScheduleSummaryCard(
 private fun ScheduleSummaryHeader(
     schedule: MonthlyScheduleUiModel,
     isExpanded: Boolean,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(11.dp)
-                .background(
-                    color = schedule.categoryColor.toComposeColor(),
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .size(11.dp)
+                    .background(
+                        color = schedule.categoryColor.toComposeColor(),
+                        shape = CircleShape
+                    )
         )
 
         Spacer(
-            modifier = Modifier.width(14.dp),
+            modifier = Modifier.width(14.dp)
         )
 
         Text(
@@ -125,28 +129,29 @@ private fun ScheduleSummaryHeader(
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
 
         Spacer(
-            modifier = Modifier.width(12.dp),
+            modifier = Modifier.width(12.dp)
         )
 
         Box(
-            modifier = Modifier
-                .size(38.dp)
-                .background(
-                    color = SummaryArrowBackgroundColor,
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(38.dp)
+                    .background(
+                        color = SummaryArrowBackgroundColor,
+                        shape = CircleShape
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (isExpanded) "⌃" else "⌄",
                 color = SummaryTitleColor,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 24.sp,
+                lineHeight = 24.sp
             )
         }
     }
@@ -158,37 +163,39 @@ private fun ScheduleSummaryHeader(
 @Composable
 private fun ScheduleExpandedContent(
     schedule: MonthlyScheduleUiModel,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
     ) {
         ScheduleDivider()
 
         ScheduleDetailRow(
             icon = "◇",
-            label = "태그",
+            label = "태그"
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(
-                            color = schedule.categoryColor.toComposeColor(),
-                            shape = CircleShape,
-                        ),
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .background(
+                                color = schedule.categoryColor.toComposeColor(),
+                                shape = CircleShape
+                            )
                 )
 
                 Text(
-                    text = schedule.categoryName.ifBlank {
-                        "없음"
-                    },
+                    text =
+                        schedule.categoryName.ifBlank {
+                            "없음"
+                        },
                     color = SummaryDescriptionColor,
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -196,10 +203,10 @@ private fun ScheduleExpandedContent(
         ScheduleDivider()
 
         ScheduleDetailRow(
-            icon = "◷",
+            icon = "◷"
         ) {
             ScheduleDateTimeContent(
-                schedule = schedule,
+                schedule = schedule
             )
         }
 
@@ -207,15 +214,16 @@ private fun ScheduleExpandedContent(
 
         ScheduleDetailRow(
             icon = "⌖",
-            label = "위치",
+            label = "위치"
         ) {
             Text(
-                text = schedule.location.ifBlank {
-                    "없음"
-                },
+                text =
+                    schedule.location.ifBlank {
+                        "없음"
+                    },
                 color = SummaryDescriptionColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
         }
 
@@ -223,15 +231,16 @@ private fun ScheduleExpandedContent(
 
         ScheduleDetailRow(
             icon = "⟳",
-            label = "반복",
+            label = "반복"
         ) {
             Text(
-                text = schedule.repeatText.ifBlank {
-                    "없음"
-                },
+                text =
+                    schedule.repeatText.ifBlank {
+                        "없음"
+                    },
                 color = SummaryDescriptionColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
         }
 
@@ -239,16 +248,17 @@ private fun ScheduleExpandedContent(
 
         ScheduleDetailRow(
             icon = "▤",
-            label = "메모",
+            label = "메모"
         ) {
             Text(
-                text = schedule.memo.ifBlank {
-                    "없음"
-                },
+                text =
+                    schedule.memo.ifBlank {
+                        "없음"
+                    },
                 color = SummaryDescriptionColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 22.sp,
+                lineHeight = 22.sp
             )
         }
     }
@@ -260,28 +270,30 @@ private fun ScheduleExpandedContent(
 @Composable
 private fun ScheduleDateTimeContent(
     schedule: MonthlyScheduleUiModel,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(28.dp),
+        horizontalArrangement = Arrangement.spacedBy(28.dp)
     ) {
         ScheduleDateTimeColumn(
             label = "시작",
-            date = schedule.startDate.format(
-                ScheduleDateFormatter,
-            ),
+            date =
+                schedule.startDate.format(
+                    ScheduleDateFormatter
+                ),
             time = createStartTimeText(schedule),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
 
         ScheduleDateTimeColumn(
             label = "종료",
-            date = schedule.endDate.format(
-                ScheduleDateFormatter,
-            ),
+            date =
+                schedule.endDate.format(
+                    ScheduleDateFormatter
+                ),
             time = createEndTimeText(schedule),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -294,31 +306,31 @@ private fun ScheduleDateTimeColumn(
     label: String,
     date: String,
     time: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         Text(
             text = label,
             color = SummaryLabelColor,
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
 
         Text(
             text = date,
             color = SummaryDescriptionColor,
             fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
 
         Text(
             text = time,
             color = SummaryLabelColor,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -331,45 +343,47 @@ private fun ScheduleDetailRow(
     icon: String,
     modifier: Modifier = Modifier,
     label: String? = null,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.Top,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.Top
     ) {
         Box(
-            modifier = Modifier
-                .size(30.dp)
-                .background(
-                    color = SummaryIconBackgroundColor,
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(30.dp)
+                    .background(
+                        color = SummaryIconBackgroundColor,
+                        shape = CircleShape
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = icon,
                 color = SummaryLabelColor,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(
-            modifier = Modifier.width(12.dp),
+            modifier = Modifier.width(12.dp)
         )
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             if (label != null) {
                 Text(
                     text = label,
                     color = SummaryLabelColor,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
@@ -384,20 +398,19 @@ private fun ScheduleDetailRow(
 @Composable
 private fun ScheduleDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(
-            start = 42.dp,
-        ),
+        modifier =
+            Modifier.padding(
+                start = 42.dp
+            ),
         color = SummaryDividerColor,
-        thickness = 1.dp,
+        thickness = 1.dp
     )
 }
 
 /**
  * 일정 시작 시간을 표시할 문자열로 변환한다.
  */
-private fun createStartTimeText(
-    schedule: MonthlyScheduleUiModel,
-): String {
+private fun createStartTimeText(schedule: MonthlyScheduleUiModel): String {
     if (schedule.isAllDay) {
         return "하루 종일"
     }
@@ -410,9 +423,7 @@ private fun createStartTimeText(
 /**
  * 일정 종료 시간을 표시할 문자열로 변환한다.
  */
-private fun createEndTimeText(
-    schedule: MonthlyScheduleUiModel,
-): String {
+private fun createEndTimeText(schedule: MonthlyScheduleUiModel): String {
     if (schedule.isAllDay) {
         return "하루 종일"
     }
@@ -425,8 +436,8 @@ private fun createEndTimeText(
 /**
  * 일정 카테고리 색상을 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
+private fun ScheduleColorType.toComposeColor(): Color =
+    when (this) {
         ScheduleColorType.RED -> Color(0xFFE86F73)
         ScheduleColorType.ORANGE -> Color(0xFFED9A53)
         ScheduleColorType.YELLOW -> Color(0xFFF1D354)
@@ -437,4 +448,3 @@ private fun ScheduleColorType.toComposeColor(): Color {
         ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
         ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
     }
-}

@@ -38,30 +38,31 @@ fun CalendarMonthHeader(
     displayedYearMonth: YearMonth,
     onPreviousMonthClick: () -> Unit,
     onNextMonthClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    val monthName = displayedYearMonth.month.getDisplayName(
-        TextStyle.FULL,
-        Locale.ENGLISH,
-    )
+    val monthName =
+        displayedYearMonth.month.getDisplayName(
+            TextStyle.FULL,
+            Locale.ENGLISH
+        )
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
     ) {
         CalendarYearSelector(
             year = displayedYearMonth.year,
             onPreviousMonthClick = onPreviousMonthClick,
-            onNextMonthClick = onNextMonthClick,
+            onNextMonthClick = onNextMonthClick
         )
 
         Spacer(
-            modifier = Modifier.height(8.dp),
+            modifier = Modifier.height(8.dp)
         )
 
         CalendarMonthSelector(
             monthName = monthName,
             onPreviousMonthClick = onPreviousMonthClick,
-            onNextMonthClick = onNextMonthClick,
+            onNextMonthClick = onNextMonthClick
         )
     }
 }
@@ -74,40 +75,44 @@ private fun CalendarYearSelector(
     year: Int,
     onPreviousMonthClick: () -> Unit,
     onNextMonthClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 28.dp),   // << 값은 24~36dp 정도
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(start = 28.dp),
+        // << 값은 24~36dp 정도
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = "‹",
-            modifier = Modifier
-                .clickable(onClick = onPreviousMonthClick)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onPreviousMonthClick)
+                    .padding(4.dp),
             color = CalendarYearColor,
             fontSize = 26.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
 
         Text(
             text = year.toString(),
             color = CalendarYearColor,
             fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
 
         Text(
             text = "›",
-            modifier = Modifier
-                .clickable(onClick = onNextMonthClick)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onNextMonthClick)
+                    .padding(4.dp),
             color = CalendarYearColor,
             fontSize = 26.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -120,54 +125,57 @@ private fun CalendarMonthSelector(
     monthName: String,
     onPreviousMonthClick: () -> Unit,
     onNextMonthClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "‹",
-            modifier = Modifier
-                .size(44.dp)
-                .clickable(onClick = onPreviousMonthClick),
+            modifier =
+                Modifier
+                    .size(44.dp)
+                    .clickable(onClick = onPreviousMonthClick),
             color = CalendarTextColor,
             textAlign = TextAlign.Center,
             fontSize = 32.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 44.sp,
+            lineHeight = 44.sp
         )
 
         Text(
             text = monthName,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
             color = CalendarTextColor,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 37.sp,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.ExtraBold
         )
 
         Text(
             text = "›",
-            modifier = Modifier
-                .size(44.dp)
-                .clickable(onClick = onNextMonthClick),
+            modifier =
+                Modifier
+                    .size(44.dp)
+                    .clickable(onClick = onNextMonthClick),
             color = CalendarTextColor,
             textAlign = TextAlign.Center,
             fontSize = 32.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 44.sp,
+            lineHeight = 44.sp
         )
     }
 }
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFF8FFAA,
+    backgroundColor = 0xFFF8FFAA
 )
 @Composable
 private fun CalendarMonthHeaderPreview() {
@@ -175,8 +183,9 @@ private fun CalendarMonthHeaderPreview() {
         displayedYearMonth = YearMonth.of(2026, 12),
         onPreviousMonthClick = {},
         onNextMonthClick = {},
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
     )
 }

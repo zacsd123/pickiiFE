@@ -37,10 +37,11 @@ private val SelectedDateTitleColor = Color(0xFF1B1B1B)
 private val ActionButtonColor = Color(0xFF1B1B1B)
 private val ActionButtonTextColor = Color(0xFFFFFFFF)
 
-private val SelectedDateFormatter = DateTimeFormatter.ofPattern(
-    "M월 d일",
-    Locale.KOREAN,
-)
+private val SelectedDateFormatter =
+    DateTimeFormatter.ofPattern(
+        "M월 d일",
+        Locale.KOREAN
+    )
 
 /**
  * 월간 캘린더 화면을 표시한다.
@@ -54,39 +55,42 @@ fun MonthlyCalendarScreen(
     onScheduleClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    val selectedDateSchedules = uiState.schedules
-        .filter { schedule ->
-            schedule.includesDate(uiState.selectedDate)
-        }
+    val selectedDateSchedules =
+        uiState.schedules
+            .filter { schedule ->
+                schedule.includesDate(uiState.selectedDate)
+            }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MonthlyCalendarBackgroundColor),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MonthlyCalendarBackgroundColor)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = 24.dp,
-                bottom = 120.dp,
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding =
+                PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 24.dp,
+                    bottom = 120.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 CalendarMonthHeader(
                     displayedYearMonth = uiState.displayedYearMonth,
                     onPreviousMonthClick = onPreviousMonthClick,
-                    onNextMonthClick = onNextMonthClick,
+                    onNextMonthClick = onNextMonthClick
                 )
             }
 
             item {
                 Spacer(
-                    modifier = Modifier.height(4.dp),
+                    modifier = Modifier.height(4.dp)
                 )
             }
 
@@ -97,9 +101,9 @@ fun MonthlyCalendarScreen(
                             displayedYearMonth = uiState.displayedYearMonth,
                             selectedDate = uiState.selectedDate,
                             schedules = uiState.schedules,
-                            onDateClick = onDateClick,
+                            onDateClick = onDateClick
                         )
-                    },
+                    }
                 )
             }
 
@@ -109,7 +113,7 @@ fun MonthlyCalendarScreen(
                     onDetailClick = {
                         onDailyCalendarClick(uiState.selectedDate)
                     },
-                    onAddScheduleClick = onAddScheduleClick,
+                    onAddScheduleClick = onAddScheduleClick
                 )
             }
 
@@ -122,14 +126,14 @@ fun MonthlyCalendarScreen(
                     items = selectedDateSchedules,
                     key = { schedule ->
                         schedule.id
-                    },
+                    }
                 ) { schedule ->
                     ScheduleSummaryCard(
                         schedule = schedule,
                         isExpanded = uiState.expandedScheduleId == schedule.id,
                         onClick = {
                             onScheduleClick(schedule.id)
-                        },
+                        }
                     )
                 }
             }
@@ -143,19 +147,19 @@ fun MonthlyCalendarScreen(
 @Composable
 private fun CalendarContainer(
     content: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = CalendarContainerColor,
-                shape = RoundedCornerShape(30.dp),
-            )
-            .padding(
-                horizontal = 18.dp,
-                vertical = 22.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = CalendarContainerColor,
+                    shape = RoundedCornerShape(30.dp)
+                ).padding(
+                    horizontal = 18.dp,
+                    vertical = 22.dp
+                )
     ) {
         content()
     }
@@ -169,35 +173,36 @@ private fun SelectedDateActionRow(
     selectedDate: LocalDate,
     onDetailClick: () -> Unit,
     onAddScheduleClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = selectedDate.format(
-                    SelectedDateFormatter,
-                ),
+                text =
+                    selectedDate.format(
+                        SelectedDateFormatter
+                    ),
                 color = SelectedDateTitleColor,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             CalendarActionButton(
                 text = "자세히",
-                onClick = onDetailClick,
+                onClick = onDetailClick
             )
         }
 
         CalendarActionButton(
             text = "+ 추가",
-            onClick = onAddScheduleClick,
+            onClick = onAddScheduleClick
         )
     }
 }
@@ -209,28 +214,27 @@ private fun SelectedDateActionRow(
 private fun CalendarActionButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .background(
-                color = ActionButtonColor,
-                shape = RoundedCornerShape(50),
-            )
-            .clickable(
-                onClick = onClick,
-            )
-            .padding(
-                horizontal = 16.dp,
-                vertical = 10.dp,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .background(
+                    color = ActionButtonColor,
+                    shape = RoundedCornerShape(50)
+                ).clickable(
+                    onClick = onClick
+                ).padding(
+                    horizontal = 16.dp,
+                    vertical = 10.dp
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = ActionButtonTextColor,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -239,20 +243,19 @@ private fun CalendarActionButton(
  * 선택한 날짜에 일정이 없을 때 안내 문구를 표시한다.
  */
 @Composable
-private fun EmptyScheduleContent(
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyScheduleContent(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 28.dp),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 28.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "등록된 일정이 없어요.",
             color = Color(0xFF77776E),
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }

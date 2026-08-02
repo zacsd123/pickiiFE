@@ -17,7 +17,7 @@ private enum class CalendarScreenType {
     MONTHLY,
     DAILY,
     EDITOR,
-    CATEGORY,
+    CATEGORY
 }
 
 /**
@@ -30,7 +30,7 @@ private enum class CalendarScreenType {
 fun CalendarRoute(
     onScheduleClick: (Long) -> Unit,
     onTopLevelScreenChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var currentScreen by rememberSaveable {
         mutableStateOf(CalendarScreenType.MONTHLY.name)
@@ -38,7 +38,7 @@ fun CalendarRoute(
 
     var selectedDateText by rememberSaveable {
         mutableStateOf(
-            LocalDate.of(2026, 7, 4).toString(),
+            LocalDate.of(2026, 7, 4).toString()
         )
     }
 
@@ -57,7 +57,7 @@ fun CalendarRoute(
                 onDailyCalendarClick = { selectedDate ->
                     selectedDateText = selectedDate.toString()
                     currentScreen = CalendarScreenType.DAILY.name
-                },
+                }
             )
         }
 
@@ -71,7 +71,7 @@ fun CalendarRoute(
                     currentScreen = CalendarScreenType.EDITOR.name
                 },
                 onScheduleClick = onScheduleClick,
-                modifier = modifier,
+                modifier = modifier
             )
         }
 
@@ -86,7 +86,7 @@ fun CalendarRoute(
                 onScheduleSaved = {
                     currentScreen = CalendarScreenType.MONTHLY.name
                 },
-                modifier = modifier,
+                modifier = modifier
             )
         }
 
@@ -98,7 +98,7 @@ fun CalendarRoute(
                 onSaved = {
                     currentScreen = CalendarScreenType.EDITOR.name
                 },
-                modifier = modifier,
+                modifier = modifier
             )
         }
     }

@@ -12,5 +12,5 @@ data class ChatRoomMemberUiModel(
     val memberId: Long,
     val name: String,
     val profileImageUrl: String? = null,
-    val isLeader: Boolean = false,
+    val isLeader: Boolean = false
 )

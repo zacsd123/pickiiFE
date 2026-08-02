@@ -37,50 +37,51 @@ private val RepeatValueColor = Color(0xFF1B1B1B)
 fun ScheduleRepeatSection(
     repeatType: ScheduleRepeatType,
     onRepeatTypeChange: (ScheduleRepeatType) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember {
         mutableStateOf(false)
     }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = RepeatBackgroundColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = RepeatBackgroundColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp
+                )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    expanded = true
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        expanded = true
+                    },
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "↻",
                     color = RepeatLabelColor,
-                    fontSize = 17.sp,
+                    fontSize = 17.sp
                 )
 
                 Spacer(
-                    modifier = Modifier.width(8.dp),
+                    modifier = Modifier.width(8.dp)
                 )
 
                 Text(
                     text = "반복",
                     color = RepeatLabelColor,
-                    fontSize = 15.sp,
+                    fontSize = 15.sp
                 )
             }
 
@@ -88,7 +89,7 @@ fun ScheduleRepeatSection(
                 text = repeatType.toDisplayName(),
                 color = RepeatValueColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             )
         }
 
@@ -96,19 +97,19 @@ fun ScheduleRepeatSection(
             expanded = expanded,
             onDismissRequest = {
                 expanded = false
-            },
+            }
         ) {
             ScheduleRepeatType.entries.forEach { repeatType ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = repeatType.toDisplayName(),
+                            text = repeatType.toDisplayName()
                         )
                     },
                     onClick = {
                         expanded = false
                         onRepeatTypeChange(repeatType)
-                    },
+                    }
                 )
             }
         }
@@ -118,12 +119,11 @@ fun ScheduleRepeatSection(
 /**
  * 반복 종류를 화면 표시 문자열로 변환한다.
  */
-private fun ScheduleRepeatType.toDisplayName(): String {
-    return when (this) {
+private fun ScheduleRepeatType.toDisplayName(): String =
+    when (this) {
         ScheduleRepeatType.NONE -> "없음"
         ScheduleRepeatType.DAILY -> "매일"
         ScheduleRepeatType.WEEKLY -> "매주"
         ScheduleRepeatType.MONTHLY -> "매월"
         ScheduleRepeatType.YEARLY -> "매년"
     }
-}

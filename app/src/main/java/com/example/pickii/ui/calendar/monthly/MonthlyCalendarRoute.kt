@@ -1,6 +1,5 @@
 package com.example.pickii.ui.calendar.monthly
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,7 +10,7 @@ import java.time.LocalDate
 fun MonthlyCalendarRoute(
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
-    viewModel: MonthlyCalendarViewModel = hiltViewModel(),
+    viewModel: MonthlyCalendarViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -22,6 +21,6 @@ fun MonthlyCalendarRoute(
         onDateClick = viewModel::selectDate,
         onScheduleClick = viewModel::toggleSchedule,
         onAddScheduleClick = onAddScheduleClick,
-        onDailyCalendarClick = onDailyCalendarClick,
+        onDailyCalendarClick = onDailyCalendarClick
     )
 }

@@ -54,72 +54,76 @@ private val LeaderDelegationButtonTextColor = Color(0xFFF2F77F)
 fun ChatLeaderDelegationPanel(
     members: List<ChatRoomMemberUiModel>,
     onBackClick: () -> Unit,
-    onDelegateClick: (Long) -> Unit,
+    onDelegateClick: (Long) -> Unit
 ) {
     var selectedMemberId by rememberSaveable {
         mutableStateOf<Long?>(null)
     }
 
-    val delegatableMembers = members.filterNot { member ->
-        member.isLeader
-    }
+    val delegatableMembers =
+        members.filterNot { member ->
+            member.isLeader
+        }
 
     BackHandler(
         enabled = true,
-        onBack = onBackClick,
+        onBack = onBackClick
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LeaderDelegationPanelScrimColor)
-                .clickable(onClick = onBackClick),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(LeaderDelegationPanelScrimColor)
+                    .clickable(onClick = onBackClick)
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.79f)
-                .align(Alignment.CenterEnd)
-                .background(LeaderDelegationPanelBackgroundColor),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.79f)
+                    .align(Alignment.CenterEnd)
+                    .background(LeaderDelegationPanelBackgroundColor)
         ) {
             LeaderDelegationHeader(
-                onBackClick = onBackClick,
+                onBackClick = onBackClick
             )
 
             HorizontalDivider(
-                color = LeaderDelegationDividerColor,
+                color = LeaderDelegationDividerColor
             )
 
             Text(
                 text = "팀장 권한을 위임할 팀원을 선택하세요",
-                modifier = Modifier.padding(
-                    start = 24.dp,
-                    top = 18.dp,
-                    bottom = 8.dp,
-                ),
+                modifier =
+                    Modifier.padding(
+                        start = 24.dp,
+                        top = 18.dp,
+                        bottom = 8.dp
+                    ),
                 color = LeaderDelegationSecondaryTextColor,
-                fontSize = 13.sp,
+                fontSize = 13.sp
             )
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             ) {
                 items(
                     items = delegatableMembers,
                     key = { member ->
                         member.memberId
-                    },
+                    }
                 ) { member ->
                     LeaderDelegationMemberItem(
                         member = member,
                         isSelected = selectedMemberId == member.memberId,
                         onClick = {
                             selectedMemberId = member.memberId
-                        },
+                        }
                     )
                 }
             }
@@ -128,7 +132,7 @@ fun ChatLeaderDelegationPanel(
                 isEnabled = selectedMemberId != null,
                 onClick = {
                     selectedMemberId?.let(onDelegateClick)
-                },
+                }
             )
         }
     }
@@ -138,42 +142,43 @@ fun ChatLeaderDelegationPanel(
  * 팀장 위임 패널의 상단 영역을 표시한다.
  */
 @Composable
-private fun LeaderDelegationHeader(
-    onBackClick: () -> Unit,
-) {
+private fun LeaderDelegationHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onBackClick),
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = R.drawable.ic_back,
-                ),
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_back
+                    ),
                 contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp)
             )
         }
 
         Spacer(
-            modifier = Modifier.width(8.dp),
+            modifier = Modifier.width(8.dp)
         )
 
         Text(
             text = "팀장 위임",
             color = LeaderDelegationPrimaryTextColor,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -185,52 +190,56 @@ private fun LeaderDelegationHeader(
 private fun LeaderDelegationMemberItem(
     member: ChatRoomMemberUiModel,
     isSelected: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = if (isSelected) {
-                        LeaderDelegationSelectedColor
-                    } else {
-                        Color.Transparent
-                    },
-                )
-                .clickable(onClick = onClick)
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 14.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color =
+                            if (isSelected) {
+                                LeaderDelegationSelectedColor
+                            } else {
+                                Color.Transparent
+                            }
+                    ).clickable(onClick = onClick)
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 14.dp
+                    ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        color = createDelegationProfileColor(
-                            memberId = member.memberId,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            color =
+                                createDelegationProfileColor(
+                                    memberId = member.memberId
+                                )
                         ),
-                    ),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = member.name
-                        .firstOrNull()
-                        ?.toString()
-                        .orEmpty(),
+                    text =
+                        member.name
+                            .firstOrNull()
+                            ?.toString()
+                            .orEmpty(),
                     color = LeaderDelegationPrimaryTextColor,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.width(14.dp)
             )
 
             Text(
@@ -238,29 +247,30 @@ private fun LeaderDelegationMemberItem(
                 modifier = Modifier.weight(1f),
                 color = LeaderDelegationPrimaryTextColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             if (isSelected) {
                 Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(LeaderDelegationButtonColor),
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(LeaderDelegationButtonColor),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "✓",
                         color = LeaderDelegationButtonTextColor,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
 
         HorizontalDivider(
-            color = LeaderDelegationDividerColor,
+            color = LeaderDelegationDividerColor
         )
     }
 }
@@ -271,40 +281,40 @@ private fun LeaderDelegationMemberItem(
 @Composable
 private fun LeaderDelegationButton(
     isEnabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(
-                horizontal = 24.dp,
-                vertical = 18.dp,
-            )
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                color = if (isEnabled) {
-                    LeaderDelegationButtonColor
-                } else {
-                    Color(0xFFD1D3D8)
-                },
-            )
-            .clickable(
-                enabled = isEnabled,
-                onClick = onClick,
-            )
-            .padding(vertical = 18.dp),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(
+                    horizontal = 24.dp,
+                    vertical = 18.dp
+                ).clip(RoundedCornerShape(18.dp))
+                .background(
+                    color =
+                        if (isEnabled) {
+                            LeaderDelegationButtonColor
+                        } else {
+                            Color(0xFFD1D3D8)
+                        }
+                ).clickable(
+                    enabled = isEnabled,
+                    onClick = onClick
+                ).padding(vertical = 18.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "위임하기",
-            color = if (isEnabled) {
-                LeaderDelegationButtonTextColor
-            } else {
-                Color.White
-            },
+            color =
+                if (isEnabled) {
+                    LeaderDelegationButtonTextColor
+                } else {
+                    Color.White
+                },
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -312,16 +322,15 @@ private fun LeaderDelegationButton(
 /**
  * 팀원별 임시 프로필 배경색을 반환한다.
  */
-private fun createDelegationProfileColor(
-    memberId: Long,
-): Color {
-    val colors = listOf(
-        Color(0xFFC9B7FF),
-        Color(0xFFF0B3C6),
-        Color(0xFFF2C58F),
-        Color(0xFFB8E3D1),
-        Color(0xFFB9D7FA),
-    )
+private fun createDelegationProfileColor(memberId: Long): Color {
+    val colors =
+        listOf(
+            Color(0xFFC9B7FF),
+            Color(0xFFF0B3C6),
+            Color(0xFFF2C58F),
+            Color(0xFFB8E3D1),
+            Color(0xFFB9D7FA)
+        )
 
     return colors[(memberId % colors.size).toInt()]
 }

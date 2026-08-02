@@ -13,17 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -45,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -59,12 +57,12 @@ import java.util.Locale
  */
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class,
+    ExperimentalLayoutApi::class
 )
 @Composable
 fun MeetingRegistrationBottomSheet(
     onDismiss: () -> Unit,
-    onNextClick: (QuickMeetingForm) -> Unit,
+    onNextClick: (QuickMeetingForm) -> Unit
 ) {
     var meetingTitle by remember {
         mutableStateOf("")
@@ -94,14 +92,15 @@ fun MeetingRegistrationBottomSheet(
         mutableStateOf(false)
     }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     val isFormValid =
         meetingTitle.isNotBlank() &&
-                startDateMillis != null &&
-                endDateMillis != null
+            startDateMillis != null &&
+            endDateMillis != null
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -110,27 +109,29 @@ fun MeetingRegistrationBottomSheet(
         dragHandle = {
             BottomSheetDefaults.DragHandle(
                 width = 36.dp,
-                height = 4.dp,
+                height = 4.dp
             )
         },
-        shape = RoundedCornerShape(
-            topStart = 28.dp,
-            topEnd = 28.dp,
-        ),
+        shape =
+            RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp
+            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 24.dp,
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 24.dp
+                    )
         ) {
             MeetingSheetHeader(
-                onCloseClick = onDismiss,
+                onCloseClick = onDismiss
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -139,7 +140,7 @@ fun MeetingRegistrationBottomSheet(
                 title = meetingTitle,
                 onTitleChange = {
                     meetingTitle = it
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -148,7 +149,7 @@ fun MeetingRegistrationBottomSheet(
                 selectedDuration = selectedDuration,
                 onDurationSelected = {
                     selectedDuration = it
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -158,7 +159,7 @@ fun MeetingRegistrationBottomSheet(
                 endDateMillis = endDateMillis,
                 onClick = {
                     showDatePicker = true
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -167,7 +168,7 @@ fun MeetingRegistrationBottomSheet(
                 selectedCount = selectedCandidateCount,
                 onCountSelected = {
                     selectedCandidateCount = it
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -176,7 +177,7 @@ fun MeetingRegistrationBottomSheet(
                 memo = memo,
                 onMemoChange = {
                     memo = it
-                },
+                }
             )
 
             Spacer(modifier = Modifier.height(26.dp))
@@ -197,27 +198,29 @@ fun MeetingRegistrationBottomSheet(
                                 startDateMillis = selectedStartDate,
                                 endDateMillis = selectedEndDate,
                                 candidateCount = selectedCandidateCount,
-                                memo = memo.trim(),
-                            ),
+                                memo = memo.trim()
+                            )
                         )
                     }
                 },
                 enabled = isFormValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF171714),
-                    contentColor = Color.White,
-                    disabledContainerColor = Color(0xFFE5E7EC),
-                    disabledContentColor = Color(0xFFA7ADBC),
-                ),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF171714),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFFE5E7EC),
+                        disabledContentColor = Color(0xFFA7ADBC)
+                    )
             ) {
                 Text(
                     text = "다음 →",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -234,7 +237,7 @@ fun MeetingRegistrationBottomSheet(
                 startDateMillis = start
                 endDateMillis = end
                 showDatePicker = false
-            },
+            }
         )
     }
 }
@@ -243,29 +246,27 @@ fun MeetingRegistrationBottomSheet(
  * 회의 등록 바텀시트의 상단 제목과 닫기 버튼이다.
  */
 @Composable
-private fun MeetingSheetHeader(
-    onCloseClick: () -> Unit,
-) {
+private fun MeetingSheetHeader(onCloseClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "회의 등록",
             modifier = Modifier.weight(1f),
             color = Color(0xFF18181B),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         IconButton(
-            onClick = onCloseClick,
+            onClick = onCloseClick
         ) {
             Text(
                 text = "×",
                 color = Color(0xFF667085),
                 fontSize = 28.sp,
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Light
             )
         }
     }
@@ -277,12 +278,12 @@ private fun MeetingSheetHeader(
 @Composable
 private fun MeetingTitleSection(
     title: String,
-    onTitleChange: (String) -> Unit,
+    onTitleChange: (String) -> Unit
 ) {
     Column {
         SectionTitle(
             title = "회의명",
-            required = true,
+            required = true
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -290,23 +291,25 @@ private fun MeetingTitleSection(
         TextField(
             value = title,
             onValueChange = onTitleChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
             placeholder = {
                 Text(
                     text = "회의명을 입력하세요",
                     color = Color(0xFF9CA3AF),
-                    fontSize = 14.sp,
+                    fontSize = 14.sp
                 )
             },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-                imeAction = ImeAction.Next,
-            ),
+            keyboardOptions =
+                KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
             shape = RoundedCornerShape(16.dp),
-            colors = meetingTextFieldColors(),
+            colors = meetingTextFieldColors()
         )
     }
 }
@@ -318,19 +321,20 @@ private fun MeetingTitleSection(
 @Composable
 private fun MeetingDurationSection(
     selectedDuration: Int,
-    onDurationSelected: (Int) -> Unit,
+    onDurationSelected: (Int) -> Unit
 ) {
-    val durationOptions = listOf(
-        30 to "30분",
-        60 to "1시간",
-        90 to "1시간 30분",
-        120 to "2시간",
-        180 to "3시간",
-    )
+    val durationOptions =
+        listOf(
+            30 to "30분",
+            60 to "1시간",
+            90 to "1시간 30분",
+            120 to "2시간",
+            180 to "3시간"
+        )
 
     Column {
         SectionTitle(
-            title = "소요 시간",
+            title = "소요 시간"
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -338,7 +342,7 @@ private fun MeetingDurationSection(
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             durationOptions.forEach { option ->
                 val minutes = option.first
@@ -349,7 +353,7 @@ private fun MeetingDurationSection(
                     selected = selectedDuration == minutes,
                     onClick = {
                         onDurationSelected(minutes)
-                    },
+                    }
                 )
             }
         }
@@ -363,39 +367,39 @@ private fun MeetingDurationSection(
 private fun MeetingDateRangeSection(
     startDateMillis: Long?,
     endDateMillis: Long?,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column {
         SectionTitle(
             title = "일정 수집 기간",
-            description = "팀원이 개인 일정을 등록하는 기간",
+            description = "팀원이 개인 일정을 등록하는 기간"
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             DateBox(
                 dateMillis = startDateMillis,
                 placeholder = "시작일",
                 modifier = Modifier.weight(1f),
-                onClick = onClick,
+                onClick = onClick
             )
 
             Text(
                 text = "~",
                 modifier = Modifier.padding(horizontal = 8.dp),
                 color = Color(0xFFA0A5B1),
-                fontSize = 14.sp,
+                fontSize = 14.sp
             )
 
             DateBox(
                 dateMillis = endDateMillis,
                 placeholder = "종료일",
                 modifier = Modifier.weight(1f),
-                onClick = onClick,
+                onClick = onClick
             )
         }
     }
@@ -409,25 +413,27 @@ private fun DateBox(
     dateMillis: Long?,
     placeholder: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = modifier
-            .height(52.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFFF4F5F7))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp),
-        contentAlignment = Alignment.CenterStart,
+        modifier =
+            modifier
+                .height(52.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xFFF4F5F7))
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.CenterStart
     ) {
         Text(
             text = dateMillis?.let(::formatMeetingDate) ?: placeholder,
-            color = if (dateMillis == null) {
-                Color(0xFFA0A5B1)
-            } else {
-                Color(0xFF292D35)
-            },
-            fontSize = 14.sp,
+            color =
+                if (dateMillis == null) {
+                    Color(0xFFA0A5B1)
+                } else {
+                    Color(0xFF292D35)
+                },
+            fontSize = 14.sp
         )
     }
 }
@@ -441,12 +447,13 @@ private fun MeetingDateRangePickerDialog(
     initialStartDateMillis: Long?,
     initialEndDateMillis: Long?,
     onDismiss: () -> Unit,
-    onConfirm: (Long, Long) -> Unit,
+    onConfirm: (Long, Long) -> Unit
 ) {
-    val dateRangePickerState = rememberDateRangePickerState(
-        initialSelectedStartDateMillis = initialStartDateMillis,
-        initialSelectedEndDateMillis = initialEndDateMillis,
-    )
+    val dateRangePickerState =
+        rememberDateRangePickerState(
+            initialSelectedStartDateMillis = initialStartDateMillis,
+            initialSelectedEndDateMillis = initialEndDateMillis
+        )
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
@@ -464,63 +471,66 @@ private fun MeetingDateRangePickerDialog(
                     ) {
                         onConfirm(
                             selectedStart,
-                            selectedEnd,
+                            selectedEnd
                         )
                     }
                 },
                 enabled =
                     dateRangePickerState.selectedStartDateMillis != null &&
-                            dateRangePickerState.selectedEndDateMillis != null,
+                        dateRangePickerState.selectedEndDateMillis != null
             ) {
                 Text(
                     text = "확인",
                     color = Color(0xFF171714),
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         },
         dismissButton = {
             TextButton(
-                onClick = onDismiss,
+                onClick = onDismiss
             ) {
                 Text(
                     text = "취소",
-                    color = Color(0xFF667085),
+                    color = Color(0xFF667085)
                 )
             }
-        },
+        }
     ) {
         DateRangePicker(
             state = dateRangePickerState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(520.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(520.dp),
             title = {
                 Text(
                     text = "일정 수집 기간",
-                    modifier = Modifier.padding(
-                        start = 24.dp,
-                        top = 16.dp,
-                        end = 24.dp,
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = 24.dp,
+                            top = 16.dp,
+                            end = 24.dp
+                        ),
                     color = Color(0xFF18181B),
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             },
             headline = {
                 Text(
                     text = "시작일과 종료일을 선택하세요",
-                    modifier = Modifier.padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 8.dp,
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = 24.dp,
+                            end = 24.dp,
+                            bottom = 8.dp
+                        ),
                     color = Color(0xFF667085),
-                    fontSize = 14.sp,
+                    fontSize = 14.sp
                 )
             },
-            showModeToggle = false,
+            showModeToggle = false
         )
     }
 }
@@ -531,21 +541,21 @@ private fun MeetingDateRangePickerDialog(
 @Composable
 private fun MeetingCandidateSection(
     selectedCount: Int,
-    onCountSelected: (Int) -> Unit,
+    onCountSelected: (Int) -> Unit
 ) {
     val candidateOptions = listOf(2, 3, 4, 5)
 
     Column {
         SectionTitle(
             title = "회의 후보 수",
-            description = "최대 몇 개까지 추릴까요?",
+            description = "최대 몇 개까지 추릴까요?"
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             candidateOptions.forEach { count ->
                 MeetingSelectChip(
@@ -555,7 +565,7 @@ private fun MeetingCandidateSection(
                         onCountSelected(count)
                     },
                     modifier = Modifier.weight(1f),
-                    useContentPadding = false,
+                    useContentPadding = false
                 )
             }
         }
@@ -568,12 +578,12 @@ private fun MeetingCandidateSection(
 @Composable
 private fun MeetingMemoSection(
     memo: String,
-    onMemoChange: (String) -> Unit,
+    onMemoChange: (String) -> Unit
 ) {
     Column {
         SectionTitle(
             title = "메모",
-            optional = true,
+            optional = true
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -581,22 +591,24 @@ private fun MeetingMemoSection(
         TextField(
             value = memo,
             onValueChange = onMemoChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(110.dp),
             placeholder = {
                 Text(
                     text = "회의 목적이나 안건을 간단히 적어주세요 (선택)",
                     color = Color(0xFF9CA3AF),
-                    fontSize = 14.sp,
+                    fontSize = 14.sp
                 )
             },
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-                imeAction = ImeAction.Default,
-            ),
+            keyboardOptions =
+                KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Default
+                ),
             shape = RoundedCornerShape(16.dp),
-            colors = meetingTextFieldColors(),
+            colors = meetingTextFieldColors()
         )
     }
 }
@@ -610,42 +622,44 @@ private fun MeetingSelectChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    useContentPadding: Boolean = true,
+    useContentPadding: Boolean = true
 ) {
     Box(
-        modifier = modifier
-            .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                if (selected) {
-                    Color(0xFF171714)
-                } else {
-                    Color(0xFFF4F5F7)
-                },
-            )
-            .clickable(onClick = onClick)
-            .then(
-                if (useContentPadding) {
-                    Modifier.padding(horizontal = 16.dp)
-                } else {
-                    Modifier
-                },
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .height(40.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    if (selected) {
+                        Color(0xFF171714)
+                    } else {
+                        Color(0xFFF4F5F7)
+                    }
+                ).clickable(onClick = onClick)
+                .then(
+                    if (useContentPadding) {
+                        Modifier.padding(horizontal = 16.dp)
+                    } else {
+                        Modifier
+                    }
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = if (selected) {
-                Color.White
-            } else {
-                Color(0xFF717784)
-            },
+            color =
+                if (selected) {
+                    Color.White
+                } else {
+                    Color(0xFF717784)
+                },
             fontSize = 13.sp,
-            fontWeight = if (selected) {
-                FontWeight.SemiBold
-            } else {
-                FontWeight.Normal
-            },
+            fontWeight =
+                if (selected) {
+                    FontWeight.SemiBold
+                } else {
+                    FontWeight.Normal
+                }
         )
     }
 }
@@ -658,17 +672,17 @@ private fun SectionTitle(
     title: String,
     required: Boolean = false,
     optional: Boolean = false,
-    description: String? = null,
+    description: String? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
             color = Color(0xFF4B5563),
             fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold
         )
 
         when {
@@ -676,7 +690,7 @@ private fun SectionTitle(
                 Text(
                     text = " 필수",
                     color = Color(0xFFFF7373),
-                    fontSize = 11.sp,
+                    fontSize = 11.sp
                 )
             }
 
@@ -684,7 +698,7 @@ private fun SectionTitle(
                 Text(
                     text = " 선택",
                     color = Color(0xFFA0A5B1),
-                    fontSize = 11.sp,
+                    fontSize = 11.sp
                 )
             }
         }
@@ -694,7 +708,7 @@ private fun SectionTitle(
                 text = "  ($description)",
                 color = Color(0xFFA0A5B1),
                 fontSize = 10.sp,
-                maxLines = 1,
+                maxLines = 1
             )
         }
     }
@@ -716,17 +730,14 @@ private fun meetingTextFieldColors() =
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent,
-        cursorColor = Color(0xFF171714),
+        cursorColor = Color(0xFF171714)
     )
 
 /**
  * 밀리초 날짜를 화면에 표시할 문자열로 변환한다.
  */
-private fun formatMeetingDate(
-    millis: Long,
-): String {
-    return SimpleDateFormat(
+private fun formatMeetingDate(millis: Long): String =
+    SimpleDateFormat(
         "yyyy.MM.dd",
-        Locale.getDefault(),
+        Locale.getDefault()
     ).format(Date(millis))
-}
