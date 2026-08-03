@@ -27,29 +27,30 @@ import java.time.LocalTime
 fun DailyScheduleBlock(
     schedule: DailyScheduleUiModel,
     onClick: (Long) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .background(
-                color = schedule.colorType.toColor(),
-                shape = RoundedCornerShape(12.dp),
-            )
-            .clickable {
-                onClick(schedule.id)
-            },
+        modifier =
+            modifier
+                .background(
+                    color = schedule.colorType.toColor(),
+                    shape = RoundedCornerShape(12.dp)
+                ).clickable {
+                    onClick(schedule.id)
+                }
     ) {
         Text(
             text = schedule.title,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(
-                    horizontal = 10.dp,
-                    vertical = 8.dp,
-                ),
+            modifier =
+                Modifier
+                    .align(Alignment.TopStart)
+                    .padding(
+                        horizontal = 10.dp,
+                        vertical = 8.dp
+                    ),
             color = Color.White,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -57,34 +58,35 @@ fun DailyScheduleBlock(
 /**
  * 일정 색상 타입을 실제 색상으로 변환한다.
  */
-private fun DailyScheduleColorType.toColor(): Color {
-    return when (this) {
+private fun DailyScheduleColorType.toColor(): Color =
+    when (this) {
         DailyScheduleColorType.RED -> Color(0xFFE86B6B)
         DailyScheduleColorType.GREEN -> Color(0xFF72C472)
         DailyScheduleColorType.BLUE -> Color(0xFF5E8EF7)
         DailyScheduleColorType.PURPLE -> Color(0xFF8C73E6)
         DailyScheduleColorType.YELLOW -> Color(0xFFF5C84B)
     }
-}
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
+    backgroundColor = 0xFFFFFFFF
 )
 @Composable
 private fun DailyScheduleBlockPreview() {
     DailyScheduleBlock(
-        schedule = DailyScheduleUiModel(
-            id = 1L,
-            title = "회의",
-            date = LocalDate.now(),
-            startTime = LocalTime.of(9, 0),
-            endTime = LocalTime.of(11, 0),
-            colorType = DailyScheduleColorType.BLUE,
-        ),
+        schedule =
+            DailyScheduleUiModel(
+                id = 1L,
+                title = "회의",
+                date = LocalDate.now(),
+                startTime = LocalTime.of(9, 0),
+                endTime = LocalTime.of(11, 0),
+                colorType = DailyScheduleColorType.BLUE
+            ),
         onClick = {},
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize(),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .fillMaxSize()
     )
 }

@@ -12,15 +12,15 @@ import java.time.LocalTime
  * 일일 캘린더 화면의 상태를 관리한다.
  */
 class DailyCalendarViewModel : ViewModel() {
-
     private val initialDate = LocalDate.of(2026, 7, 4)
 
-    private val _uiState = MutableStateFlow(
-        DailyCalendarUiState(
-            selectedDate = initialDate,
-            schedules = createSampleSchedules(),
-        ),
-    )
+    private val _uiState =
+        MutableStateFlow(
+            DailyCalendarUiState(
+                selectedDate = initialDate,
+                schedules = createSampleSchedules()
+            )
+        )
 
     val uiState: StateFlow<DailyCalendarUiState> = _uiState.asStateFlow()
 
@@ -30,7 +30,7 @@ class DailyCalendarViewModel : ViewModel() {
     fun moveToPreviousDate() {
         _uiState.update { currentState ->
             currentState.copy(
-                selectedDate = currentState.selectedDate.minusDays(1),
+                selectedDate = currentState.selectedDate.minusDays(1)
             )
         }
     }
@@ -41,7 +41,7 @@ class DailyCalendarViewModel : ViewModel() {
     fun moveToNextDate() {
         _uiState.update { currentState ->
             currentState.copy(
-                selectedDate = currentState.selectedDate.plusDays(1),
+                selectedDate = currentState.selectedDate.plusDays(1)
             )
         }
     }
@@ -52,7 +52,7 @@ class DailyCalendarViewModel : ViewModel() {
     fun selectDate(date: LocalDate) {
         _uiState.update { currentState ->
             currentState.copy(
-                selectedDate = date,
+                selectedDate = date
             )
         }
     }
@@ -68,15 +68,15 @@ class DailyCalendarViewModel : ViewModel() {
     /**
      * 피그마 확인용 샘플 일정을 만든다.
      */
-    private fun createSampleSchedules(): List<DailyScheduleUiModel> {
-        return listOf(
+    private fun createSampleSchedules(): List<DailyScheduleUiModel> =
+        listOf(
             DailyScheduleUiModel(
                 id = 1L,
                 title = "일정1",
                 date = initialDate,
                 startTime = LocalTime.of(1, 0),
                 endTime = LocalTime.of(2, 0),
-                colorType = DailyScheduleColorType.RED,
+                colorType = DailyScheduleColorType.RED
             ),
             DailyScheduleUiModel(
                 id = 2L,
@@ -84,8 +84,7 @@ class DailyCalendarViewModel : ViewModel() {
                 date = initialDate,
                 startTime = LocalTime.of(6, 0),
                 endTime = LocalTime.of(8, 0),
-                colorType = DailyScheduleColorType.GREEN,
-            ),
+                colorType = DailyScheduleColorType.GREEN
+            )
         )
-    }
 }

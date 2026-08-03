@@ -52,28 +52,30 @@ fun ScheduleCategoryScreen(
     onColorSelect: (ScheduleColorType) -> Unit,
     onAddCategoryClick: () -> Unit,
     onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(ScreenBackgroundColor),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(ScreenBackgroundColor)
     ) {
         ScheduleCategoryHeader(
-            onCloseClick = onCloseClick,
+            onCloseClick = onCloseClick
         )
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(
-                horizontal = 20.dp,
-                vertical = 12.dp,
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding =
+                PaddingValues(
+                    horizontal = 20.dp,
+                    vertical = 12.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(
                 items = uiState.categories,
-                key = { category -> category.id },
+                key = { category -> category.id }
             ) { category ->
                 ScheduleCategoryItem(
                     category = category,
@@ -82,13 +84,13 @@ fun ScheduleCategoryScreen(
                     },
                     onDeleteClick = {
                         onCategoryDeleteClick(category.id)
-                    },
+                    }
                 )
             }
 
             item {
                 Spacer(
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
@@ -97,7 +99,7 @@ fun ScheduleCategoryScreen(
                     text = "새 태그 추가",
                     color = SecondaryTextColor,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
@@ -105,20 +107,21 @@ fun ScheduleCategoryScreen(
                 BasicTextField(
                     value = uiState.newCategoryName,
                     onValueChange = onCategoryNameChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = InputBackgroundColor,
-                            shape = RoundedCornerShape(16.dp),
-                        )
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = 14.dp,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = InputBackgroundColor,
+                                shape = RoundedCornerShape(16.dp)
+                            ).padding(
+                                horizontal = 16.dp,
+                                vertical = 14.dp
+                            ),
+                    textStyle =
+                        TextStyle(
+                            color = PrimaryTextColor,
+                            fontSize = 16.sp
                         ),
-                    textStyle = TextStyle(
-                        color = PrimaryTextColor,
-                        fontSize = 16.sp,
-                    ),
                     cursorBrush = SolidColor(PrimaryTextColor),
                     singleLine = true,
                     decorationBox = { innerTextField ->
@@ -126,71 +129,70 @@ fun ScheduleCategoryScreen(
                             Text(
                                 text = "태그 이름",
                                 color = SecondaryTextColor,
-                                fontSize = 16.sp,
+                                fontSize = 16.sp
                             )
                         }
 
                         innerTextField()
-                    },
+                    }
                 )
             }
 
             item {
                 ScheduleColorPalette(
                     selectedColor = uiState.selectedColor,
-                    onColorSelect = onColorSelect,
+                    onColorSelect = onColorSelect
                 )
             }
 
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = AddButtonColor,
-                            shape = RoundedCornerShape(16.dp),
-                        )
-                        .clickable(
-                            enabled = uiState.canAddCategory,
-                            onClick = onAddCategoryClick,
-                        )
-                        .padding(vertical = 15.dp),
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = AddButtonColor,
+                                shape = RoundedCornerShape(16.dp)
+                            ).clickable(
+                                enabled = uiState.canAddCategory,
+                                onClick = onAddCategoryClick
+                            ).padding(vertical = 15.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (uiState.editingCategoryId == null) {
-                            "태그 추가"
-                        } else {
-                            "태그 수정"
-                        },
+                        text =
+                            if (uiState.editingCategoryId == null) {
+                                "태그 추가"
+                            } else {
+                                "태그 수정"
+                            },
                         color = PrimaryTextColor,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp,
-                )
-                .background(
-                    color = SaveButtonColor,
-                    shape = RoundedCornerShape(28.dp),
-                )
-                .clickable(onClick = onSaveClick)
-                .padding(vertical = 17.dp),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    ).background(
+                        color = SaveButtonColor,
+                        shape = RoundedCornerShape(28.dp)
+                    ).clickable(onClick = onSaveClick)
+                    .padding(vertical = 17.dp),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "저장",
                 color = AddButtonColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -199,32 +201,34 @@ fun ScheduleCategoryScreen(
 @Composable
 private fun ScheduleCategoryHeader(
     onCloseClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "태그 관리",
             color = PrimaryTextColor,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         Text(
             text = "×",
-            modifier = Modifier
-                .clickable(onClick = onCloseClick)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onCloseClick)
+                    .padding(4.dp),
             color = PrimaryTextColor,
-            fontSize = 28.sp,
+            fontSize = 28.sp
         )
     }
 }
@@ -234,32 +238,33 @@ private fun ScheduleCategoryItem(
     category: ScheduleCategory,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = ItemBackgroundColor,
-                shape = RoundedCornerShape(16.dp),
-            )
-            .padding(
-                horizontal = 16.dp,
-                vertical = 14.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = ItemBackgroundColor,
+                    shape = RoundedCornerShape(16.dp)
+                ).padding(
+                    horizontal = 16.dp,
+                    vertical = 14.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(12.dp)
-                .background(
-                    color = category.color.toComposeColor(),
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .size(12.dp)
+                    .background(
+                        color = category.color.toComposeColor(),
+                        shape = CircleShape
+                    )
         )
 
         Spacer(
-            modifier = Modifier.width(12.dp),
+            modifier = Modifier.width(12.dp)
         )
 
         Text(
@@ -267,25 +272,27 @@ private fun ScheduleCategoryItem(
             modifier = Modifier.weight(1f),
             color = PrimaryTextColor,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
 
         Text(
             text = "✎",
-            modifier = Modifier
-                .clickable(onClick = onEditClick)
-                .padding(6.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onEditClick)
+                    .padding(6.dp),
             color = SecondaryTextColor,
-            fontSize = 18.sp,
+            fontSize = 18.sp
         )
 
         Text(
             text = "⌫",
-            modifier = Modifier
-                .clickable(onClick = onDeleteClick)
-                .padding(6.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onDeleteClick)
+                    .padding(6.dp),
             color = Color(0xFFFF6B6B),
-            fontSize = 18.sp,
+            fontSize = 18.sp
         )
     }
 }
@@ -294,36 +301,35 @@ private fun ScheduleCategoryItem(
 private fun ScheduleColorPalette(
     selectedColor: ScheduleColorType,
     onColorSelect: (ScheduleColorType) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         ScheduleColorType.entries
             .filterNot { color ->
                 color == ScheduleColorType.BLACK
-            }
-            .forEach { color ->
+            }.forEach { color ->
                 Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .background(
-                            color = color.toComposeColor(),
-                            shape = CircleShape,
-                        )
-                        .clickable {
-                            onColorSelect(color)
-                        },
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(30.dp)
+                            .background(
+                                color = color.toComposeColor(),
+                                shape = CircleShape
+                            ).clickable {
+                                onColorSelect(color)
+                            },
+                    contentAlignment = Alignment.Center
                 ) {
                     if (color == selectedColor) {
                         Text(
                             text = "✓",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -331,8 +337,8 @@ private fun ScheduleColorPalette(
     }
 }
 
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
+private fun ScheduleColorType.toComposeColor(): Color =
+    when (this) {
         ScheduleColorType.RED -> Color(0xFFE95F5F)
         ScheduleColorType.ORANGE -> Color(0xFFEB9852)
         ScheduleColorType.YELLOW -> Color(0xFFF2CF4A)
@@ -343,4 +349,3 @@ private fun ScheduleColorType.toComposeColor(): Color {
         ScheduleColorType.GRAY -> Color(0xFF8F959D)
         ScheduleColorType.BLACK -> Color(0xFF1B1B1B)
     }
-}

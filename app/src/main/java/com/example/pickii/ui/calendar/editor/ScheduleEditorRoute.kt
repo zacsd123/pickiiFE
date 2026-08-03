@@ -16,16 +16,21 @@ fun ScheduleEditorRoute(
     onManageCategoryClick: () -> Unit,
     onScheduleSaved: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ScheduleEditorViewModel = hiltViewModel(),
+    scheduleId: Long? = null,
+    viewModel: ScheduleEditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(scheduleId) {
+        viewModel.initialize(scheduleId)
+    }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             onScheduleSaved()
 
             viewModel.onEvent(
-                ScheduleEditorUiEvent.SavedStateConsumed,
+                ScheduleEditorUiEvent.SavedStateConsumed
             )
         }
     }
@@ -35,6 +40,6 @@ fun ScheduleEditorRoute(
         onBackClick = onBackClick,
         onManageCategoryClick = onManageCategoryClick,
         onEvent = viewModel::onEvent,
-        modifier = modifier,
+        modifier = modifier
     )
 }
