@@ -123,7 +123,6 @@ fun MyPageRoute(
             SettingsScreen(
                 onBackClick = { currentScreen = MyPageScreenType.HOME.name },
                 onNavigateToPasswordChange = { currentScreen = MyPageScreenType.PASSWORD_CHANGE.name },
-                onNavigateToProfile = { currentScreen = MyPageScreenType.PROFILE_VIEW.name },
                 onNavigateToWithdrawal = { currentScreen = MyPageScreenType.WITHDRAWAL.name },
                 onLoggedOut = onLoggedOut
             )

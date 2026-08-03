@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** 설정 화면의 계정 설정 섹션(카카오 연동 상태 표시, 로그아웃)을 담당한다. */
+/** 설정 화면의 계정 설정 섹션(카카오 연동/해제, 로그아웃)을 담당한다. */
 @HiltViewModel
 class SettingsViewModel
     @Inject
@@ -24,6 +24,10 @@ class SettingsViewModel
         val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
         init {
+            refreshSocialAccounts()
+        }
+
+        private fun refreshSocialAccounts() {
             viewModelScope.launch {
                 accountRepository.getSocialAccounts().onSuccess { accounts ->
                     _uiState.update {
@@ -49,6 +53,31 @@ class SettingsViewModel
                 sessionRepository.logout()
                 _uiState.update { it.copy(isLogoutConfirmVisible = false) }
                 onLoggedOut()
+            }
+        }
+
+        fun onLinkClick() {
+            _uiState.update { it.copy(isSocialLinkComingSoonVisible = true) }
+        }
+
+        fun onSocialLinkComingSoonShown() {
+            _uiState.update { it.copy(isSocialLinkComingSoonVisible = false) }
+        }
+
+        fun onUnlinkRequest(provider: String) {
+            _uiState.update { it.copy(isUnlinkConfirmVisible = true, pendingUnlinkProvider = provider) }
+        }
+
+        fun onDismissUnlinkDialog() {
+            _uiState.update { it.copy(isUnlinkConfirmVisible = false, pendingUnlinkProvider = null) }
+        }
+
+        fun onConfirmUnlink() {
+            val provider = _uiState.value.pendingUnlinkProvider ?: return
+            viewModelScope.launch {
+                accountRepository.unlinkSocialAccount(provider)
+                _uiState.update { it.copy(isUnlinkConfirmVisible = false, pendingUnlinkProvider = null) }
+                refreshSocialAccounts()
             }
         }
     }
