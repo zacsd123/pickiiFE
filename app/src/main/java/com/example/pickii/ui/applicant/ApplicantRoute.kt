@@ -11,11 +11,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun ApplicantRoute(
     onBackClick: () -> Unit,
-    viewModel: ApplicantListViewModel = viewModel()
+    viewModel: ApplicantListViewModel = viewModel(),
 ) {
     var currentScreen by remember {
         mutableStateOf<ApplicantScreen>(
-            ApplicantScreen.List
+            ApplicantScreen.List,
         )
     }
 
@@ -24,12 +24,11 @@ fun ApplicantRoute(
             ApplicantListScreen(
                 onBackClick = onBackClick,
                 onApplicantDetailClick = { applicantId ->
-                    currentScreen =
-                        ApplicantScreen.Detail(
-                            applicantId = applicantId
-                        )
+                    currentScreen = ApplicantScreen.Detail(
+                        applicantId = applicantId,
+                    )
                 },
-                viewModel = viewModel
+                viewModel = viewModel,
             )
         }
 
@@ -39,29 +38,28 @@ fun ApplicantRoute(
             }
 
             ApplicantDetailScreen(
-                applicant =
-                    viewModel.getApplicant(
-                        applicantId = screen.applicantId
-                    ),
+                applicant = viewModel.getApplicant(
+                    applicantId = screen.applicantId,
+                ),
                 onBackClick = {
                     currentScreen = ApplicantScreen.List
                 },
                 onAcceptClick = { applicantId ->
                     viewModel.acceptApplicant(
-                        applicantId = applicantId
+                        applicantId = applicantId,
                     )
                 },
                 onRejectClick = { applicantId ->
                     viewModel.rejectApplicant(
-                        applicantId = applicantId
+                        applicantId = applicantId,
                     )
-                }
+                },
             )
         }
     }
 
     BackHandler(
-        enabled = currentScreen == ApplicantScreen.List
+        enabled = currentScreen == ApplicantScreen.List,
     ) {
         onBackClick()
     }

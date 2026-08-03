@@ -16,19 +16,20 @@ private val TimeLineColor = Color(0xFFE7E7E7)
  * 일일 캘린더의 시간 구분선을 표시한다.
  */
 @Composable
-fun DailyTimeLine(modifier: Modifier = Modifier) {
+fun DailyTimeLine(
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(TimeLineColor)
+        modifier = modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(TimeLineColor),
     )
 }
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFFFFFFF
+    backgroundColor = 0xFFFFFFFF,
 )
 @Composable
 private fun DailyTimeLinePreview() {

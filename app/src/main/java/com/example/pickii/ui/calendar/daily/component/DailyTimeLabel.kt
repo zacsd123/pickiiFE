@@ -16,7 +16,7 @@ private val TimeLabelColor = Color(0xFFB4B4B4)
 @Composable
 fun DailyTimeLabel(
     hour: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Text(
         text = formatHour(hour),
@@ -24,22 +24,24 @@ fun DailyTimeLabel(
         color = TimeLabelColor,
         fontSize = 15.sp,
         fontWeight = FontWeight.Medium,
-        maxLines = 1
+        maxLines = 1,
     )
 }
 
 /**
  * 정수 시간을 00:00 형식으로 변환한다.
  */
-private fun formatHour(hour: Int): String = "%02d:00".format(hour)
+private fun formatHour(hour: Int): String {
+    return "%02d:00".format(hour)
+}
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFFFFFFFF
+    backgroundColor = 0xFFFFFFFF,
 )
 @Composable
 private fun DailyTimeLabelPreview() {
     DailyTimeLabel(
-        hour = 6
+        hour = 6,
     )
 }

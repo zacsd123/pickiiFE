@@ -5,8 +5,9 @@ package com.example.pickii.ui.applicant
  */
 data class ApplicantListUiState(
     val applicants: List<ApplicantUiModel> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 ) {
+
     val pendingCount: Int
         get() = applicants.count { it.status == ApplicantStatus.PENDING }
 

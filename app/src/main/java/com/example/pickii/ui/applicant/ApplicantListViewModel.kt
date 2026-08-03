@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ApplicantListViewModel : ViewModel() {
-    private val _uiState =
-        MutableStateFlow(
-            ApplicantListUiState(
-                applicants = createMockApplicants()
-            )
+
+    private val _uiState = MutableStateFlow(
+        ApplicantListUiState(
+            applicants = createMockApplicants()
         )
+    )
     val uiState: StateFlow<ApplicantListUiState> = _uiState.asStateFlow()
 
     /**
@@ -37,36 +37,37 @@ class ApplicantListViewModel : ViewModel() {
     /**
      * id로 지원자를 찾는다.
      */
-    fun getApplicant(applicantId: Long): ApplicantUiModel? =
-        uiState.value.applicants.find { applicant ->
+    fun getApplicant(
+        applicantId: Long,
+    ): ApplicantUiModel? {
+        return uiState.value.applicants.find { applicant ->
             applicant.id == applicantId
         }
+    }
 
     /**
      * 상태를 변경한다.
      */
     private fun updateApplicantStatus(
         applicantId: Long,
-        status: ApplicantStatus
+        status: ApplicantStatus,
     ) {
-        _uiState.value =
-            _uiState.value.copy(
-                applicants =
-                    _uiState.value.applicants.map { applicant ->
-                        if (applicant.id == applicantId) {
-                            applicant.copy(status = status)
-                        } else {
-                            applicant
-                        }
-                    }
-            )
+        _uiState.value = _uiState.value.copy(
+            applicants = _uiState.value.applicants.map { applicant ->
+                if (applicant.id == applicantId) {
+                    applicant.copy(status = status)
+                } else {
+                    applicant
+                }
+            }
+        )
     }
 
     /**
      * 더미 데이터
      */
-    private fun createMockApplicants(): List<ApplicantUiModel> =
-        listOf(
+    private fun createMockApplicants(): List<ApplicantUiModel> {
+        return listOf(
             ApplicantUiModel(
                 id = 1,
                 nickname = "김지원",
@@ -111,6 +112,7 @@ class ApplicantListViewModel : ViewModel() {
                 appliedDate = "2026.07.26",
                 applicationMessage = "팀 프로젝트 경험이 많습니다.",
                 status = ApplicantStatus.PENDING
-            )
+            ),
         )
+    }
 }

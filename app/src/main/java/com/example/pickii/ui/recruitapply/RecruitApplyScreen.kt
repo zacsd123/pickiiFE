@@ -286,8 +286,8 @@ private fun PostSummaryCard(
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            post.category?.let { InfoChip(label = it.label) }
-            post.topic?.let { InfoChip(label = it.label) }
+            InfoChip(label = post.category.label)
+            InfoChip(label = post.topic.label)
         }
 
         Spacer(modifier = Modifier.height(12.dp))

@@ -18,7 +18,7 @@ fun DailyCalendarRoute(
     onAddScheduleClick: () -> Unit,
     onScheduleClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: DailyCalendarViewModel = hiltViewModel()
+    viewModel: DailyCalendarViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -39,6 +39,6 @@ fun DailyCalendarRoute(
             viewModel.selectSchedule(scheduleId)
             onScheduleClick(scheduleId)
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }

@@ -11,8 +11,9 @@ data class ScheduleCategoryUiState(
     val newCategoryName: String = "",
     val selectedColor: ScheduleColorType = ScheduleColorType.RED,
     val editingCategoryId: Long? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
 ) {
+
     val canAddCategory: Boolean
         get() = newCategoryName.isNotBlank()
 }

@@ -13,18 +13,6 @@ sealed class PickiiDestination(
     /** 로그인 화면. */
     data object Login : PickiiDestination("login")
 
-    /** 회원가입 화면(가입 폼 + 가입완료 화면을 한 화면에서 처리). */
-    data object Signup : PickiiDestination("signup")
-
-    /** 최초 로그인 시 이력서(프로필)를 입력받는 온보딩 화면. */
-    data object Onboarding : PickiiDestination("onboarding")
-
-    /** 비로그인 상태 비밀번호 재설정 화면. */
-    data object PasswordReset : PickiiDestination("password-reset")
-
-    /** 아이디 찾기 화면. */
-    data object FindId : PickiiDestination("find-id")
-
     /** 홈 화면. */
     data object Home : PickiiDestination("home")
 
@@ -58,28 +46,6 @@ sealed class PickiiDestination(
         companion object {
             /** [androidx.navigation.compose.NavHost]에 등록할 경로 템플릿. */
             const val ROUTE = "recruit/{$ARG_POST_ID}/edit"
-        }
-    }
-
-    /** 캘린더 화면 **/
-    data object Calender : PickiiDestination("calender")
-
-    /** 채팅 화면 **/
-    data object Chat : PickiiDestination("chat")
-
-    /** 마이페이지 화면(내부적으로 여러 하위 화면을 자체 상태로 전환한다). */
-    data object MyPage : PickiiDestination("mypage")
-
-    /** 마이페이지 "프로필을 만들어보세요"에서 진입하는 온보딩(이력서 생성) 화면. */
-    data object OnboardingFromMyPage : PickiiDestination("mypage/onboarding")
-
-    /** 공고 지원자 목록 화면(마이페이지의 "작성 공고"에서 진입). */
-    data class ApplicantList(
-        val postId: String
-    ) : PickiiDestination("recruit/$postId/applicants") {
-        companion object {
-            /** [androidx.navigation.compose.NavHost]에 등록할 경로 템플릿. */
-            const val ROUTE = "recruit/{$ARG_POST_ID}/applicants"
         }
     }
 }

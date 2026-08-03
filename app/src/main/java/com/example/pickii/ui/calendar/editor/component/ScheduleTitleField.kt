@@ -26,27 +26,26 @@ private val TitleCursorColor = Color(0xFF1B1B1B)
 fun ScheduleTitleField(
     title: String,
     onTitleChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     BasicTextField(
         value = title,
         onValueChange = onTitleChange,
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(
-                    color = TitleFieldBackgroundColor,
-                    shape = RoundedCornerShape(18.dp)
-                ).padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        textStyle =
-            TextStyle(
-                color = TitleTextColor,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = TitleFieldBackgroundColor,
+                shape = RoundedCornerShape(18.dp),
+            )
+            .padding(
+                horizontal = 20.dp,
+                vertical = 20.dp,
             ),
+        textStyle = TextStyle(
+            color = TitleTextColor,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+        ),
         cursorBrush = SolidColor(TitleCursorColor),
         singleLine = true,
         decorationBox = { innerTextField ->
@@ -55,11 +54,11 @@ fun ScheduleTitleField(
                     text = "일정 제목",
                     color = TitlePlaceholderColor,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             innerTextField()
-        }
+        },
     )
 }

@@ -21,13 +21,3 @@ val PickiiDisabledGray = Color(0xFFE0E0E0)
 val PickiiNavYellow = Color(0xFFF9FCA8)
 
 val PickiiPostCardBackground = Color(0xCCFFFFFF)
-
-// 내 프로필 확인 화면(카드형 UI) 컬러
-val PickiiProfileCardBlack = Color(0xFF0A0A09)
-val PickiiProfileCardGoldBright = Color(0xFFF7D040)
-val PickiiProfileCardGoldMid = Color(0xFFC6AC35)
-val PickiiProfileCardGoldDim = Color(0xFF5D4B19)
-
-// 카카오 브랜드 컬러(카카오 로그인 버튼 가이드라인)
-val KakaoYellow = Color(0xFFFEE500)
-val KakaoLabel = Color(0xFF191919)
