@@ -1,6 +1,5 @@
 package com.example.pickii.ui.mypage.profile
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,6 +19,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Interests
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,33 +32,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.AdditionalLinkEntry
 import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
-import com.example.pickii.domain.model.SocialAccount
 import com.example.pickii.ui.common.AvatarPlaceholder
-import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.SelectableChip
-import com.example.pickii.ui.theme.PickiiBlue
-import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.mypage.profile.component.ProfileCardEmptyState
+import com.example.pickii.ui.mypage.profile.component.ProfileCardFrame
+import com.example.pickii.ui.mypage.profile.component.ProfileCardStack
+import com.example.pickii.ui.theme.PickiiProfileCardGoldBright
+import com.example.pickii.ui.theme.PickiiProfileCardGoldMid
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import java.time.YearMonth
 
+private const val PROFILE_CARD_COUNT = 6
+
 /**
- * 이력서 형태의 내 프로필 조회 화면.
+ * 이력서 형태의 내 프로필 조회 화면. 카드 6장을 넘겨보는 캐러셀로 보여준다.
  *
  * @param onBackClick 뒤로가기 콜백
  * @param onEditClick "수정" 버튼 클릭 콜백
@@ -67,41 +74,28 @@ fun ProfileViewScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    if (uiState.isSocialLinkComingSoonVisible) {
-        val message = stringResource(R.string.mypage_profile_social_link_coming_soon)
-        androidx.compose.runtime.LaunchedEffect(uiState.isSocialLinkComingSoonVisible) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            viewModel.onSocialLinkComingSoonShown()
-        }
-    }
 
     ProfileViewScreenContent(
         uiState = uiState,
         onBackClick = onBackClick,
-        onEditClick = onEditClick,
-        onLinkClick = viewModel::onLinkClick,
-        onUnlinkRequest = viewModel::onUnlinkRequest,
-        onDismissUnlinkDialog = viewModel::onDismissUnlinkDialog,
-        onConfirmUnlink = viewModel::onConfirmUnlink
+        onEditClick = onEditClick
     )
 }
 
-@Suppress("LongParameterList")
 @Composable
 private fun ProfileViewScreenContent(
     uiState: ProfileViewUiState,
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onLinkClick: () -> Unit,
-    onUnlinkRequest: (String) -> Unit,
-    onDismissUnlinkDialog: () -> Unit,
-    onConfirmUnlink: () -> Unit
+    onEditClick: () -> Unit
 ) {
     val profile = uiState.profile
 
-    Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(PickiiYellowLight)
+    ) {
         if (uiState.isLoading) {
             LoadingIndicator()
         } else if (profile == null) {
@@ -110,99 +104,33 @@ private fun ProfileViewScreenContent(
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
                 ProfileViewHeader(onBackClick = onBackClick, onEditClick = onEditClick)
 
                 Spacer(modifier = Modifier.height(20.dp))
-                ProfileSummaryRow(profile = profile, topicLabels = uiState.topicLabels)
+
+                ProfileCardStack(
+                    pageCount = PROFILE_CARD_COUNT,
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                ) { index ->
+                    when (index) {
+                        0 -> CharacterCard(profile)
+                        1 -> TopicSchoolLinksCard(profile, uiState.topicLabels)
+                        2 -> AboutMeCard(profile)
+                        3 -> SkillsCard(profile)
+                        4 -> LicenseCard(profile)
+                        else -> ExperienceCard(profile)
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                SectionCard(title = stringResource(R.string.mypage_profile_label_about_me)) {
-                    Text(
-                        text = profile.aboutMe.orEmpty(),
-                        color = Color.Black,
-                        fontSize = 13.sp,
-                        modifier = Modifier.heightIn(min = 80.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                SectionCard(title = null) {
-                    InfoRow(
-                        label = stringResource(R.string.mypage_profile_label_email),
-                        value = profile.contactEmail.orEmpty()
-                    )
-                    InfoRow(label = stringResource(R.string.mypage_profile_label_university), value = profile.univ)
-                    InfoRow(label = stringResource(R.string.mypage_profile_label_major), value = profile.major)
-                    InfoRow(
-                        label = stringResource(R.string.mypage_profile_label_academic_status),
-                        value = profile.academicStatus.label,
-                        showDivider = false
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                SocialAccountsSection(
-                    socialAccounts = uiState.socialAccounts,
-                    onLinkClick = onLinkClick,
-                    onUnlinkClick = onUnlinkRequest
-                )
-
-                if (profile.additionalLinks.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    SectionCard(title = stringResource(R.string.mypage_profile_label_links)) {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(profile.additionalLinks) { link -> AdditionalLinkChip(link) }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                SectionCard(title = stringResource(R.string.mypage_profile_label_skills)) {
-                    if (profile.skillTools.isEmpty()) {
-                        EmptySectionText()
-                    } else {
-                        profile.skillTools.forEach { SkillToolRow(it) }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                SectionCard(title = stringResource(R.string.mypage_profile_label_licenses)) {
-                    if (profile.licenses.isEmpty()) {
-                        EmptySectionText()
-                    } else {
-                        profile.licenses.forEach { LicenseRow(it) }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                SectionCard(title = stringResource(R.string.mypage_profile_label_experience)) {
-                    if (profile.experiences.isEmpty()) {
-                        EmptySectionText()
-                    } else {
-                        profile.experiences.forEachIndexed { index, entry ->
-                            ExperienceRow(entry)
-                            if (index != profile.experiences.lastIndex) Spacer(modifier = Modifier.height(12.dp))
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
-    }
-
-    if (uiState.isUnlinkConfirmVisible) {
-        ConfirmDialog(
-            title = stringResource(R.string.mypage_profile_social_unlink_confirm_title),
-            body = stringResource(R.string.mypage_profile_social_unlink_confirm_body),
-            confirmLabel = stringResource(R.string.common_button_confirm),
-            dismissLabel = stringResource(R.string.common_button_cancel),
-            onConfirm = onConfirmUnlink,
-            onDismiss = onDismissUnlinkDialog
-        )
     }
 }
 
@@ -244,127 +172,159 @@ private fun ProfileViewHeader(
     }
 }
 
+/** 카드1: 캐릭터 + Lv + 경험치 바 + 닉네임. 다른 카드와 달리 헤더/구분선 없이 중앙정렬로 구성한다. */
 @Composable
-private fun ProfileSummaryRow(
+private fun CharacterCard(profile: MemberProfile) {
+    ProfileCardFrame(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                AvatarPlaceholder(size = 112.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+                LevelProgressBar(exp = profile.exp, modifier = Modifier.width(160.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = profile.nickname,
+                    color = PickiiProfileCardGoldBright,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+/** 카드2: Topic(관심분야) + 학교/전공 + 학적상태 + 외부링크. */
+@Composable
+private fun TopicSchoolLinksCard(
     profile: MemberProfile,
     topicLabels: List<String>
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
-                .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    ProfileCardFrame(
+        modifier = Modifier.fillMaxSize(),
+        headerIcon = Icons.Filled.Interests,
+        title = stringResource(R.string.mypage_profile_card_topic_title)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = profile.nickname, color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             if (topicLabels.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     topicLabels.take(3).forEach { label ->
                         SelectableChip(label = label, selected = true, enabled = false, onClick = {})
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            CardInfoRow(label = stringResource(R.string.mypage_profile_label_university), value = profile.univ)
+            CardInfoRow(label = stringResource(R.string.mypage_profile_label_major), value = profile.major)
+            CardInfoRow(
+                label = stringResource(R.string.mypage_profile_label_academic_status),
+                value = profile.academicStatus.label,
+                showDivider = profile.additionalLinks.isNotEmpty()
+            )
+
+            if (profile.additionalLinks.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.mypage_profile_label_links),
+                    color = PickiiProfileCardGoldMid,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(profile.additionalLinks) { link -> AdditionalLinkChip(link) }
+                }
             }
         }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            AvatarPlaceholder(size = 56.dp)
-            Spacer(modifier = Modifier.height(8.dp))
-            LevelProgressBar(exp = profile.exp, modifier = Modifier.width(96.dp))
-        }
     }
 }
 
+/** 카드3: 자기소개. */
 @Composable
-private fun SectionCard(
-    title: String?,
-    content: @Composable () -> Unit
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
-                .padding(16.dp)
+private fun AboutMeCard(profile: MemberProfile) {
+    ProfileCardFrame(
+        modifier = Modifier.fillMaxSize(),
+        headerIcon = Icons.Filled.Description,
+        title = stringResource(R.string.mypage_profile_label_about_me)
     ) {
-        if (title != null) {
-            Text(text = title, color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = profile.aboutMe.orEmpty(),
+            color = Color.White,
+            fontSize = 14.sp,
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        )
+    }
+}
+
+/** 카드4: Skill & Tool. */
+@Composable
+private fun SkillsCard(profile: MemberProfile) {
+    ProfileCardFrame(
+        modifier = Modifier.fillMaxSize(),
+        headerIcon = Icons.Filled.Build,
+        title = stringResource(R.string.mypage_profile_label_skills)
+    ) {
+        if (profile.skillTools.isEmpty()) {
+            ProfileCardEmptyState()
+        } else {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                profile.skillTools.forEach { SkillToolRow(it) }
+            }
         }
-        content()
+    }
+}
+
+/** 카드5: 자격증(License). */
+@Composable
+private fun LicenseCard(profile: MemberProfile) {
+    ProfileCardFrame(
+        modifier = Modifier.fillMaxSize(),
+        headerIcon = Icons.Filled.WorkspacePremium,
+        title = stringResource(R.string.mypage_profile_label_licenses)
+    ) {
+        if (profile.licenses.isEmpty()) {
+            ProfileCardEmptyState()
+        } else {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                profile.licenses.forEach { LicenseRow(it) }
+            }
+        }
+    }
+}
+
+/** 카드6: 수상 및 경험(Experience). */
+@Composable
+private fun ExperienceCard(profile: MemberProfile) {
+    ProfileCardFrame(
+        modifier = Modifier.fillMaxSize(),
+        headerIcon = Icons.Filled.EmojiEvents,
+        title = stringResource(R.string.mypage_profile_label_experience)
+    ) {
+        if (profile.experiences.isEmpty()) {
+            ProfileCardEmptyState()
+        } else {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                profile.experiences.forEachIndexed { index, entry ->
+                    ExperienceRow(entry)
+                    if (index != profile.experiences.lastIndex) Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun InfoRow(
+private fun CardInfoRow(
     label: String,
     value: String,
     showDivider: Boolean = true
 ) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(text = label, color = PickiiTextGray, fontSize = 13.sp, modifier = Modifier.width(84.dp))
-        Text(text = value, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        Text(text = label, color = PickiiProfileCardGoldMid, fontSize = 13.sp, modifier = Modifier.width(84.dp))
+        Text(text = value, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }
     if (showDivider) {
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiFieldBackground))
-    }
-}
-
-@Composable
-private fun SocialAccountsSection(
-    socialAccounts: List<SocialAccount>,
-    onLinkClick: () -> Unit,
-    onUnlinkClick: (String) -> Unit
-) {
-    val kakao = socialAccounts.find { it.provider == "KAKAO" }
-    val isLinked = kakao?.linked == true
-
-    SectionCard(title = stringResource(R.string.mypage_profile_label_social_accounts)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(R.string.mypage_profile_social_kakao),
-                color = Color.Black,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text =
-                    stringResource(
-                        if (isLinked) R.string.mypage_profile_social_linked else R.string.mypage_profile_social_not_linked
-                    ),
-                color = if (isLinked) PickiiBlue else PickiiTextGray,
-                fontSize = 12.sp
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Box(
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(PickiiFieldBackground)
-                        .clickable(onClick = { if (isLinked) onUnlinkClick("KAKAO") else onLinkClick() })
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text =
-                        stringResource(
-                            if (isLinked) {
-                                R.string.mypage_profile_social_button_unlink
-                            } else {
-                                R.string.mypage_profile_social_button_link
-                            }
-                        ),
-                    color = Color.Black,
-                    fontSize = 12.sp
-                )
-            }
-        }
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiProfileCardGoldMid.copy(alpha = 0.25f)))
     }
 }
 
@@ -374,19 +334,19 @@ private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
         modifier =
             Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(PickiiFieldBackground)
+                .background(PickiiProfileCardGoldMid.copy(alpha = 0.15f))
                 .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
-        Text(text = link.linkName, color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        Text(text = link.url, color = PickiiTextGray, fontSize = 11.sp)
+        Text(text = link.linkName, color = PickiiProfileCardGoldBright, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(text = link.url, color = Color.White, fontSize = 11.sp)
     }
 }
 
 @Composable
 private fun SkillToolRow(entry: SkillToolEntry) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(text = entry.techStackName, color = Color.Black, fontSize = 13.sp, modifier = Modifier.weight(1f))
-        Text(text = skillLevelLabel(entry.level), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = entry.techStackName, color = Color.White, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        Text(text = skillLevelLabel(entry.level), color = PickiiProfileCardGoldMid, fontSize = 12.sp)
     }
 }
 
@@ -401,27 +361,27 @@ private fun skillLevelLabel(level: Int): String =
 @Composable
 private fun LicenseRow(entry: LicenseEntry) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(text = entry.licenseName, color = Color.Black, fontSize = 13.sp, modifier = Modifier.weight(1f))
-        Text(text = entry.acquiredDate.toString(), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = entry.licenseName, color = Color.White, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        Text(text = entry.acquiredDate.toString(), color = PickiiProfileCardGoldMid, fontSize = 12.sp)
     }
 }
 
 @Composable
 private fun ExperienceRow(entry: ExperienceEntry) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = entry.title, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(text = entry.title, color = PickiiProfileCardGoldBright, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = entry.organization, color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = entry.organization, color = PickiiProfileCardGoldMid, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(2.dp))
         val ongoingLabel = stringResource(R.string.mypage_profile_experience_ongoing)
         Text(
             text = experiencePeriod(entry.startDate, entry.endDate, ongoingLabel),
-            color = PickiiTextGray,
+            color = PickiiProfileCardGoldMid,
             fontSize = 12.sp
         )
         if (entry.description.isNotBlank()) {
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = entry.description, color = Color.Black, fontSize = 12.sp)
+            Text(text = entry.description, color = Color.White, fontSize = 12.sp)
         }
     }
 }
@@ -432,7 +392,34 @@ private fun experiencePeriod(
     ongoingLabel: String
 ): String = "$start ~ ${end?.toString() ?: ongoingLabel}"
 
+@Preview
 @Composable
-private fun EmptySectionText() {
-    Text(text = "-", color = PickiiTextGray, fontSize = 13.sp)
+fun ProfileViewScreenContentPre() {
+    ProfileViewScreenContent(
+        uiState =
+            ProfileViewUiState(
+                isLoading = false,
+                profile =
+                    MemberProfile(
+                        nickname = "닉네임",
+                        univId = 1,
+                        univ = "서울대학교",
+                        major = "컴퓨터공학과",
+                        academicStatus = AcademicStatus.ENROLLED,
+                        hope = null,
+                        strength = null,
+                        aboutMe = "자기소개 텍스트",
+                        contactEmail = null,
+                        exp = 120,
+                        topicIds = emptyList(),
+                        skillTools = emptyList(),
+                        licenses = emptyList(),
+                        experiences = emptyList(),
+                        additionalLinks = emptyList()
+                    ),
+                topicLabels = listOf("기획/아이디어")
+            ),
+        onBackClick = {},
+        onEditClick = {}
+    )
 }

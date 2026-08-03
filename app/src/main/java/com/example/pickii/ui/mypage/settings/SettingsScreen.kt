@@ -1,7 +1,9 @@
 package com.example.pickii.ui.mypage.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -16,11 +19,13 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,10 +41,9 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 
 /**
- * 설정 화면. 계정 설정(비밀번호 변경/카카오 연동/로그아웃/회원탈퇴)과 알림 설정을 한 화면에서 보여준다(사진 목업 기준).
+ * 설정 화면. 계정 설정(비밀번호 변경/카카오 연동·해제/로그아웃/회원탈퇴)과 알림 설정을 한 화면에서 보여준다(사진 목업 기준).
  *
  * @param onNavigateToPasswordChange "비밀번호 바꾸기" 클릭 콜백
- * @param onNavigateToProfile "카카오 연동" 클릭 콜백(연동 관리는 프로필 화면의 소셜 계정 섹션에서 한다)
  * @param onNavigateToWithdrawal "회원탈퇴" 클릭 콜백
  * @param onLoggedOut 로그아웃 완료 콜백(앱 레벨 네비게이션)
  */
@@ -47,7 +51,6 @@ import com.example.pickii.ui.theme.PickiiYellowLight
 fun SettingsScreen(
     onBackClick: () -> Unit,
     onNavigateToPasswordChange: () -> Unit,
-    onNavigateToProfile: () -> Unit,
     onNavigateToWithdrawal: () -> Unit,
     onLoggedOut: () -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
@@ -55,13 +58,25 @@ fun SettingsScreen(
 ) {
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    if (uiState.isSocialLinkComingSoonVisible) {
+        val message = stringResource(R.string.mypage_profile_social_link_coming_soon)
+        LaunchedEffect(uiState.isSocialLinkComingSoonVisible) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            settingsViewModel.onSocialLinkComingSoonShown()
+        }
+    }
 
     SettingsScreenContent(
         uiState = uiState,
         notificationUiState = notificationUiState,
         onBackClick = onBackClick,
         onPasswordChangeClick = onNavigateToPasswordChange,
-        onKakaoLinkClick = onNavigateToProfile,
+        onLinkClick = settingsViewModel::onLinkClick,
+        onUnlinkRequest = settingsViewModel::onUnlinkRequest,
+        onDismissUnlinkDialog = settingsViewModel::onDismissUnlinkDialog,
+        onConfirmUnlink = settingsViewModel::onConfirmUnlink,
         onLogoutRequest = settingsViewModel::onLogoutRequest,
         onDismissLogoutDialog = settingsViewModel::onDismissLogoutDialog,
         onConfirmLogout = { settingsViewModel.onConfirmLogout(onLoggedOut) },
@@ -84,7 +99,10 @@ private fun SettingsScreenContent(
     notificationUiState: NotificationSettingsUiState,
     onBackClick: () -> Unit,
     onPasswordChangeClick: () -> Unit,
-    onKakaoLinkClick: () -> Unit,
+    onLinkClick: () -> Unit,
+    onUnlinkRequest: (String) -> Unit,
+    onDismissUnlinkDialog: () -> Unit,
+    onConfirmUnlink: () -> Unit,
     onLogoutRequest: () -> Unit,
     onDismissLogoutDialog: () -> Unit,
     onConfirmLogout: () -> Unit,
@@ -117,13 +135,10 @@ private fun SettingsScreenContent(
                 title = stringResource(R.string.mypage_settings_password_change),
                 onClick = onPasswordChangeClick
             )
-            SettingsRow(
-                title = stringResource(R.string.mypage_settings_kakao_link),
-                trailingText =
-                    stringResource(
-                        if (uiState.isKakaoLinked) R.string.mypage_profile_social_linked else R.string.mypage_profile_social_not_linked
-                    ),
-                onClick = onKakaoLinkClick
+            KakaoLinkRow(
+                isLinked = uiState.isKakaoLinked,
+                onLinkClick = onLinkClick,
+                onUnlinkClick = { onUnlinkRequest("KAKAO") }
             )
             SettingsRow(title = stringResource(R.string.mypage_settings_logout), onClick = onLogoutRequest)
             SettingsRow(
@@ -202,6 +217,17 @@ private fun SettingsScreenContent(
             onDismiss = onDismissLogoutDialog
         )
     }
+
+    if (uiState.isUnlinkConfirmVisible) {
+        ConfirmDialog(
+            title = stringResource(R.string.mypage_profile_social_unlink_confirm_title),
+            body = stringResource(R.string.mypage_profile_social_unlink_confirm_body),
+            confirmLabel = stringResource(R.string.common_button_confirm),
+            dismissLabel = stringResource(R.string.common_button_cancel),
+            onConfirm = onConfirmUnlink,
+            onDismiss = onDismissUnlinkDialog
+        )
+    }
 }
 
 @Composable
@@ -240,10 +266,70 @@ private fun SettingsRow(
             }
         }
         if (showDivider) {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiFieldBackground)
             )
         }
+    }
+}
+
+/** 카카오 연동/해제를 이 화면에서 바로 처리하는 행이다(연동 관리를 프로필 화면에서 이 화면으로 이전). */
+@Composable
+private fun KakaoLinkRow(
+    isLinked: Boolean,
+    onLinkClick: () -> Unit,
+    onUnlinkClick: () -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.mypage_settings_kakao_link),
+                color = Color.Black,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text =
+                    stringResource(
+                        if (isLinked) {
+                            R.string.mypage_profile_social_linked
+                        } else {
+                            R.string.mypage_profile_social_not_linked
+                        }
+                    ),
+                color = if (isLinked) PickiiBlue else PickiiTextGray,
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(PickiiFieldBackground)
+                        .clickable(onClick = { if (isLinked) onUnlinkClick() else onLinkClick() })
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text =
+                        stringResource(
+                            if (isLinked) {
+                                R.string.mypage_profile_social_button_unlink
+                            } else {
+                                R.string.mypage_profile_social_button_link
+                            }
+                        ),
+                    color = Color.Black,
+                    fontSize = 12.sp
+                )
+            }
+        }
+        Box(
+            modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiFieldBackground)
+        )
     }
 }
 
@@ -273,7 +359,7 @@ private fun ToggleRow(
             )
         }
         if (showDivider) {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiFieldBackground)
             )
         }
