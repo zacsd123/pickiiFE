@@ -27,4 +27,10 @@ interface AccountRepository {
 
     /** 소셜 계정 연동을 해제한다(1-13). */
     suspend fun unlinkSocialAccount(provider: String): Result<Unit>
+
+    /** 소셜 계정을 현재 로그인된 계정에 연동한다(1-11). [providerId]는 해당 소셜의 고유 사용자 id다. */
+    suspend fun linkSocialAccount(
+        provider: String,
+        providerId: String
+    ): Result<Unit>
 }

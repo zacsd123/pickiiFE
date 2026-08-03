@@ -3,6 +3,7 @@ package com.example.pickii.data.repository
 import com.example.pickii.data.remote.api.AuthApiService
 import com.example.pickii.data.remote.dto.ChangePasswordRequest
 import com.example.pickii.data.remote.dto.SocialAccountDto
+import com.example.pickii.data.remote.dto.SocialLinkRequest
 import com.example.pickii.data.remote.dto.WithdrawAgreementsDto
 import com.example.pickii.data.remote.dto.WithdrawRequest
 import com.example.pickii.domain.model.SocialAccount
@@ -63,6 +64,14 @@ class AccountApiRepository
 
         override suspend fun unlinkSocialAccount(provider: String): Result<Unit> =
             safeApiCallUnit(json) { authApiService.unlinkSocialAccount(provider) }
+
+        override suspend fun linkSocialAccount(
+            provider: String,
+            providerId: String
+        ): Result<Unit> =
+            safeApiCall(json) {
+                authApiService.linkSocialAccount(provider, SocialLinkRequest(providerId))
+            }.map { }
 
         private fun SocialAccountDto.toDomain(): SocialAccount = SocialAccount(provider = provider, linked = linked)
     }

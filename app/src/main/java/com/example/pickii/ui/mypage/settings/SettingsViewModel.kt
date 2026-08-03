@@ -1,5 +1,6 @@
 package com.example.pickii.ui.mypage.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.repository.AccountRepository
@@ -56,12 +57,25 @@ class SettingsViewModel
             }
         }
 
-        fun onLinkClick() {
-            _uiState.update { it.copy(isSocialLinkComingSoonVisible = true) }
-        }
-
-        fun onSocialLinkComingSoonShown() {
-            _uiState.update { it.copy(isSocialLinkComingSoonVisible = false) }
+        /**
+         * 카카오 SDK로 얻은 사용자 id를 현재 계정에 연동한다(1-11).
+         *
+         * @param providerId 카카오 SDK `UserApiClient.me()`로 얻은 사용자 고유 id
+         * @param onError 연동 요청이 실패했을 때 호출되는 콜백(이미 연동된 계정 등)
+         */
+        fun onKakaoLinkConfirmed(
+            providerId: String,
+            onError: () -> Unit
+        ) {
+            viewModelScope.launch {
+                accountRepository
+                    .linkSocialAccount("KAKAO", providerId)
+                    .onSuccess { refreshSocialAccounts() }
+                    .onFailure {
+                        Log.e("SettingsViewModel", "linkSocialAccount failed", it)
+                        onError()
+                    }
+            }
         }
 
         fun onUnlinkRequest(provider: String) {

@@ -5,6 +5,5 @@ data class SettingsUiState(
     val isKakaoLinked: Boolean = false,
     val isLogoutConfirmVisible: Boolean = false,
     val isUnlinkConfirmVisible: Boolean = false,
-    val pendingUnlinkProvider: String? = null,
-    val isSocialLinkComingSoonVisible: Boolean = false
+    val pendingUnlinkProvider: String? = null
 )

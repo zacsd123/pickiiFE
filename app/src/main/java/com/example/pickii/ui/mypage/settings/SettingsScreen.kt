@@ -19,8 +19,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +39,8 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import com.example.pickii.util.kakao.KakaoAuthClient
+import kotlinx.coroutines.launch
 
 /**
  * 설정 화면. 계정 설정(비밀번호 변경/카카오 연동·해제/로그아웃/회원탈퇴)과 알림 설정을 한 화면에서 보여준다(사진 목업 기준).
@@ -59,21 +61,36 @@ fun SettingsScreen(
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
-    if (uiState.isSocialLinkComingSoonVisible) {
-        val message = stringResource(R.string.mypage_profile_social_link_coming_soon)
-        LaunchedEffect(uiState.isSocialLinkComingSoonVisible) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            settingsViewModel.onSocialLinkComingSoonShown()
-        }
-    }
+    val scope = rememberCoroutineScope()
+    val kakaoLinkErrorMessage = stringResource(R.string.mypage_profile_social_link_error)
 
     SettingsScreenContent(
         uiState = uiState,
         notificationUiState = notificationUiState,
         onBackClick = onBackClick,
         onPasswordChangeClick = onNavigateToPasswordChange,
-        onLinkClick = settingsViewModel::onLinkClick,
+        onLinkClick = {
+            scope.launch {
+                KakaoAuthClient
+                    .login(context)
+                    .onSuccess {
+                        KakaoAuthClient
+                            .getUserId()
+                            .onSuccess { providerId ->
+                                settingsViewModel.onKakaoLinkConfirmed(
+                                    providerId = providerId.toString(),
+                                    onError = {
+                                        Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }.onFailure {
+                                Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                            }
+                    }.onFailure {
+                        Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                    }
+            }
+        },
         onUnlinkRequest = settingsViewModel::onUnlinkRequest,
         onDismissUnlinkDialog = settingsViewModel::onDismissUnlinkDialog,
         onConfirmUnlink = settingsViewModel::onConfirmUnlink,
