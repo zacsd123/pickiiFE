@@ -54,6 +54,7 @@ fun ScheduleEditorScreen(
                 .background(EditorBackgroundColor)
     ) {
         ScheduleEditorHeader(
+            title = if (uiState.isEditMode) "일정 수정" else "일정 등록",
             onBackClick = onBackClick
         )
 
@@ -122,6 +123,7 @@ fun ScheduleEditorScreen(
                     startTime = uiState.startTime,
                     endTime = uiState.endTime,
                     isAllDay = uiState.isAllDay,
+                    repeatType = uiState.repeatType,
                     onDateRangeChange = { startDate, endDate ->
                         onEvent(
                             ScheduleEditorUiEvent.DateRangeSelected(startDate, endDate)
@@ -186,6 +188,7 @@ fun ScheduleEditorScreen(
  */
 @Composable
 private fun ScheduleEditorHeader(
+    title: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -216,7 +219,7 @@ private fun ScheduleEditorHeader(
         )
 
         Text(
-            text = "일정 등록",
+            text = title,
             color = EditorHeaderTitleColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold

@@ -41,6 +41,9 @@ private val SummaryArrowBackgroundColor = Color(0xFFFFFFFF)
 private val SummaryDividerColor = Color(0xFFE5E5DE)
 private val SummaryIconBackgroundColor = Color(0xFFF1F2F6)
 
+private val EditButtonBackgroundColor = Color(0xFFF1F2F6)
+private val EditButtonTextColor = Color(0xFF202330)
+
 private val ScheduleDateFormatter =
     DateTimeFormatter.ofPattern(
         "yyyy.MM.dd"
@@ -56,6 +59,7 @@ fun ScheduleSummaryCard(
     schedule: MonthlyScheduleUiModel,
     isExpanded: Boolean,
     onClick: () -> Unit,
+    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -89,7 +93,8 @@ fun ScheduleSummaryCard(
                 ) + fadeOut()
         ) {
             ScheduleExpandedContent(
-                schedule = schedule
+                schedule = schedule,
+                onEditClick = onEditClick
             )
         }
     }
@@ -163,6 +168,7 @@ private fun ScheduleSummaryHeader(
 @Composable
 private fun ScheduleExpandedContent(
     schedule: MonthlyScheduleUiModel,
+    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -259,6 +265,26 @@ private fun ScheduleExpandedContent(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 lineHeight = 22.sp
+            )
+        }
+
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .background(
+                        color = EditButtonBackgroundColor,
+                        shape = RoundedCornerShape(16.dp)
+                    ).clickable(onClick = onEditClick)
+                    .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "일정 수정하기",
+                color = EditButtonTextColor,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }

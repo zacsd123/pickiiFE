@@ -22,8 +22,12 @@ data class ScheduleEditorUiState(
     val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
     val repeatWeekdays: Set<DayOfWeek> = emptySet(),
     val memo: String = "",
+    val editingScheduleId: Long? = null,
     val isSaved: Boolean = false
 ) {
+    val isEditMode: Boolean
+        get() = editingScheduleId != null
+
     val canSave: Boolean
         get() {
             if (title.isBlank()) {
