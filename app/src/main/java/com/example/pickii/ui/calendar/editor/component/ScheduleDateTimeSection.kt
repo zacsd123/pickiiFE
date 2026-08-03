@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.domain.model.ScheduleRepeatType
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -58,6 +59,7 @@ fun ScheduleDateTimeSection(
     startTime: LocalTime,
     endTime: LocalTime,
     isAllDay: Boolean,
+    repeatType: ScheduleRepeatType,
     onDateRangeChange: (LocalDate, LocalDate) -> Unit,
     onStartTimeChange: (LocalTime) -> Unit,
     onEndTimeChange: (LocalTime) -> Unit,
@@ -67,6 +69,8 @@ fun ScheduleDateTimeSection(
     var showDatePicker by remember {
         mutableStateOf(false)
     }
+
+    val isRepeatEnabled = repeatType != ScheduleRepeatType.NONE
 
     Column(
         modifier =
@@ -164,6 +168,7 @@ fun ScheduleDateTimeSection(
         ScheduleDatePickerSheet(
             initialStartDate = startDate,
             initialEndDate = endDate,
+            isRepeatEnabled = isRepeatEnabled,
             onDismiss = {
                 showDatePicker = false
             },

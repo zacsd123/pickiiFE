@@ -74,6 +74,7 @@ private val OrderedWeekdays =
 fun ScheduleDatePickerSheet(
     initialStartDate: LocalDate,
     initialEndDate: LocalDate,
+    isRepeatEnabled: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (startDate: LocalDate, endDate: LocalDate) -> Unit,
     onClear: () -> Unit,
@@ -173,8 +174,9 @@ fun ScheduleDatePickerSheet(
 
             SheetFooter(
                 canClear = selectionStart != null || selectionEnd != null,
-                canSkipEndDate = selectionStart != null,
+                canSkipEndDate = !isRepeatEnabled && selectionStart != null,
                 canConfirm = selectionStart != null && selectionEnd != null,
+                showSkipEndDateButton = !isRepeatEnabled,
                 onClearClick = {
                     selectionStart = null
                     selectionEnd = null
@@ -425,6 +427,7 @@ private fun SheetFooter(
     canClear: Boolean,
     canSkipEndDate: Boolean,
     canConfirm: Boolean,
+    showSkipEndDateButton: Boolean,
     onClearClick: () -> Unit,
     onSkipEndDateClick: () -> Unit,
     onConfirmClick: () -> Unit,
@@ -441,12 +444,14 @@ private fun SheetFooter(
             onClick = onClearClick
         )
 
-        FooterTextButton(
-            text = "지정 안함",
-            enabled = canSkipEndDate,
-            modifier = Modifier.weight(1f),
-            onClick = onSkipEndDateClick
-        )
+        if (showSkipEndDateButton) {
+            FooterTextButton(
+                text = "지정 안함",
+                enabled = canSkipEndDate,
+                modifier = Modifier.weight(1f),
+                onClick = onSkipEndDateClick
+            )
+        }
 
         Box(
             modifier =
