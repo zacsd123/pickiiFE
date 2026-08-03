@@ -16,17 +16,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,11 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
-import com.example.pickii.domain.model.RecruitPostSummary
+import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
-import com.example.pickii.ui.common.PaginationRow
-import com.example.pickii.ui.common.PickiiTopBar
+import com.example.pickii.ui.common.PickiiBottomNav
+import com.example.pickii.ui.common.PickiiBottomNavTab
 import com.example.pickii.ui.common.SelectableChip
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -73,6 +72,9 @@ private val PostActionButtonHeight = 36.dp
  * @param onPostDetailClick 모집 글의 상세보기 버튼 클릭 콜백
  * @param onPostApplyClick 모집 글의 지원하기 버튼 클릭 콜백
  * @param onNotificationClick 알림 아이콘 클릭 콜백
+ * @param onCalendarClick 하단 캘린더 탭 클릭 콜백
+ * @param onChatClick 하단 채팅 탭 클릭 콜백
+ * @param onProfileClick 하단 프로필 탭 클릭 콜백
  */
 @Composable
 fun HomeScreen(
@@ -80,6 +82,9 @@ fun HomeScreen(
     onPostDetailClick: (postId: String) -> Unit = {},
     onPostApplyClick: (postId: String) -> Unit = {},
     onNotificationClick: () -> Unit = {},
+    onCalendarClick: () -> Unit = {},
+    onChatClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -87,7 +92,6 @@ fun HomeScreen(
     HomeScreenContent(
         uiState = uiState,
         onSearchQueryChange = viewModel::onSearchQueryChange,
-        onSearchSubmit = viewModel::onSearchClick,
         onToggleFilterPanel = viewModel::onToggleFilterPanel,
         onCampusScopeChange = viewModel::onCampusScopeChange,
         onCategorySelect = viewModel::onCategorySelect,
@@ -97,10 +101,14 @@ fun HomeScreen(
         onPreviousPageClick = viewModel::onPreviousPage,
         onNextPageClick = viewModel::onNextPage,
         onPageClick = viewModel::onPageClick,
+        onBottomNavTabSelect = viewModel::onBottomNavTabSelect,
         onRegisterPostClick = onRegisterPostClick,
         onPostDetailClick = onPostDetailClick,
         onPostApplyClick = onPostApplyClick,
-        onNotificationClick = onNotificationClick
+        onNotificationClick = onNotificationClick,
+        onCalendarClick = onCalendarClick,
+        onChatClick = onChatClick,
+        onProfileClick = onProfileClick
     )
 }
 
@@ -109,7 +117,6 @@ fun HomeScreen(
 private fun HomeScreenContent(
     uiState: HomeUiState,
     onSearchQueryChange: (String) -> Unit,
-    onSearchSubmit: () -> Unit,
     onToggleFilterPanel: () -> Unit,
     onCampusScopeChange: (CampusScope) -> Unit,
     onCategorySelect: (RecruitCategory) -> Unit,
@@ -119,123 +126,211 @@ private fun HomeScreenContent(
     onPreviousPageClick: () -> Unit,
     onNextPageClick: () -> Unit,
     onPageClick: (Int) -> Unit,
+    onBottomNavTabSelect: (PickiiBottomNavTab) -> Unit,
     onRegisterPostClick: () -> Unit,
     onPostDetailClick: (postId: String) -> Unit,
     onPostApplyClick: (postId: String) -> Unit,
-    onNotificationClick: () -> Unit
+    onNotificationClick: () -> Unit,
+    onCalendarClick: () -> Unit,
+    onChatClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(PickiiYellowLight)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PickiiTopBar(
-            notificationCount = uiState.notificationCount,
-            onNotificationClick = onNotificationClick,
-            centerContent = {
-                Text(
-                    text = uiState.schoolName,
-                    color = PickiiTextGray,
-                    fontSize = 13.sp,
-                    modifier = Modifier.weight(1f)
+    Scaffold(
+        containerColor = PickiiYellowLight,
+        bottomBar = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                PickiiBottomNav(
+                    selectedTab = uiState.selectedBottomNavTab,
+                    onTabSelect = { tab ->
+                        onBottomNavTabSelect(tab)
+                        when (tab) {
+                            PickiiBottomNavTab.HOME -> Unit
+                            PickiiBottomNavTab.CALENDAR -> onCalendarClick()
+                            PickiiBottomNavTab.CHAT -> onChatClick()
+                            PickiiBottomNavTab.MY_PAGE -> onProfileClick()
+                        }
+                    }
                 )
             }
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        SearchField(query = uiState.searchQuery, onQueryChange = onSearchQueryChange, onSubmit = onSearchSubmit)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            FilterToggleButton(onClick = onToggleFilterPanel)
-            CampusScopeToggle(selected = uiState.campusScope, onSelect = onCampusScopeChange)
         }
-
-        if (uiState.isFilterExpanded) {
-            Spacer(modifier = Modifier.height(16.dp))
-            FilterPanel(
-                categories = uiState.categories,
-                topics = uiState.topics,
-                selectedCategory = uiState.selectedCategory,
-                selectedTopics = uiState.selectedTopics,
-                onCategorySelect = onCategorySelect,
-                onTopicToggle = onTopicToggle,
-                onResetFilters = onResetFilters,
-                onSearchClick = onSearchClick
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row(
+    ) { innerPadding ->
+        Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp, 0.dp, 0.dp, 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .background(PickiiYellowLight)
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.home_recruit_posts_title, uiState.totalElements),
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HomeTopBar(
+                schoolName = uiState.schoolName,
+                notificationCount = uiState.notificationCount,
+                onNotificationClick = onNotificationClick
             )
-            RegisterPostButton(onClick = onRegisterPostClick)
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        uiState.posts.chunked(2).forEach { rowPosts ->
+            SearchField(query = uiState.searchQuery, onQueryChange = onSearchQueryChange)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                rowPosts.forEach { post ->
-                    PostCard(
-                        post = post,
-                        onDetailClick = { onPostDetailClick(post.id) },
-                        onApplyClick = { onPostApplyClick(post.id) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                if (rowPosts.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                FilterToggleButton(onClick = onToggleFilterPanel)
+                CampusScopeToggle(selected = uiState.campusScope, onSelect = onCampusScopeChange)
             }
+
+            if (uiState.isFilterExpanded) {
+                Spacer(modifier = Modifier.height(16.dp))
+                FilterPanel(
+                    selectedCategory = uiState.selectedCategory,
+                    selectedTopics = uiState.selectedTopics,
+                    onCategorySelect = onCategorySelect,
+                    onTopicToggle = onTopicToggle,
+                    onResetFilters = onResetFilters,
+                    onSearchClick = onSearchClick
+                )
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 0.dp, 0.dp, 0.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.home_recruit_posts_title, uiState.posts.size),
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                RegisterPostButton(onClick = onRegisterPostClick)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            uiState.currentPagePosts.chunked(2).forEach { rowPosts ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowPosts.forEach { post ->
+                        PostCard(
+                            post = post,
+                            onDetailClick = { onPostDetailClick(post.id) },
+                            onApplyClick = { onPostApplyClick(post.id) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (rowPosts.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            PaginationRow(
+                currentPage = uiState.currentPage,
+                totalPages = uiState.totalPages,
+                visiblePageNumbers = uiState.visiblePageNumbers,
+                onPageClick = onPageClick,
+                onPreviousClick = onPreviousPageClick,
+                onNextClick = onNextPageClick
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
-
-        PaginationRow(
-            currentPage = uiState.currentPage,
-            totalPages = uiState.totalPages,
-            visiblePageNumbers = uiState.visiblePageNumbers,
-            onPageClick = onPageClick,
-            onPreviousClick = onPreviousPageClick,
-            onNextClick = onNextPageClick
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
-/** 공고 제목/작성자를 검색하는 입력창. 검색 아이콘을 누르거나 키보드의 검색 버튼을 누르면 [onSubmit]이 호출된다. */
+/** 상단의 Pickii 로고, 학교명, 알림 아이콘. */
+@Composable
+private fun HomeTopBar(
+    schoolName: String,
+    notificationCount: Int,
+    onNotificationClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "P", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(text = "Pickii", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = schoolName,
+            color = PickiiTextGray,
+            fontSize = 13.sp,
+            modifier = Modifier.weight(1f)
+        )
+
+        Box(
+            modifier =
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(PickiiFieldBackground)
+                    .clickable(onClick = onNotificationClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Notifications,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.size(18.dp)
+            )
+
+            if (notificationCount > 0) {
+                Box(
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(Color.Red),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = notificationCount.toString(),
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** 공고 제목/작성자를 검색하는 입력창. */
 @Composable
 private fun SearchField(
     query: String,
-    onQueryChange: (String) -> Unit,
-    onSubmit: () -> Unit
+    onQueryChange: (String) -> Unit
 ) {
     OutlinedTextField(
         value = query,
@@ -246,16 +341,7 @@ private fun SearchField(
         },
         singleLine = true,
         shape = RoundedCornerShape(ChipCornerRadius),
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                tint = PickiiTextGray,
-                modifier = Modifier.clickable(onClick = onSubmit)
-            )
-        },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
+        trailingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null, tint = PickiiTextGray) },
         colors =
             OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
@@ -297,8 +383,6 @@ private fun FilterToggleButton(onClick: () -> Unit) {
 /** 카테고리/주제를 고르는 필터 패널. */
 @Composable
 private fun FilterPanel(
-    categories: List<RecruitCategory>,
-    topics: List<RecruitTopic>,
     selectedCategory: RecruitCategory?,
     selectedTopics: Set<RecruitTopic>,
     onCategorySelect: (RecruitCategory) -> Unit,
@@ -322,7 +406,7 @@ private fun FilterPanel(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            categories.forEach { category ->
+            RecruitCategory.entries.forEach { category ->
                 SelectableChip(
                     label = category.label,
                     selected = category == selectedCategory,
@@ -341,13 +425,13 @@ private fun FilterPanel(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(10.dp))
-        topics.chunked(4).forEach { rowTopics ->
+        RecruitTopic.entries.chunked(4).forEach { rowTopics ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 rowTopics.forEach { topic ->
                     SelectableChip(
                         label = topic.label,
                         selected = topic in selectedTopics,
-                        enabled = true,
+                        enabled = topic.isEnabled,
                         onClick = { onTopicToggle(topic) }
                     )
                 }
@@ -422,7 +506,7 @@ private fun RegisterPostButton(onClick: () -> Unit) {
 /** 모집 글 하나를 보여주는 카드. 카드 영역을 누르면 상세보기와 동일하게 상세 화면으로 이동한다. */
 @Composable
 private fun PostCard(
-    post: RecruitPostSummary,
+    post: RecruitPost,
     onDetailClick: () -> Unit,
     onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -513,6 +597,63 @@ private fun PostCard(
     }
 }
 
+/** 모집 글 목록의 페이지 번호. 현재 페이지는 검은 원으로 강조되고, 첫/마지막 페이지에서는 이전/다음 버튼이 비활성화된다. */
+@Composable
+private fun PaginationRow(
+    currentPage: Int,
+    totalPages: Int,
+    visiblePageNumbers: List<Int>,
+    onPageClick: (Int) -> Unit,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit
+) {
+    val hasPreviousPage = currentPage > 1
+    val hasNextPage = currentPage < totalPages
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "<",
+            color = if (hasPreviousPage) Color.Black else PickiiTextGray,
+            fontSize = 14.sp,
+            modifier = Modifier.clickable(enabled = hasPreviousPage, onClick = onPreviousClick)
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        visiblePageNumbers.forEach { page ->
+            val isSelected = page == currentPage
+            Box(
+                modifier =
+                    Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) Color.Black else Color.Transparent)
+                        .clickable(enabled = !isSelected) { onPageClick(page) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = page.toString(),
+                    color = if (isSelected) Color.White else PickiiTextGray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        Text(
+            text = ">",
+            color = if (hasNextPage) Color.Black else PickiiTextGray,
+            fontSize = 14.sp,
+            modifier = Modifier.clickable(enabled = hasNextPage, onClick = onNextClick)
+        )
+    }
+}
+
 /** [HomeScreen]의 프리뷰 (필터 패널이 접힌 기본 상태). */
 @Preview(showBackground = true)
 @Composable
@@ -521,7 +662,6 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             uiState = HomeUiState(),
             onSearchQueryChange = {},
-            onSearchSubmit = {},
             onToggleFilterPanel = {},
             onCampusScopeChange = {},
             onCategorySelect = {},
@@ -531,10 +671,14 @@ private fun HomeScreenPreview() {
             onPreviousPageClick = {},
             onNextPageClick = {},
             onPageClick = {},
+            onBottomNavTabSelect = {},
             onRegisterPostClick = {},
             onPostDetailClick = {},
             onPostApplyClick = {},
-            onNotificationClick = {}
+            onNotificationClick = {},
+            onCalendarClick = {},
+            onChatClick = {},
+            onProfileClick = {}
         )
     }
 }
@@ -547,7 +691,6 @@ private fun HomeScreenFilterExpandedPreview() {
         HomeScreenContent(
             uiState = HomeUiState(isFilterExpanded = true),
             onSearchQueryChange = {},
-            onSearchSubmit = {},
             onToggleFilterPanel = {},
             onCampusScopeChange = {},
             onCategorySelect = {},
@@ -557,10 +700,14 @@ private fun HomeScreenFilterExpandedPreview() {
             onPreviousPageClick = {},
             onNextPageClick = {},
             onPageClick = {},
+            onBottomNavTabSelect = {},
             onRegisterPostClick = {},
             onPostDetailClick = {},
             onPostApplyClick = {},
-            onNotificationClick = {}
+            onNotificationClick = {},
+            onCalendarClick = {},
+            onChatClick = {},
+            onProfileClick = {}
         )
     }
 }

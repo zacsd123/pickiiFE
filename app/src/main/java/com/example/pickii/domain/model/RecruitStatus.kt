@@ -5,6 +5,5 @@ enum class RecruitStatus(
     val label: String
 ) {
     OPEN("모집 중"),
-    CLOSED("모집 마감"),
-    ADDITIONAL("추가 모집중")
+    CLOSED("모집 마감")
 }

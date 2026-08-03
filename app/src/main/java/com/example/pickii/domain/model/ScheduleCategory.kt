@@ -12,5 +12,5 @@ package com.example.pickii.domain.model
 data class ScheduleCategory(
     val id: Long,
     val name: String,
-    val color: ScheduleColorType
+    val color: ScheduleColorType,
 )

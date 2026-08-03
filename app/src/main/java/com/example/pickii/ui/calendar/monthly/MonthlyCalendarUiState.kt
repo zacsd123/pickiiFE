@@ -1,10 +1,8 @@
 package com.example.pickii.ui.calendar.monthly
 
-import com.example.pickii.domain.model.ScheduleRepeatType
-import com.example.pickii.domain.model.scheduleRecurrenceIncludesDate
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.LocalTime
 
 /**
  * 월간 캘린더 화면에 표시할 전체 상태다.
@@ -18,16 +16,16 @@ data class MonthlyCalendarUiState(
     val displayedYearMonth: YearMonth = YearMonth.of(2026, 7),
     val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
     val schedules: List<MonthlyScheduleUiModel> = createMockSchedules(),
-    val expandedScheduleId: Long? = null
+    val expandedScheduleId: Long? = null,
 ) {
+
     /**
      * 현재 선택한 날짜에 포함되는 일정 목록이다.
      */
     val selectedDateSchedules: List<MonthlyScheduleUiModel>
-        get() =
-            schedules.filter { schedule ->
-                schedule.includesDate(selectedDate)
-            }
+        get() = schedules.filter { schedule ->
+            schedule.includesDate(selectedDate)
+        }
 }
 
 /**
@@ -57,23 +55,17 @@ data class MonthlyScheduleUiModel(
     val startTime: String = "",
     val endTime: String = "",
     val location: String = "",
-    val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
-    val repeatWeekdays: Set<DayOfWeek> = emptySet(),
     val repeatText: String = "없음",
     val memo: String = "",
-    val isAllDay: Boolean
+    val isAllDay: Boolean,
 ) {
+
     /**
-     * 전달받은 날짜가 일정 기간(반복 포함) 안에 포함되는지 확인한다.
+     * 전달받은 날짜가 일정 기간 안에 포함되는지 확인한다.
      */
-    fun includesDate(date: LocalDate): Boolean =
-        scheduleRecurrenceIncludesDate(
-            date = date,
-            startDate = startDate,
-            endDate = endDate,
-            repeatType = repeatType,
-            repeatWeekdays = repeatWeekdays
-        )
+    fun includesDate(date: LocalDate): Boolean {
+        return !date.isBefore(startDate) && !date.isAfter(endDate)
+    }
 
     /**
      * 여러 날짜에 걸친 일정인지 반환한다.
@@ -96,14 +88,14 @@ enum class ScheduleColorType {
     PURPLE,
     PINK,
     GRAY,
-    BLACK
+    BLACK,
 }
 
 /**
  * 화면 확인을 위한 임시 일정 데이터다.
  */
-private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
-    listOf(
+private fun createMockSchedules(): List<MonthlyScheduleUiModel> {
+    return listOf(
         MonthlyScheduleUiModel(
             id = 1L,
             title = "아르바이트",
@@ -115,7 +107,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             location = "스타벅스 강남점",
             repeatText = "매주 토, 일",
             memo = "머리끈 꼭 챙기기. 오픈 담당이라 8:50까지 도착해야 함.",
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 2L,
@@ -128,7 +120,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             location = "카페",
             repeatText = "없음",
             memo = "",
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 3L,
@@ -137,7 +129,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryColor = ScheduleColorType.GREEN,
             startDate = LocalDate.of(2026, 7, 6),
             endDate = LocalDate.of(2026, 7, 10),
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 4L,
@@ -145,7 +137,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "개인",
             categoryColor = ScheduleColorType.PURPLE,
             startDate = LocalDate.of(2026, 7, 7),
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 5L,
@@ -153,7 +145,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "약속",
             categoryColor = ScheduleColorType.RED,
             startDate = LocalDate.of(2026, 7, 14),
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 6L,
@@ -161,7 +153,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "개인",
             categoryColor = ScheduleColorType.PURPLE,
             startDate = LocalDate.of(2026, 7, 18),
-            isAllDay = true
+            isAllDay = true,
         ),
         MonthlyScheduleUiModel(
             id = 7L,
@@ -169,7 +161,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "없음",
             categoryColor = ScheduleColorType.GRAY,
             startDate = LocalDate.of(2026, 7, 21),
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 8L,
@@ -177,7 +169,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "없음",
             categoryColor = ScheduleColorType.BLACK,
             startDate = LocalDate.of(2026, 7, 25),
-            isAllDay = false
+            isAllDay = false,
         ),
         MonthlyScheduleUiModel(
             id = 9L,
@@ -185,6 +177,7 @@ private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
             categoryName = "개인",
             categoryColor = ScheduleColorType.PURPLE,
             startDate = LocalDate.of(2026, 7, 28),
-            isAllDay = false
-        )
+            isAllDay = false,
+        ),
     )
+}

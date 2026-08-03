@@ -33,55 +33,53 @@ private val LocationCursorColor = Color(0xFF1B1B1B)
 fun ScheduleLocationField(
     location: String,
     onLocationChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(
-                    color = LocationFieldBackgroundColor,
-                    shape = RoundedCornerShape(18.dp)
-                ).padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp
-                )
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = LocationFieldBackgroundColor,
+                shape = RoundedCornerShape(18.dp),
+            )
+            .padding(
+                horizontal = 20.dp,
+                vertical = 18.dp,
+            ),
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "⌖",
                 color = LocationLabelColor,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
 
             Spacer(
-                modifier = Modifier.width(8.dp)
+                modifier = Modifier.width(8.dp),
             )
 
             Text(
                 text = "위치",
                 color = LocationLabelColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
 
         BasicTextField(
             value = location,
             onValueChange = onLocationChange,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 14.dp),
-            textStyle =
-                TextStyle(
-                    color = LocationTextColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp),
+            textStyle = TextStyle(
+                color = LocationTextColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+            ),
             cursorBrush = SolidColor(LocationCursorColor),
             singleLine = true,
             decorationBox = { innerTextField ->
@@ -90,12 +88,12 @@ fun ScheduleLocationField(
                         text = "위치를 입력해주세요.",
                         color = LocationPlaceholderColor,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
 
                 innerTextField()
-            }
+            },
         )
     }
 }

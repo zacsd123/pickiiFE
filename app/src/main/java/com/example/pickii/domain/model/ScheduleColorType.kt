@@ -12,5 +12,5 @@ enum class ScheduleColorType {
     PURPLE,
     PINK,
     GRAY,
-    BLACK
+    BLACK,
 }

@@ -14,7 +14,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class CalendarRepositoryModule {
+
     @Binds
     @Singleton
-    abstract fun bindCalendarRepository(fakeCalendarRepository: FakeCalendarRepository): CalendarRepository
+    abstract fun bindCalendarRepository(
+        fakeCalendarRepository: FakeCalendarRepository,
+    ): CalendarRepository
 }

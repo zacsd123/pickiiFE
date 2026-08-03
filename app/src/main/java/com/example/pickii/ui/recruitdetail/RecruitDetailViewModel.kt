@@ -68,6 +68,7 @@ data class RecruitDetailUiState(
     val post: RecruitPost? = null,
     val comments: List<RecruitComment> = emptyList(),
     val isScraped: Boolean = false,
+    val hasApplied: Boolean = false,
     val currentUser: CurrentUser? = null,
     val isLoggedIn: Boolean = false,
     val commentDraft: String = "",
@@ -76,8 +77,7 @@ data class RecruitDetailUiState(
     val isLoginPromptVisible: Boolean = false,
     val pendingDeleteCommentId: String? = null,
     val isDeletePostDialogVisible: Boolean = false,
-    val isClosePostDialogVisible: Boolean = false,
-    val isReopenPostDialogVisible: Boolean = false
+    val isClosePostDialogVisible: Boolean = false
 ) {
     /** 댓글을 오래된 순으로 정렬하고 답글을 들여쓰기 깊이와 함께 펼친 목록. */
     val displayComments: List<CommentDisplayItem>
@@ -108,12 +108,7 @@ private data class DetailSnapshot(
     val currentUser: CurrentUser?
 )
 
-/**
- * 공고 상세 화면의 상태를 보관하고, [RecruitRepository]로 게시글/댓글을 조회하며 스크랩·지원·댓글·작성자 전용 동작을 처리한다.
- *
- * `observePosts()`처럼 전체를 구독하는 API가 서버에 없으므로, [postFlow]/[commentsFlow]에 조회 결과를
- * 직접 채워 넣고 성공한 변경 동작 뒤에는 해당 부분만 다시 조회한다.
- */
+/** 공고 상세 화면의 상태를 보관하고, 스크랩·지원·댓글·작성자 전용 동작을 처리한다. */
 @HiltViewModel
 class RecruitDetailViewModel
     @Inject
@@ -123,9 +118,6 @@ class RecruitDetailViewModel
         private val sessionRepository: SessionRepository
     ) : ViewModel() {
         private val postId: String = requireNotNull(savedStateHandle[ARG_POST_ID]) { "postId가 필요합니다." }
-
-        private val postFlow = MutableStateFlow<RecruitPost?>(null)
-        private val commentsFlow = MutableStateFlow<List<RecruitComment>>(emptyList())
 
         private val _uiState = MutableStateFlow(RecruitDetailUiState())
         val uiState: StateFlow<RecruitDetailUiState> = _uiState.asStateFlow()
@@ -137,43 +129,41 @@ class RecruitDetailViewModel
 
         init {
             observeDetail()
-            loadPost()
-            loadComments()
         }
 
         /** 게시글, 댓글, 로그인 상태를 함께 구독해 화면 상태에 반영한다. */
         private fun observeDetail() {
             viewModelScope.launch {
                 combine(
-                    postFlow,
-                    commentsFlow,
+                    recruitRepository.observePosts(),
+                    recruitRepository.observeComments(postId),
                     sessionRepository.isLoggedIn,
                     sessionRepository.currentUser
-                ) { post, comments, isLoggedIn, currentUser ->
-                    DetailSnapshot(post = post, comments = comments, isLoggedIn = isLoggedIn, currentUser = currentUser)
-                }.collect { snapshot ->
-                    _uiState.update {
-                        it.copy(
-                            post = snapshot.post,
-                            comments = snapshot.comments,
-                            isScraped = snapshot.post?.isScrapped ?: false,
-                            isLoggedIn = snapshot.isLoggedIn,
-                            currentUser = snapshot.currentUser
-                        )
-                    }
-                }
+                ) { posts, comments, isLoggedIn, currentUser ->
+                    DetailSnapshot(
+                        post = posts.firstOrNull { it.id == postId },
+                        comments = comments,
+                        isLoggedIn = isLoggedIn,
+                        currentUser = currentUser
+                    )
+                }.collect { snapshot -> applySnapshot(snapshot) }
             }
         }
 
-        private fun loadPost() {
-            viewModelScope.launch {
-                recruitRepository.getPostById(postId).onSuccess { postFlow.value = it }
-            }
-        }
-
-        private fun loadComments() {
-            viewModelScope.launch {
-                recruitRepository.getComments(postId).onSuccess { commentsFlow.value = it }
+        /** 구독 결과를 스크랩/지원 여부와 함께 화면 상태에 반영한다. */
+        private fun applySnapshot(snapshot: DetailSnapshot) {
+            val userId = snapshot.currentUser?.id
+            val isScraped = userId?.let { recruitRepository.isScraped(postId, it) } ?: false
+            val hasApplied = userId?.let { recruitRepository.hasApplied(postId, it) } ?: false
+            _uiState.update {
+                it.copy(
+                    post = snapshot.post,
+                    comments = snapshot.comments,
+                    isLoggedIn = snapshot.isLoggedIn,
+                    currentUser = snapshot.currentUser,
+                    isScraped = isScraped,
+                    hasApplied = hasApplied
+                )
             }
         }
 
@@ -194,20 +184,14 @@ class RecruitDetailViewModel
 
         /** 스크랩 상태를 토글한다. 비로그인 상태면 로그인 유도 팝업을 띄운다. */
         fun onScrapClick() {
-            if (!_uiState.value.isLoggedIn) {
+            val userId = _uiState.value.currentUser?.id
+            if (userId == null) {
                 onLoginPromptRequested()
                 return
             }
-            val wasScraped = _uiState.value.isScraped
             viewModelScope.launch {
-                if (wasScraped) {
-                    recruitRepository.unscrapPost(postId).onSuccess {
-                        postFlow.update { post -> post?.copy(isScrapped = false) }
-                    }
-                } else {
-                    recruitRepository.scrapPost(postId).onSuccess { isScrapped ->
-                        postFlow.update { post -> post?.copy(isScrapped = isScrapped) }
-                    }
+                recruitRepository.toggleScrap(postId, userId).onSuccess { isScraped ->
+                    _uiState.update { it.copy(isScraped = isScraped) }
                 }
             }
         }
@@ -242,7 +226,8 @@ class RecruitDetailViewModel
          */
         fun onSubmitComment() {
             val state = _uiState.value
-            if (!state.isLoggedIn) {
+            val user = state.currentUser
+            if (user == null) {
                 onLoginPromptRequested()
                 return
             }
@@ -251,17 +236,14 @@ class RecruitDetailViewModel
                 return
             }
             viewModelScope.launch {
-                recruitRepository
-                    .addComment(
-                        postId = postId,
-                        parentCommentId = state.replyTargetCommentId,
-                        content = state.commentDraft.trim()
-                    ).onSuccess {
-                        _uiState.update {
-                            it.copy(commentDraft = "", replyTargetCommentId = null, replyTargetNickname = null)
-                        }
-                        loadComments()
-                    }
+                recruitRepository.addComment(
+                    postId = postId,
+                    authorId = user.id,
+                    authorNickname = user.nickname,
+                    parentCommentId = state.replyTargetCommentId,
+                    content = state.commentDraft.trim()
+                )
+                _uiState.update { it.copy(commentDraft = "", replyTargetCommentId = null, replyTargetNickname = null) }
             }
         }
 
@@ -279,7 +261,7 @@ class RecruitDetailViewModel
         fun onConfirmDeleteComment() {
             val commentId = _uiState.value.pendingDeleteCommentId ?: return
             viewModelScope.launch {
-                recruitRepository.deleteComment(commentId).onSuccess { loadComments() }
+                recruitRepository.deleteComment(commentId)
                 _uiState.update { it.copy(pendingDeleteCommentId = null) }
             }
         }
@@ -297,26 +279,8 @@ class RecruitDetailViewModel
         /** 공고 마감을 확정한다. */
         fun onConfirmCloseRecruiting() {
             viewModelScope.launch {
-                recruitRepository.closePost(postId).onSuccess { loadPost() }
+                recruitRepository.closePost(postId)
                 _uiState.update { it.copy(isClosePostDialogVisible = false) }
-            }
-        }
-
-        /** 추가 모집 확인 팝업을 띄운다. */
-        fun onReopenRecruitingRequested() {
-            _uiState.update { it.copy(isReopenPostDialogVisible = true) }
-        }
-
-        /** 추가 모집 확인 팝업을 닫는다. */
-        fun onDismissReopenRecruitingDialog() {
-            _uiState.update { it.copy(isReopenPostDialogVisible = false) }
-        }
-
-        /** 추가 모집을 확정한다. */
-        fun onConfirmReopenRecruiting() {
-            viewModelScope.launch {
-                recruitRepository.reopenAdditionalRecruiting(postId).onSuccess { loadPost() }
-                _uiState.update { it.copy(isReopenPostDialogVisible = false) }
             }
         }
 
@@ -337,10 +301,9 @@ class RecruitDetailViewModel
          */
         fun onConfirmDeletePost(onDeleted: () -> Unit) {
             viewModelScope.launch {
-                recruitRepository.deletePost(postId).onSuccess {
-                    _uiState.update { it.copy(isDeletePostDialogVisible = false) }
-                    onDeleted()
-                }
+                recruitRepository.deletePost(postId)
+                _uiState.update { it.copy(isDeletePostDialogVisible = false) }
+                onDeleted()
             }
         }
 

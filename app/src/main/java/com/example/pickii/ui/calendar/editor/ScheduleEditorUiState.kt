@@ -2,7 +2,6 @@ package com.example.pickii.ui.calendar.editor
 
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.domain.model.ScheduleRepeatType
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -20,13 +19,9 @@ data class ScheduleEditorUiState(
     val isAllDay: Boolean = false,
     val location: String = "",
     val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
-    val repeatWeekdays: Set<DayOfWeek> = emptySet(),
     val memo: String = "",
-    val editingScheduleId: Long? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
 ) {
-    val isEditMode: Boolean
-        get() = editingScheduleId != null
 
     val canSave: Boolean
         get() {

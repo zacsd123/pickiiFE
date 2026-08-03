@@ -1,3 +1,4 @@
 package com.example.pickii.ui.calendar
 
-class CalendarUiEvent
+class CalendarUiEvent {
+}

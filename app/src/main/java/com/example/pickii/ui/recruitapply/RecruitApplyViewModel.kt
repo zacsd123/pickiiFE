@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
-import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
@@ -26,9 +25,6 @@ import javax.inject.Inject
 
 /** "전달 메시지"에 입력할 수 있는 최대 글자 수. */
 private const val MAX_MESSAGE_LENGTH = 300
-
-/** 서버가 이미 지원한 공고에 다시 지원했을 때 내려주는 에러 코드. */
-private const val ERROR_CODE_ALREADY_APPLIED = "ALREADY_APPLIED"
 
 /** [RecruitApplyScreen]에 표시되는 상태. */
 data class RecruitApplyUiState(
@@ -70,15 +66,15 @@ class RecruitApplyViewModel
         val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
 
         init {
-            loadPost()
+            observePost()
             observeCurrentUser()
         }
 
-        /** 이 화면이 보여줄 게시글을 [RecruitRepository]에서 한 번 조회한다. */
-        private fun loadPost() {
+        /** [RecruitRepository]에서 이 화면이 보여줄 게시글을 구독한다. */
+        private fun observePost() {
             viewModelScope.launch {
-                recruitRepository.getPostById(postId).onSuccess { post ->
-                    _uiState.update { it.copy(post = post) }
+                recruitRepository.observePosts().collect { posts ->
+                    _uiState.update { it.copy(post = posts.firstOrNull { post -> post.id == postId }) }
                 }
             }
         }
@@ -114,21 +110,14 @@ class RecruitApplyViewModel
             _uiState.update { it.copy(aiDialogState = AiDialogState.Hidden) }
         }
 
-        /**
-         * 지금까지 입력한 메시지를 공고 맥락에 맞게 AI로 다듬는다.
-         *
-         * 원본 메시지가 필요한 API라, 비어 있으면 호출하지 않고 안내 토스트만 띄운다.
-         */
+        /** 게시글 정보를 바탕으로 AI 지원 메시지 초안을 생성한다. */
         private fun generateAiDraft() {
-            val message = _uiState.value.message
-            if (message.isBlank()) {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_ai_draft_message_required))
-                return
-            }
+            val post = _uiState.value.post ?: return
             _uiState.update { it.copy(aiDialogState = AiDialogState.Loading) }
             viewModelScope.launch {
+                val prompt = "${post.title} (${post.category.label}, ${post.topic.label})"
                 recruitRepository
-                    .generateApplyAiDraft(postId, message)
+                    .generateAiDraft(prompt)
                     .onSuccess { draft ->
                         _uiState.update { it.copy(message = draft, aiDialogState = AiDialogState.Hidden) }
                     }.onFailure {
@@ -152,19 +141,20 @@ class RecruitApplyViewModel
             _uiState.update { it.copy(isSubmitConfirmDialogVisible = true) }
         }
 
-        /** 지원 확인 팝업에서 확인을 눌러 실제로 지원을 등록한다. 이미 지원한 공고면 안내 토스트만 띄운다. */
+        /** 지원 확인 팝업에서 확인을 눌러 실제로 지원을 등록한다. */
         fun onSubmitConfirm() {
             val post = _uiState.value.post ?: return
+            val user = _uiState.value.currentUser ?: return
             _uiState.update { it.copy(isSubmitConfirmDialogVisible = false) }
             viewModelScope.launch {
                 recruitRepository
-                    .submitApplication(postId = post.id, message = _uiState.value.message)
-                    .onSuccess {
+                    .submitApplication(
+                        postId = post.id,
+                        applicantId = user.id,
+                        applicantNickname = user.nickname,
+                        message = _uiState.value.message
+                    ).onSuccess {
                         _uiState.update { it.copy(isCompletionDialogVisible = true) }
-                    }.onFailure { error ->
-                        if (error is ApiException && error.code == ERROR_CODE_ALREADY_APPLIED) {
-                            emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_detail_toast_already_applied))
-                        }
                     }
             }
         }
@@ -188,10 +178,5 @@ class RecruitApplyViewModel
         /** 뒤로가기 경고 팝업을 닫고 화면에 남는다. */
         fun onBackWarningDismiss() {
             _uiState.update { it.copy(isBackWarningDialogVisible = false) }
-        }
-
-        /** 1회성 이벤트를 발행한다. */
-        private fun emitEvent(event: RecruitUiEvent) {
-            viewModelScope.launch { _events.send(event) }
         }
     }

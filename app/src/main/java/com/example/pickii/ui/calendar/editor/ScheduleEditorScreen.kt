@@ -45,40 +45,36 @@ fun ScheduleEditorScreen(
     onBackClick: () -> Unit,
     onManageCategoryClick: () -> Unit,
     onEvent: (ScheduleEditorUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(EditorBackgroundColor)
+        modifier = modifier
+            .fillMaxSize()
+            .background(EditorBackgroundColor),
     ) {
         ScheduleEditorHeader(
-            title = if (uiState.isEditMode) "일정 수정" else "일정 등록",
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
         )
 
         LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-            contentPadding =
-                PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 20.dp,
-                    bottom = 40.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                end = 20.dp,
+                top = 20.dp,
+                bottom = 40.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
                 ScheduleTitleField(
                     title = uiState.title,
                     onTitleChange = { title ->
                         onEvent(
-                            ScheduleEditorUiEvent.TitleChanged(title)
+                            ScheduleEditorUiEvent.TitleChanged(title),
                         )
-                    }
+                    },
                 )
             }
 
@@ -89,30 +85,11 @@ fun ScheduleEditorScreen(
                     onCategoryClick = { categoryId ->
                         onEvent(
                             ScheduleEditorUiEvent.CategorySelected(
-                                categoryId
-                            )
+                                categoryId,
+                            ),
                         )
                     },
-                    onManageClick = onManageCategoryClick
-                )
-            }
-
-            item {
-                ScheduleRepeatSection(
-                    repeatType = uiState.repeatType,
-                    onRepeatTypeChange = { repeatType ->
-                        onEvent(
-                            ScheduleEditorUiEvent.RepeatTypeChanged(
-                                repeatType
-                            )
-                        )
-                    },
-                    selectedWeekdays = uiState.repeatWeekdays,
-                    onWeekdayToggle = { dayOfWeek ->
-                        onEvent(
-                            ScheduleEditorUiEvent.RepeatWeekdayToggled(dayOfWeek)
-                        )
-                    }
+                    onManageClick = onManageCategoryClick,
                 )
             }
 
@@ -123,27 +100,31 @@ fun ScheduleEditorScreen(
                     startTime = uiState.startTime,
                     endTime = uiState.endTime,
                     isAllDay = uiState.isAllDay,
-                    repeatType = uiState.repeatType,
-                    onDateRangeChange = { startDate, endDate ->
+                    onStartDateChange = { date ->
                         onEvent(
-                            ScheduleEditorUiEvent.DateRangeSelected(startDate, endDate)
+                            ScheduleEditorUiEvent.StartDateChanged(date),
+                        )
+                    },
+                    onEndDateChange = { date ->
+                        onEvent(
+                            ScheduleEditorUiEvent.EndDateChanged(date),
                         )
                     },
                     onStartTimeChange = { time ->
                         onEvent(
-                            ScheduleEditorUiEvent.StartTimeChanged(time)
+                            ScheduleEditorUiEvent.StartTimeChanged(time),
                         )
                     },
                     onEndTimeChange = { time ->
                         onEvent(
-                            ScheduleEditorUiEvent.EndTimeChanged(time)
+                            ScheduleEditorUiEvent.EndTimeChanged(time),
                         )
                     },
                     onAllDayChange = { isAllDay ->
                         onEvent(
-                            ScheduleEditorUiEvent.AllDayChanged(isAllDay)
+                            ScheduleEditorUiEvent.AllDayChanged(isAllDay),
                         )
-                    }
+                    },
                 )
             }
 
@@ -152,9 +133,22 @@ fun ScheduleEditorScreen(
                     location = uiState.location,
                     onLocationChange = { location ->
                         onEvent(
-                            ScheduleEditorUiEvent.LocationChanged(location)
+                            ScheduleEditorUiEvent.LocationChanged(location),
                         )
-                    }
+                    },
+                )
+            }
+
+            item {
+                ScheduleRepeatSection(
+                    repeatType = uiState.repeatType,
+                    onRepeatTypeChange = { repeatType ->
+                        onEvent(
+                            ScheduleEditorUiEvent.RepeatTypeChanged(
+                                repeatType,
+                            ),
+                        )
+                    },
                 )
             }
 
@@ -163,9 +157,9 @@ fun ScheduleEditorScreen(
                     memo = uiState.memo,
                     onMemoChange = { memo ->
                         onEvent(
-                            ScheduleEditorUiEvent.MemoChanged(memo)
+                            ScheduleEditorUiEvent.MemoChanged(memo),
                         )
-                    }
+                    },
                 )
             }
 
@@ -174,9 +168,9 @@ fun ScheduleEditorScreen(
                     isEnabled = uiState.canSave,
                     onClick = {
                         onEvent(
-                            ScheduleEditorUiEvent.SaveClicked
+                            ScheduleEditorUiEvent.SaveClicked,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -188,41 +182,39 @@ fun ScheduleEditorScreen(
  */
 @Composable
 private fun ScheduleEditorHeader(
-    title: String,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(EditorHeaderBackgroundColor)
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
+            .fillMaxWidth()
+            .background(EditorHeaderBackgroundColor)
+            .padding(
+                horizontal = 20.dp,
+                vertical = 18.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "‹",
-            modifier =
-                Modifier
-                    .clickable(
-                        onClick = onBackClick
-                    ).padding(
-                        end = 16.dp
-                    ),
+            modifier = Modifier
+                .clickable(
+                    onClick = onBackClick,
+                )
+                .padding(
+                    end = 16.dp,
+                ),
             color = EditorBackButtonColor,
             fontSize = 34.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 34.sp
+            lineHeight = 34.sp,
         )
 
         Text(
-            text = title,
+            text = "일정 등록",
             color = EditorHeaderTitleColor,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
     }
 }
@@ -234,33 +226,33 @@ private fun ScheduleEditorHeader(
 private fun ScheduleSaveButton(
     isEnabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(
-                    color =
-                        if (isEnabled) {
-                            SaveButtonEnabledColor
-                        } else {
-                            SaveButtonDisabledColor
-                        },
-                    shape = RoundedCornerShape(16.dp)
-                ).clickable(
-                    enabled = isEnabled,
-                    onClick = onClick
-                ).padding(
-                    vertical = 16.dp
-                ),
-        contentAlignment = Alignment.Center
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = if (isEnabled) {
+                    SaveButtonEnabledColor
+                } else {
+                    SaveButtonDisabledColor
+                },
+                shape = RoundedCornerShape(16.dp),
+            )
+            .clickable(
+                enabled = isEnabled,
+                onClick = onClick,
+            )
+            .padding(
+                vertical = 16.dp,
+            ),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "저장",
             color = SaveButtonTextColor,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
     }
 }
