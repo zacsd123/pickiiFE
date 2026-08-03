@@ -16,9 +16,14 @@ fun ScheduleEditorRoute(
     onManageCategoryClick: () -> Unit,
     onScheduleSaved: () -> Unit,
     modifier: Modifier = Modifier,
+    scheduleId: Long? = null,
     viewModel: ScheduleEditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(scheduleId) {
+        viewModel.initialize(scheduleId)
+    }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {

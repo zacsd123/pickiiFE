@@ -34,6 +34,41 @@ class ScheduleEditorViewModel
             observeCategories()
         }
 
+        /**
+         * 등록 화면을 새 일정 작성 상태로, 또는 기존 일정을 불러와 수정 상태로 초기화한다.
+         */
+        fun initialize(scheduleId: Long?) {
+            if (scheduleId == null) {
+                _uiState.update { currentState ->
+                    ScheduleEditorUiState(categories = currentState.categories)
+                }
+                return
+            }
+
+            val schedule =
+                calendarRepository.schedules.value.find { existingSchedule ->
+                    existingSchedule.id == scheduleId
+                } ?: return
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    editingScheduleId = schedule.id,
+                    title = schedule.title,
+                    selectedCategoryId = schedule.categoryId,
+                    startDate = schedule.startDate,
+                    endDate = schedule.endDate,
+                    startTime = schedule.startTime ?: currentState.startTime,
+                    endTime = schedule.endTime ?: currentState.endTime,
+                    isAllDay = schedule.isAllDay,
+                    location = schedule.location,
+                    repeatType = schedule.repeatType,
+                    repeatWeekdays = schedule.repeatWeekdays,
+                    memo = schedule.memo,
+                    isSaved = false
+                )
+            }
+        }
+
         private fun observeCategories() {
             viewModelScope.launch {
                 calendarRepository.categories.collect { categories ->
@@ -218,7 +253,7 @@ class ScheduleEditorViewModel
 
             val schedule =
                 CalendarSchedule(
-                    id = calendarRepository.createScheduleId(),
+                    id = currentState.editingScheduleId ?: calendarRepository.createScheduleId(),
                     title = currentState.title.trim(),
                     categoryId = currentState.selectedCategoryId,
                     startDate = currentState.startDate,
@@ -242,7 +277,11 @@ class ScheduleEditorViewModel
                     isAllDay = currentState.isAllDay
                 )
 
-            calendarRepository.addSchedule(schedule)
+            if (currentState.editingScheduleId != null) {
+                calendarRepository.updateSchedule(schedule)
+            } else {
+                calendarRepository.addSchedule(schedule)
+            }
 
             _uiState.update { currentState ->
                 currentState.copy(

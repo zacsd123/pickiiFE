@@ -30,13 +30,10 @@ private val RepeatLabelColor = Color(0xFF777777)
 private val RepeatValueColor = Color(0xFF1B1B1B)
 private val RepeatValuePlaceholderColor = Color(0xFFAAAAAA)
 
-private val RepeatOptionSelectedBackgroundColor = Color(0xFFF5F6D8)
-private val RepeatOptionDividerColor = Color(0xFFF1F1F1)
-
 /**
  * 일정 반복 설정 영역이다.
  *
- * 행을 누르면 카드 내부에 반복 종류 목록이 인라인으로 펼쳐진다.
+ * 행을 누르면 앵커드 팝업 드롭다운으로 반복 종류 목록이 펼쳐진다.
  */
 @Composable
 fun ScheduleRepeatSection(
@@ -68,7 +65,7 @@ fun ScheduleRepeatSection(
                 Modifier
                     .fillMaxWidth()
                     .clickable {
-                        expanded = !expanded
+                        expanded = true
                     },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -120,56 +117,14 @@ fun ScheduleRepeatSection(
             }
         }
 
-        if (expanded) {
-            Column {
-                ScheduleRepeatType.entries.forEachIndexed { index, option ->
-                    if (index > 0) {
-                        androidx.compose.foundation.layout.Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .background(RepeatOptionDividerColor)
-                                    .padding(top = 1.dp)
-                        )
-                    }
-
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color =
-                                        if (option == repeatType) {
-                                            RepeatOptionSelectedBackgroundColor
-                                        } else {
-                                            Color.Transparent
-                                        }
-                                ).clickable {
-                                    expanded = false
-                                    onRepeatTypeChange(option)
-                                }.padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = option.toDisplayName(),
-                            color = RepeatValueColor,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-
-                        if (option == repeatType) {
-                            Text(
-                                text = "✓",
-                                color = RepeatValueColor,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        RepeatTypeDropdown(
+            expanded = expanded,
+            selectedRepeatType = repeatType,
+            onDismissRequest = {
+                expanded = false
+            },
+            onOptionSelected = onRepeatTypeChange
+        )
 
         if (repeatType == ScheduleRepeatType.WEEKLY) {
             RepeatWeekdaySelector(
@@ -179,15 +134,3 @@ fun ScheduleRepeatSection(
         }
     }
 }
-
-/**
- * 반복 종류를 화면 표시 문자열로 변환한다.
- */
-private fun ScheduleRepeatType.toDisplayName(): String =
-    when (this) {
-        ScheduleRepeatType.NONE -> "없음"
-        ScheduleRepeatType.DAILY -> "매일"
-        ScheduleRepeatType.WEEKLY -> "매주"
-        ScheduleRepeatType.MONTHLY -> "매월"
-        ScheduleRepeatType.YEARLY -> "매년"
-    }

@@ -53,6 +53,7 @@ fun MonthlyCalendarScreen(
     onNextMonthClick: () -> Unit,
     onDateClick: (LocalDate) -> Unit,
     onScheduleClick: (Long) -> Unit,
+    onEditScheduleClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
@@ -133,6 +134,9 @@ fun MonthlyCalendarScreen(
                         isExpanded = uiState.expandedScheduleId == schedule.id,
                         onClick = {
                             onScheduleClick(schedule.id)
+                        },
+                        onEditClick = {
+                            onEditScheduleClick(schedule.id)
                         }
                     )
                 }
