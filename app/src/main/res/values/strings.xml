@@ -270,6 +270,8 @@
     <string name="mypage_profile_label_licenses">자격증</string>
     <string name="mypage_profile_label_experience">수상 및 경험</string>
     <string name="mypage_profile_experience_ongoing">진행중</string>
+    <string name="mypage_profile_card_topic_title">Topic</string>
+    <string name="mypage_profile_card_empty_message">열심히 준비하는 중이에요...</string>
 
     <string name="mypage_profile_edit_title">프로필 수정</string>
     <string name="mypage_profile_edit_label_about_me">자기소개</string>
