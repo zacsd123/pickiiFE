@@ -24,6 +24,19 @@ interface SessionRepository {
         autoLogin: Boolean = false
     ): Result<CurrentUser>
 
+    /**
+     * 카카오 액세스 토큰으로 로그인한다(1-10). 소셜은 가입 수단이 아니므로, 프로필에서
+     * 카카오를 먼저 연동한 계정만 로그인에 성공한다 — 연동 안 된 계정이면 `ApiException`의
+     * code가 `"NOT_LINKED_ACCOUNT"`인 실패를 반환한다.
+     *
+     * @param kakaoAccessToken 카카오 SDK 로그인으로 받은 액세스 토큰
+     * @param autoLogin 자동 로그인 여부(Refresh Token 만료 기간에 반영됨)
+     */
+    suspend fun loginWithKakao(
+        kakaoAccessToken: String,
+        autoLogin: Boolean = false
+    ): Result<CurrentUser>
+
     /** 로그인하지 않고 비회원으로 둘러본다. */
     suspend fun continueAsGuest()
 

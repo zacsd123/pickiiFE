@@ -5,7 +5,9 @@ import com.example.pickii.data.local.TokenStore
 import com.example.pickii.data.remote.api.AuthApiService
 import com.example.pickii.data.remote.dto.LoginRequest
 import com.example.pickii.data.remote.dto.LogoutRequest
+import com.example.pickii.data.remote.dto.SocialLoginRequest
 import com.example.pickii.domain.model.CurrentUser
+import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
@@ -24,6 +26,7 @@ import javax.inject.Singleton
  */
 private const val DEFAULT_EXPERIENCE = 0
 private const val DEFAULT_HAS_PROFILE = true
+private const val SOCIAL_PROVIDER_KAKAO = "KAKAO"
 
 @Singleton
 class RecruitAuthSessionRepository
@@ -32,6 +35,7 @@ class RecruitAuthSessionRepository
         private val authApiService: AuthApiService,
         private val tokenStore: TokenStore,
         private val deviceIdProvider: DeviceIdProvider,
+        private val profileRepository: ProfileRepository,
         private val json: Json
     ) : SessionRepository {
         private val _currentUser = MutableStateFlow<CurrentUser?>(null)
@@ -57,6 +61,44 @@ class RecruitAuthSessionRepository
                         nickname = body.nickname,
                         experience = DEFAULT_EXPERIENCE,
                         hasProfile = DEFAULT_HAS_PROFILE
+                    )
+                _currentUser.value = user
+                _isLoggedIn.value = true
+                user
+            }
+
+        override suspend fun loginWithKakao(
+            kakaoAccessToken: String,
+            autoLogin: Boolean
+        ): Result<CurrentUser> =
+            safeApiCall(json) {
+                val deviceId = deviceIdProvider.getDeviceId()
+                authApiService.socialLogin(
+                    SOCIAL_PROVIDER_KAKAO,
+                    SocialLoginRequest(kakaoAccessToken, autoLogin, deviceId)
+                )
+            }.map { envelope ->
+                val body = envelope.data
+                tokenStore.saveTokens(body.accessToken, body.refreshToken)
+                // 소셜 로그인 응답(1-10)에는 memberId가 내려오지 않아 id는 비워둔다.
+                // "내 글" 비교 등 id 기반 UI는 다음 프로필 갱신 전까지 부정확할 수 있다.
+                val hasProfile = profileRepository.hasResume()
+                val nickname =
+                    if (hasProfile) {
+                        profileRepository
+                            .getMyProfile()
+                            .getOrNull()
+                            ?.nickname
+                            .orEmpty()
+                    } else {
+                        ""
+                    }
+                val user =
+                    CurrentUser(
+                        id = "",
+                        nickname = nickname,
+                        experience = DEFAULT_EXPERIENCE,
+                        hasProfile = hasProfile
                     )
                 _currentUser.value = user
                 _isLoggedIn.value = true

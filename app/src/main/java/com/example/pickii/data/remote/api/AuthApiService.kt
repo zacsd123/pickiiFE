@@ -13,6 +13,10 @@ import com.example.pickii.data.remote.dto.PasswordResetRequest
 import com.example.pickii.data.remote.dto.SignupRequest
 import com.example.pickii.data.remote.dto.SignupResponseDto
 import com.example.pickii.data.remote.dto.SocialAccountDto
+import com.example.pickii.data.remote.dto.SocialLinkRequest
+import com.example.pickii.data.remote.dto.SocialLinkResponseDto
+import com.example.pickii.data.remote.dto.SocialLoginRequest
+import com.example.pickii.data.remote.dto.SocialLoginResponseDto
 import com.example.pickii.data.remote.dto.WithdrawRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -85,4 +89,21 @@ interface AuthApiService {
     suspend fun unlinkSocialAccount(
         @Path("provider") provider: String
     ): Response<Unit>
+
+    /**
+     * 1-10 소셜 로그인. 연동되지 않은 소셜 계정으로 시도하면 404 `NOT_LINKED_ACCOUNT`로 실패한다
+     * (소셜은 가입 수단이 아니라, 이메일/비밀번호로 가입 후 연동한 계정의 로그인 편의 기능이다).
+     */
+    @POST("auth/social/{provider}/login")
+    suspend fun socialLogin(
+        @Path("provider") provider: String,
+        @Body request: SocialLoginRequest
+    ): Response<ApiEnvelope<SocialLoginResponseDto>>
+
+    /** 1-11 소셜 계정 연동. 로그인된 상태에서 카카오 등 소셜 계정을 현재 계정에 연결한다. */
+    @POST("auth/social/{provider}/link")
+    suspend fun linkSocialAccount(
+        @Path("provider") provider: String,
+        @Body request: SocialLinkRequest
+    ): Response<ApiEnvelope<SocialLinkResponseDto>>
 }
