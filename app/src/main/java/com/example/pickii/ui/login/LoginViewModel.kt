@@ -2,6 +2,7 @@ package com.example.pickii.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +64,41 @@ class LoginViewModel
                 sessionRepository.login(state.email, state.password, state.isAutoLoginChecked).onSuccess {
                     if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
                 }
+            }
+        }
+
+        /**
+         * 카카오 액세스 토큰으로 로그인을 시도한다.
+         *
+         * 이 계정에 카카오가 연동돼 있지 않으면([SessionRepository.loginWithKakao] 참고) [onNotLinked]를,
+         * 그 밖의 실패면 [onError]를 호출한다.
+         *
+         * @param kakaoAccessToken 카카오 SDK 로그인으로 받은 액세스 토큰
+         * @param onNavigateHome 로그인 성공 + 프로필 보유 시 호출되는 콜백
+         * @param onNavigateOnboarding 로그인 성공 + 프로필 미보유 시 호출되는 콜백(최초 로그인 온보딩)
+         * @param onNotLinked 이 계정에 카카오가 아직 연동되지 않아 실패했을 때 호출되는 콜백
+         * @param onError 그 밖의 이유로 실패했을 때 호출되는 콜백
+         */
+        @Suppress("LongParameterList")
+        fun onKakaoLoginClick(
+            kakaoAccessToken: String,
+            onNavigateHome: () -> Unit,
+            onNavigateOnboarding: () -> Unit,
+            onNotLinked: () -> Unit,
+            onError: () -> Unit
+        ) {
+            viewModelScope.launch {
+                sessionRepository
+                    .loginWithKakao(kakaoAccessToken, _uiState.value.isAutoLoginChecked)
+                    .onSuccess {
+                        if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
+                    }.onFailure { error ->
+                        if (error is ApiException && error.code == "NOT_LINKED_ACCOUNT") {
+                            onNotLinked()
+                        } else {
+                            onError()
+                        }
+                    }
             }
         }
 

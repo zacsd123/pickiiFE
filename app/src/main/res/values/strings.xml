@@ -10,12 +10,13 @@
     <string name="login_placeholder_email">example@google.com</string>
     <string name="login_label_password">비밀번호</string>
     <string name="login_placeholder_password">password@!</string>
-    <string name="login_reset_password">비밀번호 재설정하기</string>
     <string name="login_button_submit">로그인하기</string>
     <string name="login_auto_login">자동 로그인</string>
     <string name="login_divider_or">또는</string>
     <string name="login_button_signup">회원가입</string>
-    <string name="login_button_find_account">회원 찾기</string>
+    <string name="login_button_kakao">카카오 로그인</string>
+    <string name="login_kakao_not_linked">카카오 로그인을 사용하려면 로그인 후 프로필에서 카카오를 먼저 연결해주세요</string>
+    <string name="login_kakao_error">카카오 로그인에 실패했어요. 다시 시도해주세요.</string>
     <string name="login_guest_browse">비회원으로 둘러보기 &gt;</string>
 
     <string name="nav_home">홈</string>
@@ -262,7 +263,7 @@
     <string name="mypage_profile_social_not_linked">연결 안 됨</string>
     <string name="mypage_profile_social_button_unlink">연결 해제</string>
     <string name="mypage_profile_social_button_link">연동하기</string>
-    <string name="mypage_profile_social_link_coming_soon">카카오 로그인 연동은 곧 지원 예정이에요.</string>
+    <string name="mypage_profile_social_link_error">카카오 연동에 실패했어요. 이미 다른 계정에 연동된 카카오 계정일 수 있어요.</string>
     <string name="mypage_profile_social_unlink_confirm_title">연결을 해제할까요?</string>
     <string name="mypage_profile_social_unlink_confirm_body">해제해도 이메일과 비밀번호로 계속 로그인할 수 있어요.</string>
     <string name="mypage_profile_label_links">외부 링크</string>
