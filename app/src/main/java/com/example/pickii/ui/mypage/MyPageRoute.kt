@@ -52,7 +52,8 @@ fun MyPageRoute(
     onNavigateToRecruitEdit: (postId: String) -> Unit,
     onNavigateToRecruitDetail: (postId: String) -> Unit,
     onNavigateToChatRoom: (roomId: String) -> Unit,
-    onLoggedOut: () -> Unit
+    onLoggedOut: () -> Unit,
+    onNotificationClick: () -> Unit,
 ) {
     var currentScreen by rememberSaveable { mutableStateOf(MyPageScreenType.HOME.name) }
 
@@ -71,7 +72,8 @@ fun MyPageRoute(
                 onScrapsClick = { currentScreen = MyPageScreenType.SCRAPS.name },
                 onMyCommentsClick = { currentScreen = MyPageScreenType.MY_COMMENTS.name },
                 onFeedbackClick = { currentScreen = MyPageScreenType.FEEDBACK.name },
-                onSettingsClick = { currentScreen = MyPageScreenType.SETTINGS.name }
+                onSettingsClick = { currentScreen = MyPageScreenType.SETTINGS.name },
+                onNotificationClick = onNotificationClick,
             )
         }
 
