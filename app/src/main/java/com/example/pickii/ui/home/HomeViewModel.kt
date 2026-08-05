@@ -59,7 +59,6 @@ class HomeViewModel
 
         init {
             loadFilterOptions()
-            refresh()
         }
 
         /** 필터 패널에 표시할 카테고리/주제 마스터 데이터를 불러온다. */
