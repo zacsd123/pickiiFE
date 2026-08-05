@@ -40,12 +40,26 @@ private val WriteTextColor = Color(0xFF1D1D1B)
 private val WriteDescriptionColor = Color(0xFF85857E)
 private val WriteInformationColor = Color(0xFFFFFFDF)
 
+/** `POST /feedbacks`(4-10) 요청 본문 중 화면에서 입력받는 항목. */
+data class FeedbackWriteInput(
+    val responsibility: Int,
+    val communication: Int,
+    val participation: Int,
+    val cooperation: Int,
+    val deadline: Int,
+    val strength: String,
+    val weakness: String,
+)
+
+/** 서버가 요구하는 주관식 후기 최소 길이(4-10 명세: 30~500자). */
+private const val FEEDBACK_TEXT_MIN_LENGTH = 30
+
 @Composable
 fun FeedbackWriteScreen(
     projectTitle: String,
     memberName: String,
     onBackClick: () -> Unit,
-    onSubmitClick: () -> Unit,
+    onSubmitClick: (FeedbackWriteInput) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var responsibilityScore by remember { mutableIntStateOf(0) }
@@ -63,8 +77,8 @@ fun FeedbackWriteScreen(
             participationScore > 0 &&
             cooperationScore > 0 &&
             deadlineScore > 0 &&
-            goodPoint.isNotBlank() &&
-            improvementPoint.isNotBlank()
+            goodPoint.length >= FEEDBACK_TEXT_MIN_LENGTH &&
+            improvementPoint.length >= FEEDBACK_TEXT_MIN_LENGTH
 
     BackHandler(onBack = onBackClick)
 
@@ -149,7 +163,8 @@ fun FeedbackWriteScreen(
             item {
                 FeedbackTextField(
                     title = "함께한 팀원에 대한 칭찬을 남겨주세요.",
-                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다.",
+                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
+                        "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
                     placeholder = "자유롭게 작성해주세요...",
                     value = goodPoint,
                     onValueChange = {
@@ -161,7 +176,8 @@ fun FeedbackWriteScreen(
             item {
                 FeedbackTextField(
                     title = "함께한 팀원이 개선할 점을 남겨주세요.",
-                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다.",
+                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
+                        "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
                     placeholder = "자유롭게 작성해주세요...",
                     value = improvementPoint,
                     onValueChange = {
@@ -177,7 +193,19 @@ fun FeedbackWriteScreen(
             item {
                 FeedbackSubmitButton(
                     isEnabled = isSubmitEnabled,
-                    onClick = onSubmitClick,
+                    onClick = {
+                        onSubmitClick(
+                            FeedbackWriteInput(
+                                responsibility = responsibilityScore,
+                                communication = communicationScore,
+                                participation = participationScore,
+                                cooperation = cooperationScore,
+                                deadline = deadlineScore,
+                                strength = goodPoint,
+                                weakness = improvementPoint,
+                            )
+                        )
+                    },
                 )
             }
         }

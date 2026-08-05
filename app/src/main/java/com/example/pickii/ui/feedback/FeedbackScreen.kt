@@ -14,8 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.pickii.R
+import com.example.pickii.ui.common.EmptyStateMessage
+import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.feedback.component.FeedbackTab
 import com.example.pickii.ui.feedback.component.FeedbackTipCard
@@ -49,8 +53,19 @@ fun FeedbackScreen(
             onNotificationClick = onNotificationClick,
         )
 
-        when (uiState.selectedTab) {
-            FeedbackTabType.WRITE -> {
+        when {
+            uiState.isLoading && uiState.projects.isEmpty() -> {
+                LoadingIndicator(modifier = Modifier.weight(1f))
+            }
+
+            uiState.selectedTab == FeedbackTabType.RECEIVED && uiState.projects.isEmpty() -> {
+                EmptyStateMessage(
+                    message = stringResource(R.string.mypage_feedback_empty),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            uiState.selectedTab == FeedbackTabType.WRITE -> {
                 WritableFeedbackContent(
                     projects = uiState.projects,
                     onWriteFeedbackClick = onWriteFeedbackClick,
@@ -58,7 +73,7 @@ fun FeedbackScreen(
                 )
             }
 
-            FeedbackTabType.RECEIVED -> {
+            else -> {
                 ReceivedFeedbackContent(
                     projects = uiState.projects,
                     onReceivedFeedbackClick = onReceivedFeedbackClick,
