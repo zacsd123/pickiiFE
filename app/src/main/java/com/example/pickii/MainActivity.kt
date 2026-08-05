@@ -48,6 +48,7 @@ import com.example.pickii.ui.mypage.MyPageRoute
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.navigation.PickiiDestination
+import com.example.pickii.ui.notification.NotificationRoute
 import com.example.pickii.ui.onboarding.OnboardingScreen
 import com.example.pickii.ui.passwordreset.PasswordResetScreen
 import com.example.pickii.ui.recruitapply.RecruitApplyScreen
@@ -286,7 +287,24 @@ private fun PickiiNavHost() {
                     },
                     onPostApplyClick = { postId ->
                         navController.navigate(PickiiDestination.RecruitApply(postId).route)
+                    },
+                    onNotificationClick = {
+                        navController.navigate(PickiiDestination.Notification.route) {
+                            launchSingleTop = true
+                        }
                     }
+                )
+            }
+
+            composable(PickiiDestination.Notification.route) {
+                NotificationRoute(
+                    onCloseClick = { navController.popBackStack() },
+                    onHomeClick = {
+                        navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
+                    },
+                    onCalendarClick = { navController.navigateToTab(PickiiDestination.Calender.route) },
+                    onChatClick = { navController.navigateToTab(PickiiDestination.Chat.route) },
+                    onMyPageClick = { navController.navigateToTab(PickiiDestination.MyPage.route) }
                 )
             }
 
@@ -387,7 +405,8 @@ private fun PickiiNavHost() {
                         pendingChatRoomId = roomId.toLongOrNull()
                         navController.navigateToTab(PickiiDestination.Chat.route)
                     },
-                    onLoggedOut = { navController.navigateToLoginClearingBackStack() }
+                    onLoggedOut = { navController.navigateToLoginClearingBackStack() },
+                    onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) }
                 )
             }
 

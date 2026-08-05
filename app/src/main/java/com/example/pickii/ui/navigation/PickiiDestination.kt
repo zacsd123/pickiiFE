@@ -28,6 +28,9 @@ sealed class PickiiDestination(
     /** 홈 화면. */
     data object Home : PickiiDestination("home")
 
+    /** 알림. */
+    data object Notification : PickiiDestination("notification")
+
     /** 공고 글 등록 화면. */
     data object RecruitCreate : PickiiDestination("recruit/create")
 
