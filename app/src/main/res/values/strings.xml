@@ -374,4 +374,9 @@
     <string name="mypage_feedback_status_done">완료</string>
     <string name="mypage_feedback_status_pending">미완료</string>
     <string name="mypage_feedback_button_evaluate">평가하기</string>
+
+    <string name="feedback_toast_load_failed">피드백 정보를 불러오지 못했습니다.</string>
+    <string name="feedback_toast_submit_failed">제출에 실패했습니다. 다시 시도해주세요.</string>
+    <string name="feedback_toast_already_evaluated">이미 평가를 완료했습니다.</string>
+    <string name="feedback_toast_ai_feedback_failed">AI 피드백을 불러오지 못했습니다.</string>
 </resources>

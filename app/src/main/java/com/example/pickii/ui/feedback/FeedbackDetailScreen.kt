@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -92,10 +93,14 @@ fun FeedbackDetailScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FeedbackSummaryCard(
-            uiState = uiState,
-            modifier = Modifier.weight(1f),
-        )
+        if (uiState.isLoading) {
+            LoadingIndicator(modifier = Modifier.weight(1f))
+        } else {
+            FeedbackSummaryCard(
+                uiState = uiState,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

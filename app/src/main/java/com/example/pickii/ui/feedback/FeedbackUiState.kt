@@ -6,8 +6,10 @@ enum class FeedbackTabType {
 }
 
 data class FeedbackUiState(
+    val isLoading: Boolean = false,
     val selectedTab: FeedbackTabType = FeedbackTabType.WRITE,
     val projects: List<FeedbackProjectUiModel> = emptyList(),
+    val aiFeedback: FeedbackDetailUiState = FeedbackDetailUiState(),
 )
 
 data class FeedbackProjectUiModel(

@@ -1,12 +1,16 @@
 package com.example.pickii.ui.feedback
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.pickii.ui.common.RecruitUiEvent
 
 private enum class FeedbackScreenType {
     LIST,
@@ -21,6 +25,7 @@ fun FeedbackRoute(
     viewModel: FeedbackViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     var currentScreen by remember {
         mutableStateOf(FeedbackScreenType.LIST)
@@ -32,6 +37,15 @@ fun FeedbackRoute(
 
     var selectedMemberId by remember {
         mutableStateOf<Long?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is RecruitUiEvent.ShowToast ->
+                    Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     when (currentScreen) {
@@ -47,6 +61,7 @@ fun FeedbackRoute(
                 onReceivedFeedbackClick = { projectId ->
                     selectedProjectId = projectId
                     selectedMemberId = null
+                    viewModel.loadAiFeedback(projectId)
                     currentScreen = FeedbackScreenType.DETAIL
                 },
                 onNotificationClick = onNotificationClick,
@@ -71,39 +86,25 @@ fun FeedbackRoute(
                 onBackClick = {
                     currentScreen = FeedbackScreenType.LIST
                 },
-                onSubmitClick = {
+                onSubmitClick = { input ->
                     val projectId = selectedProjectId
                     val memberId = selectedMemberId
 
                     if (projectId != null && memberId != null) {
-                        viewModel.completeMemberFeedback(
+                        viewModel.submitFeedback(
                             projectId = projectId,
                             memberId = memberId,
+                            input = input,
+                            onComplete = { currentScreen = FeedbackScreenType.LIST },
                         )
                     }
-
-                    currentScreen = FeedbackScreenType.LIST
                 },
             )
         }
 
         FeedbackScreenType.DETAIL -> {
             FeedbackDetailScreen(
-                uiState = FeedbackDetailUiState(
-                    keywords = listOf(
-                        "빠른일처리",
-                        "열정",
-                    ),
-                    complimentSummary = buildString {
-                        append("맡은 역할을 책임감 있게 수행하고, ")
-                        append("팀원들과 적극적으로 소통했다는 의견이 많았습니다. ")
-                        append("업무 진행 속도가 빠르고 프로젝트에 열정적으로 참여한 점이 강점으로 평가되었습니다.")
-                    },
-                    improvementSummary = buildString {
-                        append("업무 진행 과정에서 본인의 의견을 조금 더 구체적으로 공유하면 ")
-                        append("팀원들이 상황을 이해하고 협업하는 데 도움이 될 것 같다는 의견이 있었습니다.")
-                    },
-                ),
+                uiState = uiState.aiFeedback,
                 onCloseClick = {
                     currentScreen = FeedbackScreenType.LIST
                 },
