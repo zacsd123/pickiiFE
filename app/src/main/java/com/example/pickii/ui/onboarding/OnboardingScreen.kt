@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
+import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
 import com.example.pickii.ui.common.AddEntryButton
 import com.example.pickii.ui.common.AiGenerationDialog
@@ -96,6 +97,7 @@ fun OnboardingScreen(
         onAddSkillTool = viewModel::onAddSkillTool,
         onRemoveSkillTool = viewModel::onRemoveSkillTool,
         onSkillToolNameChange = viewModel::onSkillToolNameChange,
+        onSkillToolSelect = viewModel::onSkillToolSelect,
         onSkillToolLevelChange = viewModel::onSkillToolLevelChange,
         onAddLink = viewModel::onAddLink,
         onRemoveLink = viewModel::onRemoveLink,
@@ -136,6 +138,7 @@ private fun OnboardingScreenContent(
     onAddSkillTool: () -> Unit,
     onRemoveSkillTool: (String) -> Unit,
     onSkillToolNameChange: (String, String) -> Unit,
+    onSkillToolSelect: (String, TechStack) -> Unit,
     onSkillToolLevelChange: (String, Int) -> Unit,
     onAddLink: () -> Unit,
     onRemoveLink: (String) -> Unit,
@@ -222,6 +225,7 @@ private fun OnboardingScreenContent(
                             onAddSkillTool = onAddSkillTool,
                             onRemoveSkillTool = onRemoveSkillTool,
                             onNameChange = onSkillToolNameChange,
+                            onSelect = onSkillToolSelect,
                             onLevelChange = onSkillToolLevelChange
                         )
                     7 ->
@@ -487,6 +491,7 @@ private fun SkillToolStep(
     onAddSkillTool: () -> Unit,
     onRemoveSkillTool: (String) -> Unit,
     onNameChange: (String, String) -> Unit,
+    onSelect: (String, TechStack) -> Unit,
     onLevelChange: (String, Int) -> Unit
 ) {
     uiState.skillToolDrafts.forEach { draft ->
@@ -500,10 +505,18 @@ private fun SkillToolStep(
                 query = draft.techStackName,
                 onQueryChange = { onNameChange(draft.id, it) },
                 suggestions = if (draft.techStackName.isBlank()) emptyList() else suggestions,
-                onSelect = { onNameChange(draft.id, it.name) },
+                onSelect = { onSelect(draft.id, it) },
                 itemLabel = { it.name },
                 placeholder = stringResource(R.string.onboarding_placeholder_skill_name)
             )
+            if (draft.techStackName.isNotBlank() && !draft.isSelected) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.onboarding_skill_not_selected_hint),
+                    color = PickiiTextGray,
+                    fontSize = 12.sp
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SkillLevelChip(
@@ -727,6 +740,7 @@ private fun OnboardingStep1Preview() {
             onAddSkillTool = {},
             onRemoveSkillTool = {},
             onSkillToolNameChange = { _, _ -> },
+            onSkillToolSelect = { _, _ -> },
             onSkillToolLevelChange = { _, _ -> },
             onAddLink = {},
             onRemoveLink = {},

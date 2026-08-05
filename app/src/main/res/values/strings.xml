@@ -197,6 +197,7 @@
     <string name="onboarding_placeholder_experience_desc">활동 내용을 입력해주세요</string>
     <string name="onboarding_button_add_experience">+ 경험 추가</string>
     <string name="onboarding_placeholder_skill_name">기술/툴 이름을 입력해주세요</string>
+    <string name="onboarding_skill_not_selected_hint">목록에서 선택해주세요</string>
     <string name="onboarding_skill_level_high">상</string>
     <string name="onboarding_skill_level_mid">중</string>
     <string name="onboarding_skill_level_low">하</string>

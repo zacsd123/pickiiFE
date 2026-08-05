@@ -7,6 +7,7 @@ import com.example.pickii.domain.model.AdditionalLinkEntry
 import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.SkillToolEntry
+import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
 import com.example.pickii.domain.model.UpdateProfileInput
 import com.example.pickii.domain.repository.MasterDataRepository
@@ -97,7 +98,11 @@ class ProfileEditViewModel
                                     },
                                 skillToolDrafts =
                                     profile.skillTools.map { entry ->
-                                        SkillToolDraft(techStackName = entry.techStackName, level = entry.level)
+                                        SkillToolDraft(
+                                            techStackName = entry.techStackName,
+                                            level = entry.level,
+                                            isSelected = true
+                                        )
                                     },
                                 linkDrafts =
                                     profile.additionalLinks.map { entry ->
@@ -232,7 +237,23 @@ class ProfileEditViewModel
             _uiState.update { state ->
                 state.copy(
                     skillToolDrafts =
-                        state.skillToolDrafts.map { if (it.id == id) it.copy(techStackName = value) else it }
+                        state.skillToolDrafts.map {
+                            if (it.id == id) it.copy(techStackName = value, isSelected = false) else it
+                        }
+                )
+            }
+        }
+
+        fun onSkillToolSelect(
+            id: String,
+            techStack: TechStack
+        ) {
+            _uiState.update { state ->
+                state.copy(
+                    skillToolDrafts =
+                        state.skillToolDrafts.map {
+                            if (it.id == id) it.copy(techStackName = techStack.name, isSelected = true) else it
+                        }
                 )
             }
         }
