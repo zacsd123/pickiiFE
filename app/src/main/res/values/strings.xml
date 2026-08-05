@@ -43,7 +43,7 @@
     <string name="common_login_required_button_login">로그인하러 가기</string>
     <string name="common_login_required_button_cancel">닫기</string>
     <string name="common_ai_dialog_loading">AI가 열심히 생성 중입니다...</string>
-    <string name="common_ai_dialog_failed_title">생성에 실패했습니다.</string>
+    <string name="common_ai_dialog_failed_title">AI 사용량이 많아, 제한되었어요. 다시 시도해주세요.</string>
     <string name="common_ai_dialog_button_retry">다시 시도</string>
     <string name="common_ai_dialog_button_close">닫기</string>
 

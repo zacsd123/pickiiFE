@@ -17,13 +17,14 @@ val PickiiTextGray = Color(0xFF9B9B9B)
 val PickiiFieldBackground = Color(0xFFF3F3EE)
 val PickiiBlue = Color(0xFF3B82F6)
 val PickiiDisabledGray = Color(0xFFE0E0E0)
+val PickiiSettingBackground = Color(0xFFF5F5F5)
 
 val PickiiNavYellow = Color(0xFFF9FCA8)
 
 val PickiiPostCardBackground = Color(0xCCFFFFFF)
 
 // 내 프로필 확인 화면(카드형 UI) 컬러
-val PickiiProfileCardBlack = Color(0xFF0A0A09)
+val PickiiProfileCardBlack = Color(0xFF101010)
 val PickiiProfileCardGoldBright = Color(0xFFF7D040)
 val PickiiProfileCardGoldMid = Color(0xFFC6AC35)
 val PickiiProfileCardGoldDim = Color(0xFF5D4B19)
