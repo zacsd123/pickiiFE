@@ -66,6 +66,7 @@ fun MyPageHomeScreen(
     onMyCommentsClick: () -> Unit,
     onFeedbackClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     viewModel: MyPageHomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,7 +81,8 @@ fun MyPageHomeScreen(
         onScrapsClick = onScrapsClick,
         onMyCommentsClick = onMyCommentsClick,
         onFeedbackClick = onFeedbackClick,
-        onSettingsClick = onSettingsClick
+        onSettingsClick = onSettingsClick,
+        onNotificationClick = onNotificationClick
     )
 }
 
@@ -96,7 +98,8 @@ private fun MyPageHomeScreenContent(
     onScrapsClick: () -> Unit,
     onMyCommentsClick: () -> Unit,
     onFeedbackClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onNotificationClick: () -> Unit,
 ) {
     if (uiState.isLoading) {
         LoadingIndicator(modifier = Modifier.fillMaxSize().background(PickiiYellowLight))
@@ -113,7 +116,7 @@ private fun MyPageHomeScreenContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        PickiiTopBar(notificationCount = 0, onNotificationClick = {})
+        PickiiTopBar(notificationCount = 0, onNotificationClick = onNotificationClick)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -339,7 +342,8 @@ private fun MyPageHomeScreenPreview() {
             onScrapsClick = {},
             onMyCommentsClick = {},
             onFeedbackClick = {},
-            onSettingsClick = {}
+            onSettingsClick = {},
+            onNotificationClick = {},
         )
     }
 }
