@@ -225,7 +225,6 @@ private fun RecruitDetailScreenContent(
                     items(uiState.displayComments, key = { it.comment.id }) { item ->
                         CommentRow(
                             item = item,
-                            currentUserId = uiState.currentUser?.id,
                             onReplyClick = onReplyClick,
                             onDeleteClick = onDeleteCommentClick
                         )
@@ -612,12 +611,13 @@ private fun EmptyCommentsText() {
 @Composable
 private fun CommentRow(
     item: CommentDisplayItem,
-    currentUserId: String?,
     onReplyClick: (RecruitComment) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
     val comment = item.comment
-    val isOwnComment = !comment.isDeleted && comment.authorId == currentUserId
+    // 서버가 요청 시점의 로그인 사용자 기준으로 계산해 내려주는 값이라, 로그인 방식(일반/카카오)과
+    // 무관하게 항상 정확하다. 클라이언트에서 authorId를 currentUser.id와 직접 비교하지 않는다.
+    val isOwnComment = !comment.isDeleted && comment.isAuthor
     val nicknameText =
         if (item.visualIndentLevel > 0) {
             stringResource(R.string.recruit_comment_reply_indent_prefix, comment.authorNickname)

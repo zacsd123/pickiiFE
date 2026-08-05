@@ -278,7 +278,8 @@ class RecruitApiRepository
                     authorNickname = authorNickname.orEmpty(),
                     content = content,
                     createdAt = parseIsoOffsetDateTime(createdAt),
-                    isDeleted = authorNickname == null
+                    isDeleted = authorNickname == null,
+                    isAuthor = isAuthor
                 )
             return listOf(current) + replies.flatMap { it.flatten(postId, commentId.toString()) }
         }
