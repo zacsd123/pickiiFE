@@ -119,6 +119,10 @@ private fun PickiiNavHost() {
     val mainNavigationViewModel: MainNavigationViewModel = hiltViewModel()
     val isLoggedIn by mainNavigationViewModel.isLoggedIn.collectAsStateWithLifecycle()
     var showMyPageLoginPrompt by remember { mutableStateOf(false) }
+    var showChatLoginPrompt by remember { mutableStateOf(false) }
+
+    // "지원 현황"의 "채팅방 바로가기"에서 채팅 탭으로 이동할 때, 목록을 거치지 않고 바로 진입할 채팅방 id.
+    var pendingChatRoomId by remember { mutableStateOf<Long?>(null) }
 
     val resolvedTab =
         when (currentRoute) {
@@ -156,6 +160,16 @@ private fun PickiiNavHost() {
         )
     }
 
+    if (showChatLoginPrompt) {
+        LoginRequiredDialog(
+            onLoginClick = {
+                showChatLoginPrompt = false
+                navController.navigateToLoginClearingBackStack()
+            },
+            onDismiss = { showChatLoginPrompt = false }
+        )
+    }
+
     Scaffold(
         containerColor = PickiiYellowLight,
         bottomBar = {
@@ -177,7 +191,9 @@ private fun PickiiNavHost() {
                                     }
                                 }
                                 PickiiBottomNavTab.CHAT -> {
-                                    if (currentRoute != PickiiDestination.Chat.route) {
+                                    if (!isLoggedIn) {
+                                        showChatLoginPrompt = true
+                                    } else if (currentRoute != PickiiDestination.Chat.route) {
                                         navController.navigateToTab(PickiiDestination.Chat.route)
                                     }
                                 }
@@ -330,7 +346,8 @@ private fun PickiiNavHost() {
                 popExitTransition = { ExitTransition.None }
             ) {
                 ChatRoute(
-                    onTopLevelScreenChange = { isChatTopLevel = it }
+                    onTopLevelScreenChange = { isChatTopLevel = it },
+                    initialRoomId = pendingChatRoomId
                 )
             }
 
@@ -366,9 +383,10 @@ private fun PickiiNavHost() {
                     onNavigateToRecruitDetail = { postId ->
                         navController.navigate(PickiiDestination.RecruitDetail(postId).route)
                     },
-                    // TODO: 특정 채팅방으로 바로 이동하는 딥링크는 Phase 4(지원 현황 "채팅방 바로가기")에서 ChatRoute에
-                    // initialRoomId를 추가할 때 함께 연결한다. 지금은 채팅 탭으로만 이동한다.
-                    onNavigateToChatRoom = { navController.navigateToTab(PickiiDestination.Chat.route) },
+                    onNavigateToChatRoom = { roomId ->
+                        pendingChatRoomId = roomId.toLongOrNull()
+                        navController.navigateToTab(PickiiDestination.Chat.route)
+                    },
                     onLoggedOut = { navController.navigateToLoginClearingBackStack() }
                 )
             }

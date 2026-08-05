@@ -23,6 +23,7 @@ okhttp = "4.12.0"
 kotlinxSerializationJson = "1.7.3"
 datastorePreferences = "1.1.1"
 kakaoSdk = "2.24.0"
+krossbow = "10.0.0"
 
 [libraries]
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
@@ -56,6 +57,8 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 android-desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 kakao-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
+krossbow-stomp-kxserialization-json = { group = "org.hildan.krossbow", name = "krossbow-stomp-kxserialization-json", version.ref = "krossbow" }
+krossbow-websocket-okhttp = { group = "org.hildan.krossbow", name = "krossbow-websocket-okhttp", version.ref = "krossbow" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -6,6 +6,5 @@ data class ChatProjectInfoUiModel(
     val endDate: String,
     val memberCount: Int,
     val leaderName: String,
-    val progressPercent: Int,
     val projectStatus: ProjectStatus
 )

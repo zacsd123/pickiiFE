@@ -103,7 +103,7 @@ class MyPageActivityApiRepository
                 recruitId = recruitId.toString(),
                 recruitTitle = recruitTitle,
                 status = status.toApplyStatus(),
-                appliedAt = parseIsoOffsetDateTime(appliedAt),
+                appliedAt = parseIsoOffsetDateTime(createdAt),
                 chatRoomId = chatRoomId?.toString()
             )
 

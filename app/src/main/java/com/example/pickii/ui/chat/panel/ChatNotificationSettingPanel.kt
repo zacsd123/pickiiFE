@@ -63,6 +63,7 @@ private enum class NotificationMuteTime(
 @Composable
 fun ChatNotificationSettingPanel(
     initialNotificationEnabled: Boolean,
+    onEnabledChange: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
     var isNotificationEnabled by rememberSaveable {
@@ -131,6 +132,7 @@ fun ChatNotificationSettingPanel(
                     isEnabled = true,
                     onCheckedChange = { isChecked ->
                         isNotificationEnabled = isChecked
+                        onEnabledChange(isChecked)
 
                         if (!isChecked) {
                             isKeywordNotificationEnabled = false
@@ -138,6 +140,7 @@ fun ChatNotificationSettingPanel(
                     }
                 )
 
+                // 키워드 알림/알림 모음 시간은 8-8 API에 대응 필드가 없어 로컬 상태로만 둔다(의도적 — 이번 연동 범위 밖).
                 NotificationToggleCard(
                     title = "키워드 알림",
                     description = "내 이름이 언급될 때만",

@@ -1,22 +1,27 @@
 package com.example.pickii.ui.chat
 
+import java.time.LocalDateTime
+
 /**
  * 채팅 메시지 화면 표시 모델이다.
  *
  * @property id 메시지 식별자
- * @property senderName 메시지 작성자 이름
+ * @property senderId 작성자 회원 식별자
+ * @property senderNickname 메시지 작성자 닉네임
  * @property content 메시지 내용
- * @property sentAt 메시지 전송 시간
+ * @property createdAt 메시지 전송 시각
  * @property isMine 현재 사용자가 보낸 메시지인지 여부
- * @property unreadCount 아직 읽지 않은 참여자 수
- * @property imageUri 이미지 메시지일 때 표시할 사진의 URI
+ * @property isReadByCounterpart 상대가 이 메시지를 읽었는지 여부(내가 보낸 메시지에서만 의미 있음)
+ * @property imageUri 이미지 메시지일 때 표시할 사진의 URI(로컬 선택 URI 또는 서버 imageUrl)
  */
 data class ChatMessageUiModel(
-    val id: Long,
+    val id: String,
+    val senderId: Long = 0L,
+    val senderNickname: String = "",
     val content: String,
-    val sentAt: String,
+    val createdAt: LocalDateTime,
     val isMine: Boolean,
-    val unreadCount: Int = 0,
+    val isReadByCounterpart: Boolean = false,
     val type: ChatMessageType = ChatMessageType.TEXT,
     val meetingNotice: MeetingNoticeUiModel? = null,
     val imageUri: String? = null

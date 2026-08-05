@@ -9,6 +9,7 @@ import com.example.pickii.data.remote.dto.SocialLoginRequest
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.util.decodeJwtSubject
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,8 +81,12 @@ class RecruitAuthSessionRepository
             }.map { envelope ->
                 val body = envelope.data
                 tokenStore.saveTokens(body.accessToken, body.refreshToken)
-                // 소셜 로그인 응답(1-10)에는 memberId가 내려오지 않아 id는 비워둔다.
-                // "내 글" 비교 등 id 기반 UI는 다음 프로필 갱신 전까지 부정확할 수 있다.
+                // 소셜 로그인 응답(1-10)에는 memberId가 내려오지 않는다. 정상 로그인과 같은 인증
+                // 서버가 발급한 토큰이므로 subject 클레임에서 회원 id를 대신 읽는다(§JwtDecoder).
+                // sub가 숫자가 아니면(백엔드가 다른 값을 넣은 경우) 여전히 빈 값으로 남고, "내 글"
+                // 비교 등 id 기반 UI는 다음 프로필 갱신 전까지 부정확할 수 있다 — 이 경우 백엔드가
+                // 소셜 로그인 응답에 memberId를 직접 내려주는 것이 근본적인 해결책이다.
+                val memberId = decodeJwtSubject(body.accessToken)?.toLongOrNull()
                 val hasProfile = profileRepository.hasResume()
                 val nickname =
                     if (hasProfile) {
@@ -95,7 +100,7 @@ class RecruitAuthSessionRepository
                     }
                 val user =
                     CurrentUser(
-                        id = "",
+                        id = memberId?.toString().orEmpty(),
                         nickname = nickname,
                         experience = DEFAULT_EXPERIENCE,
                         hasProfile = hasProfile

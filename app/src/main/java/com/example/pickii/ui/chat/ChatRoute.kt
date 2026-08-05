@@ -18,26 +18,20 @@ private enum class ChatScreenType {
  *
  * @param onTopLevelScreenChange 채팅 목록 화면(최상위)인지 여부가 바뀔 때마다 호출된다. 바깥의 공유 바텀 내비게이션을
  * 언제 보여줄지 결정하는 데 쓰인다.
+ * @param initialRoomId 지정하면 목록을 거치지 않고 바로 해당 채팅방으로 진입한다(예: "지원 현황"의 채팅방 바로가기).
  */
 @Composable
 fun ChatRoute(
     onTopLevelScreenChange: (Boolean) -> Unit,
+    initialRoomId: Long? = null,
     modifier: Modifier = Modifier
 ) {
     var currentScreen by rememberSaveable {
-        mutableStateOf(ChatScreenType.LIST.name)
+        mutableStateOf(if (initialRoomId != null) ChatScreenType.ROOM.name else ChatScreenType.LIST.name)
     }
 
     var selectedRoomId by rememberSaveable {
-        mutableStateOf(0L)
-    }
-
-    var selectedRoomTitle by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    var selectedRoomType by rememberSaveable {
-        mutableStateOf(ChatRoomType.GROUP.name)
+        mutableStateOf(initialRoomId ?: 0L)
     }
 
     LaunchedEffect(currentScreen) {
@@ -49,10 +43,8 @@ fun ChatRoute(
     ) {
         ChatScreenType.LIST -> {
             ChatListRoute(
-                onChatRoomClick = { chatRoom ->
-                    selectedRoomId = chatRoom.id
-                    selectedRoomTitle = chatRoom.roomName
-                    selectedRoomType = chatRoom.type.name
+                onChatRoomClick = { roomId ->
+                    selectedRoomId = roomId
                     currentScreen = ChatScreenType.ROOM.name
                 }
             )
@@ -61,8 +53,6 @@ fun ChatRoute(
         ChatScreenType.ROOM -> {
             ChatRoomRoute(
                 roomId = selectedRoomId,
-                roomTitle = selectedRoomTitle,
-                roomType = ChatRoomType.valueOf(selectedRoomType),
                 onBackClick = {
                     currentScreen = ChatScreenType.LIST.name
                 },

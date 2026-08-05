@@ -387,21 +387,16 @@ private fun ChatRoomInfoMenuItem(
 
 /**
  * 채팅방 종류에 따라 정보 패널 제목을 생성한다.
+ *
+ * GROUP 방은 다른 팀원의 팀장 여부를 알 수 없어(§8-2 알려진 제약) 팀장 이름 기반 문구 대신 방 제목을 쓴다.
  */
 private fun createChatRoomInfoTitle(uiState: ChatRoomUiState): String =
     when (uiState.roomType) {
-        ChatRoomType.PERSONAL -> {
+        ChatRoomType.DIRECT -> {
             "${uiState.personalChatMemberName}님의 채팅방"
         }
 
         ChatRoomType.GROUP -> {
-            val otherMemberCount =
-                (uiState.memberCount - 1).coerceAtLeast(0)
-
-            if (otherMemberCount == 0) {
-                "${uiState.leaderName}님의 채팅방"
-            } else {
-                "${uiState.leaderName} 외 ${otherMemberCount}명의 채팅방"
-            }
+            "${uiState.roomTitle} 채팅방"
         }
     }
