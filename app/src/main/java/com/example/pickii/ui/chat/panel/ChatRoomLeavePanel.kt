@@ -47,7 +47,8 @@ private val LeaveCancelButtonColor = Color(0xFFF3F4F6)
 fun ChatRoomLeavePanel(
     isCurrentUserLeader: Boolean,
     onBackClick: () -> Unit,
-    onLeaveClick: () -> Unit
+    onLeaveClick: () -> Unit,
+    onDelegateLeaderClick: () -> Unit
 ) {
     BackHandler(
         enabled = true,
@@ -119,7 +120,7 @@ fun ChatRoomLeavePanel(
                 Text(
                     text =
                         if (isCurrentUserLeader) {
-                            "팀장이 나가면 팀원 중 1명이 자동으로 팀장이 됩니다."
+                            "팀장 권한을 위임한 후 나갈 수 있어요."
                         } else {
                             "채팅방을 나가면 더 이상 메시지를 확인할 수 없습니다."
                         },
@@ -168,12 +169,13 @@ fun ChatRoomLeavePanel(
                                 .weight(1f)
                                 .clip(RoundedCornerShape(18.dp))
                                 .background(LeaveButtonColor)
-                                .clickable(onClick = onLeaveClick)
-                                .padding(vertical = 18.dp),
+                                .clickable(
+                                    onClick = if (isCurrentUserLeader) onDelegateLeaderClick else onLeaveClick
+                                ).padding(vertical = 18.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "나가기",
+                            text = if (isCurrentUserLeader) "팀장 위임하기" else "나가기",
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold

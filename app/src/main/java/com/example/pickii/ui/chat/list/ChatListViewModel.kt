@@ -1,11 +1,26 @@
 package com.example.pickii.ui.chat
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
+import com.example.pickii.data.remote.dto.ApiException
+import com.example.pickii.domain.model.ChatRoomSummary
+import com.example.pickii.domain.repository.ChatRepository
+import com.example.pickii.ui.common.RecruitUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val CHAT_LIST_PAGE_SIZE = 10
+private const val ERROR_CODE_CANNOT_CHAT_SELF = "CANNOT_CHAT_SELF"
+private const val ERROR_CODE_USER_NOT_FOUND = "USER_NOT_FOUND"
 
 /**
  * 채팅 목록 화면의 상태와 사용자 동작을 관리한다.
@@ -13,17 +28,23 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatListViewModel
     @Inject
-    constructor() : ViewModel() {
-        private val _uiState =
-            MutableStateFlow(
-                ChatListUiState(
-                    selectedTab = ChatListTab.DIRECT,
-                    groupChatRooms = createGroupChatRooms(),
-                    directChatRooms = createDirectChatRooms()
-                )
-            )
+    constructor(
+        private val chatRepository: ChatRepository
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(ChatListUiState())
+        val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
 
-        val uiState = _uiState.asStateFlow()
+        private val _events = Channel<RecruitUiEvent>(Channel.BUFFERED)
+        val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
+
+        private val _navigationEvents = Channel<ChatNavigationEvent>(Channel.BUFFERED)
+        val navigationEvents: Flow<ChatNavigationEvent> = _navigationEvents.receiveAsFlow()
+
+        /** 두 탭의 첫 페이지를 모두 새로 불러온다. 목록 화면에 진입할 때마다 호출한다. */
+        fun refreshAll() {
+            refresh(ChatListTab.GROUP)
+            refresh(ChatListTab.DIRECT)
+        }
 
         /**
          * 사용자가 선택한 채팅 탭으로 변경한다.
@@ -36,27 +57,82 @@ class ChatListViewModel
             }
         }
 
-        /**
-         * 특정 채팅방의 알림 설정을 반대로 변경한다.
-         *
-         * @param chatRoomId 알림 설정을 변경할 채팅방 식별자
-         */
+        /** [tab]의 첫 페이지를 서버에서 새로 불러와 기존 목록을 대체한다. */
+        private fun refresh(tab: ChatListTab) {
+            _uiState.update { it.withLoading(tab, isLoading = true) }
+            viewModelScope.launch {
+                chatRepository
+                    .getChatRooms(type = tab.toChatRoomType(), page = 0, size = CHAT_LIST_PAGE_SIZE)
+                    .onSuccess { page ->
+                        _uiState.update { state ->
+                            state
+                                .withRooms(tab, page.rooms.map { it.toPreviewUiModel() })
+                                .withPageInfo(tab, currentPage = page.currentPage, hasNext = page.hasNext)
+                                .withLoading(tab, isLoading = false)
+                        }
+                    }.onFailure {
+                        _uiState.update { state -> state.withLoading(tab, isLoading = false) }
+                    }
+            }
+        }
+
+        /** [tab]에 다음 페이지가 있으면 이어서 불러와 기존 목록 뒤에 덧붙인다. */
+        fun loadNextPage(tab: ChatListTab) {
+            val state = _uiState.value
+            val hasNext = if (tab == ChatListTab.GROUP) state.groupHasNext else state.directHasNext
+            val isLoadingMore = if (tab == ChatListTab.GROUP) state.isGroupLoadingMore else state.isDirectLoadingMore
+            if (!hasNext || isLoadingMore) return
+
+            val nextPage = (if (tab == ChatListTab.GROUP) state.groupPage else state.directPage) + 1
+            _uiState.update { it.withLoadingMore(tab, isLoadingMore = true) }
+
+            viewModelScope.launch {
+                chatRepository
+                    .getChatRooms(type = tab.toChatRoomType(), page = nextPage, size = CHAT_LIST_PAGE_SIZE)
+                    .onSuccess { page ->
+                        _uiState.update { current ->
+                            val appended = current.roomsOf(tab) + page.rooms.map { it.toPreviewUiModel() }
+                            current
+                                .withRooms(tab, appended)
+                                .withPageInfo(tab, currentPage = page.currentPage, hasNext = page.hasNext)
+                                .withLoadingMore(tab, isLoadingMore = false)
+                        }
+                    }.onFailure {
+                        _uiState.update { current -> current.withLoadingMore(tab, isLoadingMore = false) }
+                    }
+            }
+        }
+
+        /** 특정 채팅방의 알림 설정을 반대로 변경한다(낙관적 갱신 후 서버 반영, 실패 시 되돌린다). */
         fun toggleNotification(chatRoomId: Long) {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    groupChatRooms = currentState.groupChatRooms.toggleNotification(chatRoomId),
-                    directChatRooms = currentState.directChatRooms.toggleNotification(chatRoomId)
+            val currentlyEnabled =
+                (_uiState.value.groupChatRooms + _uiState.value.directChatRooms)
+                    .find { it.id == chatRoomId }
+                    ?.isNotificationEnabled ?: return
+
+            applyNotificationState(chatRoomId, enabled = !currentlyEnabled)
+
+            viewModelScope.launch {
+                chatRepository.updateNotification(chatRoomId, enabled = !currentlyEnabled).onFailure {
+                    applyNotificationState(chatRoomId, enabled = currentlyEnabled)
+                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                }
+            }
+        }
+
+        private fun applyNotificationState(
+            chatRoomId: Long,
+            enabled: Boolean
+        ) {
+            _uiState.update { state ->
+                state.copy(
+                    groupChatRooms = state.groupChatRooms.withNotification(chatRoomId, enabled),
+                    directChatRooms = state.directChatRooms.withNotification(chatRoomId, enabled)
                 )
             }
         }
 
-        /**
-         * 특정 채팅방의 읽지 않은 메시지 개수를 0으로 변경한다.
-         *
-         * 추후 실제 API가 연결되면 채팅방 진입 시 서버의 읽음 처리 API를 호출하도록 교체한다.
-         *
-         * @param chatRoomId 읽음 처리할 채팅방 식별자
-         */
+        /** 특정 채팅방을 읽음 상태로 표시한다(목록 화면 로컬 표시용 — 실제 읽음 처리는 채팅방 진입 시 서버에 반영된다). */
         fun markChatRoomAsRead(chatRoomId: Long) {
             _uiState.update { currentState ->
                 currentState.copy(
@@ -66,111 +142,98 @@ class ChatListViewModel
             }
         }
 
-        /**
-         * 특정 채팅방의 알림 상태를 변경한 새 목록을 반환한다.
-         *
-         * @param chatRoomId 변경할 채팅방 식별자
-         */
-        private fun List<ChatRoomPreviewUiModel>.toggleNotification(chatRoomId: Long): List<ChatRoomPreviewUiModel> =
-            map { chatRoom ->
-                if (chatRoom.id == chatRoomId) {
-                    chatRoom.copy(
-                        isNotificationEnabled = !chatRoom.isNotificationEnabled
-                    )
-                } else {
-                    chatRoom
-                }
-            }
-
-        /**
-         * 특정 채팅방을 읽음 상태로 변경한 새 목록을 반환한다.
-         *
-         * @param chatRoomId 읽음 처리할 채팅방 식별자
-         */
-        private fun List<ChatRoomPreviewUiModel>.markAsRead(chatRoomId: Long): List<ChatRoomPreviewUiModel> =
-            map { chatRoom ->
-                if (chatRoom.id == chatRoomId) {
-                    chatRoom.copy(unreadCount = 0)
-                } else {
-                    chatRoom
-                }
-            }
-
-        /**
-         * 개인 채팅방 화면 확인을 위한 임시 데이터를 생성한다.
-         */
-        private fun createDirectChatRooms(): List<ChatRoomPreviewUiModel> =
-            listOf(
-                ChatRoomPreviewUiModel(
-                    id = 1L,
-                    type = ChatRoomType.PERSONAL,
-                    roomName = "김민준",
-                    senderName = "김민준",
-                    lastMessage = "안녕하세요! 연락 주셔서 감사합니다",
-                    lastMessageTime = "오후 3:20",
-                    recruitTitle = "React 개발자 모집",
-                    unreadCount = 2,
-                    isNotificationEnabled = true
-                ),
-                ChatRoomPreviewUiModel(
-                    id = 2L,
-                    type = ChatRoomType.PERSONAL,
-                    roomName = "이서연",
-                    senderName = "이서연",
-                    lastMessage = "내일 미팅 참석 가능하신가요?",
-                    lastMessageTime = "오후 12:00",
-                    recruitTitle = "UI/UX 디자이너 모집",
-                    unreadCount = 0,
-                    isNotificationEnabled = true
-                )
-            )
-
-        /**
-         * 그룹 채팅방 화면 확인을 위한 임시 데이터를 생성한다.
-         */
-        private fun createGroupChatRooms(): List<ChatRoomPreviewUiModel> =
-            listOf(
-                ChatRoomPreviewUiModel(
-                    id = 101L,
-                    type = ChatRoomType.GROUP,
-                    roomName = "Pickii 앱 개발 프로젝트",
-                    senderName = "김민서",
-                    lastMessage = "화면 구현 완료되면 공유 부탁드려요!",
-                    lastMessageTime = "오후 4:10",
-                    recruitTitle = "React Native 개발자 모집",
-                    participantSummary = "김민서 님 외 3명",
-                    unreadCount = 5,
-                    isNotificationEnabled = true
-                ),
-                ChatRoomPreviewUiModel(
-                    id = 102L,
-                    type = ChatRoomType.GROUP,
-                    roomName = "교내 해커톤 준비팀",
-                    senderName = "조승완",
-                    lastMessage = "회의 일정 투표가 등록됐어요.",
-                    lastMessageTime = "어제",
-                    recruitTitle = "교내 해커톤 팀원 모집",
-                    participantSummary = "조승완 님 외 4명",
-                    unreadCount = 1,
-                    isNotificationEnabled = false
-                )
-            )
-
-        /**
-         * 채팅 목록에서 특정 채팅방을 제거한다.
-         */
-        fun removeChatRoom(roomId: Long) {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    groupChatRooms =
-                        currentState.groupChatRooms.filterNot { chatRoom ->
-                            chatRoom.id == roomId
-                        },
-                    directChatRooms =
-                        currentState.directChatRooms.filterNot { chatRoom ->
-                            chatRoom.id == roomId
-                        }
-                )
+        /** 상대 회원과의 1:1 채팅방을 생성(또는 기존 채팅방을 조회)하고 해당 채팅방으로 이동하는 이벤트를 발행한다. */
+        fun startDirectChat(targetMemberId: Long) {
+            viewModelScope.launch {
+                chatRepository
+                    .createDirectChatRoom(targetMemberId)
+                    .onSuccess { result ->
+                        _navigationEvents.send(ChatNavigationEvent.OpenRoom(result.chatRoomId))
+                    }.onFailure { error ->
+                        val messageRes =
+                            if (error is ApiException) {
+                                when (error.code) {
+                                    ERROR_CODE_CANNOT_CHAT_SELF -> R.string.chat_toast_cannot_chat_self
+                                    ERROR_CODE_USER_NOT_FOUND -> R.string.chat_toast_user_not_found
+                                    else -> R.string.chat_toast_generic_error
+                                }
+                            } else {
+                                R.string.chat_toast_generic_error
+                            }
+                        emitEvent(RecruitUiEvent.ShowToast(messageRes))
+                    }
             }
         }
+
+        private fun emitEvent(event: RecruitUiEvent) {
+            viewModelScope.launch { _events.send(event) }
+        }
+
+        private fun List<ChatRoomPreviewUiModel>.withNotification(
+            chatRoomId: Long,
+            enabled: Boolean
+        ): List<ChatRoomPreviewUiModel> =
+            map { chatRoom ->
+                if (chatRoom.id == chatRoomId) chatRoom.copy(isNotificationEnabled = enabled) else chatRoom
+            }
+
+        private fun List<ChatRoomPreviewUiModel>.markAsRead(chatRoomId: Long): List<ChatRoomPreviewUiModel> =
+            map { chatRoom ->
+                if (chatRoom.id == chatRoomId) chatRoom.copy(unreadCount = 0) else chatRoom
+            }
+    }
+
+private fun ChatListTab.toChatRoomType(): ChatRoomType =
+    when (this) {
+        ChatListTab.GROUP -> ChatRoomType.GROUP
+        ChatListTab.DIRECT -> ChatRoomType.DIRECT
+    }
+
+private fun ChatRoomSummary.toPreviewUiModel(): ChatRoomPreviewUiModel =
+    ChatRoomPreviewUiModel(
+        id = chatRoomId,
+        type = type,
+        roomName = title,
+        lastMessage = (lastMessage ?: "").truncateForChatListPreview(),
+        lastMessageTime = lastMessageAt?.toChatListPreviewTimeText().orEmpty(),
+        participantSummary = null,
+        unreadCount = unreadCount,
+        isNotificationEnabled = isNotificationEnabled
+    )
+
+private fun ChatListUiState.roomsOf(tab: ChatListTab): List<ChatRoomPreviewUiModel> =
+    if (tab == ChatListTab.GROUP) groupChatRooms else directChatRooms
+
+private fun ChatListUiState.withRooms(
+    tab: ChatListTab,
+    rooms: List<ChatRoomPreviewUiModel>
+): ChatListUiState = if (tab == ChatListTab.GROUP) copy(groupChatRooms = rooms) else copy(directChatRooms = rooms)
+
+private fun ChatListUiState.withPageInfo(
+    tab: ChatListTab,
+    currentPage: Int,
+    hasNext: Boolean
+): ChatListUiState =
+    if (tab == ChatListTab.GROUP) {
+        copy(groupPage = currentPage, groupHasNext = hasNext)
+    } else {
+        copy(directPage = currentPage, directHasNext = hasNext)
+    }
+
+private fun ChatListUiState.withLoading(
+    tab: ChatListTab,
+    isLoading: Boolean
+): ChatListUiState =
+    if (tab == ChatListTab.GROUP) copy(isGroupLoading = isLoading) else copy(isDirectLoading = isLoading)
+
+private fun ChatListUiState.withLoadingMore(
+    tab: ChatListTab,
+    isLoadingMore: Boolean
+): ChatListUiState =
+    if (tab ==
+        ChatListTab.GROUP
+    ) {
+        copy(isGroupLoadingMore = isLoadingMore)
+    } else {
+        copy(isDirectLoadingMore = isLoadingMore)
     }

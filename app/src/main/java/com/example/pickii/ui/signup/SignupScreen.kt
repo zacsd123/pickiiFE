@@ -179,7 +179,8 @@ private fun SignupFormContent(
                 onValueChange = onNicknameChange,
                 buttonLabel = stringResource(R.string.signup_button_check_nickname),
                 onButtonClick = onCheckNicknameClick,
-                buttonEnabled = uiState.nickname.isNotBlank() && !uiState.isCheckingNickname
+                buttonEnabled = uiState.nickname.isNotBlank() && !uiState.isCheckingNickname,
+                PlaceHolderText = "닉네임을 입력해주세요."
             )
             StatusMessage(message = uiState.nicknameMessage, isError = uiState.isNicknameMessageError)
 
@@ -191,7 +192,8 @@ private fun SignupFormContent(
                 onValueChange = onEmailChange,
                 buttonLabel = stringResource(R.string.signup_button_send_code),
                 onButtonClick = onSendEmailCodeClick,
-                buttonEnabled = uiState.email.isNotBlank() && !uiState.isSendingEmailCode
+                buttonEnabled = uiState.email.isNotBlank() && !uiState.isSendingEmailCode,
+                PlaceHolderText = "example@google.com"
             )
 
             if (uiState.isEmailCodeSent) {
@@ -201,7 +203,8 @@ private fun SignupFormContent(
                     onValueChange = onEmailCodeChange,
                     buttonLabel = stringResource(R.string.signup_button_verify_code),
                     onButtonClick = onVerifyEmailCodeClick,
-                    buttonEnabled = uiState.emailCode.isNotBlank() && !uiState.isVerifyingEmailCode
+                    buttonEnabled = uiState.emailCode.isNotBlank() && !uiState.isVerifyingEmailCode,
+                    PlaceHolderText = "인증번호를 입력해주세요."
                 )
             }
             StatusMessage(message = uiState.emailMessage, isError = uiState.isEmailMessageError)
@@ -213,7 +216,8 @@ private fun SignupFormContent(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
                 isVisible = uiState.isPasswordVisible,
-                onToggleVisibility = onTogglePasswordVisibility
+                onToggleVisibility = onTogglePasswordVisibility,
+                PlaceHolderText = "비밀번호"
             )
             Text(
                 text = stringResource(R.string.signup_helper_password_rule),
@@ -227,7 +231,8 @@ private fun SignupFormContent(
                 value = uiState.passwordConfirm,
                 onValueChange = onPasswordConfirmChange,
                 isVisible = uiState.isPasswordVisible,
-                onToggleVisibility = onTogglePasswordVisibility
+                onToggleVisibility = onTogglePasswordVisibility,
+                PlaceHolderText = "비밀번호 확인"
             )
             if (uiState.passwordConfirm.isNotEmpty()) {
                 StatusMessage(
@@ -286,7 +291,12 @@ private fun SignupWelcomeContent(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colors = listOf(PickiiYellowLight, Color.White)))
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+        ) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -365,12 +375,14 @@ private fun FieldWithButton(
     onValueChange: (String) -> Unit,
     buttonLabel: String,
     onButtonClick: () -> Unit,
-    buttonEnabled: Boolean
+    buttonEnabled: Boolean,
+    PlaceHolderText: String
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            placeholder = { Text(PlaceHolderText) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             shape = RoundedCornerShape(FieldCornerRadius),
@@ -401,11 +413,13 @@ private fun PasswordField(
     value: String,
     onValueChange: (String) -> Unit,
     isVisible: Boolean,
-    onToggleVisibility: () -> Unit
+    onToggleVisibility: () -> Unit,
+    PlaceHolderText: String
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        placeholder = { Text(PlaceHolderText) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         shape = RoundedCornerShape(FieldCornerRadius),

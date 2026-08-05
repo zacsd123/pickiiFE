@@ -13,7 +13,7 @@ data class MyApplyDto(
     val recruitId: Long,
     val recruitTitle: String,
     val status: String,
-    val appliedAt: String,
+    val createdAt: String,
     val chatRoomId: Long? = null
 )
 

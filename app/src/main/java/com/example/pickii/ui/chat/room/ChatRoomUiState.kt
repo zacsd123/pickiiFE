@@ -5,7 +5,7 @@ package com.example.pickii.ui.chat
  */
 enum class ChatRoomType {
     GROUP,
-    PERSONAL
+    DIRECT
 }
 
 /**
@@ -49,8 +49,9 @@ fun ProjectStatus.toDisplayText(): String =
 data class ChatRoomUiState(
     val roomId: Long = 0L,
     val roomTitle: String = "",
-    val roomType: ChatRoomType = ChatRoomType.PERSONAL,
-    val memberCount: Int = 2,
+    val roomType: ChatRoomType = ChatRoomType.DIRECT,
+    val isLoading: Boolean = true,
+    val memberCount: Int = 0,
     val members: List<ChatRoomMemberUiModel> = emptyList(),
     val leaderName: String = "",
     val personalChatMemberName: String = "",
@@ -58,6 +59,9 @@ data class ChatRoomUiState(
     val projectStatus: ProjectStatus = ProjectStatus.IN_PROGRESS,
     val isCurrentUserLeader: Boolean = false,
     val messages: List<ChatMessageUiModel> = emptyList(),
+    val nextMessageCursor: String? = null,
+    val hasMoreMessages: Boolean = false,
+    val isLoadingMoreMessages: Boolean = false,
     val messageInput: String = "",
     val isActionMenuExpanded: Boolean = false,
     val isNoticeExpanded: Boolean = false,
@@ -66,12 +70,11 @@ data class ChatRoomUiState(
     val noticeRegisteredAt: String = "",
     val projectInfo: ChatProjectInfoUiModel =
         ChatProjectInfoUiModel(
-            projectTitle = "캡스톤 디자인 프로젝트",
-            startDate = "2026.03.02",
-            endDate = "2026.08.31",
-            memberCount = 5,
-            leaderName = "민준",
-            progressPercent = 62,
+            projectTitle = "",
+            startDate = "",
+            endDate = "",
+            memberCount = 0,
+            leaderName = "",
             projectStatus = ProjectStatus.IN_PROGRESS
         ),
     val meetings: List<ManagedMeetingUiModel> = emptyList()

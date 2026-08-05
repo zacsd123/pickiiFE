@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
+import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
 import com.example.pickii.ui.common.AddEntryButton
 import com.example.pickii.ui.common.CharacterCounterText
@@ -91,6 +92,7 @@ fun ProfileEditScreen(
         onAddSkillTool = viewModel::onAddSkillTool,
         onRemoveSkillTool = viewModel::onRemoveSkillTool,
         onSkillToolNameChange = viewModel::onSkillToolNameChange,
+        onSkillToolSelect = viewModel::onSkillToolSelect,
         onSkillToolLevelChange = viewModel::onSkillToolLevelChange,
         onAddLink = viewModel::onAddLink,
         onRemoveLink = viewModel::onRemoveLink,
@@ -128,6 +130,7 @@ private fun ProfileEditScreenContent(
     onAddSkillTool: () -> Unit,
     onRemoveSkillTool: (String) -> Unit,
     onSkillToolNameChange: (String, String) -> Unit,
+    onSkillToolSelect: (String, TechStack) -> Unit,
     onSkillToolLevelChange: (String, Int) -> Unit,
     onAddLink: () -> Unit,
     onRemoveLink: (String) -> Unit,
@@ -295,6 +298,7 @@ private fun ProfileEditScreenContent(
                                 )
                             },
                         onNameChange = { onSkillToolNameChange(draft.id, it) },
+                        onSelect = { onSkillToolSelect(draft.id, it) },
                         onLevelChange = { onSkillToolLevelChange(draft.id, it) }
                     )
                 }
@@ -463,18 +467,27 @@ private fun ExperienceFields(
 @Composable
 private fun SkillToolFields(
     draft: SkillToolDraft,
-    suggestions: List<com.example.pickii.domain.model.TechStack>,
+    suggestions: List<TechStack>,
     onNameChange: (String) -> Unit,
+    onSelect: (TechStack) -> Unit,
     onLevelChange: (Int) -> Unit
 ) {
     SearchDropdownField(
         query = draft.techStackName,
         onQueryChange = onNameChange,
         suggestions = if (draft.techStackName.isBlank()) emptyList() else suggestions,
-        onSelect = { onNameChange(it.name) },
+        onSelect = onSelect,
         itemLabel = { it.name },
         placeholder = stringResource(R.string.onboarding_placeholder_skill_name)
     )
+    if (draft.techStackName.isNotBlank() && !draft.isSelected) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.onboarding_skill_not_selected_hint),
+            color = PickiiTextGray,
+            fontSize = 12.sp
+        )
+    }
     Spacer(modifier = Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         SelectableChip(

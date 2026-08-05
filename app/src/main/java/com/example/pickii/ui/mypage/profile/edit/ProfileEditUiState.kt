@@ -49,5 +49,6 @@ data class ProfileEditUiState(
             academicStatus != null &&
                 selectedUniversity != null &&
                 major.length in 2..PROFILE_EDIT_MAX_MAJOR_LENGTH &&
-                contactEmail.isNotBlank()
+                contactEmail.isNotBlank() &&
+                skillToolDrafts.all { it.techStackName.isBlank() || it.isSelected }
 }

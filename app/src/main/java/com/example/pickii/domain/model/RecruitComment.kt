@@ -17,5 +17,6 @@ data class RecruitComment(
     val authorNickname: String,
     val content: String,
     val createdAt: LocalDateTime,
-    val isDeleted: Boolean = false
+    val isDeleted: Boolean = false,
+    val isAuthor: Boolean = false
 )

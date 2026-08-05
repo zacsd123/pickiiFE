@@ -12,17 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,8 +33,6 @@ private val ProjectInfoPrimaryTextColor = Color(0xFF20283A)
 private val ProjectInfoSecondaryTextColor = Color(0xFF8E95A3)
 private val ProjectInfoCardColor = Color(0xFFF6F7F9)
 private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)
-private val ProjectInfoProgressTrackColor = Color(0xFFE5E7EB)
-private val ProjectInfoProgressColor = Color(0xFF202020)
 
 /**
  * 채팅방 프로젝트 정보를 표시한다.
@@ -104,10 +99,12 @@ fun ChatProjectInfoPanel(
                     value = "${projectInfo.memberCount}명"
                 )
 
-                ProjectInfoItem(
-                    label = "팀장",
-                    value = projectInfo.leaderName
-                )
+                if (projectInfo.leaderName.isNotBlank()) {
+                    ProjectInfoItem(
+                        label = "팀장",
+                        value = projectInfo.leaderName
+                    )
+                }
             }
         }
     }
@@ -159,14 +156,12 @@ private fun ProjectInfoHeader(onBackClick: () -> Unit) {
 }
 
 /**
- * 프로젝트 진행률 카드를 표시한다.
+ * 프로젝트 제목과 진행 상태를 보여주는 카드를 표시한다.
+ *
+ * 진행률(%)은 8-2 API 응답에 근거 데이터가 없어 표시하지 않는다(알려진 API 제약).
  */
 @Composable
 private fun ProjectProgressCard(projectInfo: ChatProjectInfoUiModel) {
-    val progressPercent =
-        projectInfo.progressPercent
-            .coerceIn(0, 100)
-
     Column(
         modifier =
             Modifier
@@ -204,46 +199,6 @@ private fun ProjectProgressCard(projectInfo: ChatProjectInfoUiModel) {
                 fontWeight = FontWeight.Bold
             )
         }
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "진행률",
-                modifier = Modifier.weight(1f),
-                color = ProjectInfoSecondaryTextColor,
-                fontSize = 12.sp
-            )
-
-            Text(
-                text = "$progressPercent%",
-                color = ProjectInfoPrimaryTextColor,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
-        LinearProgressIndicator(
-            progress = {
-                progressPercent / 100f
-            },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(7.dp)
-                    .clip(RoundedCornerShape(20.dp)),
-            color = ProjectInfoProgressColor,
-            trackColor = ProjectInfoProgressTrackColor
-        )
     }
 }
 

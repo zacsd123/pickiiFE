@@ -146,7 +146,7 @@ private fun RecruitFormScreenContent(
     onShortIntroChange: (String) -> Unit,
     onDetailContentChange: (String) -> Unit,
     onGenerateAiDraftClick: () -> Unit,
-    onDismissAiDialog: () -> Unit,
+        onDismissAiDialog: () -> Unit,
     onSubmitClick: () -> Unit,
     onDismissSubmitConfirm: () -> Unit,
     onConfirmSubmit: () -> Unit,

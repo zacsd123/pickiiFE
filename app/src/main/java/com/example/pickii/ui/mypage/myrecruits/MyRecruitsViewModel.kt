@@ -26,10 +26,6 @@ class MyRecruitsViewModel
         private val _uiState = MutableStateFlow(MyRecruitsUiState())
         val uiState: StateFlow<MyRecruitsUiState> = _uiState.asStateFlow()
 
-        init {
-            refresh()
-        }
-
         fun refresh() {
             load(_uiState.value.currentPage)
         }

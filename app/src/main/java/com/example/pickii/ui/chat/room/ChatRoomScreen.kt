@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -31,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +54,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.pickii.R
+import com.example.pickii.ui.common.OneShotEventEffect
+import com.example.pickii.ui.common.RecruitUiEvent
 import kotlinx.coroutines.delay
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
@@ -61,6 +65,7 @@ private val InputBackgroundColor = Color(0xFFF1F2F5)
 private val SecondaryTextColor = Color(0xFF9CA3AF)
 private val PickiiYellowColor = Color(0xFFF9FCA8)
 private const val MEETING_DURATION_MILLIS = 2 * 60 * 60 * 1000L
+private const val LOAD_MORE_MESSAGES_THRESHOLD = 3
 
 /**
  * 채팅방 상태와 화면을 연결한다.
@@ -68,21 +73,29 @@ private const val MEETING_DURATION_MILLIS = 2 * 60 * 60 * 1000L
 @Composable
 fun ChatRoomRoute(
     roomId: Long,
-    roomTitle: String,
-    roomType: ChatRoomType,
     onBackClick: () -> Unit,
     onLeaveChatRoom: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatRoomViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
-    LaunchedEffect(roomId, roomTitle, roomType) {
-        viewModel.initializeRoom(
-            roomId = roomId,
-            roomTitle = roomTitle,
-            roomType = roomType
-        )
+    LaunchedEffect(roomId) {
+        viewModel.initializeRoom(roomId = roomId)
+    }
+
+    OneShotEventEffect(flow = viewModel.events) { event ->
+        when (event) {
+            is RecruitUiEvent.ShowToast ->
+                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    OneShotEventEffect(flow = viewModel.navigationEvents) { event ->
+        when (event) {
+            ChatRoomNavigationEvent.LeftRoom -> onLeaveChatRoom()
+        }
     }
 
     ChatRoomScreen(
@@ -95,10 +108,12 @@ fun ChatRoomRoute(
         onNoticeRegister = viewModel::registerNotice,
         onMeetingSend = viewModel::sendMeetingNotice,
         onSendImages = viewModel::sendImageMessages,
+        onLoadMoreMessages = viewModel::loadMoreMessages,
         modifier = modifier,
         onDelegateLeader = viewModel::delegateLeader,
         onRemoveMember = viewModel::removeMember,
-        onLeaveChatRoom = onLeaveChatRoom,
+        onNotificationEnabledChange = viewModel::updateNotificationSetting,
+        onLeaveChatRoomRequested = viewModel::leaveChatRoom,
         onDeleteMeeting = viewModel::deleteMeeting
     )
 }
@@ -117,13 +132,32 @@ private fun ChatRoomScreen(
     onNoticeRegister: (String) -> Unit,
     onMeetingSend: (QuickMeetingForm) -> Unit,
     onSendImages: (List<Uri>) -> Unit,
+    onLoadMoreMessages: () -> Unit,
     modifier: Modifier = Modifier,
     onDelegateLeader: (Long) -> Unit,
     onRemoveMember: (Long) -> Unit,
-    onLeaveChatRoom: () -> Unit,
+    onNotificationEnabledChange: (Boolean) -> Unit,
+    onLeaveChatRoomRequested: () -> Unit,
     onDeleteMeeting: (Long) -> Unit
 ) {
     val listState = rememberLazyListState()
+
+    val shouldLoadMoreMessages by
+        remember {
+            derivedStateOf {
+                val firstVisibleIndex =
+                    listState.layoutInfo.visibleItemsInfo
+                        .firstOrNull()
+                        ?.index ?: 0
+                firstVisibleIndex <= LOAD_MORE_MESSAGES_THRESHOLD
+            }
+        }
+
+    LaunchedEffect(shouldLoadMoreMessages, uiState.hasMoreMessages) {
+        if (shouldLoadMoreMessages && uiState.hasMoreMessages && uiState.messages.isNotEmpty()) {
+            onLoadMoreMessages()
+        }
+    }
 
     var showQuickMeetingSheet by remember {
         mutableStateOf(false)
@@ -235,8 +269,6 @@ private fun ChatRoomScreen(
                 }
             )
 
-            ChatDateDivider()
-
             ChatNotice(
                 noticeContent = uiState.noticeContent,
                 noticeWriter = uiState.noticeWriter,
@@ -258,8 +290,18 @@ private fun ChatRoomScreen(
                     count = uiState.messages.size,
                     key = { index -> uiState.messages[index].id }
                 ) { index ->
+                    val message = uiState.messages[index]
+                    val previousMessage = uiState.messages.getOrNull(index - 1)
+
+                    if (previousMessage == null ||
+                        previousMessage.createdAt.toLocalDate() != message.createdAt.toLocalDate()
+                    ) {
+                        ChatDateDivider(dateText = message.createdAt.toChatDateDividerText())
+                    }
+
                     ChatMessageItem(
-                        message = uiState.messages[index]
+                        message = message,
+                        isLastOfRun = uiState.messages.isLastOfConsecutiveRun(index)
                     )
                 }
 
@@ -332,6 +374,7 @@ private fun ChatRoomScreen(
         if (isNotificationSettingPanelVisible) {
             ChatNotificationSettingPanel(
                 initialNotificationEnabled = uiState.isNotificationEnabled,
+                onEnabledChange = onNotificationEnabledChange,
                 onBackClick = {
                     isNotificationSettingPanelVisible = false
                     isChatRoomInfoPanelVisible = true
@@ -398,7 +441,11 @@ private fun ChatRoomScreen(
                 },
                 onLeaveClick = {
                     isLeavePanelVisible = false
-                    onLeaveChatRoom()
+                    onLeaveChatRoomRequested()
+                },
+                onDelegateLeaderClick = {
+                    isLeavePanelVisible = false
+                    isLeaderDelegationPanelVisible = true
                 }
             )
         }
@@ -560,7 +607,7 @@ private fun ChatRoomHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (roomType == ChatRoomType.GROUP) "G" else "P",
+                    text = if (roomType == ChatRoomType.GROUP) "G" else "D",
                     color = Color(0xFF6B7280),
                     fontWeight = FontWeight.Bold
                 )
@@ -604,7 +651,7 @@ private fun ChatRoomHeader(
  * 채팅 날짜 구분선을 표시한다.
  */
 @Composable
-private fun ChatDateDivider() {
+private fun ChatDateDivider(dateText: String) {
     Row(
         modifier =
             Modifier
@@ -621,7 +668,7 @@ private fun ChatDateDivider() {
         )
 
         Text(
-            text = "2026-05-22",
+            text = dateText,
             modifier = Modifier.padding(horizontal = 14.dp),
             color = SecondaryTextColor,
             fontSize = 11.sp
@@ -742,16 +789,21 @@ private fun ChatNotice(
  * 메시지 작성자에 따라 말풍선을 좌우로 배치한다.
  */
 @Composable
-private fun ChatMessageItem(message: ChatMessageUiModel) {
+private fun ChatMessageItem(
+    message: ChatMessageUiModel,
+    isLastOfRun: Boolean
+) {
     when (message.type) {
         ChatMessageType.TEXT -> {
             if (message.isMine) {
                 MyChatMessage(
-                    message = message
+                    message = message,
+                    isLastOfRun = isLastOfRun
                 )
             } else {
                 OtherChatMessage(
-                    message = message
+                    message = message,
+                    isLastOfRun = isLastOfRun
                 )
             }
         }
@@ -772,12 +824,14 @@ private fun ChatMessageItem(message: ChatMessageUiModel) {
                 if (message.isMine) {
                     MyImageMessage(
                         message = message,
-                        imageUri = uri
+                        imageUri = uri,
+                        isLastOfRun = isLastOfRun
                     )
                 } else {
                     OtherImageMessage(
                         message = message,
-                        imageUri = uri
+                        imageUri = uri,
+                        isLastOfRun = isLastOfRun
                     )
                 }
             }
@@ -786,34 +840,37 @@ private fun ChatMessageItem(message: ChatMessageUiModel) {
 }
 
 /**
- * 현재 사용자가 보낸 메시지를 표시한다.
+ * 현재 사용자가 보낸 메시지를 표시한다. 시각/읽음 표시는 연속된 내 메시지 묶음의 마지막에만 보여준다.
  */
 @Composable
-private fun MyChatMessage(message: ChatMessageUiModel) {
+private fun MyChatMessage(
+    message: ChatMessageUiModel,
+    isLastOfRun: Boolean
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.Bottom
     ) {
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            if (message.unreadCount > 0) {
+        if (isLastOfRun) {
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
                 Text(
-                    text = message.unreadCount.toString(),
+                    text = if (message.isReadByCounterpart) "읽음" else "읽기 전",
                     color = Color(0xFFB4B868),
+                    fontSize = 10.sp
+                )
+
+                Text(
+                    text = message.createdAt.toChatRoomBubbleTimeText(),
+                    color = SecondaryTextColor,
                     fontSize = 10.sp
                 )
             }
 
-            Text(
-                text = message.sentAt,
-                color = SecondaryTextColor,
-                fontSize = 10.sp
-            )
+            Spacer(modifier = Modifier.width(6.dp))
         }
-
-        Spacer(modifier = Modifier.width(6.dp))
 
         Text(
             text = message.content,
@@ -840,29 +897,18 @@ private fun MyChatMessage(message: ChatMessageUiModel) {
 }
 
 /**
- * 상대방이 보낸 메시지를 표시한다.
+ * 상대방이 보낸 메시지를 표시한다. 시각은 연속된 상대 메시지 묶음의 마지막에만 보여준다.
  */
 @Composable
-private fun OtherChatMessage(message: ChatMessageUiModel) {
+private fun OtherChatMessage(
+    message: ChatMessageUiModel,
+    isLastOfRun: Boolean
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE5E7EB)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "P",
-                color = Color(0xFF9CA3AF),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        ChatSenderAvatar(nickname = message.senderNickname)
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -888,12 +934,34 @@ private fun OtherChatMessage(message: ChatMessageUiModel) {
             lineHeight = 19.sp
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
+        if (isLastOfRun) {
+            Spacer(modifier = Modifier.width(6.dp))
 
+            Text(
+                text = message.createdAt.toChatRoomBubbleTimeText(),
+                color = SecondaryTextColor,
+                fontSize = 10.sp
+            )
+        }
+    }
+}
+
+/** 상대방 메시지 왼쪽에 보여줄 발신자 아바타. 닉네임 첫 글자를 표시한다. */
+@Composable
+private fun ChatSenderAvatar(nickname: String) {
+    Box(
+        modifier =
+            Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFE5E7EB)),
+        contentAlignment = Alignment.Center
+    ) {
         Text(
-            text = message.sentAt,
-            color = SecondaryTextColor,
-            fontSize = 10.sp
+            text = nickname.firstOrNull()?.toString().orEmpty(),
+            color = Color(0xFF9CA3AF),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -906,32 +974,33 @@ private val ChatImageBubbleSize = 160.dp
 @Composable
 private fun MyImageMessage(
     message: ChatMessageUiModel,
-    imageUri: String
+    imageUri: String,
+    isLastOfRun: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.Bottom
     ) {
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            if (message.unreadCount > 0) {
+        if (isLastOfRun) {
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
                 Text(
-                    text = message.unreadCount.toString(),
+                    text = if (message.isReadByCounterpart) "읽음" else "읽기 전",
                     color = Color(0xFFB4B868),
+                    fontSize = 10.sp
+                )
+
+                Text(
+                    text = message.createdAt.toChatRoomBubbleTimeText(),
+                    color = SecondaryTextColor,
                     fontSize = 10.sp
                 )
             }
 
-            Text(
-                text = message.sentAt,
-                color = SecondaryTextColor,
-                fontSize = 10.sp
-            )
+            Spacer(modifier = Modifier.width(6.dp))
         }
-
-        Spacer(modifier = Modifier.width(6.dp))
 
         AsyncImage(
             model = imageUri,
@@ -958,27 +1027,14 @@ private fun MyImageMessage(
 @Composable
 private fun OtherImageMessage(
     message: ChatMessageUiModel,
-    imageUri: String
+    imageUri: String,
+    isLastOfRun: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE5E7EB)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "P",
-                color = Color(0xFF9CA3AF),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        ChatSenderAvatar(nickname = message.senderNickname)
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -999,13 +1055,15 @@ private fun OtherImageMessage(
                     )
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
+        if (isLastOfRun) {
+            Spacer(modifier = Modifier.width(6.dp))
 
-        Text(
-            text = message.sentAt,
-            color = SecondaryTextColor,
-            fontSize = 10.sp
-        )
+            Text(
+                text = message.createdAt.toChatRoomBubbleTimeText(),
+                color = SecondaryTextColor,
+                fontSize = 10.sp
+            )
+        }
     }
 }
 

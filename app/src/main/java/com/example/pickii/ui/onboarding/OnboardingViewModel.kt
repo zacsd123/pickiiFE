@@ -77,6 +77,10 @@ data class OnboardingUiState(
     val isStep1Valid: Boolean
         get() = academicStatus != null && selectedUniversity != null && major.length in 2..50
 
+    /** 6단계(Skill & Tool)는 마스터 데이터 목록에서 선택된 이름만 서버에 전달 가능하다. */
+    val isStep6Valid: Boolean
+        get() = skillToolDrafts.all { it.techStackName.isBlank() || it.isSelected }
+
     val isLastStep: Boolean
         get() = step == ONBOARDING_TOTAL_STEPS
 }
@@ -238,7 +242,21 @@ class OnboardingViewModel
                 state.copy(
                     skillToolDrafts =
                         state.skillToolDrafts.map {
-                            if (it.id == id) it.copy(techStackName = value) else it
+                            if (it.id == id) it.copy(techStackName = value, isSelected = false) else it
+                        }
+                )
+            }
+        }
+
+        fun onSkillToolSelect(
+            id: String,
+            techStack: TechStack
+        ) {
+            _uiState.update { state ->
+                state.copy(
+                    skillToolDrafts =
+                        state.skillToolDrafts.map {
+                            if (it.id == id) it.copy(techStackName = techStack.name, isSelected = true) else it
                         }
                 )
             }
@@ -323,6 +341,7 @@ class OnboardingViewModel
         fun onNextClick(onCompleted: () -> Unit) {
             val state = _uiState.value
             if (state.step == 1 && !state.isStep1Valid) return
+            if (state.step == 6 && !state.isStep6Valid) return
 
             if (state.isLastStep) {
                 submit(onCompleted)

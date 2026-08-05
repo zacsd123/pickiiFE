@@ -14,9 +14,25 @@ enum class ChatListTab {
  * @property selectedTab 현재 선택된 탭
  * @property groupChatRooms 그룹 채팅방 목록
  * @property directChatRooms 개인 채팅방 목록
+ * @property isGroupLoading 그룹 탭 첫 페이지 로딩 여부
+ * @property isDirectLoading 개인 탭 첫 페이지 로딩 여부
+ * @property isGroupLoadingMore 그룹 탭 다음 페이지 로딩 여부
+ * @property isDirectLoadingMore 개인 탭 다음 페이지 로딩 여부
+ * @property groupPage 그룹 탭에서 마지막으로 불러온 페이지 번호
+ * @property directPage 개인 탭에서 마지막으로 불러온 페이지 번호
+ * @property groupHasNext 그룹 탭에 다음 페이지가 있는지 여부
+ * @property directHasNext 개인 탭에 다음 페이지가 있는지 여부
  */
 data class ChatListUiState(
     val selectedTab: ChatListTab = ChatListTab.DIRECT,
     val groupChatRooms: List<ChatRoomPreviewUiModel> = emptyList(),
-    val directChatRooms: List<ChatRoomPreviewUiModel> = emptyList()
+    val directChatRooms: List<ChatRoomPreviewUiModel> = emptyList(),
+    val isGroupLoading: Boolean = false,
+    val isDirectLoading: Boolean = false,
+    val isGroupLoadingMore: Boolean = false,
+    val isDirectLoadingMore: Boolean = false,
+    val groupPage: Int = 0,
+    val directPage: Int = 0,
+    val groupHasNext: Boolean = false,
+    val directHasNext: Boolean = false
 )

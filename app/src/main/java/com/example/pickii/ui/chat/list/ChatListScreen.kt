@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -24,11 +26,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,33 +44,56 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.ui.common.OneShotEventEffect
+import com.example.pickii.ui.common.RecruitUiEvent
 
 private val ChatBackgroundColor = Color(0xFFF9FCA8)
 private val ChatPrimaryColor = Color(0xFF1B2130)
 private val ChatSecondaryTextColor = Color(0xFF9BA1B1)
 private val ChatProfileBackgroundColor = Color(0xFFE7E8ED)
 private val ChatUnselectedTabColor = Color(0xFFF1F2F6)
+private const val LOAD_MORE_THRESHOLD = 3
 
 /**
  * 채팅 목록 화면의 ViewModel 상태를 구독하고 사용자 동작을 전달한다.
  *
- * @param onChatRoomClick 채팅방 선택 시 실행할 동작
+ * @param onChatRoomClick 채팅방 선택(또는 1:1 채팅방 생성 후 이동) 시 실행할 동작. 채팅방 식별자만 전달하며,
+ * 방 제목/종류는 채팅방 화면이 상세 조회 API로 직접 가져온다.
  * @param viewModel 채팅 목록 화면 ViewModel
  */
 @Composable
 fun ChatListRoute(
-    onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit,
+    onChatRoomClick: (Long) -> Unit,
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshAll()
+    }
+
+    OneShotEventEffect(flow = viewModel.events) { event ->
+        when (event) {
+            is RecruitUiEvent.ShowToast ->
+                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    OneShotEventEffect(flow = viewModel.navigationEvents) { event ->
+        when (event) {
+            is ChatNavigationEvent.OpenRoom -> onChatRoomClick(event.roomId)
+        }
+    }
 
     ChatListScreen(
         uiState = uiState,
         onTabSelected = viewModel::selectTab,
         onNotificationClick = viewModel::toggleNotification,
+        onLoadNextPage = viewModel::loadNextPage,
         onChatRoomClick = { chatRoom ->
             viewModel.markChatRoomAsRead(chatRoom.id)
-            onChatRoomClick(chatRoom)
+            onChatRoomClick(chatRoom.id)
         }
     )
 }
@@ -77,6 +106,7 @@ fun ChatListRoute(
  * @param uiState 채팅 목록 화면 상태
  * @param onTabSelected 탭 선택 동작
  * @param onNotificationClick 알림 아이콘 선택 동작
+ * @param onLoadNextPage 목록 끝에 가까워졌을 때 다음 페이지를 불러오는 동작
  * @param onChatRoomClick 채팅방 선택 동작
  */
 @Composable
@@ -84,6 +114,7 @@ fun ChatListScreen(
     uiState: ChatListUiState,
     onTabSelected: (ChatListTab) -> Unit,
     onNotificationClick: (Long) -> Unit,
+    onLoadNextPage: (ChatListTab) -> Unit,
     onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit
 ) {
     val chatRooms =
@@ -91,6 +122,25 @@ fun ChatListScreen(
             ChatListTab.GROUP -> uiState.groupChatRooms
             ChatListTab.DIRECT -> uiState.directChatRooms
         }
+
+    val listState = rememberLazyListState()
+
+    val shouldLoadMore by
+        remember(uiState.selectedTab) {
+            derivedStateOf {
+                val lastVisibleIndex =
+                    listState.layoutInfo.visibleItemsInfo
+                        .lastOrNull()
+                        ?.index ?: 0
+                lastVisibleIndex >= chatRooms.size - LOAD_MORE_THRESHOLD
+            }
+        }
+
+    LaunchedEffect(shouldLoadMore, uiState.selectedTab) {
+        if (shouldLoadMore && chatRooms.isNotEmpty()) {
+            onLoadNextPage(uiState.selectedTab)
+        }
+    }
 
     Column(
         modifier =
@@ -117,12 +167,19 @@ fun ChatListScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        val isInitialLoading =
+            when (uiState.selectedTab) {
+                ChatListTab.GROUP -> uiState.isGroupLoading
+                ChatListTab.DIRECT -> uiState.isDirectLoading
+            }
+
         if (chatRooms.isEmpty()) {
-            EmptyChatContent(
-                selectedTab = uiState.selectedTab
-            )
+            if (!isInitialLoading) {
+                EmptyChatContent()
+            }
         } else {
             LazyColumn(
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 items(
@@ -294,43 +351,15 @@ private fun ChatRoomPreviewCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(
-                    modifier = Modifier.height(13.dp)
-                )
+                chatRoom.participantSummary?.let { summary ->
+                    Spacer(
+                        modifier = Modifier.height(13.dp)
+                    )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Text(
-                        text =
-                            if (chatRoom.type == ChatRoomType.GROUP) {
-                                chatRoom.participantSummary.orEmpty()
-                            } else {
-                                stringResource(
-                                    R.string.chat_user_name_format,
-                                    chatRoom.senderName
-                                )
-                            },
-                        modifier = Modifier.weight(1f),
+                        text = summary,
                         color = ChatSecondaryTextColor,
                         fontSize = 13.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(
-                        modifier = Modifier.width(8.dp)
-                    )
-
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.chat_recruit_title_format,
-                                chatRoom.recruitTitle
-                            ),
-                        color = ChatSecondaryTextColor,
-                        fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -363,9 +392,11 @@ private fun ChatRoomPreviewCard(
                             .clickable(onClick = onNotificationClick)
                 )
 
-                UnreadMessageBadge(
-                    unreadCount = chatRoom.unreadCount
-                )
+                if (chatRoom.unreadCount > 0) {
+                    UnreadMessageBadge(
+                        unreadCount = chatRoom.unreadCount
+                    )
+                }
             }
         }
     }
@@ -465,7 +496,8 @@ private fun ChatProfileCircle(modifier: Modifier = Modifier) {
 }
 
 /**
- * 읽지 않은 메시지 개수를 원형 배지로 표시한다.
+ * 읽지 않은 메시지 개수를 원형 배지로 표시한다. 0개일 때는 호출하지 않는다(스펙 8-1 6번: 미확인 메시지가
+ * 없으면 배지를 표시하지 않는다).
  *
  * @param unreadCount 읽지 않은 메시지 개수
  */
@@ -491,12 +523,10 @@ private fun UnreadMessageBadge(unreadCount: Int) {
 }
 
 /**
- * 선택한 탭에 표시할 채팅방이 없을 때 빈 화면을 표시한다.
- *
- * @param selectedTab 현재 선택된 탭
+ * 표시할 채팅방이 없을 때 빈 화면을 표시한다.
  */
 @Composable
-private fun EmptyChatContent(selectedTab: ChatListTab) {
+private fun EmptyChatContent() {
     Box(
         modifier =
             Modifier
@@ -505,11 +535,7 @@ private fun EmptyChatContent(selectedTab: ChatListTab) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text =
-                when (selectedTab) {
-                    ChatListTab.GROUP -> stringResource(R.string.chat_empty_group)
-                    ChatListTab.DIRECT -> stringResource(R.string.chat_empty_direct)
-                },
+            text = stringResource(R.string.chat_empty_list),
             color = ChatSecondaryTextColor,
             fontSize = 16.sp,
             style = MaterialTheme.typography.bodyLarge

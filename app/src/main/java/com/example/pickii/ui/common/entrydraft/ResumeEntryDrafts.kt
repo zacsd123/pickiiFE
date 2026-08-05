@@ -7,7 +7,8 @@ import java.util.UUID
 data class SkillToolDraft(
     val id: String = UUID.randomUUID().toString(),
     val techStackName: String = "",
-    val level: Int = 2
+    val level: Int = 2,
+    val isSelected: Boolean = false
 )
 
 /** "자격증" 항목 하나의 입력 중 상태. */

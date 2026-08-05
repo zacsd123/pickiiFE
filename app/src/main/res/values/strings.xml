@@ -43,7 +43,7 @@
     <string name="common_login_required_button_login">로그인하러 가기</string>
     <string name="common_login_required_button_cancel">닫기</string>
     <string name="common_ai_dialog_loading">AI가 열심히 생성 중입니다...</string>
-    <string name="common_ai_dialog_failed_title">생성에 실패했습니다.</string>
+    <string name="common_ai_dialog_failed_title">AI 사용량이 많아, 제한되었어요. 다시 시도해주세요.</string>
     <string name="common_ai_dialog_button_retry">다시 시도</string>
     <string name="common_ai_dialog_button_close">닫기</string>
 
@@ -136,10 +136,12 @@
     <string name="chat_direct_tab">개인</string>
     <string name="chat_notification_enabled">채팅방 알림 켜짐</string>
     <string name="chat_notification_disabled">채팅방 알림 꺼짐</string>
-    <string name="chat_user_name_format">%1$s 님</string>
-    <string name="chat_recruit_title_format">[%1$s]</string>
-    <string name="chat_empty_group">참여 중인 그룹 채팅방이 없습니다.</string>
-    <string name="chat_empty_direct">아직 개인 채팅방이 없습니다.</string>
+    <string name="chat_empty_list">아직 채팅방이 없습니다.</string>
+    <string name="chat_toast_generic_error">잠시 후 다시 시도해주세요.</string>
+    <string name="chat_toast_send_invalid_file">전송할 수 없는 파일입니다.</string>
+    <string name="chat_toast_cannot_chat_self">자기 자신과는 채팅을 시작할 수 없어요.</string>
+    <string name="chat_toast_user_not_found">존재하지 않는 회원이에요.</string>
+    <string name="chat_toast_leader_must_delegate">팀장 권한을 위임한 후 나갈 수 있어요.</string>
 
     <string name="signup_title">회원가입하기</string>
     <string name="signup_label_nickname">닉네임</string>
@@ -195,6 +197,7 @@
     <string name="onboarding_placeholder_experience_desc">활동 내용을 입력해주세요</string>
     <string name="onboarding_button_add_experience">+ 경험 추가</string>
     <string name="onboarding_placeholder_skill_name">기술/툴 이름을 입력해주세요</string>
+    <string name="onboarding_skill_not_selected_hint">목록에서 선택해주세요</string>
     <string name="onboarding_skill_level_high">상</string>
     <string name="onboarding_skill_level_mid">중</string>
     <string name="onboarding_skill_level_low">하</string>
