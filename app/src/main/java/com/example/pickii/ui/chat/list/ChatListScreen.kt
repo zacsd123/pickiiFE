@@ -331,22 +331,42 @@ private fun ChatRoomPreviewCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = chatRoom.lastMessageTime,
-                    color = ChatSecondaryTextColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = chatRoom.roomName,
+                        color = ChatPrimaryColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Spacer(
+                        modifier = Modifier.width(8.dp)
+                    )
+
+                    Text(
+                        text = chatRoom.lastMessageTime,
+                        color = ChatSecondaryTextColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
                 Spacer(
                     modifier = Modifier.height(5.dp)
                 )
 
                 Text(
-                    text = chatRoom.lastMessage,
-                    color = ChatPrimaryColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    text = chatRoom.lastMessage.ifBlank { stringResource(R.string.chat_room_no_message) },
+                    color = ChatSecondaryTextColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

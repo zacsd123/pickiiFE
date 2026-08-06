@@ -6,5 +6,6 @@ import com.example.pickii.domain.model.MemberProfile
 data class ProfileViewUiState(
     val isLoading: Boolean = true,
     val profile: MemberProfile? = null,
-    val topicLabels: List<String> = emptyList()
+    val topicLabels: List<String> = emptyList(),
+    val toastMessageRes: Int? = null
 )

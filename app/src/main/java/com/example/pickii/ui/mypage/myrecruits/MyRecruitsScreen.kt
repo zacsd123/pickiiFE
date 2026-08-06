@@ -1,6 +1,6 @@
 package com.example.pickii.ui.mypage.myrecruits
 
-import androidx.compose.foundation.ScrollState
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,17 +33,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.MyRecruitSummary
 import com.example.pickii.domain.model.RecruitStatus
-import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.MyPageSectionHeader
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.StatusBadge
-import com.example.pickii.ui.theme.PickiiBlue
-import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import com.example.pickii.ui.theme.PickiiPaletteBlue
+import com.example.pickii.ui.theme.PickiiPaletteGray
+import com.example.pickii.ui.theme.PickiiPaletteGreen
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
-import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toFullDisplayString
 
 /**
@@ -53,20 +57,31 @@ import com.example.pickii.util.toFullDisplayString
 @Composable
 fun MyRecruitsScreen(
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onNavigateToApplicantList: (postId: String) -> Unit,
     onNavigateToRecruitEdit: (postId: String) -> Unit,
     viewModel: MyRecruitsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
+    }
+
+    if (uiState.toastMessageRes != null) {
+        val messageRes = uiState.toastMessageRes
+        LaunchedEffect(messageRes) {
+            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            viewModel.onToastShown()
+        }
     }
 
     MyRecruitsScreenContent(
         uiState = uiState,
         visiblePageNumbers = viewModel.visiblePageNumbers,
         onBackClick = onBackClick,
+        onNotificationClick = onNotificationClick,
         onApplicantsClick = onNavigateToApplicantList,
         onEditClick = onNavigateToRecruitEdit,
         onActionRequest = viewModel::onActionRequest,
@@ -84,6 +99,7 @@ private fun MyRecruitsScreenContent(
     uiState: MyRecruitsUiState,
     visiblePageNumbers: List<Int>,
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onApplicantsClick: (String) -> Unit,
     onEditClick: (String) -> Unit,
     onActionRequest: (String, MyRecruitPendingAction) -> Unit,
@@ -96,12 +112,16 @@ private fun MyRecruitsScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PickiiYellowLight)
+            .background(PickiiPaletteBaseWhite)
             .padding(horizontal = 16.dp)
-            .verticalScroll(state = ScrollState(0, ))
+            .verticalScroll(state = rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_my_recruits_title), onBackClick = onBackClick)
+        MyPageSectionHeader(
+            title = stringResource(R.string.mypage_my_recruits_title),
+            onBackClick = onBackClick,
+            onNotificationClick = onNotificationClick
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
@@ -199,7 +219,11 @@ private fun MyRecruitCard(
 
         Spacer(modifier = Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CardActionButton(stringResource(R.string.mypage_my_recruits_button_applicants), onApplicantsClick)
+            CardActionButton(
+                stringResource(R.string.mypage_my_recruits_button_applicants),
+                onApplicantsClick,
+                style = CardActionButtonStyle.BLACK
+            )
             if (recruit.status != RecruitStatus.CLOSED) {
                 CardActionButton(stringResource(R.string.mypage_my_recruits_button_edit), onEditClick)
             }
@@ -207,13 +231,13 @@ private fun MyRecruitCard(
                 CardActionButton(
                     stringResource(R.string.mypage_my_recruits_button_reopen),
                     onReopenClick,
-                    isPrimary = true
+                    style = CardActionButtonStyle.PRIMARY
                 )
             } else {
                 CardActionButton(
                     stringResource(R.string.mypage_my_recruits_button_close),
                     onCloseClick,
-                    isDanger = true
+                    style = CardActionButtonStyle.DANGER
                 )
             }
             CardActionButton(stringResource(R.string.mypage_my_recruits_button_delete), onDeleteClick)
@@ -221,20 +245,27 @@ private fun MyRecruitCard(
     }
 }
 
+private enum class CardActionButtonStyle {
+    NEUTRAL,
+    BLACK,
+    PRIMARY,
+    DANGER
+}
+
 @Composable
 private fun CardActionButton(
     label: String,
     onClick: () -> Unit,
-    isPrimary: Boolean = false,
-    isDanger: Boolean = false
+    style: CardActionButtonStyle = CardActionButtonStyle.NEUTRAL
 ) {
     val background =
-        when {
-            isPrimary -> PickiiBlue
-            isDanger -> Color(0xFFE57373)
-            else -> PickiiFieldBackground
+        when (style) {
+            CardActionButtonStyle.NEUTRAL -> PickiiFieldBackground
+            CardActionButtonStyle.BLACK -> Color.Black
+            CardActionButtonStyle.PRIMARY -> PickiiPaletteBlue
+            CardActionButtonStyle.DANGER -> PickiiPaletteRed
         }
-    val contentColor = if (isPrimary || isDanger) Color.White else Color.Black
+    val contentColor = if (style == CardActionButtonStyle.NEUTRAL) Color.Black else Color.White
     Box(
         modifier =
             Modifier
@@ -249,7 +280,7 @@ private fun CardActionButton(
 
 private fun recruitStatusColor(status: RecruitStatus): Color =
     when (status) {
-        RecruitStatus.OPEN -> PickiiBlue
-        RecruitStatus.CLOSED -> PickiiDisabledGray
-        RecruitStatus.ADDITIONAL -> Color(0xFF66BB6A)
+        RecruitStatus.OPEN -> PickiiPaletteGreen
+        RecruitStatus.CLOSED -> PickiiPaletteGray
+        RecruitStatus.ADDITIONAL -> PickiiPaletteGreen
     }

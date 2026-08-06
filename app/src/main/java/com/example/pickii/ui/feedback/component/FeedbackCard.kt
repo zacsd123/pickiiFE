@@ -27,8 +27,8 @@ import com.example.pickii.ui.feedback.FeedbackProjectUiModel
 private val FeedbackCardColor = Color(0xFFFFFEF6)
 private val FeedbackTextColor = Color(0xFF1E1E1C)
 private val FeedbackDescriptionColor = Color(0xFF777771)
-private val FeedbackPrimaryColor = Color(0xFF6685ED)
-private val FeedbackDisabledColor = Color(0xFFDADAD7)
+private val FeedbackPrimaryColor = Color.Black
+private val FeedbackDisabledColor = Color(0xFFCCCCCC)
 
 @Composable
 fun WritableFeedbackCard(
@@ -206,6 +206,8 @@ private fun FeedbackProjectTitleAndInformation(
     }
 }
 
+private val FeedbackCompletedColor = Color(0xFF4CAF50)
+
 @Composable
 private fun FeedbackMemberRow(
     member: FeedbackMemberUiModel,
@@ -223,15 +225,31 @@ private fun FeedbackMemberRow(
             modifier = Modifier.weight(1f),
         )
 
-        FeedbackActionButton(
-            text = if (member.isCompleted) {
-                "평가 완료"
-            } else {
-                "평가하러 가기"
-            },
-            isEnabled = !member.isCompleted,
-            onClick = onClick,
-        )
+        if (member.isCompleted) {
+            Box(
+                modifier =
+                    Modifier
+                        .height(34.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(FeedbackCompletedColor)
+                        .padding(horizontal = 15.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "평가 완료",
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            FeedbackActionButton(
+                text = "평가하러 가기",
+                isEnabled = true,
+                onClick = onClick,
+            )
+        }
     }
 }
 

@@ -6,10 +6,12 @@ import com.example.pickii.data.remote.dto.ApplyAiDraftRequest
 import com.example.pickii.data.remote.dto.ApplyRequest
 import com.example.pickii.data.remote.dto.CommentCreateRequest
 import com.example.pickii.data.remote.dto.CommentDto
+import com.example.pickii.data.remote.dto.ProjectCreateRequest
 import com.example.pickii.data.remote.dto.RecruitDetailDto
 import com.example.pickii.data.remote.dto.RecruitSummaryDto
 import com.example.pickii.data.remote.dto.RecruitWriteRequest
 import com.example.pickii.domain.model.CampusScope
+import com.example.pickii.domain.model.ProjectCreationResult
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPage
@@ -205,6 +207,21 @@ class RecruitApiRepository
             return safeApiCall(json) {
                 recruitApiService.generateApplyAiDraft(id, ApplyAiDraftRequest(message = message))
             }.map { it.data.convertedText }
+        }
+
+        override suspend fun createProject(
+            postId: String,
+            name: String
+        ): Result<ProjectCreationResult> {
+            val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
+            return safeApiCall(json) {
+                recruitApiService.createProject(id, ProjectCreateRequest(name = name))
+            }.map { envelope ->
+                ProjectCreationResult(
+                    projectId = envelope.data.projectId.toString(),
+                    chatRoomId = envelope.data.chatRoomId.toString()
+                )
+            }
         }
 
         private fun buildWriteRequest(

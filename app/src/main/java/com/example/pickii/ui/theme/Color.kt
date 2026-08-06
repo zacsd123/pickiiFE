@@ -32,3 +32,10 @@ val PickiiProfileCardGoldDim = Color(0xFF5D4B19)
 // 카카오 브랜드 컬러(카카오 로그인 버튼 가이드라인)
 val KakaoYellow = Color(0xFFFEE500)
 val KakaoLabel = Color(0xFF191919)
+
+// 팔레트(마이페이지/알림 리디자인 기준 색). 기본 노란색은 PickiiYellowLight, 카카오 노란색은 KakaoYellow와 같다.
+val PickiiPaletteBaseWhite = Color(0xFFF8F8F4)
+val PickiiPaletteGray = Color(0xFFCCCCCC)
+val PickiiPaletteGreen = Color(0xFF4CAF50)
+val PickiiPaletteRed = Color(0xFFE53935)
+val PickiiPaletteBlue = Color(0xFF4285F4)

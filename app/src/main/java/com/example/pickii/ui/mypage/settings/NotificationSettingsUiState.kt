@@ -14,5 +14,6 @@ data class NotificationSettingsUiState(
             matchNoti = false,
             projectNoti = false,
             marketingNoti = false
-        )
+        ),
+    val toastMessageRes: Int? = null
 )

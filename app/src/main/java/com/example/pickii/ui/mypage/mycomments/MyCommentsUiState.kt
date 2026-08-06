@@ -7,5 +7,6 @@ data class MyCommentsUiState(
     val isLoading: Boolean = true,
     val items: List<MyComment> = emptyList(),
     val currentPage: Int = 1,
-    val totalPages: Int = 1
+    val totalPages: Int = 1,
+    val toastMessageRes: Int? = null
 )

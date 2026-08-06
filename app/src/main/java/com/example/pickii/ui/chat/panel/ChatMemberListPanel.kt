@@ -45,7 +45,8 @@ private val LeaderBadgeTextColor = Color(0xFF4A4F00)
 @Composable
 fun ChatMemberListPanel(
     members: List<ChatRoomMemberUiModel>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onMemberClick: (Long) -> Unit
 ) {
     BackHandler(
         enabled = true,
@@ -92,7 +93,8 @@ fun ChatMemberListPanel(
                     }
                 ) { member ->
                     ChatMemberListItem(
-                        member = member
+                        member = member,
+                        onClick = { onMemberClick(member.memberId) }
                     )
                 }
             }
@@ -149,7 +151,10 @@ private fun MemberListHeader(onBackClick: () -> Unit) {
  * 팀원 한 명의 정보를 세로 목록 행으로 표시한다.
  */
 @Composable
-private fun ChatMemberListItem(member: ChatRoomMemberUiModel) {
+private fun ChatMemberListItem(
+    member: ChatRoomMemberUiModel,
+    onClick: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -157,6 +162,7 @@ private fun ChatMemberListItem(member: ChatRoomMemberUiModel) {
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .clickable(onClick = onClick)
                     .padding(
                         horizontal = 24.dp,
                         vertical = 14.dp

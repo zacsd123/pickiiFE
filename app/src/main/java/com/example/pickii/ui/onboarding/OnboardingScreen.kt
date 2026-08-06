@@ -310,7 +310,11 @@ private fun SchoolInfoStep(
     onMajorChange: (String) -> Unit
 ) {
     StepFieldLabel(text = stringResource(R.string.onboarding_label_academic_status))
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         AcademicStatus.entries.forEach { status ->
             SelectableChip(
                 label = status.label,
@@ -572,7 +576,11 @@ private fun LinkStep(
             onRemove = { onRemoveLink(draft.id) },
             modifier = Modifier.padding(bottom = 12.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 uiState.availableLinkCategories.forEach { category ->
                     SelectableChip(
                         label = category.name,

@@ -42,7 +42,8 @@ data class ProfileEditUiState(
     val aboutMe: String = "",
     val contactEmail: String = "",
     val isSaving: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val toastMessageRes: Int? = null
 ) {
     val isValid: Boolean
         get() =

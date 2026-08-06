@@ -17,7 +17,7 @@ import java.time.YearMonth
 data class MonthlyCalendarUiState(
     val displayedYearMonth: YearMonth = YearMonth.of(2026, 7),
     val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
-    val schedules: List<MonthlyScheduleUiModel> = createMockSchedules(),
+    val schedules: List<MonthlyScheduleUiModel> = emptyList(),
     val expandedScheduleId: Long? = null
 ) {
     /**
@@ -98,93 +98,3 @@ enum class ScheduleColorType {
     GRAY,
     BLACK
 }
-
-/**
- * 화면 확인을 위한 임시 일정 데이터다.
- */
-private fun createMockSchedules(): List<MonthlyScheduleUiModel> =
-    listOf(
-        MonthlyScheduleUiModel(
-            id = 1L,
-            title = "아르바이트",
-            categoryName = "알바",
-            categoryColor = ScheduleColorType.RED,
-            startDate = LocalDate.of(2026, 7, 4),
-            startTime = "09:00",
-            endTime = "18:00",
-            location = "스타벅스 강남점",
-            repeatText = "매주 토, 일",
-            memo = "머리끈 꼭 챙기기. 오픈 담당이라 8:50까지 도착해야 함.",
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 2L,
-            title = "아르바이트",
-            categoryName = "알바",
-            categoryColor = ScheduleColorType.RED,
-            startDate = LocalDate.of(2026, 7, 4),
-            startTime = "19:00",
-            endTime = "22:00",
-            location = "카페",
-            repeatText = "없음",
-            memo = "",
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 3L,
-            title = "프로젝트 진행 기간",
-            categoryName = "약속",
-            categoryColor = ScheduleColorType.GREEN,
-            startDate = LocalDate.of(2026, 7, 6),
-            endDate = LocalDate.of(2026, 7, 10),
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 4L,
-            title = "개인 일정",
-            categoryName = "개인",
-            categoryColor = ScheduleColorType.PURPLE,
-            startDate = LocalDate.of(2026, 7, 7),
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 5L,
-            title = "모임",
-            categoryName = "약속",
-            categoryColor = ScheduleColorType.RED,
-            startDate = LocalDate.of(2026, 7, 14),
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 6L,
-            title = "개인 일정",
-            categoryName = "개인",
-            categoryColor = ScheduleColorType.PURPLE,
-            startDate = LocalDate.of(2026, 7, 18),
-            isAllDay = true
-        ),
-        MonthlyScheduleUiModel(
-            id = 7L,
-            title = "일정",
-            categoryName = "없음",
-            categoryColor = ScheduleColorType.GRAY,
-            startDate = LocalDate.of(2026, 7, 21),
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 8L,
-            title = "일정",
-            categoryName = "없음",
-            categoryColor = ScheduleColorType.BLACK,
-            startDate = LocalDate.of(2026, 7, 25),
-            isAllDay = false
-        ),
-        MonthlyScheduleUiModel(
-            id = 9L,
-            title = "개인 일정",
-            categoryName = "개인",
-            categoryColor = ScheduleColorType.PURPLE,
-            startDate = LocalDate.of(2026, 7, 28),
-            isAllDay = false
-        )
-    )

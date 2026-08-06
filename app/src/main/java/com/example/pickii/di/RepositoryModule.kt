@@ -1,9 +1,11 @@
 package com.example.pickii.di
 
 import com.example.pickii.data.repository.AccountApiRepository
+import com.example.pickii.data.repository.ApplicantApiRepository
 import com.example.pickii.data.repository.ChatApiRepository
 import com.example.pickii.data.repository.FeedbackApiRepository
 import com.example.pickii.data.repository.MyPageActivityApiRepository
+import com.example.pickii.data.repository.NotificationApiRepository
 import com.example.pickii.data.repository.NotificationSettingsApiRepository
 import com.example.pickii.data.repository.ProfileApiRepository
 import com.example.pickii.data.repository.RecruitApiRepository
@@ -11,10 +13,12 @@ import com.example.pickii.data.repository.RecruitAuthSessionRepository
 import com.example.pickii.data.repository.RecruitMasterDataRepository
 import com.example.pickii.data.repository.SignupApiRepository
 import com.example.pickii.domain.repository.AccountRepository
+import com.example.pickii.domain.repository.ApplicantRepository
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.FeedbackRepository
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.MyPageActivityRepository
+import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.NotificationSettingsRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.RecruitRepository
@@ -81,4 +85,14 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindChatRepository(impl: ChatApiRepository): ChatRepository
+
+    /** [ApplicantRepository]를 [ApplicantApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindApplicantRepository(impl: ApplicantApiRepository): ApplicantRepository
+
+    /** [NotificationRepository]를 [NotificationApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(impl: NotificationApiRepository): NotificationRepository
 }

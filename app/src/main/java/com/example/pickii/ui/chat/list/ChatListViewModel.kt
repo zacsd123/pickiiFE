@@ -72,6 +72,7 @@ class ChatListViewModel
                         }
                     }.onFailure {
                         _uiState.update { state -> state.withLoading(tab, isLoading = false) }
+                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_list_toast_load_failed))
                     }
             }
         }
@@ -99,6 +100,7 @@ class ChatListViewModel
                         }
                     }.onFailure {
                         _uiState.update { current -> current.withLoadingMore(tab, isLoadingMore = false) }
+                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_list_toast_load_more_failed))
                     }
             }
         }

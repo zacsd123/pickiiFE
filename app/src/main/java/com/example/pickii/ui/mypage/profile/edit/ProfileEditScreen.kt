@@ -1,10 +1,12 @@
 package com.example.pickii.ui.mypage.profile.edit
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,11 +24,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,6 +75,15 @@ fun ProfileEditScreen(
     viewModel: ProfileEditViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    if (uiState.toastMessageRes != null) {
+        val messageRes = uiState.toastMessageRes
+        LaunchedEffect(messageRes) {
+            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            viewModel.onToastShown()
+        }
+    }
 
     ProfileEditScreenContent(
         uiState = uiState,
@@ -172,7 +185,11 @@ private fun ProfileEditScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             FieldLabel(stringResource(R.string.onboarding_label_academic_status))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 AcademicStatus.entries.forEach { status ->
                     SelectableChip(
                         label = status.label,
@@ -213,18 +230,19 @@ private fun ProfileEditScreenContent(
 
             Spacer(modifier = Modifier.height(24.dp))
             FieldLabel(stringResource(R.string.onboarding_step2_title))
-            uiState.availableTopics.chunked(3).forEach { rowTopics ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    rowTopics.forEach { topic ->
-                        SelectableChip(
-                            label = topic.label,
-                            selected = topic.id in uiState.selectedTopicIds,
-                            enabled = true,
-                            onClick = { onTopicToggle(topic.id) }
-                        )
-                    }
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                uiState.availableTopics.forEach { topic ->
+                    SelectableChip(
+                        label = topic.label,
+                        selected = topic.id in uiState.selectedTopicIds,
+                        enabled = true,
+                        onClick = { onTopicToggle(topic.id) }
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -518,7 +536,11 @@ private fun LinkFields(
     onCategorySelect: (String) -> Unit,
     onUrlChange: (String) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         availableLinkCategories.forEach { category ->
             SelectableChip(
                 label = category,

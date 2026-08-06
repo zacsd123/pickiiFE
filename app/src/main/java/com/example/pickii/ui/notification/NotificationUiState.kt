@@ -11,6 +11,8 @@ data class NotificationItemUiModel(
     val timeText: String,
     val type: NotificationType,
     val isRead: Boolean,
+    val referenceType: String?,
+    val referenceId: String?,
 )
 
 enum class NotificationType {
@@ -18,4 +20,5 @@ enum class NotificationType {
     ACCEPT,
     APPLY,
     CLOSED,
+    OTHER,
 }

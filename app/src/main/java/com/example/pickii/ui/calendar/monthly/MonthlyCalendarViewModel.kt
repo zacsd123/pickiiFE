@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -43,6 +44,12 @@ class MonthlyCalendarViewModel
 
         init {
             observeCalendarData()
+            viewModelScope.launch { calendarRepository.loadCategories() }
+            loadMonth(_uiState.value.displayedYearMonth)
+        }
+
+        private fun loadMonth(yearMonth: YearMonth) {
+            viewModelScope.launch { calendarRepository.loadSchedules(yearMonth) }
         }
 
         /**
@@ -103,30 +110,30 @@ class MonthlyCalendarViewModel
          * 이전 달로 이동한다.
          */
         fun moveToPreviousMonth() {
+            val previousMonth = _uiState.value.displayedYearMonth.minusMonths(1)
             _uiState.update { currentState ->
-                val previousMonth = currentState.displayedYearMonth.minusMonths(1)
-
                 currentState.copy(
                     displayedYearMonth = previousMonth,
                     selectedDate = previousMonth.atDay(1),
                     expandedScheduleId = null
                 )
             }
+            loadMonth(previousMonth)
         }
 
         /**
          * 다음 달로 이동한다.
          */
         fun moveToNextMonth() {
+            val nextMonth = _uiState.value.displayedYearMonth.plusMonths(1)
             _uiState.update { currentState ->
-                val nextMonth = currentState.displayedYearMonth.plusMonths(1)
-
                 currentState.copy(
                     displayedYearMonth = nextMonth,
                     selectedDate = nextMonth.atDay(1),
                     expandedScheduleId = null
                 )
             }
+            loadMonth(nextMonth)
         }
 
         /**
@@ -140,6 +147,7 @@ class MonthlyCalendarViewModel
                     expandedScheduleId = null
                 )
             }
+            loadMonth(yearMonth)
         }
 
         /**

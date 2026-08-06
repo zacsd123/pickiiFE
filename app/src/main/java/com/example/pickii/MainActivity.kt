@@ -1,9 +1,14 @@
 package com.example.pickii
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -16,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -44,11 +51,15 @@ import com.example.pickii.ui.common.PickiiBottomNavTab
 import com.example.pickii.ui.findid.FindIdScreen
 import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
+import com.example.pickii.ui.memberprofile.MemberProfileScreen
 import com.example.pickii.ui.mypage.MyPageRoute
+import com.example.pickii.ui.mypage.MyPageScreenType
+import com.example.pickii.ui.navigation.ARG_MEMBER_ID
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.navigation.PickiiDestination
 import com.example.pickii.ui.notification.NotificationRoute
+import com.example.pickii.ui.notification.NotificationType
 import com.example.pickii.ui.onboarding.OnboardingScreen
 import com.example.pickii.ui.passwordreset.PasswordResetScreen
 import com.example.pickii.ui.recruitapply.RecruitApplyScreen
@@ -65,6 +76,11 @@ private const val NAV_TRANSITION_DURATION_MS = 200
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var notificationChatRoomId by mutableStateOf<Long?>(null)
+
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
     /** 스플래시 화면을 먼저 띄우고, [PickiiNavHost]로 이후 화면 전환을 구성한다. */
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -72,14 +88,34 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         hideSystemNavigationBar()
+        requestNotificationPermissionIfNeeded()
+        notificationChatRoomId = intent.chatRoomIdExtra()
 
         setContent {
             PickiiTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    PickiiNavHost()
+                    PickiiNavHost(
+                        notificationChatRoomId = notificationChatRoomId,
+                        onNotificationChatRoomConsumed = { notificationChatRoomId = null }
+                    )
                 }
             }
         }
+    }
+
+    /** 채팅 알림을 탭했을 때(싱글톱이라 기존 인스턴스가 재사용됨) 새 방 id를 반영한다. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        notificationChatRoomId = intent.chatRoomIdExtra()
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+        if (!granted) requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     /** 카메라 등 다른 앱을 다녀오면 시스템 내비게이션 바가 다시 나타나므로, 돌아올 때마다 다시 숨긴다. */
@@ -98,11 +134,24 @@ class MainActivity : ComponentActivity() {
         controller.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
+
+    companion object {
+        /** 채팅 알림을 탭해 들어왔을 때, 바로 열어야 할 채팅방 id를 담는 인텐트 extra 키. */
+        const val EXTRA_CHAT_ROOM_ID = "extra_chat_room_id"
+    }
+}
+
+private fun Intent.chatRoomIdExtra(): Long? {
+    val value = getLongExtra(MainActivity.EXTRA_CHAT_ROOM_ID, -1L)
+    return value.takeIf { it != -1L }
 }
 
 /** 앱의 전체 화면 전환을 담당하는 내비게이션 그래프. */
 @Composable
-private fun PickiiNavHost() {
+private fun PickiiNavHost(
+    notificationChatRoomId: Long? = null,
+    onNotificationChatRoomConsumed: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val currentRoute =
         navController
@@ -124,6 +173,19 @@ private fun PickiiNavHost() {
 
     // "지원 현황"의 "채팅방 바로가기"에서 채팅 탭으로 이동할 때, 목록을 거치지 않고 바로 진입할 채팅방 id.
     var pendingChatRoomId by remember { mutableStateOf<Long?>(null) }
+
+    // 알림 클릭으로 마이페이지 탭에 진입할 때, 홈을 거치지 않고 바로 보여줄 하위 화면(예: 지원 수락 알림 → 지원 현황).
+    var pendingMyPageScreen by remember { mutableStateOf<MyPageScreenType?>(null) }
+
+    // 채팅 알림을 탭해 들어온 경우. 스플래시를 지나 홈에 도달한 뒤에 채팅 탭으로 이동시킨다(스플래시 단계에서는
+    // 아직 백스택에 홈이 없어 navigateToTab의 popUpTo가 아무 효과가 없다).
+    LaunchedEffect(notificationChatRoomId, currentRoute) {
+        if (notificationChatRoomId != null && currentRoute == PickiiDestination.Home.route) {
+            pendingChatRoomId = notificationChatRoomId
+            navController.navigateToTab(PickiiDestination.Chat.route)
+            onNotificationChatRoomConsumed()
+        }
+    }
 
     val resolvedTab =
         when (currentRoute) {
@@ -224,7 +286,9 @@ private fun PickiiNavHost() {
             composable(PickiiDestination.Splash.route) {
                 SplashScreen(
                     onTimeout = {
-                        navController.navigate(PickiiDestination.Login.route) {
+                        // 자동 로그인: 저장된 Access Token이 아직 유효하면 로그인 화면을 건너뛴다.
+                        val destination = if (isLoggedIn) PickiiDestination.Home.route else PickiiDestination.Login.route
+                        navController.navigate(destination) {
                             popUpTo(PickiiDestination.Splash.route) { inclusive = true }
                         }
                     }
@@ -299,12 +363,38 @@ private fun PickiiNavHost() {
             composable(PickiiDestination.Notification.route) {
                 NotificationRoute(
                     onCloseClick = { navController.popBackStack() },
-                    onHomeClick = {
-                        navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
-                    },
-                    onCalendarClick = { navController.navigateToTab(PickiiDestination.Calender.route) },
-                    onChatClick = { navController.navigateToTab(PickiiDestination.Chat.route) },
-                    onMyPageClick = { navController.navigateToTab(PickiiDestination.MyPage.route) }
+                    onNotificationClick = { notification ->
+                        val referenceId = notification.referenceId
+                        when (notification.type) {
+                            // 새 지원자 알림: 공고 상세가 아니라 그 공고의 지원자 확인 화면으로 바로 이동한다.
+                            NotificationType.APPLY ->
+                                referenceId?.let { postId ->
+                                    navController.navigate(PickiiDestination.ApplicantList(postId).route)
+                                }
+
+                            // 지원 수락 알림: 마이페이지의 "지원 현황"으로 바로 이동한다.
+                            NotificationType.ACCEPT -> {
+                                pendingMyPageScreen = MyPageScreenType.APPLICATIONS
+                                navController.navigateToTab(PickiiDestination.MyPage.route)
+                            }
+
+                            // 그 외(새 댓글 등)는 referenceType 기준으로 이동한다.
+                            else ->
+                                when (notification.referenceType) {
+                                    "RECRUIT" ->
+                                        referenceId?.let {
+                                            navController.navigate(PickiiDestination.RecruitDetail(it).route)
+                                        }
+
+                                    "CHATROOM", "CHAT" ->
+                                        referenceId?.toLongOrNull()?.let { roomId ->
+                                            pendingChatRoomId = roomId
+                                            navController.navigateToTab(PickiiDestination.Chat.route)
+                                        }
+                                    // PROJECT 등 그 외/미확인 referenceType은 ENUM.md 확인 전까지 이동하지 않는다.
+                                }
+                        }
+                    }
                 )
             }
 
@@ -314,6 +404,9 @@ private fun PickiiNavHost() {
             ) {
                 RecruitDetailScreen(
                     onBackClick = { navController.popBackStack() },
+                    onAuthorProfileClick = { authorId ->
+                        navController.navigate(PickiiDestination.MemberProfile(authorId).route)
+                    },
                     onApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) },
                     onEditClick = { postId -> navController.navigate(PickiiDestination.RecruitEdit(postId).route) },
                     onDeletedNavigateHome = {
@@ -324,6 +417,13 @@ private fun PickiiNavHost() {
                     },
                     onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
                 )
+            }
+
+            composable(
+                route = PickiiDestination.MemberProfile.ROUTE,
+                arguments = listOf(navArgument(ARG_MEMBER_ID) { type = NavType.StringType })
+            ) {
+                MemberProfileScreen(onBackClick = { navController.popBackStack() })
             }
 
             composable(
@@ -365,6 +465,9 @@ private fun PickiiNavHost() {
             ) {
                 ChatRoute(
                     onTopLevelScreenChange = { isChatTopLevel = it },
+                    onNavigateToMemberProfile = { memberId ->
+                        navController.navigate(PickiiDestination.MemberProfile(memberId.toString()).route)
+                    },
                     initialRoomId = pendingChatRoomId
                 )
             }
@@ -406,7 +509,8 @@ private fun PickiiNavHost() {
                         navController.navigateToTab(PickiiDestination.Chat.route)
                     },
                     onLoggedOut = { navController.navigateToLoginClearingBackStack() },
-                    onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) }
+                    onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) },
+                    initialScreen = pendingMyPageScreen
                 )
             }
 
@@ -418,7 +522,13 @@ private fun PickiiNavHost() {
                 route = PickiiDestination.ApplicantList.ROUTE,
                 arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
             ) {
-                ApplicantRoute(onBackClick = { navController.popBackStack() })
+                ApplicantRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToChatRoom = { roomId ->
+                        pendingChatRoomId = roomId.toLongOrNull()
+                        navController.navigateToTab(PickiiDestination.Chat.route)
+                    }
+                )
             }
         }
     }

@@ -7,5 +7,6 @@ data class ScrapsUiState(
     val isLoading: Boolean = true,
     val items: List<MyScrap> = emptyList(),
     val currentPage: Int = 1,
-    val totalPages: Int = 1
+    val totalPages: Int = 1,
+    val toastMessageRes: Int? = null
 )

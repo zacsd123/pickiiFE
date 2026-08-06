@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.ui.common.CharacterCounterText
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.LoginRequiredDialog
@@ -225,6 +226,7 @@ private fun RecruitDetailScreenContent(
                     items(uiState.displayComments, key = { it.comment.id }) { item ->
                         CommentRow(
                             item = item,
+                            currentUserId = uiState.currentUser?.id,
                             onReplyClick = onReplyClick,
                             onDeleteClick = onDeleteCommentClick
                         )
@@ -468,33 +470,31 @@ private fun PostInfoCard(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(ApplyButtonHeight)
-                    .clip(RoundedCornerShape(CardCornerRadius))
-                    .background(PickiiBlue)
-                    .clickable(onClick = onApplyClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.recruit_detail_button_apply),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-
         if (isAuthor) {
-            Spacer(modifier = Modifier.height(16.dp))
             AuthorActionButtons(
-                onViewApplicantsClick = {},
+                isClosed = post.status == RecruitStatus.CLOSED,
                 onEditClick = onEditClick,
                 onCloseRecruitingClick = onCloseRecruitingClick,
-                onReopenRecruitingClick = onReopenRecruitingClick,
-                onDeletePostClick = onDeletePostClick
+                onReopenRecruitingClick = onReopenRecruitingClick
             )
+        } else {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(ApplyButtonHeight)
+                        .clip(RoundedCornerShape(CardCornerRadius))
+                        .background(PickiiBlue)
+                        .clickable(onClick = onApplyClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.recruit_detail_button_apply),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
@@ -519,45 +519,36 @@ private fun InfoSection(
     }
 }
 
-/** 글 작성자에게만 노출되는 지원자 확인/수정/마감/추가 모집/삭제 버튼 5개. */
+/**
+ * 글 작성자에게만 노출되는 버튼 2개(수정하기 + 마감하기/추가모집하기). 마감된 공고는 추가모집하기를,
+ * 그 외(모집중/추가모집중)에는 마감하기를 보여준다.
+ */
 @Composable
 private fun AuthorActionButtons(
-    onViewApplicantsClick: () -> Unit,
+    isClosed: Boolean,
     onEditClick: () -> Unit,
     onCloseRecruitingClick: () -> Unit,
-    onReopenRecruitingClick: () -> Unit,
-    onDeletePostClick: () -> Unit
+    onReopenRecruitingClick: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_view_applicants),
-                onClick = onViewApplicantsClick,
-                modifier = Modifier.weight(1f)
-            )
-            AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_edit),
-                onClick = onEditClick,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_close_recruiting),
-                onClick = onCloseRecruitingClick,
-                modifier = Modifier.weight(1f)
-            )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        AuthorActionButton(
+            text = stringResource(R.string.recruit_detail_button_edit),
+            onClick = onEditClick,
+            modifier = Modifier.weight(1f)
+        )
+        if (isClosed) {
             AuthorActionButton(
                 text = stringResource(R.string.recruit_detail_button_reopen_recruiting),
                 onClick = onReopenRecruitingClick,
                 modifier = Modifier.weight(1f)
             )
+        } else {
+            AuthorActionButton(
+                text = stringResource(R.string.recruit_detail_button_close_recruiting),
+                onClick = onCloseRecruitingClick,
+                modifier = Modifier.weight(1f)
+            )
         }
-        AuthorActionButton(
-            text = stringResource(R.string.recruit_detail_button_delete_post),
-            onClick = onDeletePostClick,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
@@ -611,13 +602,14 @@ private fun EmptyCommentsText() {
 @Composable
 private fun CommentRow(
     item: CommentDisplayItem,
+    currentUserId: String?,
     onReplyClick: (RecruitComment) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
     val comment = item.comment
-    // 서버가 요청 시점의 로그인 사용자 기준으로 계산해 내려주는 값이라, 로그인 방식(일반/카카오)과
-    // 무관하게 항상 정확하다. 클라이언트에서 authorId를 currentUser.id와 직접 비교하지 않는다.
-    val isOwnComment = !comment.isDeleted && comment.isAuthor
+    // comment.isAuthor는 "이 댓글의 작성자가 공고 작성자인지"를 뜻하는 서버 값(작성자 배지용)이지,
+    // "내가 쓴 댓글인지"가 아니다. 삭제 버튼 노출은 authorId를 currentUserId와 직접 비교해야 한다.
+    val isOwnComment = !comment.isDeleted && currentUserId != null && comment.authorId == currentUserId
     val nicknameText =
         if (item.visualIndentLevel > 0) {
             stringResource(R.string.recruit_comment_reply_indent_prefix, comment.authorNickname)

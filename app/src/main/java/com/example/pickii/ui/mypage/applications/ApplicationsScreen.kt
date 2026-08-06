@@ -31,16 +31,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.ApplyStatus
 import com.example.pickii.domain.model.MyApply
-import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.MyPageSectionHeader
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.StatusBadge
-import com.example.pickii.ui.theme.PickiiBlue
-import com.example.pickii.ui.theme.PickiiDisabledGray
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import com.example.pickii.ui.theme.PickiiPaletteGray
+import com.example.pickii.ui.theme.PickiiPaletteGreen
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
-import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toFullDisplayString
 
 /**
@@ -51,6 +52,7 @@ import com.example.pickii.util.toFullDisplayString
 @Composable
 fun ApplicationsScreen(
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onNavigateToChatRoom: (roomId: String) -> Unit,
     viewModel: ApplicationsViewModel = hiltViewModel()
 ) {
@@ -69,6 +71,7 @@ fun ApplicationsScreen(
         uiState = uiState,
         visiblePageNumbers = viewModel.visiblePageNumbers,
         onBackClick = onBackClick,
+        onNotificationClick = onNotificationClick,
         onCancelRequest = viewModel::onCancelRequest,
         onDismissCancelDialog = viewModel::onDismissCancelDialog,
         onConfirmCancel = viewModel::onConfirmCancel,
@@ -85,6 +88,7 @@ private fun ApplicationsScreenContent(
     uiState: ApplicationsUiState,
     visiblePageNumbers: List<Int>,
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onCancelRequest: (String) -> Unit,
     onDismissCancelDialog: () -> Unit,
     onConfirmCancel: () -> Unit,
@@ -93,9 +97,13 @@ private fun ApplicationsScreenContent(
     onPreviousPage: () -> Unit,
     onNextPage: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().background(PickiiYellowLight).padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite).padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_applications_title), onBackClick = onBackClick)
+        MyPageSectionHeader(
+            title = stringResource(R.string.mypage_applications_title),
+            onBackClick = onBackClick,
+            onNotificationClick = onNotificationClick
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
@@ -218,7 +226,7 @@ private fun applyStatusLabel(status: ApplyStatus): String =
 
 private fun applyStatusColor(status: ApplyStatus): Color =
     when (status) {
-        ApplyStatus.WAITING -> PickiiDisabledGray
-        ApplyStatus.ACCEPTED -> PickiiBlue
-        ApplyStatus.REJECTED -> Color(0xFFE57373)
+        ApplyStatus.WAITING -> PickiiPaletteGray
+        ApplyStatus.ACCEPTED -> PickiiPaletteGreen
+        ApplyStatus.REJECTED -> PickiiPaletteRed
     }

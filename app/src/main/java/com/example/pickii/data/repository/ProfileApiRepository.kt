@@ -50,6 +50,11 @@ class ProfileApiRepository
         override suspend fun updateProfile(input: UpdateProfileInput): Result<Unit> =
             safeApiCallUnit(json) { profileApiService.updateResume(input.toRequest()) }
 
+        override suspend fun getMemberProfile(memberId: String): Result<MemberProfile> {
+            val id = memberId.toLongOrNull() ?: return Result.failure(IllegalArgumentException("잘못된 id: $memberId"))
+            return safeApiCall(json) { profileApiService.getMemberProfile(id) }.map { it.data.toDomain() }
+        }
+
         private fun UpdateProfileInput.toRequest() =
             UpdateResumeRequest(
                 univId = univId.toLong(),

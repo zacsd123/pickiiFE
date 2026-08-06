@@ -1,10 +1,12 @@
 package com.example.pickii.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -49,8 +52,10 @@ import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
+import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.PickiiTopBar
+import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.common.SelectableChip
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -84,9 +89,18 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
+        viewModel.loadNotificationCount()
+    }
+
+    OneShotEventEffect(flow = viewModel.events) { event ->
+        when (event) {
+            is RecruitUiEvent.ShowToast ->
+                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+        }
     }
 
     HomeScreenContent(
@@ -326,7 +340,11 @@ private fun FilterPanel(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             categories.forEach { category ->
                 SelectableChip(
                     label = category.label,
@@ -346,18 +364,19 @@ private fun FilterPanel(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(10.dp))
-        topics.chunked(4).forEach { rowTopics ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                rowTopics.forEach { topic ->
-                    SelectableChip(
-                        label = topic.label,
-                        selected = topic in selectedTopics,
-                        enabled = true,
-                        onClick = { onTopicToggle(topic) }
-                    )
-                }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            topics.forEach { topic ->
+                SelectableChip(
+                    label = topic.label,
+                    selected = topic in selectedTopics,
+                    enabled = true,
+                    onClick = { onTopicToggle(topic) }
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.height(8.dp))

@@ -17,6 +17,8 @@ import com.example.pickii.data.remote.dto.SocialLinkRequest
 import com.example.pickii.data.remote.dto.SocialLinkResponseDto
 import com.example.pickii.data.remote.dto.SocialLoginRequest
 import com.example.pickii.data.remote.dto.SocialLoginResponseDto
+import com.example.pickii.data.remote.dto.TokenRefreshRequest
+import com.example.pickii.data.remote.dto.TokenRefreshResponseDto
 import com.example.pickii.data.remote.dto.WithdrawRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -34,6 +36,12 @@ interface AuthApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): Response<ApiEnvelope<LoginResponseDto>>
+
+    /** 1-6 토큰 갱신(Silent Refresh). [com.example.pickii.data.remote.TokenAuthenticator]가 401 응답 시 호출한다. */
+    @POST("auth/token/refresh")
+    suspend fun refreshToken(
+        @Body request: TokenRefreshRequest
+    ): Response<ApiEnvelope<TokenRefreshResponseDto>>
 
     @POST("auth/email/send")
     suspend fun sendEmailCode(
@@ -66,10 +74,8 @@ interface AuthApiService {
         @Body request: LogoutRequest
     ): Response<Unit>
 
-    /**
-     * 로그인 상태 비밀번호 변경. 가정 엔드포인트([ChangePasswordRequest] 참고) — 백엔드 준비 전까지 실패할 수 있다.
-     */
-    @PATCH("users/me/password")
+    /** 1-12 비밀번호 변경(로그인 상태). */
+    @PATCH("auth/password")
     suspend fun changePassword(
         @Body request: ChangePasswordRequest
     ): Response<Unit>

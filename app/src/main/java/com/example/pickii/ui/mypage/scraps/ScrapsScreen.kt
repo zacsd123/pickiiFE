@@ -1,5 +1,6 @@
 package com.example.pickii.ui.mypage.scraps
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,11 +17,13 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,29 +33,41 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.MyScrap
 import com.example.pickii.domain.model.RecruitStatus
-import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.MyPageSectionHeader
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.StatusBadge
-import com.example.pickii.ui.theme.PickiiBlue
-import com.example.pickii.ui.theme.PickiiDisabledGray
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import com.example.pickii.ui.theme.PickiiPaletteBlue
+import com.example.pickii.ui.theme.PickiiPaletteGray
+import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiTextGray
-import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toFullDisplayString
 
 /** 스크랩한 공고 화면(17번). 목록에서 바로 스크랩 해제할 수 있다. */
 @Composable
 fun ScrapsScreen(
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     viewModel: ScrapsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    if (uiState.toastMessageRes != null) {
+        val messageRes = uiState.toastMessageRes
+        LaunchedEffect(messageRes) {
+            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            viewModel.onToastShown()
+        }
+    }
 
     ScrapsScreenContent(
         uiState = uiState,
         visiblePageNumbers = viewModel.visiblePageNumbers,
         onBackClick = onBackClick,
+        onNotificationClick = onNotificationClick,
         onUnscrapClick = viewModel::onUnscrapClick,
         onPageClick = viewModel::onPageClick,
         onPreviousPage = viewModel::onPreviousPage,
@@ -60,19 +75,25 @@ fun ScrapsScreen(
     )
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun ScrapsScreenContent(
     uiState: ScrapsUiState,
     visiblePageNumbers: List<Int>,
     onBackClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onUnscrapClick: (String) -> Unit,
     onPageClick: (Int) -> Unit,
     onPreviousPage: () -> Unit,
     onNextPage: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().background(PickiiYellowLight).padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite).padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_scraps_title), onBackClick = onBackClick)
+        MyPageSectionHeader(
+            title = stringResource(R.string.mypage_scraps_title),
+            onBackClick = onBackClick,
+            onNotificationClick = onNotificationClick
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
@@ -144,7 +165,7 @@ private fun ScrapCard(
         Icon(
             imageVector = Icons.Filled.Bookmark,
             contentDescription = null,
-            tint = PickiiBlue,
+            tint = PickiiPaletteBlue,
             modifier = Modifier.clickable(onClick = onUnscrapClick)
         )
     }
@@ -152,7 +173,7 @@ private fun ScrapCard(
 
 private fun recruitStatusColor(status: RecruitStatus): Color =
     when (status) {
-        RecruitStatus.OPEN -> PickiiBlue
-        RecruitStatus.CLOSED -> PickiiDisabledGray
-        RecruitStatus.ADDITIONAL -> Color(0xFF66BB6A)
+        RecruitStatus.OPEN -> PickiiPaletteGreen
+        RecruitStatus.CLOSED -> PickiiPaletteGray
+        RecruitStatus.ADDITIONAL -> PickiiPaletteGreen
     }

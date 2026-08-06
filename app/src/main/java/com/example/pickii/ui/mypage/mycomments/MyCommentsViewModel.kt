@@ -2,6 +2,7 @@ package com.example.pickii.ui.mypage.mycomments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.util.visiblePageNumbers
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,9 +44,15 @@ class MyCommentsViewModel
                             )
                         }
                     }.onFailure {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update {
+                            it.copy(isLoading = false, toastMessageRes = R.string.mycomments_toast_load_failed)
+                        }
                     }
             }
+        }
+
+        fun onToastShown() {
+            _uiState.update { it.copy(toastMessageRes = null) }
         }
 
         val visiblePageNumbers: List<Int>

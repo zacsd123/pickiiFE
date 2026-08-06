@@ -39,10 +39,9 @@ enum class ChatConnectionState {
  * 기존 세션을 정리하고 새로 연결한다.
  *
  * SockJS 주의: 문서상 엔드포인트는 "ws(s)://{host}/api/v1/ws (SockJS)"이지만 Krossbow는 원시
- * STOMP-over-WebSocket만 지원하고 SockJS 핸드셰이크 프로토콜은 구현하지 않는다. 우선 원시 웹소켓으로
- * `{baseUrl}/ws`에 직접 접속을 시도한다. 만약 실제 백엔드가 이 경로에서 원시 업그레이드를 거부한다면(SockJS
- * 핸드셰이크를 강제하는 경우) Spring STOMP+SockJS의 관례적 폴백 경로인 `{baseUrl}/ws/websocket`으로 바꿔야
- * 한다 — 이는 실제 서버로 실증 확인이 필요하다(코드로 자동 폴백하지 않고, 확인 후 아래 [webSocketUrl]을 고친다).
+ * STOMP-over-WebSocket만 지원하고 SockJS 핸드셰이크 프로토콜은 구현하지 않는다. `{baseUrl}/ws`에 원시
+ * 웹소켓으로 직접 접속하면 서버가 SockJS 핸드셰이크를 기대해 업그레이드를 거부하므로, Spring
+ * STOMP+SockJS가 원시 웹소켓 클라이언트를 위해 제공하는 관례적 경로인 `{baseUrl}/ws/websocket`을 사용한다.
  */
 @Singleton
 class ChatStompClient
@@ -136,6 +135,6 @@ class ChatStompClient
         private fun webSocketUrl(): String {
             val httpBaseUrl = BuildConfig.API_BASE_URL.trimEnd('/')
             val webSocketBaseUrl = httpBaseUrl.replaceFirst("http", "ws")
-            return "$webSocketBaseUrl/ws"
+            return "$webSocketBaseUrl/ws/websocket"
         }
     }

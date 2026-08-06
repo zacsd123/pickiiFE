@@ -44,8 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
+import com.example.pickii.ui.common.LoadingIndicator
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantCardColor = Color(0xFFFEFFF2)
@@ -74,7 +75,7 @@ fun ApplicantListScreen(
     onBackClick: () -> Unit,
     onApplicantDetailClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ApplicantListViewModel = viewModel()
+    viewModel: ApplicantListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -108,9 +109,7 @@ fun ApplicantListScreen(
         bottomBar = {
             if (uiState.hasAcceptedApplicant) {
                 GroupChatBottomBar(
-                    onClick = {
-                        // TODO: 수락된 지원자들을 대상으로 단체 채팅방 개설
-                    }
+                    onClick = viewModel::createGroupChat
                 )
             }
         }
@@ -150,7 +149,11 @@ fun ApplicantListScreen(
                 )
             }
 
-            if (sortedApplicants.isEmpty()) {
+            if (uiState.isLoading) {
+                item {
+                    LoadingIndicator(modifier = Modifier.fillMaxWidth().height(220.dp))
+                }
+            } else if (sortedApplicants.isEmpty()) {
                 item {
                     EmptyApplicantCard()
                 }
@@ -179,7 +182,7 @@ fun ApplicantListScreen(
                             )
                         },
                         onChatClick = {
-                            // TODO: 해당 지원자와 채팅방 개설
+                            viewModel.createDirectChat(applicant.memberId)
                         }
                     )
                 }
@@ -453,27 +456,20 @@ private fun ApplicantCard(
                     )
 
                     ApplicantInformationRow(
-                        title = "전공",
-                        value = applicant.major
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(7.dp)
-                    )
-
-                    ApplicantInformationRow(
-                        title = "학년",
-                        value = "${applicant.grade}학년"
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(7.dp)
-                    )
-
-                    ApplicantInformationRow(
                         title = "지원 날짜",
                         value = applicant.appliedDate
                     )
+
+                    if (applicant.applicationMessage.isNotBlank()) {
+                        Spacer(
+                            modifier = Modifier.height(7.dp)
+                        )
+
+                        ApplicantInformationRow(
+                            title = "지원 메시지",
+                            value = applicant.applicationMessage
+                        )
+                    }
                 }
             }
 

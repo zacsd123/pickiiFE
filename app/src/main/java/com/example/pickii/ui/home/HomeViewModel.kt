@@ -2,17 +2,24 @@ package com.example.pickii.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.domain.repository.MasterDataRepository
+import com.example.pickii.domain.repository.NotificationRepository
+import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.visiblePageNumbers
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,8 +32,8 @@ private const val PAGE_WINDOW_SIZE = 5
 
 /** [HomeScreen]에 표시되는 상태. */
 data class HomeUiState(
-    val schoolName: String = "디지털서울문화예술대학교",
-    val notificationCount: Int = 9,
+    val schoolName: String = "",
+    val notificationCount: Int = 0,
     val searchQuery: String = "",
     val isFilterExpanded: Boolean = false,
     val campusScope: CampusScope = CampusScope.INTERNAL,
@@ -52,13 +59,37 @@ class HomeViewModel
     @Inject
     constructor(
         private val recruitRepository: RecruitRepository,
-        private val masterDataRepository: MasterDataRepository
+        private val masterDataRepository: MasterDataRepository,
+        private val notificationRepository: NotificationRepository,
+        private val profileRepository: ProfileRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(HomeUiState())
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+        private val _events = Channel<RecruitUiEvent>(Channel.BUFFERED)
+        val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
+
         init {
             loadFilterOptions()
+            loadSchoolName()
+        }
+
+        /** 상단 헤더에 표시할 학교명을 내 프로필에서 불러온다. */
+        private fun loadSchoolName() {
+            viewModelScope.launch {
+                profileRepository.getMyProfile().onSuccess { profile ->
+                    _uiState.update { it.copy(schoolName = profile.univ) }
+                }
+            }
+        }
+
+        /** 홈 화면 재진입 시(예: 알림 화면을 봤다 돌아왔을 때) 미읽음 알림 수를 다시 불러온다. */
+        fun loadNotificationCount() {
+            viewModelScope.launch {
+                notificationRepository.getUnreadCount().onSuccess { count ->
+                    _uiState.update { it.copy(notificationCount = count) }
+                }
+            }
         }
 
         /** 필터 패널에 표시할 카테고리/주제 마스터 데이터를 불러온다. */
@@ -100,6 +131,7 @@ class HomeViewModel
                         }
                     }.onFailure {
                         _uiState.update { it.copy(isLoading = false) }
+                        _events.send(RecruitUiEvent.ShowToast(R.string.home_toast_load_failed))
                     }
             }
         }

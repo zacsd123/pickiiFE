@@ -116,7 +116,7 @@ private fun MyPageHomeScreenContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        PickiiTopBar(notificationCount = 0, onNotificationClick = onNotificationClick)
+        PickiiTopBar(notificationCount = uiState.unreadNotificationCount, onNotificationClick = onNotificationClick)
 
         Spacer(modifier = Modifier.height(20.dp))
 

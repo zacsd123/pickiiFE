@@ -7,6 +7,7 @@ import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.ChatMessageDto
 import com.example.pickii.data.remote.dto.PublishChatMessage
+import com.example.pickii.data.remote.socket.ChatConnectionState
 import com.example.pickii.data.remote.socket.ChatStompClient
 import com.example.pickii.domain.model.ChatMessageContentType
 import com.example.pickii.domain.model.ChatRoomDetail
@@ -139,6 +140,7 @@ class ChatRoomViewModel
                         }
                     }.onFailure {
                         _uiState.update { it.copy(isLoadingMoreMessages = false) }
+                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_room_toast_load_more_failed))
                     }
             }
         }
@@ -149,6 +151,14 @@ class ChatRoomViewModel
          */
         private fun connectSocket(roomId: Long) {
             viewModelScope.launch { chatStompClient.connect(roomId) }
+
+            viewModelScope.launch {
+                chatStompClient.connectionState.collect { state ->
+                    if (state == ChatConnectionState.FAILED) {
+                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_connection_failed))
+                    }
+                }
+            }
 
             viewModelScope.launch {
                 chatStompClient.incomingMessages.collect { dto ->

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pickii.R
+import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.PickiiTopBar
@@ -25,7 +26,7 @@ import com.example.pickii.ui.feedback.component.FeedbackTab
 import com.example.pickii.ui.feedback.component.FeedbackTipCard
 import com.example.pickii.ui.feedback.component.ReceivedFeedbackCard
 import com.example.pickii.ui.feedback.component.WritableFeedbackCard
-import com.example.pickii.ui.theme.PickiiYellowLight
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 
 @Composable
 fun FeedbackScreen(
@@ -45,12 +46,13 @@ fun FeedbackScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(PickiiYellowLight),
+            .background(PickiiPaletteBaseWhite),
     ) {
         FeedbackHeaderSection(
             selectedTab = uiState.selectedTab,
             onTabClick = onTabClick,
             onNotificationClick = onNotificationClick,
+            onBackClick = onCloseClick,
         )
 
         when {
@@ -89,6 +91,7 @@ private fun FeedbackHeaderSection(
     selectedTab: FeedbackTabType,
     onTabClick: (FeedbackTabType) -> Unit,
     onNotificationClick: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -102,6 +105,13 @@ private fun FeedbackHeaderSection(
         PickiiTopBar(
             notificationCount = 0,
             onNotificationClick = onNotificationClick,
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        BackHeader(
+            title = stringResource(R.string.mypage_feedback_title),
+            onBackClick = onBackClick,
         )
 
         Spacer(modifier = Modifier.height(20.dp))

@@ -48,7 +48,9 @@ class ApplicationsViewModel
                             )
                         }
                     }.onFailure {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update {
+                            it.copy(isLoading = false, toastMessageRes = R.string.applications_toast_load_failed)
+                        }
                     }
             }
         }
@@ -90,7 +92,12 @@ class ApplicationsViewModel
                         }
                         refresh()
                     }.onFailure {
-                        _uiState.update { it.copy(pendingCancelApplyId = null) }
+                        _uiState.update {
+                            it.copy(
+                                pendingCancelApplyId = null,
+                                toastMessageRes = R.string.applications_toast_cancel_failed
+                            )
+                        }
                     }
             }
         }

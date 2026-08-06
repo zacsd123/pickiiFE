@@ -3,6 +3,9 @@ package com.example.pickii.ui.navigation
 /** 모집 글 id를 인자로 받는 경로들이 공통으로 사용하는 내비게이션 인자 이름. */
 const val ARG_POST_ID = "postId"
 
+/** 회원 id를 인자로 받는 경로들이 공통으로 사용하는 내비게이션 인자 이름. */
+const val ARG_MEMBER_ID = "memberId"
+
 /** 앱의 내비게이션 경로. */
 sealed class PickiiDestination(
     val route: String
@@ -83,6 +86,16 @@ sealed class PickiiDestination(
         companion object {
             /** [androidx.navigation.compose.NavHost]에 등록할 경로 템플릿. */
             const val ROUTE = "recruit/{$ARG_POST_ID}/applicants"
+        }
+    }
+
+    /** 다른 회원의 프로필 조회 화면(10-1). 공고 작성자 닉네임 등에서 진입한다. */
+    data class MemberProfile(
+        val memberId: String
+    ) : PickiiDestination("members/$memberId/profile") {
+        companion object {
+            /** [androidx.navigation.compose.NavHost]에 등록할 경로 템플릿. */
+            const val ROUTE = "members/{$ARG_MEMBER_ID}/profile"
         }
     }
 }
