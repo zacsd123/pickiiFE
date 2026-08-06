@@ -1,22 +1,41 @@
 package com.example.pickii.ui.applicant
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.pickii.ui.common.OneShotEventEffect
+import com.example.pickii.ui.common.RecruitUiEvent
 
 @Composable
 fun ApplicantRoute(
     onBackClick: () -> Unit,
-    viewModel: ApplicantListViewModel = viewModel()
+    onNavigateToChatRoom: (roomId: String) -> Unit,
+    viewModel: ApplicantListViewModel = hiltViewModel()
 ) {
     var currentScreen by remember {
         mutableStateOf<ApplicantScreen>(
             ApplicantScreen.List
         )
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.navigateToChatRoom.collect { roomId -> onNavigateToChatRoom(roomId) }
+    }
+
+    OneShotEventEffect(flow = viewModel.events) { event ->
+        when (event) {
+            is RecruitUiEvent.ShowToast ->
+                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+        }
     }
 
     when (val screen = currentScreen) {

@@ -2,11 +2,15 @@ package com.example.pickii.di
 
 import com.example.pickii.BuildConfig
 import com.example.pickii.data.remote.AuthInterceptor
+import com.example.pickii.data.remote.TokenAuthenticator
+import com.example.pickii.data.remote.api.ApplicantApiService
 import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.api.CalendarApiService
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
 import com.example.pickii.data.remote.api.MyPageActivityApiService
+import com.example.pickii.data.remote.api.NotificationApiService
 import com.example.pickii.data.remote.api.NotificationSettingsApiService
 import com.example.pickii.data.remote.api.ProfileApiService
 import com.example.pickii.data.remote.api.RecruitApiService
@@ -37,10 +41,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient =
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        tokenAuthenticator: TokenAuthenticator
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
             .apply {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
@@ -95,4 +103,19 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideChatApiService(retrofit: Retrofit): ChatApiService = retrofit.create(ChatApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideApplicantApiService(retrofit: Retrofit): ApplicantApiService =
+        retrofit.create(ApplicantApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNotificationApiService(retrofit: Retrofit): NotificationApiService =
+        retrofit.create(NotificationApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCalendarApiService(retrofit: Retrofit): CalendarApiService =
+        retrofit.create(CalendarApiService::class.java)
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -102,7 +103,9 @@ private fun ApplicantDetailContent(
             message = applicant.applicationMessage
         )
 
-        ApplicantAdditionalCard()
+        ApplicantKeywordsCard(
+            keywords = applicant.keywords
+        )
     }
 }
 
@@ -196,7 +199,7 @@ private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
                 )
 
                 Text(
-                    text = "${applicant.major} · ${applicant.grade}학년 · ${applicant.appliedDate}",
+                    text = applicant.appliedDate,
                     color = Color(0xFF9A9A9A),
                     fontSize = 10.sp,
                     maxLines = 1,
@@ -344,12 +347,11 @@ private fun ApplicantMessageCard(message: String) {
 }
 
 @Composable
-private fun ApplicantAdditionalCard() {
+private fun ApplicantKeywordsCard(keywords: List<String>) {
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(358.dp)
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(15.dp),
@@ -366,9 +368,58 @@ private fun ApplicantAdditionalCard() {
                 defaultElevation = 0.dp
             )
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 15.dp,
+                        vertical = 15.dp
+                    )
+        ) {
+            Text(
+                text = "선택한 지원 키워드",
+                color = Color(0xFF262626),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            if (keywords.isEmpty()) {
+                Text(
+                    text = "선택한 지원 키워드가 없습니다.",
+                    color = Color(0xFF9A9A9A),
+                    fontSize = 12.sp
+                )
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    keywords.forEach { keyword ->
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color(0xFFF0F3A0)
+                        ) {
+                            Text(
+                                text = keyword,
+                                modifier =
+                                    Modifier.padding(
+                                        horizontal = 12.dp,
+                                        vertical = 6.dp
+                                    ),
+                                color = Color(0xFF73764A),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

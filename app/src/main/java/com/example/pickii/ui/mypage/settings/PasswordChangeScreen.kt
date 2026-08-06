@@ -37,7 +37,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.theme.PickiiDisabledGray
-import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 
@@ -85,7 +86,7 @@ private fun PasswordChangeScreenContent(
             Modifier
                 .fillMaxSize()
                 .background(
-                    PickiiYellowLight
+                    PickiiPaletteBaseWhite
                 ).verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
     ) {
@@ -122,7 +123,7 @@ private fun PasswordChangeScreenContent(
         if (uiState.isMismatch) {
             Text(
                 text = stringResource(R.string.mypage_password_change_error_mismatch),
-                color = Color.Red,
+                color = PickiiPaletteRed,
                 fontSize = 12.sp
             )
         }
@@ -140,7 +141,7 @@ private fun PasswordChangeScreenContent(
         ) {
             Text(
                 text = stringResource(R.string.mypage_password_change_button_submit),
-                color = if (uiState.isValid) Color.White else PickiiTextGray,
+                color = if (uiState.isValid) PickiiYellowLight else PickiiTextGray,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -148,7 +149,7 @@ private fun PasswordChangeScreenContent(
 
         if (uiState.errorMessage != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = uiState.errorMessage, color = Color.Red, fontSize = 12.sp)
+            Text(text = uiState.errorMessage, color = PickiiPaletteRed, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -186,8 +187,8 @@ private fun PasswordField(
         },
         colors =
             OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = PickiiFieldBackground,
-                unfocusedContainerColor = PickiiFieldBackground,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent
             )

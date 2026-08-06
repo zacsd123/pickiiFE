@@ -40,6 +40,10 @@ fun CalendarRoute(
         mutableStateOf<Long?>(null)
     }
 
+    var editorEntryKey by rememberSaveable {
+        mutableStateOf(0)
+    }
+
     var selectedDateText by rememberSaveable {
         mutableStateOf(
             LocalDate.of(2026, 7, 4).toString()
@@ -57,6 +61,7 @@ fun CalendarRoute(
             MonthlyCalendarRoute(
                 onAddScheduleClick = {
                     editingScheduleId = null
+                    editorEntryKey++
                     currentScreen = CalendarScreenType.EDITOR.name
                 },
                 onDailyCalendarClick = { selectedDate ->
@@ -65,6 +70,7 @@ fun CalendarRoute(
                 },
                 onEditScheduleClick = { scheduleId ->
                     editingScheduleId = scheduleId
+                    editorEntryKey++
                     currentScreen = CalendarScreenType.EDITOR.name
                 }
             )
@@ -78,6 +84,7 @@ fun CalendarRoute(
                 },
                 onAddScheduleClick = {
                     editingScheduleId = null
+                    editorEntryKey++
                     currentScreen = CalendarScreenType.EDITOR.name
                 },
                 onScheduleClick = onScheduleClick,
@@ -88,6 +95,7 @@ fun CalendarRoute(
         CalendarScreenType.EDITOR -> {
             ScheduleEditorRoute(
                 scheduleId = editingScheduleId,
+                entryKey = editorEntryKey,
                 onBackClick = {
                     editingScheduleId = null
                     currentScreen = CalendarScreenType.MONTHLY.name

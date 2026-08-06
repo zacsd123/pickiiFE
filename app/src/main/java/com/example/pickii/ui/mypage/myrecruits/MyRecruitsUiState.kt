@@ -16,5 +16,6 @@ data class MyRecruitsUiState(
     val currentPage: Int = 1,
     val totalPages: Int = 1,
     val pendingRecruitId: String? = null,
-    val pendingAction: MyRecruitPendingAction? = null
+    val pendingAction: MyRecruitPendingAction? = null,
+    val toastMessageRes: Int? = null
 )

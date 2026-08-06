@@ -2,6 +2,7 @@ package com.example.pickii.ui.mypage.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
 import com.example.pickii.domain.model.NotificationSettings
 import com.example.pickii.domain.repository.NotificationSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,14 +28,35 @@ class NotificationSettingsViewModel
                 repository
                     .getSettings()
                     .onSuccess { settings -> _uiState.update { it.copy(isLoading = false, settings = settings) } }
-                    .onFailure { _uiState.update { it.copy(isLoading = false) } }
+                    .onFailure {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                toastMessageRes = R.string.notification_settings_toast_load_failed
+                            )
+                        }
+                    }
             }
         }
 
+        fun onToastShown() {
+            _uiState.update { it.copy(toastMessageRes = null) }
+        }
+
         private fun update(transform: (NotificationSettings) -> NotificationSettings) {
-            val newSettings = transform(_uiState.value.settings)
+            val previousSettings = _uiState.value.settings
+            val newSettings = transform(previousSettings)
             _uiState.update { it.copy(settings = newSettings) }
-            viewModelScope.launch { repository.updateSettings(newSettings) }
+            viewModelScope.launch {
+                repository.updateSettings(newSettings).onFailure {
+                    _uiState.update {
+                        it.copy(
+                            settings = previousSettings,
+                            toastMessageRes = R.string.notification_settings_toast_update_failed
+                        )
+                    }
+                }
+            }
         }
 
         /** "전체 알림"은 서버 필드가 아니라, marketingNoti를 제외한 6개를 한 번에 켜고 끄는 클라이언트 편의 토글이다. */

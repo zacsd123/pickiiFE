@@ -4,10 +4,7 @@ import com.example.pickii.domain.model.SocialAccount
 
 /** 계정 관리(비밀번호 변경, 회원 탈퇴, 소셜 계정 연동 조회/해제)를 담당한다. */
 interface AccountRepository {
-    /**
-     * 로그인 상태에서 비밀번호를 변경한다. 가정 엔드포인트([com.example.pickii.data.remote.dto.ChangePasswordRequest] 참고) —
-     * 백엔드 준비 전까지 실패할 수 있다.
-     */
+    /** 로그인 상태에서 비밀번호를 변경한다(1-12). */
     suspend fun changePassword(
         currentPassword: String,
         newPassword: String,

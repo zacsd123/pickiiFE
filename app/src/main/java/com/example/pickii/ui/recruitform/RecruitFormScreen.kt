@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -310,7 +311,11 @@ private fun FormBody(
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = stringResource(R.string.recruit_form_label_category), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             uiState.availableCategories.forEach { category ->
                 SelectableChip(
                     label = category.label,
@@ -325,18 +330,19 @@ private fun FormBody(
 
         Text(text = stringResource(R.string.recruit_form_label_topic), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        uiState.availableTopics.chunked(4).forEach { rowTopics ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                rowTopics.forEach { topic ->
-                    SelectableChip(
-                        label = topic.label,
-                        selected = topic == uiState.topic,
-                        enabled = true,
-                        onClick = { onTopicSelect(topic) }
-                    )
-                }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            uiState.availableTopics.forEach { topic ->
+                SelectableChip(
+                    label = topic.label,
+                    selected = topic == uiState.topic,
+                    enabled = true,
+                    onClick = { onTopicSelect(topic) }
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.height(12.dp))

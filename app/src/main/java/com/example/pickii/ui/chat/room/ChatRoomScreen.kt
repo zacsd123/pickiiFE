@@ -75,6 +75,7 @@ fun ChatRoomRoute(
     roomId: Long,
     onBackClick: () -> Unit,
     onLeaveChatRoom: () -> Unit,
+    onNavigateToMemberProfile: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatRoomViewModel = hiltViewModel()
 ) {
@@ -114,7 +115,8 @@ fun ChatRoomRoute(
         onRemoveMember = viewModel::removeMember,
         onNotificationEnabledChange = viewModel::updateNotificationSetting,
         onLeaveChatRoomRequested = viewModel::leaveChatRoom,
-        onDeleteMeeting = viewModel::deleteMeeting
+        onDeleteMeeting = viewModel::deleteMeeting,
+        onNavigateToMemberProfile = onNavigateToMemberProfile
     )
 }
 
@@ -138,7 +140,8 @@ private fun ChatRoomScreen(
     onRemoveMember: (Long) -> Unit,
     onNotificationEnabledChange: (Boolean) -> Unit,
     onLeaveChatRoomRequested: () -> Unit,
-    onDeleteMeeting: (Long) -> Unit
+    onDeleteMeeting: (Long) -> Unit,
+    onNavigateToMemberProfile: (Long) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -388,7 +391,8 @@ private fun ChatRoomScreen(
                 onBackClick = {
                     isMemberListPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                }
+                },
+                onMemberClick = onNavigateToMemberProfile
             )
         }
 

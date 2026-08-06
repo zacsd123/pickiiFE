@@ -1,10 +1,12 @@
 package com.example.pickii.ui.mypage.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,11 +29,13 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,6 +78,15 @@ fun ProfileViewScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    if (uiState.toastMessageRes != null) {
+        val messageRes = uiState.toastMessageRes
+        LaunchedEffect(messageRes) {
+            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            viewModel.onToastShown()
+        }
+    }
 
     ProfileViewScreenContent(
         uiState = uiState,
@@ -83,10 +96,11 @@ fun ProfileViewScreen(
 }
 
 @Composable
-private fun ProfileViewScreenContent(
+internal fun ProfileViewScreenContent(
     uiState: ProfileViewUiState,
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit
+    onEditClick: (() -> Unit)? = null,
+    title: String = stringResource(R.string.mypage_profile_title)
 ) {
     val profile = uiState.profile
 
@@ -110,7 +124,7 @@ private fun ProfileViewScreenContent(
                         .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
-                ProfileViewHeader(onBackClick = onBackClick, onEditClick = onEditClick)
+                ProfileViewHeader(title = title, onBackClick = onBackClick, onEditClick = onEditClick)
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -136,8 +150,9 @@ private fun ProfileViewScreenContent(
 
 @Composable
 private fun ProfileViewHeader(
+    title: String,
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit
+    onEditClick: (() -> Unit)?
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -148,26 +163,28 @@ private fun ProfileViewHeader(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = stringResource(R.string.mypage_profile_title),
+            text = title,
             color = Color.Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
         )
-        Box(
-            modifier =
-                Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Color.Black)
-                    .clickable(onClick = onEditClick)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.mypage_profile_button_edit),
-                color = Color.White,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
+        if (onEditClick != null) {
+            Box(
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.Black)
+                        .clickable(onClick = onEditClick)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.mypage_profile_button_edit),
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
@@ -206,7 +223,11 @@ private fun TopicSchoolLinksCard(
     ) {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             if (topicLabels.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     topicLabels.take(3).forEach { label ->
                         SelectableChip(label = label, selected = true, enabled = false, onClick = {})
                     }

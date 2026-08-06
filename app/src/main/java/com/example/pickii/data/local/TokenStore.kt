@@ -27,6 +27,9 @@ class TokenStore
         /** 현재 저장된 Access Token. 비로그인 상태면 null이다. */
         val accessTokenFlow: Flow<String?> = context.tokenDataStore.data.map { it[ACCESS_TOKEN_KEY] }
 
+        /** 현재 저장된 Refresh Token. 비로그인 상태면 null이다. */
+        val refreshTokenFlow: Flow<String?> = context.tokenDataStore.data.map { it[REFRESH_TOKEN_KEY] }
+
         suspend fun saveTokens(
             accessToken: String,
             refreshToken: String
@@ -43,4 +46,7 @@ class TokenStore
 
         /** [AuthInterceptor]처럼 코루틴 밖(OkHttp 백그라운드 스레드)에서 동기적으로 토큰을 읽을 때 사용한다. */
         fun currentAccessTokenBlocking(): String? = runBlocking { accessTokenFlow.first() }
+
+        /** [com.example.pickii.data.remote.TokenAuthenticator]가 코루틴 밖에서 동기적으로 Refresh Token을 읽을 때 사용한다. */
+        fun currentRefreshTokenBlocking(): String? = runBlocking { refreshTokenFlow.first() }
     }

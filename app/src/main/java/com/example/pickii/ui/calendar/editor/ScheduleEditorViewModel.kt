@@ -30,14 +30,24 @@ class ScheduleEditorViewModel
         val uiState: StateFlow<ScheduleEditorUiState> =
             _uiState.asStateFlow()
 
+        private var lastInitializedEntryKey: Int? = null
+
         init {
             observeCategories()
         }
 
         /**
          * 등록 화면을 새 일정 작성 상태로, 또는 기존 일정을 불러와 수정 상태로 초기화한다.
+         *
+         * [entryKey]가 이전과 같으면(태그 설정 화면을 다녀오는 등 같은 편집 세션 안에서
+         * 재진입한 경우) 무시한다 — 그렇지 않으면 화면이 재구성될 때마다 입력 중이던 값이 초기화된다.
          */
-        fun initialize(scheduleId: Long?) {
+        fun initialize(scheduleId: Long?, entryKey: Int) {
+            if (lastInitializedEntryKey == entryKey) {
+                return
+            }
+            lastInitializedEntryKey = entryKey
+
             if (scheduleId == null) {
                 _uiState.update { currentState ->
                     ScheduleEditorUiState(categories = currentState.categories)
@@ -253,7 +263,8 @@ class ScheduleEditorViewModel
 
             val schedule =
                 CalendarSchedule(
-                    id = currentState.editingScheduleId ?: calendarRepository.createScheduleId(),
+                    // 신규 등록 시 id는 서버가 발급하므로 실제로 쓰이지 않는 자리표시자다.
+                    id = currentState.editingScheduleId ?: 0L,
                     title = currentState.title.trim(),
                     categoryId = currentState.selectedCategoryId,
                     startDate = currentState.startDate,
@@ -277,16 +288,21 @@ class ScheduleEditorViewModel
                     isAllDay = currentState.isAllDay
                 )
 
-            if (currentState.editingScheduleId != null) {
-                calendarRepository.updateSchedule(schedule)
-            } else {
-                calendarRepository.addSchedule(schedule)
-            }
+            viewModelScope.launch {
+                _uiState.update { it.copy(isSaving = true) }
+                val result =
+                    if (currentState.editingScheduleId != null) {
+                        calendarRepository.updateSchedule(schedule)
+                    } else {
+                        calendarRepository.addSchedule(schedule)
+                    }
 
-            _uiState.update { currentState ->
-                currentState.copy(
-                    isSaved = true
-                )
+                result
+                    .onSuccess {
+                        _uiState.update { it.copy(isSaving = false, isSaved = true) }
+                    }.onFailure { error ->
+                        _uiState.update { it.copy(isSaving = false, errorMessage = error.message) }
+                    }
             }
         }
     }

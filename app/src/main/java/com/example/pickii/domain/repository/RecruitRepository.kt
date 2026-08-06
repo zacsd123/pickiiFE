@@ -1,6 +1,7 @@
 package com.example.pickii.domain.repository
 
 import com.example.pickii.domain.model.CampusScope
+import com.example.pickii.domain.model.ProjectCreationResult
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPage
 import com.example.pickii.domain.model.RecruitPost
@@ -101,4 +102,13 @@ interface RecruitRepository {
         postId: String,
         message: String
     ): Result<String>
+
+    /**
+     * 공고를 프로젝트(그룹 채팅)로 전환한다(6-1). 수락된(ACCEPTED) 지원자가 1명 이상 있어야 하며,
+     * 이미 프로젝트가 생성된 공고면 실패한다.
+     */
+    suspend fun createProject(
+        postId: String,
+        name: String
+    ): Result<ProjectCreationResult>
 }

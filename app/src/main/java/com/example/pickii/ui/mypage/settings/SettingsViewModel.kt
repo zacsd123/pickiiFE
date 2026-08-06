@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.repository.AccountRepository
-import com.example.pickii.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +17,7 @@ import javax.inject.Inject
 class SettingsViewModel
     @Inject
     constructor(
-        private val accountRepository: AccountRepository,
-        private val sessionRepository: SessionRepository
+        private val accountRepository: AccountRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(SettingsUiState())
         val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -38,22 +36,6 @@ class SettingsViewModel
                         )
                     }
                 }
-            }
-        }
-
-        fun onLogoutRequest() {
-            _uiState.update { it.copy(isLogoutConfirmVisible = true) }
-        }
-
-        fun onDismissLogoutDialog() {
-            _uiState.update { it.copy(isLogoutConfirmVisible = false) }
-        }
-
-        fun onConfirmLogout(onLoggedOut: () -> Unit) {
-            viewModelScope.launch {
-                sessionRepository.logout()
-                _uiState.update { it.copy(isLogoutConfirmVisible = false) }
-                onLoggedOut()
             }
         }
 

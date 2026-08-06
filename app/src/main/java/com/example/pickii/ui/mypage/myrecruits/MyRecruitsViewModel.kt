@@ -2,6 +2,7 @@ package com.example.pickii.ui.mypage.myrecruits
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.util.visiblePageNumbers
@@ -45,9 +46,15 @@ class MyRecruitsViewModel
                             )
                         }
                     }.onFailure {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update {
+                            it.copy(isLoading = false, toastMessageRes = R.string.myrecruits_toast_load_failed)
+                        }
                     }
             }
+        }
+
+        fun onToastShown() {
+            _uiState.update { it.copy(toastMessageRes = null) }
         }
 
         val visiblePageNumbers: List<Int>
@@ -87,7 +94,13 @@ class MyRecruitsViewModel
                         MyRecruitPendingAction.REOPEN -> recruitRepository.reopenAdditionalRecruiting(recruitId)
                         MyRecruitPendingAction.DELETE -> recruitRepository.deletePost(recruitId)
                     }
-                _uiState.update { it.copy(pendingRecruitId = null, pendingAction = null) }
+                _uiState.update {
+                    it.copy(
+                        pendingRecruitId = null,
+                        pendingAction = null,
+                        toastMessageRes = if (result.isFailure) R.string.myrecruits_toast_action_failed else null
+                    )
+                }
                 if (result.isSuccess) refresh()
             }
         }

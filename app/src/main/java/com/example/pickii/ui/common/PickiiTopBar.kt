@@ -26,16 +26,20 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.theme.PickiiFieldBackground
 
 /**
- * 화면 상단 공용 헤더: Pickii 로고 + 가운데 슬롯([centerContent]) + 알림종 아이콘.
+ * 화면 상단 공용 헤더: Pickii 로고 + 가운데 슬롯([centerContent]) + 오른쪽 슬롯([trailingContent]).
  *
- * @param centerContent 로고 오른쪽, 알림종 왼쪽에 들어가는 내용(학교명 텍스트, 화면 제목 등). 생략하면 로고만 남고 알림종이 오른쪽 끝에 붙는다.
+ * @param centerContent 로고 오른쪽, [trailingContent] 왼쪽에 들어가는 내용(학교명 텍스트, 화면 제목 등). 생략하면 로고만 남고 [trailingContent]가 오른쪽 끝에 붙는다.
+ * @param trailingContent 오른쪽 끝에 들어가는 내용. 생략하면 알림 개수 뱃지가 붙은 종 아이콘([NotificationBellButton])이 뜬다.
  */
 @Composable
 fun PickiiTopBar(
     notificationCount: Int,
     onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier,
-    centerContent: @Composable RowScope.() -> Unit = {}
+    centerContent: @Composable RowScope.() -> Unit = {},
+    trailingContent: @Composable RowScope.() -> Unit = {
+        NotificationBellButton(count = notificationCount, onClick = onNotificationClick)
+    }
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -62,7 +66,7 @@ fun PickiiTopBar(
             centerContent()
         }
 
-        NotificationBellButton(count = notificationCount, onClick = onNotificationClick)
+        trailingContent()
     }
 }
 
@@ -74,20 +78,25 @@ fun NotificationBellButton(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier =
-            modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(PickiiFieldBackground)
-                .clickable(onClick = onClick),
+        modifier = modifier.size(36.dp),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.Notifications,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier.size(18.dp)
-        )
+        Box(
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(PickiiFieldBackground)
+                    .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Notifications,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.size(18.dp)
+            )
+        }
 
         if (count > 0) {
             Box(

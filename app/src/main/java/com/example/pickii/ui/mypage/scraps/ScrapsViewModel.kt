@@ -2,6 +2,7 @@ package com.example.pickii.ui.mypage.scraps
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.R
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.util.visiblePageNumbers
@@ -49,7 +50,9 @@ class ScrapsViewModel
                             )
                         }
                     }.onFailure {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update {
+                            it.copy(isLoading = false, toastMessageRes = R.string.scraps_toast_load_failed)
+                        }
                     }
             }
         }
@@ -72,9 +75,19 @@ class ScrapsViewModel
         /** 목록에서 바로 스크랩을 해제한다(확인 팝업 없이 즉시 해제 — 공고 상세 화면의 스크랩 토글과 동일한 정책). */
         fun onUnscrapClick(recruitId: String) {
             viewModelScope.launch {
-                recruitRepository.unscrapPost(recruitId).onSuccess {
-                    _uiState.update { state -> state.copy(items = state.items.filterNot { it.recruitId == recruitId }) }
-                }
+                recruitRepository
+                    .unscrapPost(recruitId)
+                    .onSuccess {
+                        _uiState.update { state ->
+                            state.copy(items = state.items.filterNot { it.recruitId == recruitId })
+                        }
+                    }.onFailure {
+                        _uiState.update { it.copy(toastMessageRes = R.string.scraps_toast_unscrap_failed) }
+                    }
             }
+        }
+
+        fun onToastShown() {
+            _uiState.update { it.copy(toastMessageRes = null) }
         }
     }

@@ -17,4 +17,7 @@ interface ProfileRepository {
 
     /** 기존 프로필(이력서)을 수정한다. 생성과 달리 AI 재생성은 수행하지 않는다. */
     suspend fun updateProfile(input: UpdateProfileInput): Result<Unit>
+
+    /** 다른 회원의 프로필을 조회한다(10-1). 프로필이 없거나 탈퇴한 회원이면 "RESUME_NOT_FOUND"로 실패한다. */
+    suspend fun getMemberProfile(memberId: String): Result<MemberProfile>
 }

@@ -12,9 +12,16 @@ import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.util.decodeJwtSubject
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,11 +46,32 @@ class RecruitAuthSessionRepository
         private val profileRepository: ProfileRepository,
         private val json: Json
     ) : SessionRepository {
+        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
         private val _currentUser = MutableStateFlow<CurrentUser?>(null)
         override val currentUser: StateFlow<CurrentUser?> = _currentUser.asStateFlow()
 
-        private val _isLoggedIn = MutableStateFlow(false)
-        override val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+        /**
+         * 저장된 Access Token 유무로 로그인 상태를 판단한다. 별도 "세션 복원" 호출 없이 앱을 껐다 켜도
+         * (자동 로그인) 로그인 상태가 그대로 유지되고, [com.example.pickii.data.remote.TokenAuthenticator]가
+         * Refresh Token 만료로 토큰을 지우면 로그아웃 상태에도 자동으로 반영된다.
+         */
+        override val isLoggedIn: StateFlow<Boolean> =
+            tokenStore.accessTokenFlow
+                .map { !it.isNullOrBlank() }
+                .stateIn(scope, SharingStarted.Eagerly, false)
+
+        init {
+            scope.launch {
+                tokenStore.accessTokenFlow.collect { accessToken ->
+                    if (accessToken.isNullOrBlank()) {
+                        _currentUser.value = null
+                    } else if (_currentUser.value == null) {
+                        restoreCurrentUser(accessToken)
+                    }
+                }
+            }
+        }
 
         override suspend fun login(
             email: String,
@@ -64,7 +92,6 @@ class RecruitAuthSessionRepository
                         hasProfile = DEFAULT_HAS_PROFILE
                     )
                 _currentUser.value = user
-                _isLoggedIn.value = true
                 user
             }
 
@@ -81,32 +108,10 @@ class RecruitAuthSessionRepository
             }.map { envelope ->
                 val body = envelope.data
                 tokenStore.saveTokens(body.accessToken, body.refreshToken)
-                // 소셜 로그인 응답(1-10)에는 memberId가 내려오지 않는다. 정상 로그인과 같은 인증
-                // 서버가 발급한 토큰이므로 subject 클레임에서 회원 id를 대신 읽는다(§JwtDecoder).
-                // sub가 숫자가 아니면(백엔드가 다른 값을 넣은 경우) 여전히 빈 값으로 남고, "내 글"
-                // 비교 등 id 기반 UI는 다음 프로필 갱신 전까지 부정확할 수 있다 — 이 경우 백엔드가
-                // 소셜 로그인 응답에 memberId를 직접 내려주는 것이 근본적인 해결책이다.
-                val memberId = decodeJwtSubject(body.accessToken)?.toLongOrNull()
-                val hasProfile = profileRepository.hasResume()
-                val nickname =
-                    if (hasProfile) {
-                        profileRepository
-                            .getMyProfile()
-                            .getOrNull()
-                            ?.nickname
-                            .orEmpty()
-                    } else {
-                        ""
-                    }
-                val user =
-                    CurrentUser(
-                        id = memberId?.toString().orEmpty(),
-                        nickname = nickname,
-                        experience = DEFAULT_EXPERIENCE,
-                        hasProfile = hasProfile
-                    )
+                // 소셜 로그인 응답(1-10)에는 memberId가 내려오지 않는다. [resolveCurrentUserFromToken]이
+                // 정상 로그인과 같은 인증 서버가 발급한 토큰의 subject 클레임에서 회원 id를 대신 읽는다.
+                val user = resolveCurrentUserFromToken(body.accessToken)
                 _currentUser.value = user
-                _isLoggedIn.value = true
                 user
             }
 
@@ -124,6 +129,36 @@ class RecruitAuthSessionRepository
         override suspend fun clearSession() {
             tokenStore.clear()
             _currentUser.value = null
-            _isLoggedIn.value = false
+        }
+
+        /** 앱 재시작 등으로 토큰은 있는데 메모리의 사용자 정보가 없을 때(자동 로그인) 복원한다. */
+        private suspend fun restoreCurrentUser(accessToken: String) {
+            _currentUser.value = resolveCurrentUserFromToken(accessToken)
+        }
+
+        /**
+         * sub가 숫자가 아니면(백엔드가 다른 값을 넣은 경우) id는 빈 값으로 남고, "내 글" 비교 등
+         * id 기반 UI는 다음 프로필 갱신 전까지 부정확할 수 있다 — 이 경우 백엔드가 소셜 로그인
+         * 응답에 memberId를 직접 내려주는 것이 근본적인 해결책이다.
+         */
+        private suspend fun resolveCurrentUserFromToken(accessToken: String): CurrentUser {
+            val memberId = decodeJwtSubject(accessToken)?.toLongOrNull()
+            val hasProfile = profileRepository.hasResume()
+            val nickname =
+                if (hasProfile) {
+                    profileRepository
+                        .getMyProfile()
+                        .getOrNull()
+                        ?.nickname
+                        .orEmpty()
+                } else {
+                    ""
+                }
+            return CurrentUser(
+                id = memberId?.toString().orEmpty(),
+                nickname = nickname,
+                experience = DEFAULT_EXPERIENCE,
+                hasProfile = hasProfile
+            )
         }
     }

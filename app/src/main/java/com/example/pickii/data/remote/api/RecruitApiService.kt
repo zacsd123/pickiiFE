@@ -10,6 +10,8 @@ import com.example.pickii.data.remote.dto.CommentCreateRequest
 import com.example.pickii.data.remote.dto.CommentCreateResponseDto
 import com.example.pickii.data.remote.dto.CommentsResponseDto
 import com.example.pickii.data.remote.dto.PageEnvelope
+import com.example.pickii.data.remote.dto.ProjectCreateRequest
+import com.example.pickii.data.remote.dto.ProjectCreateResponseDto
 import com.example.pickii.data.remote.dto.RecruitCreateResponseDto
 import com.example.pickii.data.remote.dto.RecruitDetailDto
 import com.example.pickii.data.remote.dto.RecruitSummaryDto
@@ -109,4 +111,11 @@ interface RecruitApiService {
     suspend fun unscrapRecruit(
         @Path("recruitId") recruitId: Long
     ): Response<Unit>
+
+    /** 6-1 프로젝트 생성(그룹 채팅 생성). */
+    @POST("recruits/{recruitId}/project")
+    suspend fun createProject(
+        @Path("recruitId") recruitId: Long,
+        @Body request: ProjectCreateRequest
+    ): Response<ApiEnvelope<ProjectCreateResponseDto>>
 }

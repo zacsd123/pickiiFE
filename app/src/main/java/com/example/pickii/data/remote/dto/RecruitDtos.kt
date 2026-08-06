@@ -119,3 +119,18 @@ data class ScrapResponseDto(
     val recruitId: Long,
     val isScrapped: Boolean
 )
+
+/** `POST /recruits/{recruitId}/project`(6-1) 요청. */
+@Serializable
+data class ProjectCreateRequest(
+    val name: String
+)
+
+/** `POST /recruits/{recruitId}/project`(6-1) 응답. */
+@Serializable
+data class ProjectCreateResponseDto(
+    val projectId: Long,
+    val chatRoomId: Long,
+    val recruitStatus: String,
+    val memberCount: Int
+)

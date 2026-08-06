@@ -1,6 +1,7 @@
 package com.example.pickii.ui.mypage.withdrawal
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,13 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -38,14 +42,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
-import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import com.example.pickii.ui.theme.PickiiPaletteGreen
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
-import com.example.pickii.ui.theme.PickiiYellowLight
 
 private val FieldCornerRadius = 14.dp
-private val WithdrawRed = Color(0xFFE53935)
 private val WithdrawWarningBackground = Color(0xFFFDECEA)
 
 /**
@@ -94,7 +98,7 @@ private fun WithdrawalScreenContent(
     onWithdrawClick: () -> Unit,
     onComplete: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
+    Box(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite)) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Spacer(modifier = Modifier.height(16.dp))
             BackHeader(title = stringResource(R.string.mypage_withdraw_title), onBackClick = onBackClick)
@@ -124,7 +128,7 @@ private fun WithdrawalScreenContent(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = uiState.emailMessage,
-                    color = if (uiState.isEmailMessageError) Color.Red else PickiiBlue,
+                    color = if (uiState.isEmailMessageError) PickiiPaletteRed else PickiiPaletteGreen,
                     fontSize = 12.sp
                 )
             }
@@ -154,7 +158,7 @@ private fun WithdrawalScreenContent(
             ) {
                 Text(
                     text = stringResource(R.string.mypage_withdraw_warning_title),
-                    color = WithdrawRed,
+                    color = PickiiPaletteRed,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -170,15 +174,17 @@ private fun WithdrawalScreenContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            AgreementRow(
-                text = stringResource(R.string.mypage_withdraw_agreement_1),
-                checked = uiState.isDataDeletionAgreed,
-                onToggle = onToggleDataDeletionAgreed
-            )
-            AgreementRow(
-                text = stringResource(R.string.mypage_withdraw_agreement_2),
-                checked = uiState.isRejoinPolicyAgreed,
-                onToggle = onToggleRejoinPolicyAgreed
+            val allAgreed = uiState.isDataDeletionAgreed && uiState.isRejoinPolicyAgreed
+            SingleAgreementBox(
+                checked = allAgreed,
+                onToggle = {
+                    if (!uiState.isDataDeletionAgreed) onToggleDataDeletionAgreed()
+                    if (!uiState.isRejoinPolicyAgreed) onToggleRejoinPolicyAgreed()
+                    if (allAgreed) {
+                        onToggleDataDeletionAgreed()
+                        onToggleRejoinPolicyAgreed()
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -204,7 +210,7 @@ private fun WithdrawalScreenContent(
                         Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(FieldCornerRadius))
-                            .background(if (uiState.isSubmitEnabled) WithdrawRed else PickiiDisabledGray)
+                            .background(if (uiState.isSubmitEnabled) PickiiPaletteRed else PickiiDisabledGray)
                             .clickable(enabled = uiState.isSubmitEnabled, onClick = onWithdrawClick)
                             .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
@@ -220,7 +226,7 @@ private fun WithdrawalScreenContent(
 
             if (uiState.errorMessage != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = uiState.errorMessage, color = Color.Red, fontSize = 12.sp)
+                Text(text = uiState.errorMessage, color = PickiiPaletteRed, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -277,28 +283,58 @@ private fun FieldWithButton(
     }
 }
 
+/** "위 내용을 모두 확인했어요" 단일 확인 박스. 체크 시 붉은 테두리 + 채워진 원으로 강조된다. */
 @Composable
-private fun AgreementRow(
-    text: String,
+private fun SingleAgreementBox(
     checked: Boolean,
     onToggle: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(FieldCornerRadius))
+                .background(Color.White)
+                .border(
+                    width = 1.dp,
+                    color = if (checked) PickiiPaletteRed else PickiiFieldBackground,
+                    shape = RoundedCornerShape(FieldCornerRadius)
+                ).clickable(onClick = onToggle)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(checked = checked, onCheckedChange = {
-            onToggle()
-        }, colors = CheckboxDefaults.colors(checkedColor = PickiiBlue))
-        Text(text = text, color = Color.Black, fontSize = 12.sp)
+        Box(
+            modifier =
+                Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(if (checked) PickiiPaletteRed else PickiiFieldBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            if (checked) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = stringResource(R.string.mypage_withdraw_agreement_all),
+            color = if (checked) PickiiPaletteRed else PickiiTextGray,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
 @Composable
 private fun fieldColors() =
     OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = PickiiFieldBackground,
-        unfocusedContainerColor = PickiiFieldBackground,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
         focusedBorderColor = Color.Transparent,
         unfocusedBorderColor = Color.Transparent
     )

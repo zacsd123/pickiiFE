@@ -2,7 +2,6 @@ package com.example.pickii.ui.calendar.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.repository.CalendarRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -90,32 +89,25 @@ class ScheduleCategoryViewModel
 
             val editingId = currentState.editingCategoryId
 
-            if (editingId == null) {
-                calendarRepository.addCategory(
-                    ScheduleCategory(
-                        id = calendarRepository.createCategoryId(),
-                        name = trimmedName,
-                        color = currentState.selectedColor
-                    )
-                )
-            } else {
-                calendarRepository.updateCategory(
-                    ScheduleCategory(
-                        id = editingId,
-                        name = trimmedName,
-                        color = currentState.selectedColor
-                    )
-                )
-            }
+            viewModelScope.launch {
+                val result =
+                    if (editingId == null) {
+                        calendarRepository.addCategory(trimmedName, currentState.selectedColor)
+                    } else {
+                        calendarRepository.updateCategory(editingId, trimmedName, currentState.selectedColor)
+                    }
 
-            resetEditor()
+                result.onSuccess { resetEditor() }
+            }
         }
 
         fun deleteCategory(categoryId: Long) {
-            calendarRepository.deleteCategory(categoryId)
-
-            if (_uiState.value.editingCategoryId == categoryId) {
-                resetEditor()
+            viewModelScope.launch {
+                calendarRepository.deleteCategory(categoryId).onSuccess {
+                    if (_uiState.value.editingCategoryId == categoryId) {
+                        resetEditor()
+                    }
+                }
             }
         }
 

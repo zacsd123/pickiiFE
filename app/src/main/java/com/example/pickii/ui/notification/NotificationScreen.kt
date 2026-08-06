@@ -1,7 +1,6 @@
 package com.example.pickii.ui.notification
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -21,11 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Person
@@ -42,18 +37,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.common.PickiiTopBar
 
 private val NotificationBackgroundColor = Color(0xFFF8F8F5)
 private val PrimaryTextColor = Color(0xFF20201F)
 private val SecondaryTextColor = Color(0xFF8C8C87)
 private val TimeTextColor = Color(0xFFB0B0AA)
 
-private val UnreadCardBackgroundColor = Color(0xFFFFFEEE)
-private val UnreadCardBorderColor = Color(0xFFE6E56E)
+private val UnreadCardBackgroundColor = Color(0xFFF9FCA8)
 private val UnreadDotColor = Color(0xFFC6B91E)
 
 private val ReadCardBackgroundColor = Color(0xFFFFFFFF)
-private val ReadCardBorderColor = Color(0xFFE8E8E3)
 
 private val ChatIconBackgroundColor = Color(0xFFDCE8FF)
 private val ChatIconColor = Color(0xFF5B7FFF)
@@ -67,166 +61,99 @@ private val ApplyIconColor = Color(0xFFF07D26)
 private val ClosedIconBackgroundColor = Color(0xFFFFF8BC)
 private val ClosedIconColor = Color(0xFFC18F13)
 
-private val BottomBarColor = Color(0xFF1C1C1B)
-private val BottomSelectedColor = Color(0xFFF5FF9C)
-private val BottomUnselectedColor = Color(0xFF858585)
-
 @Composable
 fun NotificationScreen(
     uiState: NotificationUiState,
     onCloseClick: () -> Unit,
     onNotificationClick: (NotificationItemUiModel) -> Unit,
-    onHomeClick: () -> Unit,
-    onCalendarClick: () -> Unit,
-    onChatClick: () -> Unit,
-    onMyPageClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(NotificationBackgroundColor)
             .statusBarsPadding(),
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            NotificationHeader(
-                onCloseClick = onCloseClick,
-            )
-
-            Spacer(modifier = Modifier.height(25.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 28.dp),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "알림",
-                    color = PrimaryTextColor,
-                    fontSize = 29.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Text(
-                    text = "최근 순",
-                    color = TimeTextColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (uiState.notifications.isEmpty()) {
-                EmptyNotificationContent(
+        PickiiTopBar(
+            modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp),
+            notificationCount = 0,
+            onNotificationClick = onCloseClick,
+            trailingContent = {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                        start = 22.dp,
-                        end = 22.dp,
-                        top = 0.dp,
-                        bottom = 130.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .clickable(onClick = onCloseClick),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    items(
-                        items = uiState.notifications,
-                        key = { notification -> notification.id },
-                    ) { notification ->
-                        NotificationCard(
-                            notification = notification,
-                            onClick = {
-                                onNotificationClick(notification)
-                            },
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = "알림 화면 닫기",
+                        tint = PrimaryTextColor,
+                        modifier = Modifier.size(29.dp),
+                    )
                 }
-            }
-        }
-
-        PickiiBottomNavigation(
-            selectedItem = BottomNavigationItem.HOME,
-            onHomeClick = onHomeClick,
-            onCalendarClick = onCalendarClick,
-            onChatClick = onChatClick,
-            onMyPageClick = onMyPageClick,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(
-                    start = 77.dp,
-                    end = 77.dp,
-                    bottom = 18.dp,
-                ),
+            },
         )
-    }
-}
 
-@Composable
-private fun NotificationHeader(
-    onCloseClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 28.dp,
-                end = 28.dp,
-                top = 12.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Row(
             modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF1D1D1C)),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .padding(horizontal = 28.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "P",
-                color = Color(0xFFF4FF91),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
+                text = "알림",
+                color = PrimaryTextColor,
+                fontSize = 29.sp,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Text(
+                text = "최근 순",
+                color = TimeTextColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
             )
         }
 
-        Spacer(modifier = Modifier.size(11.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Pickii",
-            color = PrimaryTextColor,
-            fontSize = 27.sp,
-            fontWeight = FontWeight.ExtraBold,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .clickable(onClick = onCloseClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = "알림 화면 닫기",
-                tint = PrimaryTextColor,
-                modifier = Modifier.size(29.dp),
+        if (uiState.notifications.isEmpty()) {
+            EmptyNotificationContent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
             )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 22.dp,
+                    end = 22.dp,
+                    top = 0.dp,
+                    bottom = 32.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(
+                    items = uiState.notifications,
+                    key = { notification -> notification.id },
+                ) { notification ->
+                    NotificationCard(
+                        notification = notification,
+                        onClick = {
+                            onNotificationClick(notification)
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -239,20 +166,12 @@ private fun NotificationCard(
     val cardBackgroundColor =
         if (notification.isRead) ReadCardBackgroundColor else UnreadCardBackgroundColor
 
-    val cardBorderColor =
-        if (notification.isRead) ReadCardBorderColor else UnreadCardBorderColor
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(132.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(cardBackgroundColor)
-            .border(
-                width = 1.dp,
-                color = cardBorderColor,
-                shape = RoundedCornerShape(22.dp),
-            )
             .clickable(onClick = onClick)
             .padding(
                 start = 23.dp,
@@ -312,11 +231,8 @@ private fun NotificationCard(
                 modifier = Modifier
                     .padding(top = 6.dp)
                     .size(10.dp)
-                    .border(
-                        width = 2.dp,
-                        color = UnreadDotColor,
-                        shape = CircleShape,
-                    ),
+                    .clip(CircleShape)
+                    .background(UnreadDotColor),
             )
         }
     }
@@ -346,6 +262,12 @@ private fun NotificationTypeIcon(
         )
 
         NotificationType.CLOSED -> NotificationIconData(
+            imageVector = Icons.Outlined.Schedule,
+            backgroundColor = ClosedIconBackgroundColor,
+            iconColor = ClosedIconColor,
+        )
+
+        NotificationType.OTHER -> NotificationIconData(
             imageVector = Icons.Outlined.Schedule,
             backgroundColor = ClosedIconBackgroundColor,
             iconColor = ClosedIconColor,
@@ -385,127 +307,11 @@ private fun EmptyNotificationContent(
     }
 }
 
-@Composable
-private fun PickiiBottomNavigation(
-    selectedItem: BottomNavigationItem,
-    onHomeClick: () -> Unit,
-    onCalendarClick: () -> Unit,
-    onChatClick: () -> Unit,
-    onMyPageClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(76.dp)
-            .clip(RoundedCornerShape(38.dp))
-            .background(BottomBarColor)
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        BottomNavigationButton(
-            item = BottomNavigationItem.HOME,
-            isSelected = selectedItem == BottomNavigationItem.HOME,
-            onClick = onHomeClick,
-        )
-
-        BottomNavigationButton(
-            item = BottomNavigationItem.CALENDAR,
-            isSelected = selectedItem == BottomNavigationItem.CALENDAR,
-            onClick = onCalendarClick,
-        )
-
-        BottomNavigationButton(
-            item = BottomNavigationItem.CHAT,
-            isSelected = selectedItem == BottomNavigationItem.CHAT,
-            onClick = onChatClick,
-        )
-
-        BottomNavigationButton(
-            item = BottomNavigationItem.MY_PAGE,
-            isSelected = selectedItem == BottomNavigationItem.MY_PAGE,
-            onClick = onMyPageClick,
-        )
-    }
-}
-
-@Composable
-private fun BottomNavigationButton(
-    item: BottomNavigationItem,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .height(52.dp)
-            .clip(RoundedCornerShape(27.dp))
-            .background(
-                if (isSelected) {
-                    BottomSelectedColor
-                } else {
-                    Color.Transparent
-                },
-            )
-            .clickable(onClick = onClick)
-            .padding(
-                horizontal = if (isSelected) 18.dp else 14.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Icon(
-            imageVector = item.icon,
-            contentDescription = item.contentDescription,
-            tint = if (isSelected) PrimaryTextColor else BottomUnselectedColor,
-            modifier = Modifier.size(25.dp),
-        )
-
-        if (isSelected) {
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(
-                text = item.label,
-                color = PrimaryTextColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-    }
-}
-
 private data class NotificationIconData(
     val imageVector: ImageVector,
     val backgroundColor: Color,
     val iconColor: Color,
 )
-
-private enum class BottomNavigationItem(
-    val label: String,
-    val contentDescription: String,
-    val icon: ImageVector,
-) {
-    HOME(
-        label = "홈",
-        contentDescription = "홈",
-        icon = Icons.Outlined.Home,
-    ),
-    CALENDAR(
-        label = "캘린더",
-        contentDescription = "캘린더",
-        icon = Icons.Outlined.CalendarMonth,
-    ),
-    CHAT(
-        label = "채팅",
-        contentDescription = "채팅",
-        icon = Icons.Outlined.ChatBubbleOutline,
-    ),
-    MY_PAGE(
-        label = "마이페이지",
-        contentDescription = "마이페이지",
-        icon = Icons.Outlined.PersonOutline,
-    ),
-}
 
 @Preview(
     showBackground = true,
@@ -524,6 +330,8 @@ private fun NotificationScreenPreview() {
                     timeText = "방금 전",
                     type = NotificationType.CHAT,
                     isRead = false,
+                    referenceType = "CHATROOM",
+                    referenceId = "1",
                 ),
                 NotificationItemUiModel(
                     id = 2L,
@@ -532,6 +340,8 @@ private fun NotificationScreenPreview() {
                     timeText = "10분 전",
                     type = NotificationType.ACCEPT,
                     isRead = false,
+                    referenceType = "RECRUIT",
+                    referenceId = "1",
                 ),
                 NotificationItemUiModel(
                     id = 3L,
@@ -540,6 +350,8 @@ private fun NotificationScreenPreview() {
                     timeText = "1시간 전",
                     type = NotificationType.APPLY,
                     isRead = true,
+                    referenceType = "RECRUIT",
+                    referenceId = "1",
                 ),
                 NotificationItemUiModel(
                     id = 4L,
@@ -548,14 +360,12 @@ private fun NotificationScreenPreview() {
                     timeText = "3일 전",
                     type = NotificationType.CLOSED,
                     isRead = true,
+                    referenceType = "RECRUIT",
+                    referenceId = "2",
                 ),
             ),
         ),
         onCloseClick = {},
         onNotificationClick = {},
-        onHomeClick = {},
-        onCalendarClick = {},
-        onChatClick = {},
-        onMyPageClick = {},
     )
 }

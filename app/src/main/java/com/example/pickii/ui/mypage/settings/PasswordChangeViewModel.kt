@@ -13,10 +13,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 로그인 상태 비밀번호 변경 화면(사진 목업 기준: 현재 비밀번호 입력 포함).
- *
- * [AccountRepository.changePassword]는 가정 엔드포인트라 백엔드 준비 전까지 실패할 수 있다. 성공 시에는 보안을 위해
- * 실제 1-12 정책과 동일하게 모든 기기에서 로그아웃시키고 로그인 화면으로 보낸다.
+ * 로그인 상태 비밀번호 변경 화면(1-12). 성공 시 보안을 위해 정책과 동일하게 모든 기기에서
+ * 로그아웃시키고 로그인 화면으로 보낸다.
  */
 @HiltViewModel
 class PasswordChangeViewModel
