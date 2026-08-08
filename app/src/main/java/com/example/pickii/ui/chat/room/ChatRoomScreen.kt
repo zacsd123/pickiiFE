@@ -87,6 +87,39 @@ private val SecondaryTextColor = Color(0xFF9CA3AF)
 private val PickiiYellowColor = Color(0xFFF9FCA8)
 private const val LOAD_MORE_MESSAGES_THRESHOLD = 3
 
+/** 오른쪽에서 슬라이드인하는 채팅방 정보/설정 패널 종류(상호 배타적). */
+private enum class ChatRoomPanel {
+    NONE,
+    INFO,
+    NOTIFICATION_SETTING,
+    MEMBER_LIST,
+    PROJECT_INFO,
+    LEADER_DELEGATION,
+    MEMBER_REMOVAL,
+    LEAVE
+}
+
+/** 아래에서 올라오는 채팅방 바텀시트 종류(상호 배타적). */
+private sealed interface ChatRoomSheet {
+    data object None : ChatRoomSheet
+
+    data object QuickMeeting : ChatRoomSheet
+
+    data object NoticeRegistration : ChatRoomSheet
+
+    data class MeetingConfirm(
+        val meeting: QuickMeetingForm
+    ) : ChatRoomSheet
+
+    data object MeetingManagement : ChatRoomSheet
+
+    data object DirectRegister : ChatRoomSheet
+
+    data object PhotoSource : ChatRoomSheet
+
+    data object GalleryPicker : ChatRoomSheet
+}
+
 /**
  * 채팅방 상태와 화면을 연결한다.
  */
@@ -160,7 +193,8 @@ fun ChatRoomRoute(
         onForceConfirmDismiss = viewModel::onForceConfirmDismiss,
         onCancelMeetingPoll = viewModel::cancelMeetingPoll,
         onRegisterScheduleDirectly = viewModel::registerScheduleDirectly,
-        onSelectProjectColor = viewModel::onSelectProjectColor
+        onSelectProjectColor = viewModel::onSelectProjectColor,
+        onCloseProjectClick = viewModel::closeProject
     )
 }
 
@@ -197,7 +231,8 @@ private fun ChatRoomScreen(
     onForceConfirmDismiss: () -> Unit,
     onCancelMeetingPoll: (Long) -> Unit,
     onRegisterScheduleDirectly: (String, LocalDate, LocalTime, LocalTime) -> Unit,
-    onSelectProjectColor: (Long) -> Unit
+    onSelectProjectColor: (Long) -> Unit,
+    onCloseProjectClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -218,69 +253,15 @@ private fun ChatRoomScreen(
         }
     }
 
-    var showQuickMeetingSheet by remember {
-        mutableStateOf(false)
-    }
-
-    var showNoticeRegistrationSheet by remember {
-        mutableStateOf(false)
-    }
-
     var sentMeetingBanner by remember {
         mutableStateOf<QuickMeetingForm?>(null)
     }
 
-    var showMeetingConfirmSheet by remember {
-        mutableStateOf(false)
-    }
+    /** 오른쪽에서 슬라이드인하는 정보/설정 패널 중 현재 열린 것(상호 배타적, 하나만 열린다). */
+    var activePanel by rememberSaveable { mutableStateOf(ChatRoomPanel.NONE) }
 
-    var meetingToConfirm by remember {
-        mutableStateOf<QuickMeetingForm?>(null)
-    }
-
-    var isChatRoomInfoPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isNotificationSettingPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isMemberListPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isProjectInfoPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isLeaderDelegationPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isMemberRemovalPanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var isLeavePanelVisible by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var showMeetingManagementSheet by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var showDirectRegisterSheet by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var showPhotoSourceSheet by remember {
-        mutableStateOf(false)
-    }
-
-    var showGalleryPickerSheet by remember {
-        mutableStateOf(false)
-    }
+    /** 아래에서 올라오는 바텀시트 중 현재 열린 것(상호 배타적, 하나만 열린다). */
+    var activeSheet by remember { mutableStateOf<ChatRoomSheet>(ChatRoomSheet.None) }
 
     var pendingCameraUri by remember {
         mutableStateOf<Uri?>(null)
@@ -328,7 +309,7 @@ private fun ChatRoomScreen(
                 roomType = uiState.roomType,
                 onBackClick = onBackClick,
                 onMenuClick = {
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 }
             )
 
@@ -390,19 +371,19 @@ private fun ChatRoomScreen(
                 ChatActionMenu(
                     isCurrentUserLeader = uiState.isCurrentUserLeader,
                     onPhotoClick = {
-                        showPhotoSourceSheet = true
+                        activeSheet = ChatRoomSheet.PhotoSource
                     },
                     onNoticeRegisterClick = {
-                        showNoticeRegistrationSheet = true
+                        activeSheet = ChatRoomSheet.NoticeRegistration
                     },
                     onQuickMeetingClick = {
-                        showQuickMeetingSheet = true
+                        activeSheet = ChatRoomSheet.QuickMeeting
                     },
                     onMeetingManagementClick = {
-                        showMeetingManagementSheet = true
+                        activeSheet = ChatRoomSheet.MeetingManagement
                     },
                     onDirectRegisterClick = {
-                        showDirectRegisterSheet = true
+                        activeSheet = ChatRoomSheet.DirectRegister
                     }
                 )
             }
@@ -416,127 +397,114 @@ private fun ChatRoomScreen(
             )
         }
 
-        if (isChatRoomInfoPanelVisible) {
+        if (activePanel == ChatRoomPanel.INFO) {
             ChatRoomInfoPanel(
                 uiState = uiState,
                 onCloseClick = {
-                    isChatRoomInfoPanelVisible = false
+                    activePanel = ChatRoomPanel.NONE
                 },
                 onNotificationSettingClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isNotificationSettingPanelVisible = true
+                    activePanel = ChatRoomPanel.NOTIFICATION_SETTING
                 },
                 onMemberListClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isMemberListPanelVisible = true
+                    activePanel = ChatRoomPanel.MEMBER_LIST
                 },
                 onProjectInfoClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isProjectInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.PROJECT_INFO
                 },
                 onLeaderDelegationClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isLeaderDelegationPanelVisible = true
+                    activePanel = ChatRoomPanel.LEADER_DELEGATION
                 },
                 onMemberRemovalClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isMemberRemovalPanelVisible = true
+                    activePanel = ChatRoomPanel.MEMBER_REMOVAL
                 },
                 onLeaveChatRoomClick = {
-                    isChatRoomInfoPanelVisible = false
-                    isLeavePanelVisible = true
+                    activePanel = ChatRoomPanel.LEAVE
                 }
             )
         }
 
-        if (isNotificationSettingPanelVisible) {
+        if (activePanel == ChatRoomPanel.NOTIFICATION_SETTING) {
             ChatNotificationSettingPanel(
                 initialNotificationEnabled = uiState.isNotificationEnabled,
                 onEnabledChange = onNotificationEnabledChange,
                 onBackClick = {
-                    isNotificationSettingPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 }
             )
         }
 
-        if (isMemberListPanelVisible) {
+        if (activePanel == ChatRoomPanel.MEMBER_LIST) {
             ChatMemberListPanel(
                 members = uiState.members,
                 onBackClick = {
-                    isMemberListPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 },
                 onMemberClick = onNavigateToMemberProfile
             )
         }
 
-        if (isProjectInfoPanelVisible) {
+        if (activePanel == ChatRoomPanel.PROJECT_INFO) {
             ChatProjectInfoPanel(
                 projectInfo = uiState.projectInfo,
                 scheduleCategories = uiState.scheduleCategories,
                 selectedCategoryId = uiState.selectedProjectCategoryId,
                 onBackClick = {
-                    isProjectInfoPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 },
-                onSelectColor = onSelectProjectColor
+                onSelectColor = onSelectProjectColor,
+                isCurrentUserLeader = uiState.isCurrentUserLeader,
+                onCloseProjectClick = onCloseProjectClick
             )
         }
 
-        if (isLeaderDelegationPanelVisible) {
+        if (activePanel == ChatRoomPanel.LEADER_DELEGATION) {
             ChatLeaderDelegationPanel(
                 members = uiState.members,
                 onBackClick = {
-                    isLeaderDelegationPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 },
                 onDelegateClick = { memberId ->
                     onDelegateLeader(memberId)
-                    isLeaderDelegationPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 }
             )
         }
 
-        if (isMemberRemovalPanelVisible) {
+        if (activePanel == ChatRoomPanel.MEMBER_REMOVAL) {
             ChatMemberRemovalPanel(
                 members = uiState.members,
                 onBackClick = {
-                    isMemberRemovalPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 },
                 onRemoveClick = { memberId ->
                     onRemoveMember(memberId)
-                    isMemberRemovalPanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 }
             )
         }
 
-        if (isLeavePanelVisible) {
+        if (activePanel == ChatRoomPanel.LEAVE) {
             ChatRoomLeavePanel(
                 isCurrentUserLeader = uiState.isCurrentUserLeader,
                 onBackClick = {
-                    isLeavePanelVisible = false
-                    isChatRoomInfoPanelVisible = true
+                    activePanel = ChatRoomPanel.INFO
                 },
                 onLeaveClick = {
-                    isLeavePanelVisible = false
+                    activePanel = ChatRoomPanel.NONE
                     onLeaveChatRoomRequested()
                 },
                 onDelegateLeaderClick = {
-                    isLeavePanelVisible = false
-                    isLeaderDelegationPanelVisible = true
+                    activePanel = ChatRoomPanel.LEADER_DELEGATION
                 }
             )
         }
 
-        if (showMeetingManagementSheet) {
+        if (activeSheet == ChatRoomSheet.MeetingManagement) {
             MeetingManagementBottomSheet(
                 meetings = uiState.meetings,
                 onDismiss = {
-                    showMeetingManagementSheet = false
+                    activeSheet = ChatRoomSheet.None
                 },
                 onDeleteMeeting = onDeleteMeeting,
                 onAttendClick = onAttendMeeting,
@@ -544,96 +512,86 @@ private fun ChatRoomScreen(
             )
         }
 
-        if (showQuickMeetingSheet) {
+        if (activeSheet == ChatRoomSheet.QuickMeeting) {
             MeetingRegistrationBottomSheet(
                 members = uiState.members,
                 onDismiss = {
-                    showQuickMeetingSheet = false
+                    activeSheet = ChatRoomSheet.None
                 },
                 onNextClick = { meeting ->
-                    meetingToConfirm = meeting
-                    showQuickMeetingSheet = false
-                    showMeetingConfirmSheet = true
+                    activeSheet = ChatRoomSheet.MeetingConfirm(meeting)
                 }
             )
         }
 
-        if (showDirectRegisterSheet) {
+        if (activeSheet == ChatRoomSheet.DirectRegister) {
             MeetingDirectRegisterBottomSheet(
-                onDismiss = { showDirectRegisterSheet = false },
+                onDismiss = { activeSheet = ChatRoomSheet.None },
                 onRegisterClick = { title, date, startTime, endTime ->
                     onRegisterScheduleDirectly(title, date, startTime, endTime)
-                    showDirectRegisterSheet = false
+                    activeSheet = ChatRoomSheet.None
                 }
             )
         }
 
-        if (showNoticeRegistrationSheet) {
+        if (activeSheet == ChatRoomSheet.NoticeRegistration) {
             NoticeRegistrationBottomSheet(
                 initialContent = uiState.noticeContent,
                 onDismiss = {
-                    showNoticeRegistrationSheet = false
+                    activeSheet = ChatRoomSheet.None
                 },
                 onCompleteClick = { content ->
                     onNoticeRegister(content)
-                    showNoticeRegistrationSheet = false
+                    activeSheet = ChatRoomSheet.None
                 }
             )
         }
-        meetingToConfirm?.let { meeting ->
-            if (showMeetingConfirmSheet) {
-                MeetingConfirmBottomSheet(
-                    meeting = meeting,
-                    totalMemberCount = uiState.members.size,
-                    // < 버튼을 눌렀을 때
-                    onPreviousClick = {
-                        showMeetingConfirmSheet = false
-                        showQuickMeetingSheet = true
-                    },
-                    // 취소 버튼 또는 바텀시트 바깥을 눌렀을 때
-                    onCancelClick = {
-                        showMeetingConfirmSheet = false
-                        showQuickMeetingSheet = false
-                        meetingToConfirm = null
-                    },
-                    // 팀원에게 전송하기 버튼을 눌렀을 때
-                    onSendClick = {
-                        onMeetingSend(meeting)
+        (activeSheet as? ChatRoomSheet.MeetingConfirm)?.let { sheet ->
+            MeetingConfirmBottomSheet(
+                meeting = sheet.meeting,
+                totalMemberCount = uiState.members.size,
+                // < 버튼을 눌렀을 때
+                onPreviousClick = {
+                    activeSheet = ChatRoomSheet.QuickMeeting
+                },
+                // 취소 버튼 또는 바텀시트 바깥을 눌렀을 때
+                onCancelClick = {
+                    activeSheet = ChatRoomSheet.None
+                },
+                // 팀원에게 전송하기 버튼을 눌렀을 때
+                onSendClick = {
+                    onMeetingSend(sheet.meeting)
 
-                        showMeetingConfirmSheet = false
-                        showQuickMeetingSheet = false
-                        meetingToConfirm = null
-                        sentMeetingBanner = meeting
-                    }
-                )
-            }
+                    activeSheet = ChatRoomSheet.None
+                    sentMeetingBanner = sheet.meeting
+                }
+            )
         }
 
-        if (showPhotoSourceSheet) {
+        if (activeSheet == ChatRoomSheet.PhotoSource) {
             PhotoSourceBottomSheet(
                 onGalleryClick = {
-                    showPhotoSourceSheet = false
-                    showGalleryPickerSheet = true
+                    activeSheet = ChatRoomSheet.GalleryPicker
                 },
                 onCameraClick = {
-                    showPhotoSourceSheet = false
+                    activeSheet = ChatRoomSheet.None
                     val captureUri = createImageCaptureUri(context)
                     pendingCameraUri = captureUri
                     cameraLauncher.launch(captureUri)
                 },
                 onDismiss = {
-                    showPhotoSourceSheet = false
+                    activeSheet = ChatRoomSheet.None
                 }
             )
         }
 
-        if (showGalleryPickerSheet) {
+        if (activeSheet == ChatRoomSheet.GalleryPicker) {
             GalleryPickerBottomSheet(
                 onDismiss = {
-                    showGalleryPickerSheet = false
+                    activeSheet = ChatRoomSheet.None
                 },
                 onConfirm = { uris ->
-                    showGalleryPickerSheet = false
+                    activeSheet = ChatRoomSheet.None
                     onSendImages(uris)
                 }
             )
@@ -1226,7 +1184,7 @@ private fun OtherImageMessage(
 /**
  * 파일 및 회의 관련 추가 기능을 표시한다.
  */
-data class ChatActionItem(
+private data class ChatActionItem(
     @DrawableRes val iconRes: Int,
     val label: String,
     val onClick: () -> Unit
