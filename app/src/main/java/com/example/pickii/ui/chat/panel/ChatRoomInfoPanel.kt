@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
 
 private val PanelBackgroundColor = Color.White
 private val PanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -59,112 +58,98 @@ fun ChatRoomInfoPanel(
         onBack = onCloseClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onCloseClick,
+        scrimColor = PanelScrimColor,
+        panelBackgroundColor = PanelBackgroundColor,
+        panelWidthFraction = 0.86f
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(PanelScrimColor)
-                    .clickable(onClick = onCloseClick)
+        ChatRoomInfoHeader(
+            title = createChatRoomInfoTitle(uiState),
+            onCloseClick = onCloseClick
         )
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.86f)
-                    .align(Alignment.CenterEnd)
-                    .background(PanelBackgroundColor)
-        ) {
-            ChatRoomInfoHeader(
-                title = createChatRoomInfoTitle(uiState),
-                onCloseClick = onCloseClick
-            )
+        HorizontalDivider(
+            color = PanelDividerColor
+        )
 
+        ChatRoomMemberSection(
+            members = uiState.members
+        )
+
+        HorizontalDivider(
+            color = PanelDividerColor
+        )
+
+        ChatRoomInfoMenuItem(
+            iconRes = R.drawable.ic_notification,
+            title = "알람 설정",
+            status =
+                if (uiState.isNotificationEnabled) {
+                    "켜짐"
+                } else {
+                    "꺼짐"
+                },
+            onClick = onNotificationSettingClick
+        )
+
+        ChatRoomInfoMenuItem(
+            iconRes = R.drawable.ic_member_list,
+            title = "팀원 목록",
+            status = "${uiState.memberCount}명",
+            onClick = onMemberListClick
+        )
+
+        ChatRoomInfoMenuItem(
+            iconRes = R.drawable.ic_project_info,
+            title = "프로젝트 정보",
+            status = uiState.projectStatus.toDisplayText(),
+            onClick = onProjectInfoClick
+        )
+
+        if (uiState.isCurrentUserLeader) {
             HorizontalDivider(
                 color = PanelDividerColor
             )
 
-            ChatRoomMemberSection(
-                members = uiState.members
-            )
-
-            HorizontalDivider(
-                color = PanelDividerColor
-            )
-
-            ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_notification,
-                title = "알람 설정",
-                status =
-                    if (uiState.isNotificationEnabled) {
-                        "켜짐"
-                    } else {
-                        "꺼짐"
-                    },
-                onClick = onNotificationSettingClick
+            Text(
+                text = "팀장 전용",
+                modifier =
+                    Modifier.padding(
+                        start = 20.dp,
+                        top = 20.dp,
+                        bottom = 8.dp
+                    ),
+                color = PanelSecondaryTextColor,
+                fontSize = 12.sp
             )
 
             ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_member_list,
-                title = "팀원 목록",
-                status = "${uiState.memberCount}명",
-                onClick = onMemberListClick
-            )
-
-            ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_project_info,
-                title = "프로젝트 정보",
-                status = uiState.projectStatus.toDisplayText(),
-                onClick = onProjectInfoClick
-            )
-
-            if (uiState.isCurrentUserLeader) {
-                HorizontalDivider(
-                    color = PanelDividerColor
-                )
-
-                Text(
-                    text = "팀장 전용",
-                    modifier =
-                        Modifier.padding(
-                            start = 20.dp,
-                            top = 20.dp,
-                            bottom = 8.dp
-                        ),
-                    color = PanelSecondaryTextColor,
-                    fontSize = 12.sp
-                )
-
-                ChatRoomInfoMenuItem(
-                    iconRes = R.drawable.ic_leader_delegation,
-                    title = "팀장 위임",
-                    status = null,
-                    onClick = onLeaderDelegationClick
-                )
-
-                ChatRoomInfoMenuItem(
-                    iconRes = R.drawable.ic_member_removal,
-                    title = "팀원 내보내기",
-                    status = null,
-                    onClick = onMemberRemovalClick
-                )
-            }
-
-            HorizontalDivider(
-                color = PanelDividerColor
-            )
-
-            ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_leave_chat_room,
-                title = "채팅방 나가기",
+                iconRes = R.drawable.ic_leader_delegation,
+                title = "팀장 위임",
                 status = null,
-                onClick = onLeaveChatRoomClick,
-                isDestructive = true
+                onClick = onLeaderDelegationClick
+            )
+
+            ChatRoomInfoMenuItem(
+                iconRes = R.drawable.ic_member_removal,
+                title = "팀원 내보내기",
+                status = null,
+                onClick = onMemberRemovalClick
             )
         }
+
+        HorizontalDivider(
+            color = PanelDividerColor
+        )
+
+        ChatRoomInfoMenuItem(
+            iconRes = R.drawable.ic_leave_chat_room,
+            title = "채팅방 나가기",
+            status = null,
+            onClick = onLeaveChatRoomClick,
+            isDestructive = true
+        )
     }
 }
 
@@ -282,7 +267,7 @@ private fun ChatRoomMemberProfile(member: ChatRoomMemberUiModel) {
                         .padding(top = 8.dp)
                         .size(52.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE5E7EB)),
+                        .background(createMemberProfileColor(memberId = member.memberId)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -291,7 +276,7 @@ private fun ChatRoomMemberProfile(member: ChatRoomMemberUiModel) {
                             .firstOrNull()
                             ?.toString()
                             .orEmpty(),
-                    color = Color(0xFF6B7280),
+                    color = PanelPrimaryTextColor,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )

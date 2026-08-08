@@ -5,12 +5,10 @@ package com.example.pickii.ui.chat
  *
  * @property memberId 참여자 식별자
  * @property name 참여자 이름
- * @property profileImageUrl 프로필 이미지 주소
  * @property isLeader 채팅방 팀장 여부
  */
 data class ChatRoomMemberUiModel(
     val memberId: Long,
     val name: String,
-    val profileImageUrl: String? = null,
     val isLeader: Boolean = false
 )

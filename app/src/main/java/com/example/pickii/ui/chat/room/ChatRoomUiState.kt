@@ -12,12 +12,11 @@ enum class ChatRoomType {
 }
 
 /**
- * 프로젝트 진행 상태를 나타낸다.
+ * 프로젝트 진행 상태를 나타낸다. 서버는 IN_PROGRESS/END 두 가지만 쓴다(API 6-4).
  */
 enum class ProjectStatus {
-    BEFORE_START,
     IN_PROGRESS,
-    COMPLETED
+    END
 }
 
 /**
@@ -25,9 +24,8 @@ enum class ProjectStatus {
  */
 fun ProjectStatus.toDisplayText(): String =
     when (this) {
-        ProjectStatus.BEFORE_START -> "진행 전"
         ProjectStatus.IN_PROGRESS -> "진행 중"
-        ProjectStatus.COMPLETED -> "진행 완료"
+        ProjectStatus.END -> "종료"
     }
 
 /**
@@ -38,7 +36,6 @@ fun ProjectStatus.toDisplayText(): String =
  * @property roomType 그룹 또는 개인 채팅 여부
  * @property memberCount 채팅방 전체 참여자 수
  * @property members 채팅방 참여자 목록
- * @property leaderName 채팅방 팀장 이름
  * @property personalChatMemberName 개인 채팅 상대방 이름
  * @property isNotificationEnabled 채팅방 알림 활성화 여부
  * @property projectStatus 프로젝트 진행 상태
@@ -63,7 +60,6 @@ data class ChatRoomUiState(
     val isLoading: Boolean = true,
     val memberCount: Int = 0,
     val members: List<ChatRoomMemberUiModel> = emptyList(),
-    val leaderName: String = "",
     val personalChatMemberName: String = "",
     val isNotificationEnabled: Boolean = false,
     val projectStatus: ProjectStatus = ProjectStatus.IN_PROGRESS,

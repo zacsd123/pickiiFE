@@ -151,6 +151,10 @@
     <string name="chat_toast_cannot_chat_self">자기 자신과는 채팅을 시작할 수 없어요.</string>
     <string name="chat_toast_user_not_found">존재하지 않는 회원이에요.</string>
     <string name="chat_toast_leader_must_delegate">팀장 권한을 위임한 후 나갈 수 있어요.</string>
+    <string name="chat_project_close_button">프로젝트 종료</string>
+    <string name="chat_project_close_dialog_title">프로젝트를 종료할까요?</string>
+    <string name="chat_project_close_dialog_body">종료 후에는 되돌릴 수 없고, 상호평가가 시작돼요.</string>
+    <string name="chat_toast_project_closed">프로젝트를 종료했어요.</string>
 
     <string name="signup_title">회원가입하기</string>
     <string name="signup_label_nickname">닉네임</string>

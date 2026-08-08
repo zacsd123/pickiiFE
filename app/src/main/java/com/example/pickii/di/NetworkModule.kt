@@ -14,6 +14,7 @@ import com.example.pickii.data.remote.api.MyPageActivityApiService
 import com.example.pickii.data.remote.api.NotificationApiService
 import com.example.pickii.data.remote.api.NotificationSettingsApiService
 import com.example.pickii.data.remote.api.ProfileApiService
+import com.example.pickii.data.remote.api.ProjectApiService
 import com.example.pickii.data.remote.api.RecruitApiService
 import dagger.Module
 import dagger.Provides
@@ -124,4 +125,8 @@ object NetworkModule {
     @Singleton
     fun provideMeetingPollApiService(retrofit: Retrofit): MeetingPollApiService =
         retrofit.create(MeetingPollApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProjectApiService(retrofit: Retrofit): ProjectApiService = retrofit.create(ProjectApiService::class.java)
 }

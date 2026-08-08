@@ -15,6 +15,7 @@ import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.domain.repository.CalendarRepository
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.MeetingPollRepository
+import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.toDisplayString
@@ -60,7 +61,8 @@ class ChatRoomViewModel
         private val chatStompClient: ChatStompClient,
         private val sessionRepository: SessionRepository,
         private val meetingPollRepository: MeetingPollRepository,
-        private val calendarRepository: CalendarRepository
+        private val calendarRepository: CalendarRepository,
+        private val projectRepository: ProjectRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(ChatRoomUiState())
         val uiState: StateFlow<ChatRoomUiState> = _uiState.asStateFlow()
@@ -622,6 +624,20 @@ class ChatRoomViewModel
             }
         }
 
+        /** 프로젝트를 종료한다(6-4). 성공하면 방 상세를 다시 불러와 상태 뱃지("종료")를 반영한다. */
+        fun closeProject() {
+            val roomId = _uiState.value.roomId
+            val projectId = _uiState.value.projectId ?: return
+            viewModelScope.launch {
+                projectRepository
+                    .closeProject(projectId)
+                    .onSuccess {
+                        refreshDetail(roomId)
+                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_project_closed))
+                    }.onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+            }
+        }
+
         /** 채팅방 나가기를 시도한다. 성공하면 [ChatRoomNavigationEvent.LeftRoom]을 발행해 목록으로 돌아가게 한다. */
         fun leaveChatRoom() {
             val roomId = _uiState.value.roomId
@@ -701,7 +717,6 @@ class ChatRoomViewModel
                 roomType = detail.type,
                 memberCount = members.size,
                 members = members,
-                leaderName = leader?.name.orEmpty(),
                 personalChatMemberName = counterpartName,
                 isNotificationEnabled = true,
                 isCurrentUserLeader = detail.isCurrentUserLeader,
