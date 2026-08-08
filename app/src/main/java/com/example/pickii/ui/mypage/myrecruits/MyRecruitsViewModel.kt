@@ -1,20 +1,16 @@
 package com.example.pickii.ui.mypage.myrecruits
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
+import com.example.pickii.domain.model.MyRecruitSummary
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
-import com.example.pickii.util.visiblePageNumbers
+import com.example.pickii.ui.common.PagedFetchResult
+import com.example.pickii.ui.common.PagedListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val PAGE_SIZE = 10
 
 /** 작성 공고 목록(4-5) 조회, 마감/추가모집/삭제(3-4, 3-5, 3-6)를 담당한다. */
 @HiltViewModel
@@ -23,54 +19,32 @@ class MyRecruitsViewModel
     constructor(
         private val myPageActivityRepository: MyPageActivityRepository,
         private val recruitRepository: RecruitRepository
-    ) : ViewModel() {
-        private val _uiState = MutableStateFlow(MyRecruitsUiState())
-        val uiState: StateFlow<MyRecruitsUiState> = _uiState.asStateFlow()
+    ) : PagedListViewModel<MyRecruitSummary, MyRecruitsUiState>(
+            initialState = MyRecruitsUiState(),
+            loadFailureMessageRes = R.string.myrecruits_toast_load_failed
+        ) {
+        override suspend fun fetchPage(
+            page: Int,
+            size: Int
+        ): Result<PagedFetchResult<MyRecruitSummary>> =
+            myPageActivityRepository
+                .getMyRecruits(page = page, size = size)
+                .map { PagedFetchResult(it.items, it.currentPage, it.totalPages) }
 
-        fun refresh() {
-            load(_uiState.value.currentPage)
-        }
-
-        private fun load(page: Int) {
-            viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true) }
-                myPageActivityRepository
-                    .getMyRecruits(page = page - 1, size = PAGE_SIZE)
-                    .onSuccess { result ->
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                items = result.items,
-                                currentPage = result.currentPage + 1,
-                                totalPages = result.totalPages.coerceAtLeast(1)
-                            )
-                        }
-                    }.onFailure {
-                        _uiState.update {
-                            it.copy(isLoading = false, toastMessageRes = R.string.myrecruits_toast_load_failed)
-                        }
-                    }
-            }
-        }
-
-        fun onToastShown() {
-            _uiState.update { it.copy(toastMessageRes = null) }
-        }
-
-        val visiblePageNumbers: List<Int>
-            get() = visiblePageNumbers(_uiState.value.currentPage, _uiState.value.totalPages)
-
-        fun onPageClick(page: Int) = load(page)
-
-        fun onPreviousPage() {
-            if (_uiState.value.currentPage <= 1) return
-            load(_uiState.value.currentPage - 1)
-        }
-
-        fun onNextPage() {
-            if (_uiState.value.currentPage >= _uiState.value.totalPages) return
-            load(_uiState.value.currentPage + 1)
-        }
+        override fun MyRecruitsUiState.withPagedState(
+            isLoading: Boolean,
+            items: List<MyRecruitSummary>,
+            currentPage: Int,
+            totalPages: Int,
+            toastMessageRes: Int?
+        ): MyRecruitsUiState =
+            copy(
+                isLoading = isLoading,
+                items = items,
+                currentPage = currentPage,
+                totalPages = totalPages,
+                toastMessageRes = toastMessageRes
+            )
 
         fun onActionRequest(
             recruitId: String,

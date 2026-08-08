@@ -20,12 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
@@ -235,13 +234,11 @@ private fun WithdrawalScreenContent(
     }
 
     if (uiState.isComplete) {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text(text = stringResource(R.string.mypage_withdraw_complete)) },
-            text = {},
-            confirmButton = {
-                TextButton(onClick = onComplete) { Text(text = stringResource(R.string.common_button_confirm)) }
-            }
+        ConfirmDialog(
+            title = stringResource(R.string.mypage_withdraw_complete),
+            confirmLabel = stringResource(R.string.common_button_confirm),
+            onConfirm = onComplete,
+            onDismiss = {}
         )
     }
 }

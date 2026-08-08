@@ -24,13 +24,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -532,20 +530,12 @@ private fun ApplyCompletionDialog(
     onGoHomeClick: () -> Unit,
     onViewApplicationStatusClick: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onGoHomeClick,
-        title = { Text(text = stringResource(R.string.recruit_apply_dialog_complete_title)) },
-        text = {},
-        confirmButton = {
-            TextButton(onClick = onViewApplicationStatusClick) {
-                Text(text = stringResource(R.string.recruit_apply_button_view_application_status))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onGoHomeClick) {
-                Text(text = stringResource(R.string.recruit_apply_button_go_home))
-            }
-        }
+    ConfirmDialog(
+        title = stringResource(R.string.recruit_apply_dialog_complete_title),
+        confirmLabel = stringResource(R.string.recruit_apply_button_view_application_status),
+        onConfirm = onViewApplicationStatusClick,
+        dismissLabel = stringResource(R.string.recruit_apply_button_go_home),
+        onDismiss = onGoHomeClick
     )
 }
 

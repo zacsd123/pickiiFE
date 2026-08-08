@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,10 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
 
 private val LeavePanelBackgroundColor = Color.White
 private val LeavePanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -58,132 +56,117 @@ fun ChatRoomLeavePanel(
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = LeavePanelScrimColor,
+        panelBackgroundColor = LeavePanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(LeavePanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        ChatRoomLeaveHeader(
+            onBackClick = onBackClick
+        )
+
+        HorizontalDivider(
+            color = LeaveDividerColor
         )
 
         Column(
             modifier =
                 Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(LeavePanelBackgroundColor)
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ChatRoomLeaveHeader(
-                onBackClick = onBackClick
+            Spacer(
+                modifier = Modifier.weight(1f)
             )
 
-            HorizontalDivider(
-                color = LeaveDividerColor
+            Image(
+                painter =
+                    painterResource(
+                        id = R.drawable.ic_warning
+                    ),
+                contentDescription = null,
+                modifier = Modifier.size(100.dp)
             )
 
-            Column(
+            Spacer(
+                modifier = Modifier.height(26.dp)
+            )
+
+            Text(
+                text = "채팅방을 나가시겠어요?",
+                color = LeavePrimaryTextColor,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text =
+                    if (isCurrentUserLeader) {
+                        "팀장 권한을 위임한 후 나갈 수 있어요."
+                    } else {
+                        "채팅방을 나가면 더 이상 메시지를 확인할 수 없습니다."
+                    },
+                color = LeaveSecondaryTextColor,
+                fontSize = 14.sp,
+                lineHeight = 21.sp,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+
+            Row(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(bottom = 18.dp)
             ) {
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Image(
-                    painter =
-                        painterResource(
-                            id = R.drawable.ic_warning
-                        ),
-                    contentDescription = null,
-                    modifier = Modifier.size(100.dp)
-                )
-
-                Spacer(
-                    modifier = Modifier.height(26.dp)
-                )
-
-                Text(
-                    text = "채팅방을 나가시겠어요?",
-                    color = LeavePrimaryTextColor,
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-
-                Text(
-                    text =
-                        if (isCurrentUserLeader) {
-                            "팀장 권한을 위임한 후 나갈 수 있어요."
-                        } else {
-                            "채팅방을 나가면 더 이상 메시지를 확인할 수 없습니다."
-                        },
-                    color = LeaveSecondaryTextColor,
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Row(
+                Box(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(bottom = 18.dp)
+                            .weight(1f)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(LeaveCancelButtonColor)
+                            .clickable(onClick = onBackClick)
+                            .padding(vertical = 18.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(LeaveCancelButtonColor)
-                                .clickable(onClick = onBackClick)
-                                .padding(vertical = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "취소",
-                            color = LeaveSecondaryTextColor,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(
-                        modifier = Modifier.width(14.dp)
+                    Text(
+                        text = "취소",
+                        color = LeaveSecondaryTextColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
+                }
 
-                    Box(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(LeaveButtonColor)
-                                .clickable(
-                                    onClick = if (isCurrentUserLeader) onDelegateLeaderClick else onLeaveClick
-                                ).padding(vertical = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (isCurrentUserLeader) "팀장 위임하기" else "나가기",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                Spacer(
+                    modifier = Modifier.width(14.dp)
+                )
+
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(LeaveButtonColor)
+                            .clickable(
+                                onClick = if (isCurrentUserLeader) onDelegateLeaderClick else onLeaveClick
+                            ).padding(vertical = 18.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (isCurrentUserLeader) "팀장 위임하기" else "나가기",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -195,40 +178,12 @@ fun ChatRoomLeavePanel(
  */
 @Composable
 private fun ChatRoomLeaveHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "채팅방 나가기",
-            color = LeavePrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "채팅방 나가기",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = LeavePrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }

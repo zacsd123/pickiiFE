@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.KakaoLabel
 import com.example.pickii.ui.theme.KakaoYellow
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -325,30 +325,14 @@ private fun LoginScreenContent(
         }
 
         if (uiState.errorMessage != null) {
-            AlertDialog(
-                onDismissRequest = onErrorDialogDismiss,
-                title = { Text(text = stringResource(R.string.login_error_title)) },
-                text = { Text(text = uiState.errorMessage) },
-                confirmButton = {
-                    TextButton(onClick = onErrorDialogDismiss) {
-                        Text(text = stringResource(R.string.login_error_confirm))
-                    }
-                }
+            ConfirmDialog(
+                title = stringResource(R.string.login_error_title),
+                body = uiState.errorMessage,
+                confirmLabel = stringResource(R.string.login_error_confirm),
+                onConfirm = onErrorDialogDismiss
             )
         }
     }
-}
-
-/** 입력 필드 위에 표시되는 라벨 텍스트. */
-@Composable
-private fun FieldLabel(text: String) {
-    Text(
-        text = text,
-        color = Color.Black,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium
-    )
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 /** Pickii 로그인 화면 전용 스타일이 적용된 텍스트 입력 필드. */

@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -18,10 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
 
 private val LeaderDelegationPanelBackgroundColor = Color.White
 private val LeaderDelegationPanelScrimColor =
@@ -70,71 +67,56 @@ fun ChatLeaderDelegationPanel(
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = LeaderDelegationPanelScrimColor,
+        panelBackgroundColor = LeaderDelegationPanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(LeaderDelegationPanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        LeaderDelegationHeader(
+            onBackClick = onBackClick
         )
 
-        Column(
+        HorizontalDivider(
+            color = LeaderDelegationDividerColor
+        )
+
+        Text(
+            text = "팀장 권한을 위임할 팀원을 선택하세요",
             modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(LeaderDelegationPanelBackgroundColor)
+                Modifier.padding(
+                    start = 24.dp,
+                    top = 18.dp,
+                    bottom = 8.dp
+                ),
+            color = LeaderDelegationSecondaryTextColor,
+            fontSize = 13.sp
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f)
         ) {
-            LeaderDelegationHeader(
-                onBackClick = onBackClick
-            )
-
-            HorizontalDivider(
-                color = LeaderDelegationDividerColor
-            )
-
-            Text(
-                text = "팀장 권한을 위임할 팀원을 선택하세요",
-                modifier =
-                    Modifier.padding(
-                        start = 24.dp,
-                        top = 18.dp,
-                        bottom = 8.dp
-                    ),
-                color = LeaderDelegationSecondaryTextColor,
-                fontSize = 13.sp
-            )
-
-            LazyColumn(
-                modifier = Modifier.weight(1f)
-            ) {
-                items(
-                    items = delegatableMembers,
-                    key = { member ->
-                        member.memberId
+            items(
+                items = delegatableMembers,
+                key = { member ->
+                    member.memberId
+                }
+            ) { member ->
+                LeaderDelegationMemberItem(
+                    member = member,
+                    isSelected = selectedMemberId == member.memberId,
+                    onClick = {
+                        selectedMemberId = member.memberId
                     }
-                ) { member ->
-                    LeaderDelegationMemberItem(
-                        member = member,
-                        isSelected = selectedMemberId == member.memberId,
-                        onClick = {
-                            selectedMemberId = member.memberId
-                        }
-                    )
-                }
+                )
             }
-
-            LeaderDelegationButton(
-                isEnabled = selectedMemberId != null,
-                onClick = {
-                    selectedMemberId?.let(onDelegateClick)
-                }
-            )
         }
+
+        LeaderDelegationButton(
+            isEnabled = selectedMemberId != null,
+            onClick = {
+                selectedMemberId?.let(onDelegateClick)
+            }
+        )
     }
 }
 
@@ -143,42 +125,14 @@ fun ChatLeaderDelegationPanel(
  */
 @Composable
 private fun LeaderDelegationHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "팀장 위임",
-            color = LeaderDelegationPrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "팀장 위임",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = LeaderDelegationPrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }
 
 /**

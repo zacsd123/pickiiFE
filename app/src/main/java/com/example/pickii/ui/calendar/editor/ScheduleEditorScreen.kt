@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +26,7 @@ import com.example.pickii.ui.calendar.editor.component.ScheduleLocationField
 import com.example.pickii.ui.calendar.editor.component.ScheduleMemoField
 import com.example.pickii.ui.calendar.editor.component.ScheduleRepeatSection
 import com.example.pickii.ui.calendar.editor.component.ScheduleTitleField
+import com.example.pickii.ui.common.BackHeader
 
 private val EditorBackgroundColor = Color(0xFFF7F7F2)
 private val EditorHeaderBackgroundColor = Color(0xFFFFFFFF)
@@ -194,37 +192,14 @@ private fun ScheduleEditorHeader(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(EditorHeaderBackgroundColor)
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier =
-                Modifier
-                    .clickable(
-                        onClick = onBackClick
-                    ).padding(
-                        end = 16.dp
-                    )
-        )
-
-        Text(
-            text = title,
-            color = EditorHeaderTitleColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = title,
+        onBackClick = onBackClick,
+        modifier = modifier.background(EditorHeaderBackgroundColor).padding(horizontal = 20.dp, vertical = 18.dp),
+        titleColor = EditorHeaderTitleColor,
+        titleFontSize = 20.sp,
+        spacing = 16.dp
+    )
 }
 
 /**

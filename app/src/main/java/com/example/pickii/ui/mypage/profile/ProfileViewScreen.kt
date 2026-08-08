@@ -20,13 +20,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +49,7 @@ import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
 import com.example.pickii.ui.common.AvatarPlaceholder
+import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.SelectableChip
@@ -154,39 +153,32 @@ private fun ProfileViewHeader(
     onBackClick: () -> Unit,
     onEditClick: (() -> Unit)?
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier.clickable(onClick = onBackClick)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = title,
-            color = Color.Black,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
-        if (onEditClick != null) {
-            Box(
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.Black)
-                        .clickable(onClick = onEditClick)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.mypage_profile_button_edit),
-                    color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
+    BackHeader(
+        title = title,
+        onBackClick = onBackClick,
+        trailingContent =
+            if (onEditClick != null) {
+                {
+                    Box(
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(Color.Black)
+                                .clickable(onClick = onEditClick)
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.mypage_profile_button_edit),
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            } else {
+                null
             }
-        }
-    }
+    )
 }
 
 /** 카드1: 캐릭터 + Lv + 경험치 바 + 닉네임. 다른 카드와 달리 헤더/구분선 없이 중앙정렬로 구성한다. */

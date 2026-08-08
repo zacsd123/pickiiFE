@@ -18,14 +18,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,6 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
@@ -218,24 +218,14 @@ private fun PasswordResetScreenContent(
         }
 
         if (uiState.isComplete) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text(text = stringResource(R.string.password_reset_dialog_complete_title)) },
-                text = {},
-                confirmButton = {
-                    TextButton(onClick = onCompleteConfirm) {
-                        Text(text = stringResource(R.string.password_reset_button_go_login))
-                    }
-                }
+            ConfirmDialog(
+                title = stringResource(R.string.password_reset_dialog_complete_title),
+                confirmLabel = stringResource(R.string.password_reset_button_go_login),
+                onConfirm = onCompleteConfirm,
+                onDismiss = {}
             )
         }
     }
-}
-
-@Composable
-private fun FieldLabel(text: String) {
-    Text(text = text, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable

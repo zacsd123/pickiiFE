@@ -1,8 +1,5 @@
 package com.example.pickii.ui.common
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.pickii.R
@@ -18,19 +15,12 @@ fun LoginRequiredDialog(
     onLoginClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.common_login_required_title)) },
-        text = { Text(text = stringResource(R.string.common_login_required_body)) },
-        confirmButton = {
-            TextButton(onClick = onLoginClick) {
-                Text(text = stringResource(R.string.common_login_required_button_login))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.common_login_required_button_cancel))
-            }
-        }
+    ConfirmDialog(
+        title = stringResource(R.string.common_login_required_title),
+        body = stringResource(R.string.common_login_required_body),
+        confirmLabel = stringResource(R.string.common_login_required_button_login),
+        dismissLabel = stringResource(R.string.common_login_required_button_cancel),
+        onConfirm = onLoginClick,
+        onDismiss = onDismiss
     )
 }

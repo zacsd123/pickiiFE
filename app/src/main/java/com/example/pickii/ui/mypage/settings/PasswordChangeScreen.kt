@@ -36,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteRed
@@ -154,12 +155,6 @@ private fun PasswordChangeScreenContent(
 
         Spacer(modifier = Modifier.height(32.dp))
     }
-}
-
-@Composable
-private fun FieldLabel(text: String) {
-    Text(text = text, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
