@@ -8,7 +8,6 @@ data class ChatRoomSummaryDto(
     val chatRoomId: Long,
     val type: String,
     val title: String,
-    val projectId: Long? = null,
     val lastMessage: String? = null,
     val lastMessageAt: String? = null,
     val unreadCount: Int = 0,
@@ -74,9 +73,7 @@ data class CreateDirectChatRoomRequest(
 
 @Serializable
 data class CreateDirectChatRoomResponseDto(
-    val chatRoomId: Long,
-    val type: String,
-    val isNew: Boolean
+    val chatRoomId: Long
 )
 
 /** `PATCH /chatrooms/{chatRoomId}/read`(8-6) 요청. */
