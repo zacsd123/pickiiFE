@@ -41,6 +41,5 @@ data class LogoutRequest(
 @Serializable
 data class SocialAccountDto(
     val provider: String,
-    val linked: Boolean,
-    val linkedAt: String? = null
+    val linked: Boolean
 )

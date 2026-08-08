@@ -54,10 +54,4 @@ data class CalendarSchedule(
      */
     val isMultiDay: Boolean
         get() = startDate != endDate
-
-    /**
-     * 일정에 시작 시간과 종료 시간이 모두 등록되어 있는지 확인한다.
-     */
-    val hasTime: Boolean
-        get() = startTime != null && endTime != null
 }

@@ -18,15 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -55,9 +51,11 @@ import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.AiGenerationDialog
+import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.CharacterCounterText
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.common.LoginRequiredDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
@@ -147,7 +145,7 @@ private fun RecruitFormScreenContent(
     onShortIntroChange: (String) -> Unit,
     onDetailContentChange: (String) -> Unit,
     onGenerateAiDraftClick: () -> Unit,
-        onDismissAiDialog: () -> Unit,
+    onDismissAiDialog: () -> Unit,
     onSubmitClick: () -> Unit,
     onDismissSubmitConfirm: () -> Unit,
     onConfirmSubmit: () -> Unit,
@@ -205,25 +203,12 @@ private fun FormTopBar(
     title: String,
     onBackClick: () -> Unit
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier =
-                Modifier
-                    .size(24.dp)
-                    .clickable(onClick = onBackClick)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = title, color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-    }
+    BackHeader(
+        title = title,
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        titleFontSize = 20.sp
+    )
 }
 
 /** 수정 화면에 작성자가 아닌 사용자가 접근했을 때 표시되는 안내 문구. */
@@ -319,7 +304,7 @@ private fun FormBody(
             uiState.availableCategories.forEach { category ->
                 SelectableChip(
                     label = category.label,
-                    selected = category == uiState.category,
+                    selected = category in uiState.categories,
                     enabled = true,
                     onClick = { onCategorySelect(category) }
                 )
@@ -338,7 +323,7 @@ private fun FormBody(
             uiState.availableTopics.forEach { topic ->
                 SelectableChip(
                     label = topic.label,
-                    selected = topic == uiState.topic,
+                    selected = topic in uiState.topics,
                     enabled = true,
                     onClick = { onTopicSelect(topic) }
                 )
@@ -367,7 +352,8 @@ private fun FormBody(
                     .fillMaxWidth()
                     .height(90.dp),
             placeholder = {
-                val categoryLabel = uiState.category?.label ?: stringResource(R.string.recruit_form_label_category)
+                val categoryLabel =
+                    uiState.categories.firstOrNull()?.label ?: stringResource(R.string.recruit_form_label_category)
                 Text(
                     text = stringResource(R.string.recruit_form_placeholder_short_intro, categoryLabel),
                     color = PickiiTextGray
@@ -455,21 +441,18 @@ private fun FormBody(
 /** 공고 글 등록 완료를 알리는 단일 확인 버튼 팝업. */
 @Composable
 private fun CreateCompleteDialog(onConfirm: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onConfirm,
-        title = { Text(text = stringResource(R.string.recruit_form_dialog_create_complete_title)) },
-        text = { Text(text = stringResource(R.string.recruit_form_dialog_create_complete_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text(text = stringResource(R.string.common_button_confirm)) }
-        }
+    ConfirmDialog(
+        title = stringResource(R.string.recruit_form_dialog_create_complete_title),
+        body = stringResource(R.string.recruit_form_dialog_create_complete_body),
+        confirmLabel = stringResource(R.string.common_button_confirm),
+        onConfirm = onConfirm
     )
 }
 
 /** 입력 필드 위에 표시되는 굵은 섹션 라벨. */
 @Composable
 private fun FieldSectionLabel(text: String) {
-    Text(text = text, color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-    Spacer(modifier = Modifier.height(8.dp))
+    FieldLabel(text = text, fontSize = 14.sp, fontWeight = FontWeight.Bold)
 }
 
 /** 이 화면의 입력 필드들이 공통으로 사용하는 배경/테두리 색상. */

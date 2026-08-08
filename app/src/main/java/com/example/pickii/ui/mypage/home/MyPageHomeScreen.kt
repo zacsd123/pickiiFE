@@ -99,7 +99,7 @@ private fun MyPageHomeScreenContent(
     onMyCommentsClick: () -> Unit,
     onFeedbackClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onNotificationClick: () -> Unit,
+    onNotificationClick: () -> Unit
 ) {
     if (uiState.isLoading) {
         LoadingIndicator(modifier = Modifier.fillMaxSize().background(PickiiYellowLight))
@@ -343,7 +343,7 @@ private fun MyPageHomeScreenPreview() {
             onMyCommentsClick = {},
             onFeedbackClick = {},
             onSettingsClick = {},
-            onNotificationClick = {},
+            onNotificationClick = {}
         )
     }
 }

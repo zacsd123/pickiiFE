@@ -22,20 +22,15 @@ data class UniversityDto(
 
 @Serializable
 data class TechStackDto(
-    val techStackId: Int,
-    val name: String,
-    val type: String? = null
+    val name: String
 )
 
 @Serializable
 data class LicenseOptionDto(
-    val licenseId: Int,
     val name: String
 )
 
 @Serializable
 data class LinkCategoryDto(
-    val linkCategoryId: Int,
-    val name: String,
-    val picUrl: String? = null
+    val name: String
 )

@@ -1,15 +1,12 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -30,21 +27,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val LeaderDelegationPanelBackgroundColor = Color.White
 private val LeaderDelegationPanelScrimColor =
     Color.Black.copy(alpha = 0.35f)
 
-private val LeaderDelegationPrimaryTextColor = Color(0xFF20283A)
-private val LeaderDelegationSecondaryTextColor = Color(0xFF9CA3AF)
-private val LeaderDelegationDividerColor = Color(0xFFF0F1F4)
+private val LeaderDelegationPrimaryTextColor = PickiiNavyText
+private val LeaderDelegationSecondaryTextColor = PickiiGray400
+private val LeaderDelegationDividerColor = PickiiSurfaceGrayLight
 private val LeaderDelegationSelectedColor = Color(0xFFF7F8FA)
-private val LeaderDelegationButtonColor = Color(0xFF171717)
+private val LeaderDelegationButtonColor = PickiiBlackSoft
 private val LeaderDelegationButtonTextColor = Color(0xFFF2F77F)
 
 /**
@@ -70,71 +71,56 @@ fun ChatLeaderDelegationPanel(
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = LeaderDelegationPanelScrimColor,
+        panelBackgroundColor = LeaderDelegationPanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(LeaderDelegationPanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        LeaderDelegationHeader(
+            onBackClick = onBackClick
         )
 
-        Column(
+        HorizontalDivider(
+            color = LeaderDelegationDividerColor
+        )
+
+        Text(
+            text = "팀장 권한을 위임할 팀원을 선택하세요",
             modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(LeaderDelegationPanelBackgroundColor)
+                Modifier.padding(
+                    start = 24.dp,
+                    top = 18.dp,
+                    bottom = 8.dp
+                ),
+            color = LeaderDelegationSecondaryTextColor,
+            fontSize = 13.sp
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f)
         ) {
-            LeaderDelegationHeader(
-                onBackClick = onBackClick
-            )
-
-            HorizontalDivider(
-                color = LeaderDelegationDividerColor
-            )
-
-            Text(
-                text = "팀장 권한을 위임할 팀원을 선택하세요",
-                modifier =
-                    Modifier.padding(
-                        start = 24.dp,
-                        top = 18.dp,
-                        bottom = 8.dp
-                    ),
-                color = LeaderDelegationSecondaryTextColor,
-                fontSize = 13.sp
-            )
-
-            LazyColumn(
-                modifier = Modifier.weight(1f)
-            ) {
-                items(
-                    items = delegatableMembers,
-                    key = { member ->
-                        member.memberId
+            items(
+                items = delegatableMembers,
+                key = { member ->
+                    member.memberId
+                }
+            ) { member ->
+                LeaderDelegationMemberItem(
+                    member = member,
+                    isSelected = selectedMemberId == member.memberId,
+                    onClick = {
+                        selectedMemberId = member.memberId
                     }
-                ) { member ->
-                    LeaderDelegationMemberItem(
-                        member = member,
-                        isSelected = selectedMemberId == member.memberId,
-                        onClick = {
-                            selectedMemberId = member.memberId
-                        }
-                    )
-                }
+                )
             }
-
-            LeaderDelegationButton(
-                isEnabled = selectedMemberId != null,
-                onClick = {
-                    selectedMemberId?.let(onDelegateClick)
-                }
-            )
         }
+
+        LeaderDelegationButton(
+            isEnabled = selectedMemberId != null,
+            onClick = {
+                selectedMemberId?.let(onDelegateClick)
+            }
+        )
     }
 }
 
@@ -143,44 +129,14 @@ fun ChatLeaderDelegationPanel(
  */
 @Composable
 private fun LeaderDelegationHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "팀장 위임",
-            color = LeaderDelegationPrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "팀장 위임",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = LeaderDelegationPrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }
 
 /**

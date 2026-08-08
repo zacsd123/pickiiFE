@@ -53,7 +53,7 @@ class ApplicantListViewModel
             refresh()
         }
 
-        fun refresh() {
+        private fun refresh() {
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true) }
                 repository

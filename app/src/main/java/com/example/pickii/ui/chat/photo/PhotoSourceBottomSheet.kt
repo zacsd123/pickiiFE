@@ -32,6 +32,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiBlackAlt
+import com.example.pickii.ui.theme.PickiiGray700
+import com.example.pickii.ui.theme.PickiiSlateDark
+import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 
 /**
  * "사진/카메라" 항목을 눌렀을 때, 갤러리와 카메라 중 사진을 가져올 방법을 고르는 바텀시트다.
@@ -77,7 +81,7 @@ fun PhotoSourceBottomSheet(
         ) {
             Text(
                 text = "사진 보내기",
-                color = Color(0xFF18181B),
+                color = PickiiBlackAlt,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -126,13 +130,13 @@ private fun PhotoSourceRow(
                 Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF2F3F6)),
+                    .background(PickiiSurfaceGraySoft),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = Color(0xFF4B5563),
+                tint = PickiiGray700,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -141,7 +145,7 @@ private fun PhotoSourceRow(
 
         Text(
             text = label,
-            color = Color(0xFF292D35),
+            color = PickiiSlateDark,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
         )

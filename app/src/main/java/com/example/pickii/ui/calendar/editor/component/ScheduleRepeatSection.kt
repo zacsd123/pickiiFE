@@ -23,12 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleRepeatType
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiGrayMedium
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.DayOfWeek
 
 private val RepeatBackgroundColor = Color(0xFFFFFFFF)
-private val RepeatLabelColor = Color(0xFF777777)
-private val RepeatValueColor = Color(0xFF1B1B1B)
-private val RepeatValuePlaceholderColor = Color(0xFFAAAAAA)
+private val RepeatLabelColor = PickiiGray600
+private val RepeatValueColor = PickiiInk
+private val RepeatValuePlaceholderColor = PickiiGrayMedium
 
 /**
  * 일정 반복 설정 영역이다.

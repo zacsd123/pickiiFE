@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
-import com.example.pickii.ui.calendar.monthly.ScheduleColorType
+import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
 import java.time.LocalDate
 
 /**
@@ -135,18 +136,6 @@ private fun ScheduleBarRow(
 /**
  * 일정 색상 종류를 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color =
-    when (this) {
-        ScheduleColorType.RED -> Color(0xFFE86F73)
-        ScheduleColorType.ORANGE -> Color(0xFFED9A53)
-        ScheduleColorType.YELLOW -> Color(0xFFF1D354)
-        ScheduleColorType.GREEN -> Color(0xFF84C976)
-        ScheduleColorType.BLUE -> Color(0xFF6D9EEB)
-        ScheduleColorType.PURPLE -> Color(0xFFAC8AFA)
-        ScheduleColorType.PINK -> Color(0xFFE38AB0)
-        ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
-        ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
-    }
 
 private val SCHEDULE_BAR_AREA_HEIGHT = 14.dp
 private val SCHEDULE_BAR_HEIGHT = 5.dp

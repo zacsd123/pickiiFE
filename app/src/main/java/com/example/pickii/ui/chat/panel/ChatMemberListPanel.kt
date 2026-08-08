@@ -1,14 +1,12 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,17 +23,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val MemberListPanelBackgroundColor = Color.White
 private val MemberListPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val MemberListPrimaryTextColor = Color(0xFF20283A)
-private val MemberListSecondaryTextColor = Color(0xFF9CA3AF)
-private val MemberListDividerColor = Color(0xFFF0F1F4)
+private val MemberListPrimaryTextColor = PickiiNavyText
+private val MemberListSecondaryTextColor = PickiiGray400
+private val MemberListDividerColor = PickiiSurfaceGrayLight
 private val LeaderBadgeBackgroundColor = Color(0xFFF2F8A6)
 private val LeaderBadgeTextColor = Color(0xFF4A4F00)
 
@@ -53,50 +54,35 @@ fun ChatMemberListPanel(
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = MemberListPanelScrimColor,
+        panelBackgroundColor = MemberListPanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(MemberListPanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        MemberListHeader(
+            onBackClick = onBackClick
         )
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(MemberListPanelBackgroundColor)
+        HorizontalDivider(
+            color = MemberListDividerColor
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
         ) {
-            MemberListHeader(
-                onBackClick = onBackClick
-            )
-
-            HorizontalDivider(
-                color = MemberListDividerColor
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(
-                    items =
-                        members.sortedByDescending { member ->
-                            member.isLeader
-                        },
-                    key = { member ->
-                        member.memberId
-                    }
-                ) { member ->
-                    ChatMemberListItem(
-                        member = member,
-                        onClick = { onMemberClick(member.memberId) }
-                    )
+            items(
+                items =
+                    members.sortedByDescending { member ->
+                        member.isLeader
+                    },
+                key = { member ->
+                    member.memberId
                 }
+            ) { member ->
+                ChatMemberListItem(
+                    member = member,
+                    onClick = { onMemberClick(member.memberId) }
+                )
             }
         }
     }
@@ -107,44 +93,14 @@ fun ChatMemberListPanel(
  */
 @Composable
 private fun MemberListHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "팀원 목록",
-            color = MemberListPrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "팀원 목록",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = MemberListPrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }
 
 /**
@@ -275,7 +231,7 @@ private fun MemberProfileImage(member: ChatRoomMemberUiModel) {
 /**
  * 팀원별 임시 프로필 색상을 생성한다.
  */
-private fun createMemberProfileColor(memberId: Long): Color {
+fun createMemberProfileColor(memberId: Long): Color {
     val colors =
         listOf(
             Color(0xFFC9B7FF),

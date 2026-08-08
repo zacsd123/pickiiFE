@@ -30,18 +30,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
-import com.example.pickii.ui.calendar.monthly.ScheduleColorType
+import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
+import com.example.pickii.ui.theme.PickiiInk
+import com.example.pickii.ui.theme.PickiiPaletteRed
+import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import java.time.format.DateTimeFormatter
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
-private val SummaryTitleColor = Color(0xFF1B1B1B)
+private val SummaryTitleColor = PickiiInk
 private val SummaryLabelColor = Color(0xFF99999A)
 private val SummaryDescriptionColor = Color(0xFF43434A)
 private val SummaryArrowBackgroundColor = Color(0xFFFFFFFF)
 private val SummaryDividerColor = Color(0xFFE5E5DE)
-private val SummaryIconBackgroundColor = Color(0xFFF1F2F6)
+private val SummaryIconBackgroundColor = PickiiSurfaceGrayMuted
 
-private val EditButtonBackgroundColor = Color(0xFFF1F2F6)
+private val EditButtonBackgroundColor = PickiiSurfaceGrayMuted
 private val EditButtonTextColor = Color(0xFF202330)
 
 private val ScheduleDateFormatter =
@@ -60,6 +64,7 @@ fun ScheduleSummaryCard(
     isExpanded: Boolean,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -94,7 +99,8 @@ fun ScheduleSummaryCard(
         ) {
             ScheduleExpandedContent(
                 schedule = schedule,
-                onEditClick = onEditClick
+                onEditClick = onEditClick,
+                onDeleteClick = onDeleteClick
             )
         }
     }
@@ -169,6 +175,7 @@ private fun ScheduleSummaryHeader(
 private fun ScheduleExpandedContent(
     schedule: MonthlyScheduleUiModel,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -268,24 +275,47 @@ private fun ScheduleExpandedContent(
             )
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp)
-                    .background(
-                        color = EditButtonBackgroundColor,
-                        shape = RoundedCornerShape(16.dp)
-                    ).clickable(onClick = onEditClick)
-                    .padding(vertical = 14.dp),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "일정 수정하기",
-                color = EditButtonTextColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            color = EditButtonBackgroundColor,
+                            shape = RoundedCornerShape(16.dp)
+                        ).clickable(onClick = onEditClick)
+                        .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "일정 수정하기",
+                    color = EditButtonTextColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            color = EditButtonBackgroundColor,
+                            shape = RoundedCornerShape(16.dp)
+                        ).clickable(onClick = onDeleteClick)
+                        .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "삭제",
+                    color = PickiiPaletteRed,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -462,15 +492,3 @@ private fun createEndTimeText(schedule: MonthlyScheduleUiModel): String {
 /**
  * 일정 카테고리 색상을 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color =
-    when (this) {
-        ScheduleColorType.RED -> Color(0xFFE86F73)
-        ScheduleColorType.ORANGE -> Color(0xFFED9A53)
-        ScheduleColorType.YELLOW -> Color(0xFFF1D354)
-        ScheduleColorType.GREEN -> Color(0xFF84C976)
-        ScheduleColorType.BLUE -> Color(0xFF6D9EEB)
-        ScheduleColorType.PURPLE -> Color(0xFFAC8AFA)
-        ScheduleColorType.PINK -> Color(0xFFE38AB0)
-        ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
-        ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
-    }

@@ -20,11 +20,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiBlackSoft
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val CalendarTextColor = Color(0xFF171717)
+private val CalendarTextColor = PickiiBlackSoft
 private val CalendarYearColor = Color(0xFF7D7D70)
 
 /**

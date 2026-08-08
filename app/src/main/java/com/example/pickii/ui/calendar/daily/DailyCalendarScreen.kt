@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.calendar.daily.component.DailyCalendarHeader
 import com.example.pickii.ui.calendar.daily.component.DailyScheduleBlock
 import com.example.pickii.ui.calendar.daily.component.DailyTimeLabel
@@ -286,7 +287,7 @@ private fun DailyCalendarScreenPreview() {
                             date = LocalDate.of(2026, 7, 4),
                             startTime = LocalTime.of(1, 0),
                             endTime = LocalTime.of(2, 0),
-                            colorType = DailyScheduleColorType.RED
+                            colorType = ScheduleColorType.RED
                         ),
                         DailyScheduleUiModel(
                             id = 2L,
@@ -294,7 +295,7 @@ private fun DailyCalendarScreenPreview() {
                             date = LocalDate.of(2026, 7, 4),
                             startTime = LocalTime.of(6, 0),
                             endTime = LocalTime.of(8, 0),
-                            colorType = DailyScheduleColorType.GREEN
+                            colorType = ScheduleColorType.GREEN
                         ),
                         DailyScheduleUiModel(
                             id = 3L,
@@ -302,7 +303,7 @@ private fun DailyCalendarScreenPreview() {
                             date = LocalDate.of(2026, 7, 4),
                             startTime = LocalTime.of(13, 30),
                             endTime = LocalTime.of(15, 0),
-                            colorType = DailyScheduleColorType.BLUE
+                            colorType = ScheduleColorType.BLUE
                         )
                     )
             ),

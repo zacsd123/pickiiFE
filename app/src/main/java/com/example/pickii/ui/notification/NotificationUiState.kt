@@ -1,7 +1,7 @@
 package com.example.pickii.ui.notification
 
 data class NotificationUiState(
-    val notifications: List<NotificationItemUiModel> = emptyList(),
+    val notifications: List<NotificationItemUiModel> = emptyList()
 )
 
 data class NotificationItemUiModel(
@@ -10,9 +10,11 @@ data class NotificationItemUiModel(
     val description: String,
     val timeText: String,
     val type: NotificationType,
+    /** 서버가 내려준 원본 type 문자열([NotificationType]이 못 담는 값도 포함). 알림 클릭 이동 분기에 쓴다. */
+    val typeRaw: String = "",
     val isRead: Boolean,
     val referenceType: String?,
-    val referenceId: String?,
+    val referenceId: String?
 )
 
 enum class NotificationType {
@@ -20,5 +22,5 @@ enum class NotificationType {
     ACCEPT,
     APPLY,
     CLOSED,
-    OTHER,
+    OTHER
 }

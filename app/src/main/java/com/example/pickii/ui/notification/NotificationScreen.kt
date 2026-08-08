@@ -66,13 +66,14 @@ fun NotificationScreen(
     uiState: NotificationUiState,
     onCloseClick: () -> Unit,
     onNotificationClick: (NotificationItemUiModel) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(NotificationBackgroundColor)
-            .statusBarsPadding(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(NotificationBackgroundColor)
+                .statusBarsPadding()
     ) {
         PickiiTopBar(
             modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp),
@@ -80,44 +81,46 @@ fun NotificationScreen(
             onNotificationClick = onCloseClick,
             trailingContent = {
                 Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .clickable(onClick = onCloseClick),
-                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable(onClick = onCloseClick),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
                         contentDescription = "알림 화면 닫기",
                         tint = PrimaryTextColor,
-                        modifier = Modifier.size(29.dp),
+                        modifier = Modifier.size(29.dp)
                     )
                 }
-            },
+            }
         )
 
         Spacer(modifier = Modifier.height(25.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 28.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp),
             verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "알림",
                 color = PrimaryTextColor,
                 fontSize = 29.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = "최근 순",
                 color = TimeTextColor,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Normal
             )
         }
 
@@ -125,32 +128,35 @@ fun NotificationScreen(
 
         if (uiState.notifications.isEmpty()) {
             EmptyNotificationContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
             )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 22.dp,
-                    end = 22.dp,
-                    top = 0.dp,
-                    bottom = 32.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                contentPadding =
+                    androidx.compose.foundation.layout.PaddingValues(
+                        start = 22.dp,
+                        end = 22.dp,
+                        top = 0.dp,
+                        bottom = 32.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(
                     items = uiState.notifications,
-                    key = { notification -> notification.id },
+                    key = { notification -> notification.id }
                 ) { notification ->
                     NotificationCard(
                         notification = notification,
                         onClick = {
                             onNotificationClick(notification)
-                        },
+                        }
                     )
                 }
             }
@@ -161,36 +167,38 @@ fun NotificationScreen(
 @Composable
 private fun NotificationCard(
     notification: NotificationItemUiModel,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val cardBackgroundColor =
         if (notification.isRead) ReadCardBackgroundColor else UnreadCardBackgroundColor
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(132.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(cardBackgroundColor)
-            .clickable(onClick = onClick)
-            .padding(
-                start = 23.dp,
-                end = 20.dp,
-                top = 20.dp,
-                bottom = 16.dp,
-            ),
-        verticalAlignment = Alignment.Top,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(132.dp)
+                .clip(RoundedCornerShape(22.dp))
+                .background(cardBackgroundColor)
+                .clickable(onClick = onClick)
+                .padding(
+                    start = 23.dp,
+                    end = 20.dp,
+                    top = 20.dp,
+                    bottom = 16.dp
+                ),
+        verticalAlignment = Alignment.Top
     ) {
         NotificationTypeIcon(
-            type = notification.type,
+            type = notification.type
         )
 
         Spacer(modifier = Modifier.size(17.dp))
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
         ) {
             Text(
                 text = notification.title,
@@ -199,7 +207,7 @@ private fun NotificationCard(
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 22.sp,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(3.dp))
@@ -211,7 +219,7 @@ private fun NotificationCard(
                 fontWeight = FontWeight.Normal,
                 lineHeight = 19.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -220,7 +228,7 @@ private fun NotificationCard(
                 text = notification.timeText,
                 color = TimeTextColor,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Normal
             )
         }
 
@@ -228,81 +236,85 @@ private fun NotificationCard(
             Spacer(modifier = Modifier.size(10.dp))
 
             Box(
-                modifier = Modifier
-                    .padding(top = 6.dp)
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(UnreadDotColor),
+                modifier =
+                    Modifier
+                        .padding(top = 6.dp)
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(UnreadDotColor)
             )
         }
     }
 }
 
 @Composable
-private fun NotificationTypeIcon(
-    type: NotificationType,
-) {
-    val iconData = when (type) {
-        NotificationType.CHAT -> NotificationIconData(
-            imageVector = Icons.Outlined.ChatBubbleOutline,
-            backgroundColor = ChatIconBackgroundColor,
-            iconColor = ChatIconColor,
-        )
+private fun NotificationTypeIcon(type: NotificationType) {
+    val iconData =
+        when (type) {
+            NotificationType.CHAT ->
+                NotificationIconData(
+                    imageVector = Icons.Outlined.ChatBubbleOutline,
+                    backgroundColor = ChatIconBackgroundColor,
+                    iconColor = ChatIconColor
+                )
 
-        NotificationType.ACCEPT -> NotificationIconData(
-            imageVector = Icons.Rounded.Check,
-            backgroundColor = AcceptIconBackgroundColor,
-            iconColor = AcceptIconColor,
-        )
+            NotificationType.ACCEPT ->
+                NotificationIconData(
+                    imageVector = Icons.Rounded.Check,
+                    backgroundColor = AcceptIconBackgroundColor,
+                    iconColor = AcceptIconColor
+                )
 
-        NotificationType.APPLY -> NotificationIconData(
-            imageVector = Icons.Rounded.Person,
-            backgroundColor = ApplyIconBackgroundColor,
-            iconColor = ApplyIconColor,
-        )
+            NotificationType.APPLY ->
+                NotificationIconData(
+                    imageVector = Icons.Rounded.Person,
+                    backgroundColor = ApplyIconBackgroundColor,
+                    iconColor = ApplyIconColor
+                )
 
-        NotificationType.CLOSED -> NotificationIconData(
-            imageVector = Icons.Outlined.Schedule,
-            backgroundColor = ClosedIconBackgroundColor,
-            iconColor = ClosedIconColor,
-        )
+            NotificationType.CLOSED ->
+                NotificationIconData(
+                    imageVector = Icons.Outlined.Schedule,
+                    backgroundColor = ClosedIconBackgroundColor,
+                    iconColor = ClosedIconColor
+                )
 
-        NotificationType.OTHER -> NotificationIconData(
-            imageVector = Icons.Outlined.Schedule,
-            backgroundColor = ClosedIconBackgroundColor,
-            iconColor = ClosedIconColor,
-        )
-    }
+            NotificationType.OTHER ->
+                NotificationIconData(
+                    imageVector = Icons.Outlined.Schedule,
+                    backgroundColor = ClosedIconBackgroundColor,
+                    iconColor = ClosedIconColor
+                )
+        }
 
     Box(
-        modifier = Modifier
-            .size(53.dp)
-            .clip(CircleShape)
-            .background(iconData.backgroundColor),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .size(53.dp)
+                .clip(CircleShape)
+                .background(iconData.backgroundColor),
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = iconData.imageVector,
             contentDescription = null,
             tint = iconData.iconColor,
-            modifier = Modifier.size(25.dp),
+            modifier = Modifier.size(25.dp)
         )
     }
 }
 
 @Composable
-private fun EmptyNotificationContent(
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyNotificationContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "아직 받은 알림이 없습니다.",
             color = SecondaryTextColor,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -310,62 +322,64 @@ private fun EmptyNotificationContent(
 private data class NotificationIconData(
     val imageVector: ImageVector,
     val backgroundColor: Color,
-    val iconColor: Color,
+    val iconColor: Color
 )
 
 @Preview(
     showBackground = true,
     widthDp = 390,
-    heightDp = 844,
+    heightDp = 844
 )
 @Composable
 private fun NotificationScreenPreview() {
     NotificationScreen(
-        uiState = NotificationUiState(
-            notifications = listOf(
-                NotificationItemUiModel(
-                    id = 1L,
-                    title = "민지님이 채팅방을 열었습니다.",
-                    description = "지금 바로 대화해보세요!",
-                    timeText = "방금 전",
-                    type = NotificationType.CHAT,
-                    isRead = false,
-                    referenceType = "CHATROOM",
-                    referenceId = "1",
-                ),
-                NotificationItemUiModel(
-                    id = 2L,
-                    title = "지원이 수락됐어요!",
-                    description = "곧 채팅방이 열릴 거예요.",
-                    timeText = "10분 전",
-                    type = NotificationType.ACCEPT,
-                    isRead = false,
-                    referenceType = "RECRUIT",
-                    referenceId = "1",
-                ),
-                NotificationItemUiModel(
-                    id = 3L,
-                    title = "수현님이 [제일기획 아이디어 공모전]에 지원했어요.",
-                    description = "프로필을 확인해보세요!",
-                    timeText = "1시간 전",
-                    type = NotificationType.APPLY,
-                    isRead = true,
-                    referenceType = "RECRUIT",
-                    referenceId = "1",
-                ),
-                NotificationItemUiModel(
-                    id = 4L,
-                    title = "아쉽지만 [UX 공모전 팀원 모집] 공고가 마감됐어요.",
-                    description = "다른 공고도 살펴보세요!",
-                    timeText = "3일 전",
-                    type = NotificationType.CLOSED,
-                    isRead = true,
-                    referenceType = "RECRUIT",
-                    referenceId = "2",
-                ),
+        uiState =
+            NotificationUiState(
+                notifications =
+                    listOf(
+                        NotificationItemUiModel(
+                            id = 1L,
+                            title = "민지님이 채팅방을 열었습니다.",
+                            description = "지금 바로 대화해보세요!",
+                            timeText = "방금 전",
+                            type = NotificationType.CHAT,
+                            isRead = false,
+                            referenceType = "CHATROOM",
+                            referenceId = "1"
+                        ),
+                        NotificationItemUiModel(
+                            id = 2L,
+                            title = "지원이 수락됐어요!",
+                            description = "곧 채팅방이 열릴 거예요.",
+                            timeText = "10분 전",
+                            type = NotificationType.ACCEPT,
+                            isRead = false,
+                            referenceType = "RECRUIT",
+                            referenceId = "1"
+                        ),
+                        NotificationItemUiModel(
+                            id = 3L,
+                            title = "수현님이 [제일기획 아이디어 공모전]에 지원했어요.",
+                            description = "프로필을 확인해보세요!",
+                            timeText = "1시간 전",
+                            type = NotificationType.APPLY,
+                            isRead = true,
+                            referenceType = "RECRUIT",
+                            referenceId = "1"
+                        ),
+                        NotificationItemUiModel(
+                            id = 4L,
+                            title = "아쉽지만 [UX 공모전 팀원 모집] 공고가 마감됐어요.",
+                            description = "다른 공고도 살펴보세요!",
+                            timeText = "3일 전",
+                            type = NotificationType.CLOSED,
+                            isRead = true,
+                            referenceType = "RECRUIT",
+                            referenceId = "2"
+                        )
+                    )
             ),
-        ),
         onCloseClick = {},
-        onNotificationClick = {},
+        onNotificationClick = {}
     )
 }

@@ -26,20 +26,17 @@ data class ScheduleCategoryCreatedDto(
 /** `GET /users/me/schedules`(7-5) 응답에 포함된 카테고리 정보. */
 @Serializable
 data class ScheduleCategoryRefDto(
-    val categoryId: Long,
-    val title: String,
-    val color: String
+    val categoryId: Long
 )
 
 /**
  * `GET /users/me/schedules`(7-5) 응답 항목. 단발 일정은 [date]만, 반복 일정은
- * [startDate]/[endDate]/[rrule]을 사용한다([isRecurring]으로 구분).
+ * [startDate]/[endDate]/[rrule]을 사용한다.
  */
 @Serializable
 data class ScheduleDto(
     val scheduleId: Long,
     val title: String,
-    val isRecurring: Boolean,
     val date: String? = null,
     val startDate: String? = null,
     val endDate: String? = null,

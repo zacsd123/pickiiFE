@@ -17,9 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -42,7 +39,9 @@ import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
 import com.example.pickii.ui.common.AddEntryButton
+import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.CharacterCounterText
+import com.example.pickii.ui.common.FieldLabel as CommonFieldLabel
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.RemovableEntryCard
 import com.example.pickii.ui.common.SearchDropdownField
@@ -166,21 +165,10 @@ private fun ProfileEditScreenContent(
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.clickable(onClick = onBackClick)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.mypage_profile_edit_title),
-                    color = Color.Black,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            BackHeader(
+                title = stringResource(R.string.mypage_profile_edit_title),
+                onBackClick = onBackClick
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -587,8 +575,7 @@ private fun LicenseFields(
 
 @Composable
 private fun FieldLabel(text: String) {
-    Text(text = text, color = PickiiTextGray, fontSize = 12.sp)
-    Spacer(modifier = Modifier.height(8.dp))
+    CommonFieldLabel(text = text, color = PickiiTextGray, fontSize = 12.sp, fontWeight = null)
 }
 
 @Composable

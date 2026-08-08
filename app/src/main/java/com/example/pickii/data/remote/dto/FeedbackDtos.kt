@@ -11,7 +11,6 @@ data class FeedbackProjectDto(
     val remainingDays: Int,
     val memberCount: Int,
     val evaluatedCount: Int,
-    val requiredCount: Int,
     val isAiFeedbackAvailable: Boolean
 )
 

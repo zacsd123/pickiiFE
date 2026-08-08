@@ -19,12 +19,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val HeaderBackgroundColor = Color(0xFFF7F7F7)
-private val HeaderTextColor = Color(0xFF1B1B1B)
+private val HeaderTextColor = PickiiInk
 private val HeaderArrowColor = Color(0xFF999999)
 private val MenuButtonBackgroundColor = Color(0xFFFFFFFF)
 private val AddButtonBackgroundColor = Color(0xFF6D8DF5)

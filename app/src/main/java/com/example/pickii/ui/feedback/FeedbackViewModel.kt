@@ -50,8 +50,7 @@ class FeedbackViewModel
                         val projects = page.items.map { it.toUiModel() }
                         _uiState.update { it.copy(isLoading = false, projects = projects) }
                         loadWritableMembers(projects)
-                    }
-                    .onFailure {
+                    }.onFailure {
                         _uiState.update { it.copy(isLoading = false) }
                         emitEvent(RecruitUiEvent.ShowToast(R.string.feedback_toast_load_failed))
                     }
@@ -162,8 +161,7 @@ class FeedbackViewModel
                                     )
                             )
                         }
-                    }
-                    .onFailure {
+                    }.onFailure {
                         _uiState.update { it.copy(aiFeedback = FeedbackDetailUiState(isLoading = false)) }
                         emitEvent(RecruitUiEvent.ShowToast(R.string.feedback_toast_ai_feedback_failed))
                     }

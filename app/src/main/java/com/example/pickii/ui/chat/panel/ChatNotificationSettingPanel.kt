@@ -1,20 +1,15 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
@@ -29,18 +24,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiBorderGray
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val NotificationPanelBackgroundColor = Color.White
 private val NotificationPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val NotificationPrimaryTextColor = Color(0xFF20283A)
-private val NotificationSecondaryTextColor = Color(0xFF9CA3AF)
+private val NotificationPrimaryTextColor = PickiiNavyText
+private val NotificationSecondaryTextColor = PickiiGray400
 private val NotificationDisabledTextColor = Color(0xFFB6BAC4)
-private val NotificationDividerColor = Color(0xFFF0F1F4)
+private val NotificationDividerColor = PickiiSurfaceGrayLight
 private val NotificationCardColor = Color(0xFFFAFAFB)
 private val NotificationCardBorderColor = Color(0xFFE4E6EB)
 private val NotificationSwitchColor = Color(0xFFB7C85B)
@@ -88,98 +87,83 @@ fun ChatNotificationSettingPanel(
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = NotificationPanelScrimColor,
+        panelBackgroundColor = NotificationPanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(NotificationPanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        NotificationSettingHeader(
+            onBackClick = onBackClick
+        )
+
+        HorizontalDivider(
+            color = NotificationDividerColor
         )
 
         Column(
             modifier =
                 Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(NotificationPanelBackgroundColor)
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 24.dp
+                    ),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            NotificationSettingHeader(
-                onBackClick = onBackClick
+            NotificationToggleCard(
+                title = "알림 받기",
+                description = "채팅 및 공지 알림",
+                isChecked = isNotificationEnabled,
+                isEnabled = true,
+                onCheckedChange = { isChecked ->
+                    isNotificationEnabled = isChecked
+                    onEnabledChange(isChecked)
+
+                    if (!isChecked) {
+                        isKeywordNotificationEnabled = false
+                    }
+                }
             )
 
-            HorizontalDivider(
-                color = NotificationDividerColor
+            // 키워드 알림/알림 모음 시간은 8-8 API에 대응 필드가 없어 로컬 상태로만 둔다(의도적 — 이번 연동 범위 밖).
+            NotificationToggleCard(
+                title = "키워드 알림",
+                description = "내 이름이 언급될 때만",
+                isChecked = isKeywordNotificationEnabled,
+                isEnabled = isNotificationEnabled,
+                onCheckedChange = { isChecked ->
+                    isKeywordNotificationEnabled = isChecked
+                }
             )
 
-            Column(
+            Text(
+                text = "알림 모음 시간",
                 modifier =
                     Modifier
-                        .fillMaxWidth()
                         .padding(
-                            horizontal = 20.dp,
-                            vertical = 24.dp
+                            start = 4.dp,
+                            top = 8.dp
+                        ).alpha(
+                            if (isNotificationEnabled) {
+                                1f
+                            } else {
+                                0.38f
+                            }
                         ),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                NotificationToggleCard(
-                    title = "알림 받기",
-                    description = "채팅 및 공지 알림",
-                    isChecked = isNotificationEnabled,
-                    isEnabled = true,
-                    onCheckedChange = { isChecked ->
-                        isNotificationEnabled = isChecked
-                        onEnabledChange(isChecked)
+                color = NotificationSecondaryTextColor,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
 
-                        if (!isChecked) {
-                            isKeywordNotificationEnabled = false
-                        }
-                    }
-                )
-
-                // 키워드 알림/알림 모음 시간은 8-8 API에 대응 필드가 없어 로컬 상태로만 둔다(의도적 — 이번 연동 범위 밖).
-                NotificationToggleCard(
-                    title = "키워드 알림",
-                    description = "내 이름이 언급될 때만",
-                    isChecked = isKeywordNotificationEnabled,
+            NotificationMuteTime.entries.forEach { muteTime ->
+                NotificationMuteTimeItem(
+                    title = muteTime.displayName,
+                    isSelected = selectedMuteTime == muteTime,
                     isEnabled = isNotificationEnabled,
-                    onCheckedChange = { isChecked ->
-                        isKeywordNotificationEnabled = isChecked
+                    onClick = {
+                        selectedMuteTimeName = muteTime.name
                     }
                 )
-
-                Text(
-                    text = "알림 모음 시간",
-                    modifier =
-                        Modifier
-                            .padding(
-                                start = 4.dp,
-                                top = 8.dp
-                            ).alpha(
-                                if (isNotificationEnabled) {
-                                    1f
-                                } else {
-                                    0.38f
-                                }
-                            ),
-                    color = NotificationSecondaryTextColor,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                NotificationMuteTime.entries.forEach { muteTime ->
-                    NotificationMuteTimeItem(
-                        title = muteTime.displayName,
-                        isSelected = selectedMuteTime == muteTime,
-                        isEnabled = isNotificationEnabled,
-                        onClick = {
-                            selectedMuteTimeName = muteTime.name
-                        }
-                    )
-                }
             }
         }
     }
@@ -190,44 +174,14 @@ fun ChatNotificationSettingPanel(
  */
 @Composable
 private fun NotificationSettingHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "알람 설정",
-            color = NotificationPrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "알람 설정",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = NotificationPrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }
 
 /**
@@ -297,12 +251,12 @@ private fun NotificationToggleCard(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = NotificationSwitchColor,
                     uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = Color(0xFFD8DAE0),
+                    uncheckedTrackColor = PickiiBorderGray,
                     uncheckedBorderColor = Color.Transparent,
                     disabledCheckedThumbColor = Color.White,
-                    disabledCheckedTrackColor = Color(0xFFD8DAE0),
+                    disabledCheckedTrackColor = PickiiBorderGray,
                     disabledUncheckedThumbColor = Color.White,
-                    disabledUncheckedTrackColor = Color(0xFFD8DAE0),
+                    disabledUncheckedTrackColor = PickiiBorderGray,
                     disabledUncheckedBorderColor = Color.Transparent
                 )
         )
@@ -359,7 +313,7 @@ private fun NotificationMuteTimeItem(
         if (isSelected) {
             Text(
                 text = "✓",
-                color = Color(0xFF9CA3AF),
+                color = PickiiGray400,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )

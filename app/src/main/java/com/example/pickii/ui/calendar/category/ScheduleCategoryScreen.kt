@@ -30,11 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
+import com.example.pickii.ui.theme.PickiiInk
 
 private val ScreenBackgroundColor = Color(0xFFFFFFFF)
 private val ItemBackgroundColor = Color(0xFFF4F4F4)
 private val InputBackgroundColor = Color(0xFFF4F4F4)
-private val PrimaryTextColor = Color(0xFF1B1B1B)
+private val PrimaryTextColor = PickiiInk
 private val SecondaryTextColor = Color(0xFF8C8C8C)
 private val AddButtonColor = Color(0xFFE8FF7A)
 private val SaveButtonColor = Color(0xFF111111)
@@ -336,16 +338,3 @@ private fun ScheduleColorPalette(
             }
     }
 }
-
-private fun ScheduleColorType.toComposeColor(): Color =
-    when (this) {
-        ScheduleColorType.RED -> Color(0xFFE95F5F)
-        ScheduleColorType.ORANGE -> Color(0xFFEB9852)
-        ScheduleColorType.YELLOW -> Color(0xFFF2CF4A)
-        ScheduleColorType.GREEN -> Color(0xFF73C86B)
-        ScheduleColorType.BLUE -> Color(0xFF6699EC)
-        ScheduleColorType.PURPLE -> Color(0xFF9271EA)
-        ScheduleColorType.PINK -> Color(0xFFDE7FA4)
-        ScheduleColorType.GRAY -> Color(0xFF8F959D)
-        ScheduleColorType.BLACK -> Color(0xFF1B1B1B)
-    }

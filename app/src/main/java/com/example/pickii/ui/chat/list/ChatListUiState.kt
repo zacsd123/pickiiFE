@@ -22,6 +22,7 @@ enum class ChatListTab {
  * @property directPage 개인 탭에서 마지막으로 불러온 페이지 번호
  * @property groupHasNext 그룹 탭에 다음 페이지가 있는지 여부
  * @property directHasNext 개인 탭에 다음 페이지가 있는지 여부
+ * @property notificationCount 상단 헤더에 표시할 미읽음 알림 수
  */
 data class ChatListUiState(
     val selectedTab: ChatListTab = ChatListTab.DIRECT,
@@ -34,5 +35,6 @@ data class ChatListUiState(
     val groupPage: Int = 0,
     val directPage: Int = 0,
     val groupHasNext: Boolean = false,
-    val directHasNext: Boolean = false
+    val directHasNext: Boolean = false,
+    val notificationCount: Int = 0
 )

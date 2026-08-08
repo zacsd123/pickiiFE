@@ -9,10 +9,12 @@ import com.example.pickii.data.remote.api.CalendarApiService
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
+import com.example.pickii.data.remote.api.MeetingPollApiService
 import com.example.pickii.data.remote.api.MyPageActivityApiService
 import com.example.pickii.data.remote.api.NotificationApiService
 import com.example.pickii.data.remote.api.NotificationSettingsApiService
 import com.example.pickii.data.remote.api.ProfileApiService
+import com.example.pickii.data.remote.api.ProjectApiService
 import com.example.pickii.data.remote.api.RecruitApiService
 import dagger.Module
 import dagger.Provides
@@ -118,4 +120,13 @@ object NetworkModule {
     @Singleton
     fun provideCalendarApiService(retrofit: Retrofit): CalendarApiService =
         retrofit.create(CalendarApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMeetingPollApiService(retrofit: Retrofit): MeetingPollApiService =
+        retrofit.create(MeetingPollApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProjectApiService(retrofit: Retrofit): ProjectApiService = retrofit.create(ProjectApiService::class.java)
 }

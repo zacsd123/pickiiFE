@@ -1,14 +1,12 @@
 package com.example.pickii.ui.chat
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.pickii.ui.chat.room.ActiveChatRoomTracker
 
 private enum class ChatScreenType {
     LIST,
@@ -21,12 +19,17 @@ private enum class ChatScreenType {
  * @param onTopLevelScreenChange 채팅 목록 화면(최상위)인지 여부가 바뀔 때마다 호출된다. 바깥의 공유 바텀 내비게이션을
  * 언제 보여줄지 결정하는 데 쓰인다.
  * @param initialRoomId 지정하면 목록을 거치지 않고 바로 해당 채팅방으로 진입한다(예: "지원 현황"의 채팅방 바로가기).
+ * @param onInitialRoomConsumed [initialRoomId] 반영을 마쳤을 때 호출된다. 앱 레벨에서 이 값을 다시 null로
+ * 돌려놓는 데 쓴다 — 그러지 않으면 채팅 탭이 매번 새로 컴포즈될 때(다른 탭에 갔다 돌아올 때 등) 사용자가
+ * 그동안 직접 목록/다른 방으로 옮겨갔어도 다시 이 방으로 튕겨간다.
  */
 @Composable
 fun ChatRoute(
     onTopLevelScreenChange: (Boolean) -> Unit,
     onNavigateToMemberProfile: (Long) -> Unit,
+    onNotificationBellClick: () -> Unit,
     initialRoomId: Long? = null,
+    onInitialRoomConsumed: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var currentScreen by rememberSaveable {
@@ -45,20 +48,12 @@ fun ChatRoute(
         if (initialRoomId != null) {
             selectedRoomId = initialRoomId
             currentScreen = ChatScreenType.ROOM.name
+            onInitialRoomConsumed()
         }
     }
 
     LaunchedEffect(currentScreen) {
         onTopLevelScreenChange(currentScreen == ChatScreenType.LIST.name)
-    }
-
-    // 로컬 알림 폴러가 지금 보고 있는 방의 알림은 건너뛸 수 있도록, 현재 열려 있는 방 id를 계속 알려준다.
-    DisposableEffect(currentScreen, selectedRoomId) {
-        ActiveChatRoomTracker.activeRoomId.value =
-            if (ChatScreenType.valueOf(currentScreen) == ChatScreenType.ROOM) selectedRoomId else null
-        onDispose {
-            ActiveChatRoomTracker.activeRoomId.value = null
-        }
     }
 
     when (
@@ -69,7 +64,8 @@ fun ChatRoute(
                 onChatRoomClick = { roomId ->
                     selectedRoomId = roomId
                     currentScreen = ChatScreenType.ROOM.name
-                }
+                },
+                onNotificationBellClick = onNotificationBellClick
             )
         }
 

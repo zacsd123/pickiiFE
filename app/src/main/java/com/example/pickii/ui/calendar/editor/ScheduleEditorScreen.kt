@@ -26,13 +26,14 @@ import com.example.pickii.ui.calendar.editor.component.ScheduleLocationField
 import com.example.pickii.ui.calendar.editor.component.ScheduleMemoField
 import com.example.pickii.ui.calendar.editor.component.ScheduleRepeatSection
 import com.example.pickii.ui.calendar.editor.component.ScheduleTitleField
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.theme.PickiiInk
 
 private val EditorBackgroundColor = Color(0xFFF7F7F2)
 private val EditorHeaderBackgroundColor = Color(0xFFFFFFFF)
-private val EditorHeaderTitleColor = Color(0xFF1B1B1B)
-private val EditorBackButtonColor = Color(0xFF1B1B1B)
+private val EditorHeaderTitleColor = PickiiInk
 
-private val SaveButtonEnabledColor = Color(0xFF1B1B1B)
+private val SaveButtonEnabledColor = PickiiInk
 private val SaveButtonDisabledColor = Color(0xFFD6D6D0)
 private val SaveButtonTextColor = Color(0xFFFFFFFF)
 
@@ -192,39 +193,14 @@ private fun ScheduleEditorHeader(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(EditorHeaderBackgroundColor)
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "‹",
-            modifier =
-                Modifier
-                    .clickable(
-                        onClick = onBackClick
-                    ).padding(
-                        end = 16.dp
-                    ),
-            color = EditorBackButtonColor,
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 34.sp
-        )
-
-        Text(
-            text = title,
-            color = EditorHeaderTitleColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = title,
+        onBackClick = onBackClick,
+        modifier = modifier.background(EditorHeaderBackgroundColor).padding(horizontal = 20.dp, vertical = 18.dp),
+        titleColor = EditorHeaderTitleColor,
+        titleFontSize = 20.sp,
+        spacing = 16.dp
+    )
 }
 
 /**

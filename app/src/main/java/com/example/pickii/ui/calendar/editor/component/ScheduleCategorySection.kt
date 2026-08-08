@@ -24,16 +24,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleCategory
-import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiInk
 
 private val CategorySectionBackgroundColor = Color(0xFFFFFFFF)
-private val CategoryTitleColor = Color(0xFF777777)
+private val CategoryTitleColor = PickiiGray600
 
-private val SelectedCategoryBackgroundColor = Color(0xFF1B1B1B)
+private val SelectedCategoryBackgroundColor = PickiiInk
 private val SelectedCategoryTextColor = Color(0xFFFFFFFF)
 
 private val UnselectedCategoryBackgroundColor = Color(0xFFF1F1F1)
-private val UnselectedCategoryTextColor = Color(0xFF777777)
+private val UnselectedCategoryTextColor = PickiiGray600
 
 /**
  * 일정 태그 선택 영역이다.
@@ -191,15 +193,3 @@ private fun ScheduleCategoryChip(
 /**
  * 도메인 색상 타입을 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color =
-    when (this) {
-        ScheduleColorType.RED -> Color(0xFFE86F73)
-        ScheduleColorType.ORANGE -> Color(0xFFED9A53)
-        ScheduleColorType.YELLOW -> Color(0xFFF1D354)
-        ScheduleColorType.GREEN -> Color(0xFF84C976)
-        ScheduleColorType.BLUE -> Color(0xFF6D9EEB)
-        ScheduleColorType.PURPLE -> Color(0xFFAC8AFA)
-        ScheduleColorType.PINK -> Color(0xFFE38AB0)
-        ScheduleColorType.GRAY -> Color(0xFF90959D)
-        ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
-    }

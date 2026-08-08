@@ -42,7 +42,10 @@ class ScheduleEditorViewModel
          * [entryKey]가 이전과 같으면(태그 설정 화면을 다녀오는 등 같은 편집 세션 안에서
          * 재진입한 경우) 무시한다 — 그렇지 않으면 화면이 재구성될 때마다 입력 중이던 값이 초기화된다.
          */
-        fun initialize(scheduleId: Long?, entryKey: Int) {
+        fun initialize(
+            scheduleId: Long?,
+            entryKey: Int
+        ) {
             if (lastInitializedEntryKey == entryKey) {
                 return
             }

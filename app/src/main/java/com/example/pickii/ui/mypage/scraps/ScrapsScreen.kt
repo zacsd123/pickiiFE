@@ -38,10 +38,9 @@ import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.MyPageSectionHeader
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.StatusBadge
+import com.example.pickii.ui.common.recruitStatusColor
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteBlue
-import com.example.pickii.ui.theme.PickiiPaletteGray
-import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
 
@@ -170,10 +169,3 @@ private fun ScrapCard(
         )
     }
 }
-
-private fun recruitStatusColor(status: RecruitStatus): Color =
-    when (status) {
-        RecruitStatus.OPEN -> PickiiPaletteGreen
-        RecruitStatus.CLOSED -> PickiiPaletteGray
-        RecruitStatus.ADDITIONAL -> PickiiPaletteGreen
-    }

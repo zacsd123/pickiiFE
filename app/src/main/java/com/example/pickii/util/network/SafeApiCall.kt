@@ -51,6 +51,9 @@ suspend fun safeApiCallUnit(
         Result.failure(e)
     }
 
+/** 문자열 id를 [Long]으로 변환하지 못했을 때 던질 예외. */
+fun invalidIdException(id: String) = IllegalArgumentException("잘못된 id: $id")
+
 private fun <T> Response<T>.toApiException(json: Json): ApiException {
     val errorBodyString = errorBody()?.string()
     val parsed = errorBodyString?.let { runCatching { json.decodeFromString<ApiErrorBody>(it) }.getOrNull() }

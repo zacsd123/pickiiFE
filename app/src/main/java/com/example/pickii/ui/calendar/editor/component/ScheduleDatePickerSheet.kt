@@ -30,26 +30,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiGrayMedium
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-private val SheetLabelColor = Color(0xFF777777)
-private val SheetValueColor = Color(0xFF1B1B1B)
+private val SheetLabelColor = PickiiGray600
+private val SheetValueColor = PickiiInk
 
 private val WeekdayDefaultColor = Color(0xFFA8A8A8)
 private val SaturdayColor = Color(0xFF6D9EEB)
 private val SundayColor = Color(0xFFE86F73)
 
 private val TodayRingColor = Color(0xFFD7E85B)
-private val SelectedDayBackgroundColor = Color(0xFF1B1B1B)
+private val SelectedDayBackgroundColor = PickiiInk
 private val InRangeBackgroundColor = Color(0xFFFAF6C9)
 
-private val FooterButtonEnabledColor = Color(0xFF1B1B1B)
+private val FooterButtonEnabledColor = PickiiInk
 private val FooterButtonDisabledColor = Color(0xFFEDEDE7)
 private val FooterButtonEnabledTextColor = Color(0xFFFFFFFF)
-private val FooterButtonDisabledTextColor = Color(0xFFAAAAAA)
+private val FooterButtonDisabledTextColor = PickiiGrayMedium
 
 private val SheetDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 

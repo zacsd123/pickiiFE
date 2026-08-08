@@ -1,35 +1,39 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.domain.model.ScheduleCategory
+import com.example.pickii.ui.calendar.editor.component.ScheduleCategorySection
+import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiNavyText
 
 private val ProjectInfoPanelBackgroundColor = Color.White
 private val ProjectInfoPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val ProjectInfoPrimaryTextColor = Color(0xFF20283A)
+private val ProjectInfoPrimaryTextColor = PickiiNavyText
 private val ProjectInfoSecondaryTextColor = Color(0xFF8E95A3)
 private val ProjectInfoCardColor = Color(0xFFF6F7F9)
 private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)
@@ -40,73 +44,123 @@ private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)
 @Composable
 fun ChatProjectInfoPanel(
     projectInfo: ChatProjectInfoUiModel,
-    onBackClick: () -> Unit
+    scheduleCategories: List<ScheduleCategory>,
+    selectedCategoryId: Long?,
+    isCurrentUserLeader: Boolean,
+    onBackClick: () -> Unit,
+    onSelectColor: (Long) -> Unit,
+    onCloseProjectClick: () -> Unit
 ) {
+    var isCloseConfirmVisible by remember { mutableStateOf(false) }
+
     BackHandler(
         enabled = true,
         onBack = onBackClick
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    SlideInSidePanelScaffold(
+        onScrimClick = onBackClick,
+        scrimColor = ProjectInfoPanelScrimColor,
+        panelBackgroundColor = ProjectInfoPanelBackgroundColor
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(ProjectInfoPanelScrimColor)
-                    .clickable(onClick = onBackClick)
+        ProjectInfoHeader(
+            onBackClick = onBackClick
         )
 
         Column(
             modifier =
                 Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.79f)
-                    .align(Alignment.CenterEnd)
-                    .background(ProjectInfoPanelBackgroundColor)
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ProjectInfoHeader(
-                onBackClick = onBackClick
+            ProjectProgressCard(
+                projectInfo = projectInfo
             )
 
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = 20.dp,
-                            vertical = 20.dp
-                        ),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                ProjectProgressCard(
-                    projectInfo = projectInfo
-                )
+            ProjectInfoItem(
+                label = "시작일",
+                value = projectInfo.startDate
+            )
 
+            ProjectInfoItem(
+                label = "종료일",
+                value = projectInfo.endDate
+            )
+
+            ProjectInfoItem(
+                label = "팀원 수",
+                value = "${projectInfo.memberCount}명"
+            )
+
+            if (projectInfo.leaderName.isNotBlank()) {
                 ProjectInfoItem(
-                    label = "시작일",
-                    value = projectInfo.startDate
+                    label = "팀장",
+                    value = projectInfo.leaderName
+                )
+            }
+
+            if (scheduleCategories.isNotEmpty()) {
+                Text(
+                    text = "이 프로젝트 캘린더 색상",
+                    color = ProjectInfoSecondaryTextColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
 
-                ProjectInfoItem(
-                    label = "종료일",
-                    value = projectInfo.endDate
+                ScheduleCategorySection(
+                    categories = scheduleCategories,
+                    selectedCategoryId = selectedCategoryId,
+                    onCategoryClick = { categoryId -> categoryId?.let(onSelectColor) },
+                    onManageClick = {}
                 )
+            }
 
-                ProjectInfoItem(
-                    label = "팀원 수",
-                    value = "${projectInfo.memberCount}명"
-                )
-
-                if (projectInfo.leaderName.isNotBlank()) {
-                    ProjectInfoItem(
-                        label = "팀장",
-                        value = projectInfo.leaderName
-                    )
-                }
+            if (isCurrentUserLeader && projectInfo.projectStatus != ProjectStatus.END) {
+                ProjectCloseButton(onClick = { isCloseConfirmVisible = true })
             }
         }
+    }
+
+    if (isCloseConfirmVisible) {
+        ConfirmDialog(
+            title = stringResource(R.string.chat_project_close_dialog_title),
+            body = stringResource(R.string.chat_project_close_dialog_body),
+            confirmLabel = stringResource(R.string.chat_project_close_button),
+            dismissLabel = stringResource(R.string.common_button_cancel),
+            onConfirm = {
+                isCloseConfirmVisible = false
+                onCloseProjectClick()
+            },
+            onDismiss = { isCloseConfirmVisible = false }
+        )
+    }
+}
+
+/**
+ * 프로젝트 종료 버튼을 표시한다(프로젝트장에게만 노출).
+ */
+@Composable
+private fun ProjectCloseButton(onClick: () -> Unit) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFF1F1F1F))
+                .clickable(onClick = onClick)
+                .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.chat_project_close_button),
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -115,44 +169,14 @@ fun ChatProjectInfoPanel(
  */
 @Composable
 private fun ProjectInfoHeader(onBackClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = "프로젝트 정보",
-            color = ProjectInfoPrimaryTextColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    BackHeader(
+        title = "프로젝트 정보",
+        onBackClick = onBackClick,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+        titleColor = ProjectInfoPrimaryTextColor,
+        spacing = 8.dp,
+        iconTouchSize = 40.dp
+    )
 }
 
 /**

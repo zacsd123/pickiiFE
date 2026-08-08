@@ -50,6 +50,7 @@ import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
+import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.OneShotEventEffect
@@ -57,6 +58,8 @@ import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.common.SelectableChip
+import com.example.pickii.ui.common.StatusBadge
+import com.example.pickii.ui.common.recruitStatusColor
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPostCardBackground
@@ -477,7 +480,20 @@ private fun PostCard(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = post.title, color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = post.title,
+                color = Color.Black,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            StatusBadge(
+                label = post.status.label,
+                containerColor = recruitStatusColor(post.status),
+                contentColor = if (post.status == RecruitStatus.CLOSED) Color.Black else Color.White
+            )
+        }
 
         Spacer(modifier = Modifier.height(4.dp))
 

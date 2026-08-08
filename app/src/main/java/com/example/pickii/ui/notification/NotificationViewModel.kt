@@ -97,6 +97,7 @@ class NotificationViewModel
                 description = content,
                 timeText = sentAt.toRelativeTimeText(),
                 type = runCatching { NotificationType.valueOf(type) }.getOrDefault(NotificationType.OTHER),
+                typeRaw = type,
                 isRead = isRead,
                 referenceType = referenceType,
                 referenceId = referenceId

@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
+
 /** [LoginScreen]에 표시되는 입력 값과 토글 상태. */
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isPasswordVisible: Boolean = false,
-    val isAutoLoginChecked: Boolean = false
+    val isAutoLoginChecked: Boolean = false,
+    val errorMessage: String? = null
 )
 
 /** 로그인 화면의 입력 상태를 보관하고, [SessionRepository]를 통해 실제 로그인/비회원 전환을 처리한다. */
@@ -33,11 +36,15 @@ class LoginViewModel
         val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
         fun onEmailChange(value: String) {
-            _uiState.update { it.copy(email = value) }
+            _uiState.update { it.copy(email = value, errorMessage = null) }
         }
 
         fun onPasswordChange(value: String) {
-            _uiState.update { it.copy(password = value) }
+            _uiState.update { it.copy(password = value, errorMessage = null) }
+        }
+
+        fun onErrorDialogDismiss() {
+            _uiState.update { it.copy(errorMessage = null) }
         }
 
         fun onTogglePasswordVisibility() {
@@ -61,9 +68,13 @@ class LoginViewModel
         ) {
             viewModelScope.launch {
                 val state = _uiState.value
-                sessionRepository.login(state.email, state.password, state.isAutoLoginChecked).onSuccess {
-                    if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
-                }
+                sessionRepository
+                    .login(state.email, state.password, state.isAutoLoginChecked)
+                    .onSuccess {
+                        if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
+                    }.onFailure { error ->
+                        _uiState.update { it.copy(errorMessage = error.message ?: DEFAULT_ERROR_MESSAGE) }
+                    }
             }
         }
 

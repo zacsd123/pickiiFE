@@ -20,12 +20,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGrayDarkText
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantCardColor = Color(0xFFFEFFF2)
@@ -56,7 +61,7 @@ private val AcceptedColor = Color(0xFF82F363)
 private val RejectedColor = Color(0xFFEE7045)
 
 private val AcceptButtonColor = Color(0xFF627FF1)
-private val RejectButtonColor = Color(0xFF171717)
+private val RejectButtonColor = PickiiBlackSoft
 private val DetailButtonColor = Color(0xFFF0F3A0)
 
 private enum class ApplicantSortType(
@@ -210,12 +215,10 @@ private fun ApplicantListHeader(onBackClick: () -> Unit) {
             Box(
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter =
-                        painterResource(
-                            id = R.drawable.ic_back
-                        ),
-                    contentDescription = "뒤로가기",
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = Color.Black,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -227,7 +230,7 @@ private fun ApplicantListHeader(onBackClick: () -> Unit) {
 
         Text(
             text = "지원자 조회",
-            color = Color(0xFF171717),
+            color = PickiiBlackSoft,
             fontSize = 29.sp,
             fontWeight = FontWeight.Bold
         )
@@ -267,7 +270,7 @@ private fun ApplicantFilterSection(
                 ) {
                     Text(
                         text = sortType.displayName,
-                        color = Color(0xFF444444),
+                        color = PickiiGrayDarkText,
                         fontSize = 14.sp
                     )
 
@@ -277,7 +280,7 @@ private fun ApplicantFilterSection(
 
                     Text(
                         text = "⌄",
-                        color = Color(0xFF444444),
+                        color = PickiiGrayDarkText,
                         fontSize = 18.sp
                     )
                 }
@@ -435,7 +438,7 @@ private fun ApplicantCard(
                         Text(
                             text = applicant.nickname,
                             modifier = Modifier.weight(1f),
-                            color = Color(0xFF171717),
+                            color = PickiiBlackSoft,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,

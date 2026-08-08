@@ -30,6 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray650
+import com.example.pickii.ui.theme.PickiiNavyTextDark
+import com.example.pickii.ui.theme.PickiiSurfaceGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,14 +82,14 @@ fun NoticeRegistrationBottomSheet(
                 Text(
                     text = "취소",
                     modifier = Modifier.clickable(onClick = onDismiss),
-                    color = Color(0xFF6B7280),
+                    color = PickiiGray650,
                     fontSize = 15.sp
                 )
 
                 Text(
                     text = "공지 등록",
                     modifier = Modifier.weight(1f),
-                    color = Color(0xFF111827),
+                    color = PickiiNavyTextDark,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -101,7 +105,7 @@ fun NoticeRegistrationBottomSheet(
                         },
                     color =
                         if (isCompleteEnabled) {
-                            Color(0xFF111827)
+                            PickiiNavyTextDark
                         } else {
                             Color(0xFFBFC3C9)
                         },
@@ -122,12 +126,12 @@ fun NoticeRegistrationBottomSheet(
                         .fillMaxWidth()
                         .height(180.dp)
                         .background(
-                            color = Color(0xFFF4F5F7),
+                            color = PickiiSurfaceGray,
                             shape = RoundedCornerShape(18.dp)
                         ).padding(18.dp),
                 textStyle =
                     TextStyle(
-                        color = Color(0xFF111827),
+                        color = PickiiNavyTextDark,
                         fontSize = 15.sp,
                         lineHeight = 22.sp
                     ),
@@ -139,7 +143,7 @@ fun NoticeRegistrationBottomSheet(
                         if (noticeContent.isEmpty()) {
                             Text(
                                 text = "멤버들과 공유하고 싶은 소식을 남겨보세요.",
-                                color = Color(0xFF9CA3AF),
+                                color = PickiiGray400,
                                 fontSize = 15.sp,
                                 lineHeight = 22.sp
                             )

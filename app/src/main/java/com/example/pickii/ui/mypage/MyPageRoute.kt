@@ -46,6 +46,9 @@ enum class MyPageScreenType {
  * @param onNavigateToChatRoom "지원 현황"의 채팅방 바로가기에서 이동하는 콜백(앱 레벨 네비게이션)
  * @param onLoggedOut 로그아웃/회원탈퇴 완료 후 로그인 화면으로 이동하는 콜백(앱 레벨 네비게이션)
  * @param initialScreen 지정하면 마이페이지 홈을 거치지 않고 바로 해당 하위 화면으로 진입한다(예: 알림 클릭으로 "지원 현황" 진입).
+ * @param onInitialScreenConsumed [initialScreen] 반영을 마쳤을 때 호출된다. 앱 레벨에서 이 값을 다시 null로
+ * 돌려놓는 데 쓴다 — 그러지 않으면 마이페이지 탭이 매번 새로 컴포즈될 때(다른 탭에 갔다 돌아올 때 등) 이
+ * 화면이 계속 남아 있어, 사용자가 그동안 직접 홈으로 돌아갔어도 다시 이 화면으로 튕겨간다.
  */
 @Suppress("LongParameterList")
 @Composable
@@ -58,7 +61,8 @@ fun MyPageRoute(
     onNavigateToChatRoom: (roomId: String) -> Unit,
     onLoggedOut: () -> Unit,
     onNotificationClick: () -> Unit,
-    initialScreen: MyPageScreenType? = null
+    initialScreen: MyPageScreenType? = null,
+    onInitialScreenConsumed: () -> Unit = {}
 ) {
     var currentScreen by rememberSaveable {
         mutableStateOf((initialScreen ?: MyPageScreenType.HOME).name)
@@ -69,6 +73,7 @@ fun MyPageRoute(
     LaunchedEffect(initialScreen) {
         if (initialScreen != null) {
             currentScreen = initialScreen.name
+            onInitialScreenConsumed()
         }
     }
 
@@ -88,7 +93,7 @@ fun MyPageRoute(
                 onMyCommentsClick = { currentScreen = MyPageScreenType.MY_COMMENTS.name },
                 onFeedbackClick = { currentScreen = MyPageScreenType.FEEDBACK.name },
                 onSettingsClick = { currentScreen = MyPageScreenType.SETTINGS.name },
-                onNotificationClick = onNotificationClick,
+                onNotificationClick = onNotificationClick
             )
         }
 

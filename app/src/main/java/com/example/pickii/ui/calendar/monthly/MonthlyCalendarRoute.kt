@@ -11,6 +11,7 @@ fun MonthlyCalendarRoute(
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
     onEditScheduleClick: (Long) -> Unit,
+    onNotificationClick: () -> Unit,
     viewModel: MonthlyCalendarViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -22,7 +23,9 @@ fun MonthlyCalendarRoute(
         onDateClick = viewModel::selectDate,
         onScheduleClick = viewModel::toggleSchedule,
         onEditScheduleClick = onEditScheduleClick,
+        onDeleteScheduleClick = viewModel::deleteSchedule,
         onAddScheduleClick = onAddScheduleClick,
-        onDailyCalendarClick = onDailyCalendarClick
+        onDailyCalendarClick = onDailyCalendarClick,
+        onNotificationClick = onNotificationClick
     )
 }

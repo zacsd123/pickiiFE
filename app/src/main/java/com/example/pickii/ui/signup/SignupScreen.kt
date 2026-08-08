@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.SignupTerms
+import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
@@ -359,13 +360,6 @@ private fun RecapRow(
         Spacer(modifier = Modifier.width(6.dp))
         Text(text = value, color = PickiiBlue, fontSize = 14.sp)
     }
-}
-
-/** 입력 필드 위에 표시되는 라벨 텍스트. */
-@Composable
-private fun FieldLabel(text: String) {
-    Text(text = text, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 /** 텍스트 필드 오른쪽에 보조 버튼(중복확인/코드발송/인증하기)이 붙은 행. */

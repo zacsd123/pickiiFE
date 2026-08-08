@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.google.services)
 }
 
 val localProperties =
@@ -105,6 +106,9 @@ dependencies {
     implementation(libs.kakao.user)
     implementation(libs.krossbow.stomp.kxserialization.json)
     implementation(libs.krossbow.websocket.okhttp)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+    implementation(libs.kotlinx.coroutines.play.services)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

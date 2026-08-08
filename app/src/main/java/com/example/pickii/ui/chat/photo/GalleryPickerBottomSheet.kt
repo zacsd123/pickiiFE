@@ -59,6 +59,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil3.compose.AsyncImage
 import com.example.pickii.R
+import com.example.pickii.ui.theme.PickiiBlackAlt
+import com.example.pickii.ui.theme.PickiiCharcoal
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray700
+import com.example.pickii.ui.theme.PickiiGraySlate
+import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -175,7 +181,7 @@ fun GalleryPickerBottomSheet(
                                 .height(GalleryGridHeight),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFF171714))
+                        CircularProgressIndicator(color = PickiiCharcoal)
                     }
                 }
 
@@ -189,7 +195,7 @@ fun GalleryPickerBottomSheet(
                     ) {
                         Text(
                             text = "표시할 사진이 없습니다",
-                            color = Color(0xFF9CA3AF),
+                            color = PickiiGray400,
                             fontSize = 14.sp
                         )
                     }
@@ -254,7 +260,7 @@ private fun GalleryPickerHeader(
         Text(
             text = "사진 선택",
             modifier = Modifier.weight(1f),
-            color = Color(0xFF18181B),
+            color = PickiiBlackAlt,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -266,9 +272,9 @@ private fun GalleryPickerHeader(
                     .clip(CircleShape)
                     .background(
                         if (hasSelection) {
-                            Color(0xFF171714)
+                            PickiiCharcoal
                         } else {
-                            Color(0xFFF2F3F6)
+                            PickiiSurfaceGraySoft
                         }
                     ).clickable(
                         onClick = if (hasSelection) onConfirmClick else onCloseClick
@@ -281,7 +287,7 @@ private fun GalleryPickerHeader(
                         id = if (hasSelection) R.drawable.ic_check else R.drawable.ic_close
                     ),
                 contentDescription = if (hasSelection) "완료" else "닫기",
-                tint = if (hasSelection) Color.White else Color(0xFF4B5563),
+                tint = if (hasSelection) Color.White else PickiiGray700,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -312,7 +318,7 @@ private fun GalleryPermissionRequest(
                 } else {
                     "사진을 보려면 접근 권한이 필요해요"
                 },
-            color = Color(0xFF667085),
+            color = PickiiGraySlate,
             fontSize = 14.sp,
             textAlign = TextAlign.Center
         )
@@ -324,7 +330,7 @@ private fun GalleryPermissionRequest(
             shape = RoundedCornerShape(14.dp),
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF171714),
+                    containerColor = PickiiCharcoal,
                     contentColor = Color.White
                 )
         ) {
@@ -372,7 +378,7 @@ private fun GalleryPhotoCell(
                     .size(20.dp)
                     .clip(CircleShape)
                     .background(
-                        if (selected) Color(0xFF171714) else Color.White.copy(alpha = 0.7f)
+                        if (selected) PickiiCharcoal else Color.White.copy(alpha = 0.7f)
                     ),
             contentAlignment = Alignment.Center
         ) {

@@ -19,6 +19,7 @@ import com.example.pickii.domain.model.ChatRoomSummary
 import com.example.pickii.domain.model.ChatRoomSummaryPage
 import com.example.pickii.domain.model.DirectChatRoomResult
 import com.example.pickii.domain.repository.ChatRepository
+import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.chat.ChatImageValidationError
 import com.example.pickii.ui.chat.ChatRoomType
@@ -27,16 +28,18 @@ import com.example.pickii.ui.chat.toChatImagePart
 import com.example.pickii.ui.chat.validateChatImage
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.parseIsoOffsetDateTime
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val ERROR_CODE_INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
 private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
+
+/** 발신자 정보가 없는 시스템 메시지(예: 회의 조율 개설 알림)에 표시할 기본 발신자명. */
+private const val SYSTEM_SENDER_NICKNAME = "시스템"
 
 /** `8. Chat` REST API로 [ChatRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
 @Singleton
@@ -46,6 +49,7 @@ class ChatApiRepository
         @ApplicationContext private val context: Context,
         private val chatApiService: ChatApiService,
         private val sessionRepository: SessionRepository,
+        private val projectRepository: ProjectRepository,
         private val json: Json
     ) : ChatRepository {
         override suspend fun getChatRooms(
@@ -70,7 +74,13 @@ class ChatApiRepository
                     ?.id
                     ?.toLongOrNull()
             return safeApiCall(json) { chatApiService.getChatRoomDetail(chatRoomId) }
-                .map { it.data.toDomain(currentMemberId) }
+                .map { envelope ->
+                    val dto = envelope.data
+                    // GROUP 방이면 6-2로 진짜 leaderId를 받아와 팀원 전체의 팀장 여부를 정확히 계산한다.
+                    // 실패하면 본인만 신뢰 가능한 기존 규칙으로 내려간다(아래 toDomain 참고).
+                    val leaderId = dto.projectId?.let { projectRepository.getProjectLeaderId(it).getOrNull() }
+                    dto.toDomain(currentMemberId, leaderId)
+                }
         }
 
         override suspend fun getMessages(
@@ -108,7 +118,7 @@ class ChatApiRepository
         override suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult> =
             safeApiCall(json) {
                 chatApiService.createDirectChatRoom(CreateDirectChatRoomRequest(targetMemberId))
-            }.map { DirectChatRoomResult(chatRoomId = it.data.chatRoomId, isNew = it.data.isNew) }
+            }.map { DirectChatRoomResult(chatRoomId = it.data.chatRoomId) }
 
         override suspend fun markAsRead(
             chatRoomId: Long,
@@ -153,8 +163,15 @@ class ChatApiRepository
                 isNotificationEnabled = notiEnabled
             )
 
-        /** 본인만 신뢰 가능한 팀장 여부 규칙 적용: 서버가 다른 참여자의 팀장 여부를 내려주지 않는다(알려진 API 제약). */
-        private fun ChatRoomDetailDto.toDomain(currentMemberId: Long?): ChatRoomDetail {
+        /**
+         * 팀장 여부는 6-2(`GET /projects/{projectId}`)의 `leaderId`로 정확히 계산한다.
+         * 그 호출이 실패한 경우(네트워크 오류 등)에만 본인 여부만 신뢰 가능한 예전 규칙으로 내려간다
+         * (`GET /chatrooms/{chatRoomId}`의 `isLeader`는 본인 것만 알려준다 — 알려진 API 제약).
+         */
+        private fun ChatRoomDetailDto.toDomain(
+            currentMemberId: Long?,
+            leaderId: Long?
+        ): ChatRoomDetail {
             val amLeader = isLeader == true
             return ChatRoomDetail(
                 chatRoomId = chatRoomId,
@@ -165,7 +182,12 @@ class ChatApiRepository
                         ChatMember(
                             memberId = member.memberId,
                             nickname = member.nickname,
-                            isLeader = amLeader && member.memberId == currentMemberId
+                            isLeader =
+                                if (leaderId != null) {
+                                    member.memberId == leaderId
+                                } else {
+                                    amLeader && member.memberId == currentMemberId
+                                }
                         )
                     },
                 projectId = projectId,
@@ -179,8 +201,8 @@ class ChatApiRepository
         private fun ChatMessageDto.toDomain(): ChatMessage =
             ChatMessage(
                 messageId = messageId,
-                senderId = senderId,
-                senderNickname = senderNickname,
+                senderId = senderId ?: 0L,
+                senderNickname = senderNickname ?: SYSTEM_SENDER_NICKNAME,
                 type = type.toChatMessageContentType(),
                 text = message,
                 imageUrl = imageUrl,
@@ -203,5 +225,3 @@ private fun String.toProjectStatus(): ProjectStatus? = runCatching { ProjectStat
 
 private fun String.toChatMessageContentType(): ChatMessageContentType =
     runCatching { ChatMessageContentType.valueOf(this) }.getOrDefault(ChatMessageContentType.TEXT)
-
-private fun parseIsoOffsetDateTime(value: String): LocalDateTime = OffsetDateTime.parse(value).toLocalDateTime()

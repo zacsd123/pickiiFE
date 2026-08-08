@@ -46,8 +46,10 @@ data class ChatRoomDetail(
 )
 
 /**
- * 채팅방 참여자. [isLeader]는 본인(memberId가 로그인 사용자와 일치)일 때만 신뢰할 수 있다 —
- * 서버 응답에 다른 참여자의 팀장 여부가 내려오지 않아, 본인이 아닌 행은 항상 false로 채워진다.
+ * 채팅방 참여자. [isLeader]는 `GET /projects/{projectId}`(6-2)의 `leaderId`와 비교해 계산한다 —
+ * `GET /chatrooms/{chatRoomId}`(8-2) 자체의 `isLeader` 필드는 본인 여부만 알려줘서(알려진 API 제약)
+ * 다른 참여자 판정에는 쓸 수 없다. 6-2 호출이 실패하면 본인 여부만 신뢰 가능한 규칙으로 내려간다
+ * ([com.example.pickii.data.repository.ChatApiRepository] 참고).
  */
 data class ChatMember(
     val memberId: Long,
@@ -57,6 +59,5 @@ data class ChatMember(
 
 /** `POST /chatrooms/direct`(8-5) 결과. */
 data class DirectChatRoomResult(
-    val chatRoomId: Long,
-    val isNew: Boolean
+    val chatRoomId: Long
 )

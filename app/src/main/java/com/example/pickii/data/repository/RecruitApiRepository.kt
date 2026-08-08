@@ -23,10 +23,9 @@ import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -268,8 +267,8 @@ class RecruitApiRepository
                 authorNickname = authorNickname,
                 authorExperience = authorEXP,
                 onCampus = if (onCampus) CampusScope.INTERNAL else CampusScope.EXTERNAL,
-                category = category.firstOrNull()?.let { id -> allCategories.find { it.id == id } },
-                topic = topics.firstOrNull()?.let { id -> allTopics.find { it.id == id } },
+                categories = category.mapNotNull { id -> allCategories.find { it.id == id } },
+                topics = topics.mapNotNull { id -> allTopics.find { it.id == id } },
                 startDate = LocalDate.parse(startDate),
                 endDate = LocalDate.parse(endDate),
                 maxParticipants = maxMembers,
@@ -308,5 +307,3 @@ private fun invalidPostIdException(id: String) = IllegalArgumentException("ìž˜ëª
 
 private fun String.toRecruitStatus(): RecruitStatus =
     runCatching { RecruitStatus.valueOf(this) }.getOrDefault(RecruitStatus.OPEN)
-
-private fun parseIsoOffsetDateTime(value: String): LocalDateTime = OffsetDateTime.parse(value).toLocalDateTime()

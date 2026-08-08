@@ -19,12 +19,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiGrayMedium
+import com.example.pickii.ui.theme.PickiiInk
 
 private val LocationFieldBackgroundColor = Color(0xFFFFFFFF)
-private val LocationLabelColor = Color(0xFF777777)
-private val LocationTextColor = Color(0xFF1B1B1B)
-private val LocationPlaceholderColor = Color(0xFFAAAAAA)
-private val LocationCursorColor = Color(0xFF1B1B1B)
+private val LocationLabelColor = PickiiGray600
+private val LocationTextColor = PickiiInk
+private val LocationPlaceholderColor = PickiiGrayMedium
+private val LocationCursorColor = PickiiInk
 
 /**
  * 일정 위치 입력 영역이다.

@@ -2,8 +2,10 @@ package com.example.pickii.ui.calendar.monthly
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
+import com.example.pickii.domain.repository.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import com.example.pickii.domain.model.ScheduleColorType as DomainScheduleColorType
 
 private val ScheduleTimeFormatter =
     DateTimeFormatter.ofPattern(
@@ -31,7 +32,8 @@ private val ScheduleTimeFormatter =
 class MonthlyCalendarViewModel
     @Inject
     constructor(
-        private val calendarRepository: CalendarRepository
+        private val calendarRepository: CalendarRepository,
+        private val notificationRepository: NotificationRepository
     ) : ViewModel() {
         private val _uiState =
             MutableStateFlow(
@@ -46,6 +48,16 @@ class MonthlyCalendarViewModel
             observeCalendarData()
             viewModelScope.launch { calendarRepository.loadCategories() }
             loadMonth(_uiState.value.displayedYearMonth)
+            loadNotificationCount()
+        }
+
+        /** 상단 헤더에 표시할 미읽음 알림 수를 불러온다(예: 알림 화면을 봤다 돌아왔을 때). */
+        fun loadNotificationCount() {
+            viewModelScope.launch {
+                notificationRepository.getUnreadCount().onSuccess { count ->
+                    _uiState.update { it.copy(notificationCount = count) }
+                }
+            }
         }
 
         private fun loadMonth(yearMonth: YearMonth) {
@@ -70,11 +82,7 @@ class MonthlyCalendarViewModel
                         id = schedule.id,
                         title = schedule.title,
                         categoryName = category?.name ?: "없음",
-                        categoryColor =
-                            category
-                                ?.color
-                                ?.toMonthlyScheduleColorType()
-                                ?: ScheduleColorType.GRAY,
+                        categoryColor = category?.color ?: ScheduleColorType.GRAY,
                         startDate = schedule.startDate,
                         endDate = schedule.endDate,
                         startTime =
@@ -137,20 +145,6 @@ class MonthlyCalendarViewModel
         }
 
         /**
-         * 전달받은 연도와 월로 이동한다.
-         */
-        fun moveToMonth(yearMonth: YearMonth) {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    displayedYearMonth = yearMonth,
-                    selectedDate = yearMonth.atDay(1),
-                    expandedScheduleId = null
-                )
-            }
-            loadMonth(yearMonth)
-        }
-
-        /**
          * 사용자가 선택한 날짜로 상태를 변경한다.
          */
         fun selectDate(date: LocalDate) {
@@ -165,7 +159,7 @@ class MonthlyCalendarViewModel
         /**
          * 일정 상세 카드의 펼침 상태를 변경한다.
          */
-        fun toggleScheduleDetail(scheduleId: Long) {
+        private fun toggleScheduleDetail(scheduleId: Long) {
             _uiState.update { currentState ->
                 currentState.copy(
                     expandedScheduleId =
@@ -183,7 +177,7 @@ class MonthlyCalendarViewModel
         /**
          * 현재 펼쳐진 일정 상세 영역을 닫는다.
          */
-        fun closeScheduleDetail() {
+        private fun closeScheduleDetail() {
             _uiState.update { currentState ->
                 currentState.copy(
                     expandedScheduleId = null
@@ -196,6 +190,19 @@ class MonthlyCalendarViewModel
          */
         fun toggleSchedule(scheduleId: Long) {
             toggleScheduleDetail(scheduleId)
+        }
+
+        /**
+         * 일정을 삭제한다.
+         */
+        fun deleteSchedule(scheduleId: Long) {
+            viewModelScope.launch {
+                calendarRepository.deleteSchedule(scheduleId).onSuccess {
+                    if (_uiState.value.expandedScheduleId == scheduleId) {
+                        closeScheduleDetail()
+                    }
+                }
+            }
         }
     }
 
@@ -246,18 +253,3 @@ private fun DayOfWeek.toKoreanShortName(): String =
         DayOfWeek.SUNDAY -> "일"
     }
 
-/**
- * 도메인 색상 타입을 월간 캘린더 UI 색상 타입으로 변환한다.
- */
-private fun DomainScheduleColorType.toMonthlyScheduleColorType(): ScheduleColorType =
-    when (this) {
-        DomainScheduleColorType.RED -> ScheduleColorType.RED
-        DomainScheduleColorType.ORANGE -> ScheduleColorType.ORANGE
-        DomainScheduleColorType.YELLOW -> ScheduleColorType.YELLOW
-        DomainScheduleColorType.GREEN -> ScheduleColorType.GREEN
-        DomainScheduleColorType.BLUE -> ScheduleColorType.BLUE
-        DomainScheduleColorType.PURPLE -> ScheduleColorType.PURPLE
-        DomainScheduleColorType.PINK -> ScheduleColorType.PINK
-        DomainScheduleColorType.GRAY -> ScheduleColorType.GRAY
-        DomainScheduleColorType.BLACK -> ScheduleColorType.BLACK
-    }

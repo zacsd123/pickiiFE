@@ -19,8 +19,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGrayDarkText
 
 private val ApplicantDetailBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantDetailCardColor = Color(0xFFFEFFF2)
@@ -118,12 +123,10 @@ private fun ApplicantDetailHeader(onBackClick: () -> Unit) {
                 .height(30.dp),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter =
-                painterResource(
-                    id = R.drawable.ic_back
-                ),
-            contentDescription = "뒤로가기",
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
             modifier =
                 Modifier
                     .align(Alignment.CenterStart)
@@ -135,7 +138,7 @@ private fun ApplicantDetailHeader(onBackClick: () -> Unit) {
 
         Text(
             text = "지원서 상세",
-            color = Color(0xFF171717),
+            color = PickiiBlackSoft,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
@@ -187,7 +190,7 @@ private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
             ) {
                 Text(
                     text = applicant.nickname,
-                    color = Color(0xFF171717),
+                    color = PickiiBlackSoft,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -338,7 +341,7 @@ private fun ApplicantMessageCard(message: String) {
                     message.ifBlank {
                         "작성된 지원 메시지가 없습니다."
                     },
-                color = Color(0xFF444444),
+                color = PickiiGrayDarkText,
                 fontSize = 12.sp,
                 lineHeight = 21.sp
             )

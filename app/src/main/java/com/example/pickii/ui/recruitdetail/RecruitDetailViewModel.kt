@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
+import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.RecruitUiEvent
@@ -31,6 +33,9 @@ internal const val MAX_COMMENT_LENGTH = 100
 
 /** 답글의 답글이라도 화면에서는 한 단계까지만 들여쓰기로 표시하기 위한 최대 시각적 깊이. */
 private const val MAX_VISUAL_INDENT_LEVEL = 1
+
+/** 본인과 1:1 채팅을 시도했을 때 서버가 내려주는 에러 코드. */
+private const val ERROR_CODE_CANNOT_CHAT_SELF = "CANNOT_CHAT_SELF"
 
 /**
  * 댓글 목록을 화면에 그릴 순서(오래된 순, 답글은 부모 아래)로 펼친 뒤, 각 댓글의 들여쓰기 깊이를 계산한다.
@@ -63,6 +68,12 @@ data class CommentDisplayItem(
     val visualIndentLevel: Int get() = depth.coerceAtMost(MAX_VISUAL_INDENT_LEVEL)
 }
 
+/** 댓글 작성자 닉네임을 눌렀을 때 뜨는 메뉴(프로필 보기/1:1 채팅)의 대상. */
+data class CommentAuthorMenuTarget(
+    val authorId: String,
+    val authorNickname: String
+)
+
 /** [RecruitDetailScreen]에 표시되는 상태. */
 data class RecruitDetailUiState(
     val post: RecruitPost? = null,
@@ -77,7 +88,8 @@ data class RecruitDetailUiState(
     val pendingDeleteCommentId: String? = null,
     val isDeletePostDialogVisible: Boolean = false,
     val isClosePostDialogVisible: Boolean = false,
-    val isReopenPostDialogVisible: Boolean = false
+    val isReopenPostDialogVisible: Boolean = false,
+    val commentAuthorMenuTarget: CommentAuthorMenuTarget? = null
 ) {
     /** 댓글을 오래된 순으로 정렬하고 답글을 들여쓰기 깊이와 함께 펼친 목록. */
     val displayComments: List<CommentDisplayItem>
@@ -120,7 +132,8 @@ class RecruitDetailViewModel
     constructor(
         savedStateHandle: SavedStateHandle,
         private val recruitRepository: RecruitRepository,
-        private val sessionRepository: SessionRepository
+        private val sessionRepository: SessionRepository,
+        private val chatRepository: ChatRepository
     ) : ViewModel() {
         private val postId: String = requireNotNull(savedStateHandle[ARG_POST_ID]) { "postId가 필요합니다." }
 
@@ -134,6 +147,11 @@ class RecruitDetailViewModel
 
         /** 토스트 등 한 번만 소비해야 하는 이벤트. */
         val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
+
+        private val _navigateToChatRoom = Channel<Long>(Channel.BUFFERED)
+
+        /** 댓글 작성자와 1:1 채팅방 개설이 성공했을 때 이동할 채팅방 id(1회성 이벤트). */
+        val navigateToChatRoom: Flow<Long> = _navigateToChatRoom.receiveAsFlow()
 
         init {
             observeDetail()
@@ -165,6 +183,11 @@ class RecruitDetailViewModel
             }
         }
 
+        /** 화면이 다시 보일 때(ON_RESUME) 최신 게시글 정보로 갱신한다(예: 수정 화면에서 돌아왔을 때). */
+        fun refresh() {
+            loadPost()
+        }
+
         private fun loadPost() {
             viewModelScope.launch {
                 recruitRepository.getPostById(postId).onSuccess { postFlow.value = it }
@@ -185,11 +208,6 @@ class RecruitDetailViewModel
         /** 로그인 유도 팝업을 닫는다. */
         fun onDismissLoginPrompt() {
             _uiState.update { it.copy(isLoginPromptVisible = false) }
-        }
-
-        /** 이미 지원한 게시글에 다시 지원을 시도했을 때 안내 토스트를 띄운다. */
-        fun onAlreadyAppliedNoticeRequested() {
-            emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_detail_toast_already_applied))
         }
 
         /** 스크랩 상태를 토글한다. 비로그인 상태면 로그인 유도 팝업을 띄운다. */
@@ -233,6 +251,44 @@ class RecruitDetailViewModel
         /** 답글 작성 모드를 취소하고 일반 댓글 모드로 되돌아간다. */
         fun onCancelReply() {
             _uiState.update { it.copy(replyTargetCommentId = null, replyTargetNickname = null) }
+        }
+
+        /** 댓글 작성자 닉네임 클릭 시 "프로필 보기/1:1 채팅" 메뉴를 띄운다. */
+        fun onCommentAuthorClick(comment: RecruitComment) {
+            _uiState.update {
+                it.copy(
+                    commentAuthorMenuTarget =
+                        CommentAuthorMenuTarget(authorId = comment.authorId, authorNickname = comment.authorNickname)
+                )
+            }
+        }
+
+        /** 댓글 작성자 메뉴를 닫는다. */
+        fun onDismissCommentAuthorMenu() {
+            _uiState.update { it.copy(commentAuthorMenuTarget = null) }
+        }
+
+        /** 댓글 작성자 메뉴에서 "1:1 채팅하기"를 눌러, 해당 작성자와의 채팅방을 개설(또는 조회)한다. */
+        fun onCommentAuthorChatClick() {
+            val authorId =
+                _uiState.value.commentAuthorMenuTarget
+                    ?.authorId
+                    ?.toLongOrNull() ?: return
+            _uiState.update { it.copy(commentAuthorMenuTarget = null) }
+            viewModelScope.launch {
+                chatRepository
+                    .createDirectChatRoom(authorId)
+                    .onSuccess { result -> _navigateToChatRoom.send(result.chatRoomId) }
+                    .onFailure { error ->
+                        val messageRes =
+                            if (error is ApiException && error.code == ERROR_CODE_CANNOT_CHAT_SELF) {
+                                R.string.chat_toast_cannot_chat_self
+                            } else {
+                                R.string.chat_toast_generic_error
+                            }
+                        emitEvent(RecruitUiEvent.ShowToast(messageRes))
+                    }
+            }
         }
 
         /**

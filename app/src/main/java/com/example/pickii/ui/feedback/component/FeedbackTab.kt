@@ -19,24 +19,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.feedback.FeedbackTabType
+import com.example.pickii.ui.theme.PickiiTextDark
 
 private val FeedbackTabBackgroundColor = Color(0xFFFFFFDB)
-private val FeedbackSelectedTabColor = Color(0xFF1D1D1B)
+private val FeedbackSelectedTabColor = PickiiTextDark
 private val FeedbackUnselectedTextColor = Color(0xFF777771)
 
 @Composable
 fun FeedbackTab(
     selectedTab: FeedbackTabType,
     onTabClick: (FeedbackTabType) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(46.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(FeedbackTabBackgroundColor)
-            .padding(3.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(FeedbackTabBackgroundColor)
+                .padding(3.dp)
     ) {
         FeedbackTabButton(
             text = "작성 가능한 상호 평가",
@@ -44,7 +46,7 @@ fun FeedbackTab(
             onClick = {
                 onTabClick(FeedbackTabType.WRITE)
             },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
 
         FeedbackTabButton(
@@ -53,7 +55,7 @@ fun FeedbackTab(
             onClick = {
                 onTabClick(FeedbackTabType.RECEIVED)
             },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -63,31 +65,32 @@ private fun FeedbackTabButton(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                if (isSelected) {
-                    FeedbackSelectedTabColor
-                } else {
-                    Color.Transparent
-                },
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(10.dp))
+                .background(
+                    if (isSelected) {
+                        FeedbackSelectedTabColor
+                    } else {
+                        Color.Transparent
+                    }
+                ).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = if (isSelected) {
-                Color.White
-            } else {
-                FeedbackUnselectedTextColor
-            },
+            color =
+                if (isSelected) {
+                    Color.White
+                } else {
+                    FeedbackUnselectedTextColor
+                },
             fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }

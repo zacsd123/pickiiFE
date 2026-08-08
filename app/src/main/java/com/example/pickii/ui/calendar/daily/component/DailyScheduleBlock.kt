@@ -15,8 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.ui.calendar.daily.DailyScheduleColorType
+import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.calendar.daily.DailyScheduleUiModel
+import com.example.pickii.ui.common.toComposeColor
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -33,7 +34,7 @@ fun DailyScheduleBlock(
         modifier =
             modifier
                 .background(
-                    color = schedule.colorType.toColor(),
+                    color = schedule.colorType.toComposeColor(),
                     shape = RoundedCornerShape(12.dp)
                 ).clickable {
                     onClick(schedule.id)
@@ -55,18 +56,6 @@ fun DailyScheduleBlock(
     }
 }
 
-/**
- * 일정 색상 타입을 실제 색상으로 변환한다.
- */
-private fun DailyScheduleColorType.toColor(): Color =
-    when (this) {
-        DailyScheduleColorType.RED -> Color(0xFFE86B6B)
-        DailyScheduleColorType.GREEN -> Color(0xFF72C472)
-        DailyScheduleColorType.BLUE -> Color(0xFF5E8EF7)
-        DailyScheduleColorType.PURPLE -> Color(0xFF8C73E6)
-        DailyScheduleColorType.YELLOW -> Color(0xFFF5C84B)
-    }
-
 @Preview(
     showBackground = true,
     backgroundColor = 0xFFFFFFFF
@@ -81,7 +70,7 @@ private fun DailyScheduleBlockPreview() {
                 date = LocalDate.now(),
                 startTime = LocalTime.of(9, 0),
                 endTime = LocalTime.of(11, 0),
-                colorType = DailyScheduleColorType.BLUE
+                colorType = ScheduleColorType.BLUE
             ),
         onClick = {},
         modifier =

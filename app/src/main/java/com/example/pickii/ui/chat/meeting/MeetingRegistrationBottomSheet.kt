@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,14 +45,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiBlackAlt
+import com.example.pickii.ui.theme.PickiiCharcoal
+import com.example.pickii.ui.theme.PickiiDividerAlt
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray500
+import com.example.pickii.ui.theme.PickiiGray700
+import com.example.pickii.ui.theme.PickiiGraySecondary
+import com.example.pickii.ui.theme.PickiiGraySlate
+import com.example.pickii.ui.theme.PickiiSlateDark
+import com.example.pickii.ui.theme.PickiiSurfaceGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+private const val MEETING_TITLE_MAX_LENGTH = 20
+private const val DEFAULT_DAY_START_MINUTE = 9 * 60
+private const val DEFAULT_DAY_END_MINUTE = 22 * 60
+private const val DEFAULT_DEADLINE_HOURS = 12
 
 /**
  * 빠른 회의 등록 화면이다.
@@ -61,6 +81,7 @@ import java.util.Locale
 )
 @Composable
 fun MeetingRegistrationBottomSheet(
+    members: List<ChatRoomMemberUiModel>,
     onDismiss: () -> Unit,
     onNextClick: (QuickMeetingForm) -> Unit
 ) {
@@ -70,14 +91,6 @@ fun MeetingRegistrationBottomSheet(
 
     var selectedDuration by remember {
         mutableIntStateOf(60)
-    }
-
-    var selectedCandidateCount by remember {
-        mutableIntStateOf(3)
-    }
-
-    var memo by remember {
-        mutableStateOf("")
     }
 
     var startDateMillis by remember {
@@ -92,6 +105,22 @@ fun MeetingRegistrationBottomSheet(
         mutableStateOf(false)
     }
 
+    var dayStartMinute by remember {
+        mutableIntStateOf(DEFAULT_DAY_START_MINUTE)
+    }
+
+    var dayEndMinute by remember {
+        mutableIntStateOf(DEFAULT_DAY_END_MINUTE)
+    }
+
+    var deadlineHours by remember {
+        mutableIntStateOf(DEFAULT_DEADLINE_HOURS)
+    }
+
+    var selectedMemberIds by remember(members) {
+        mutableStateOf(members.map { it.memberId }.toSet())
+    }
+
     val sheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true
@@ -100,7 +129,8 @@ fun MeetingRegistrationBottomSheet(
     val isFormValid =
         meetingTitle.isNotBlank() &&
             startDateMillis != null &&
-            endDateMillis != null
+            endDateMillis != null &&
+            dayStartMinute < dayEndMinute
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -164,21 +194,36 @@ fun MeetingRegistrationBottomSheet(
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            MeetingCandidateSection(
-                selectedCount = selectedCandidateCount,
-                onCountSelected = {
-                    selectedCandidateCount = it
-                }
+            MeetingTimeRangeSection(
+                dayStartMinute = dayStartMinute,
+                dayEndMinute = dayEndMinute,
+                onDayStartChange = { dayStartMinute = it },
+                onDayEndChange = { dayEndMinute = it }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            MeetingMemoSection(
-                memo = memo,
-                onMemoChange = {
-                    memo = it
-                }
+            MeetingDeadlineSection(
+                selectedHours = deadlineHours,
+                onHoursSelected = { deadlineHours = it }
             )
+
+            if (members.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(22.dp))
+
+                MeetingParticipantsSection(
+                    members = members,
+                    selectedMemberIds = selectedMemberIds,
+                    onToggleMember = { memberId ->
+                        selectedMemberIds =
+                            if (memberId in selectedMemberIds) {
+                                selectedMemberIds - memberId
+                            } else {
+                                selectedMemberIds + memberId
+                            }
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(26.dp))
 
@@ -197,8 +242,16 @@ fun MeetingRegistrationBottomSheet(
                                 durationMinutes = selectedDuration,
                                 startDateMillis = selectedStartDate,
                                 endDateMillis = selectedEndDate,
-                                candidateCount = selectedCandidateCount,
-                                memo = memo.trim()
+                                dayStartMinuteOfDay = dayStartMinute,
+                                dayEndMinuteOfDay = dayEndMinute,
+                                deadlineHours = deadlineHours,
+                                // 전원 선택 상태면 굳이 보내지 않는다(7-10 "미지정 시 전원"과 같은 의미).
+                                memberIds =
+                                    if (selectedMemberIds.size == members.size) {
+                                        emptySet()
+                                    } else {
+                                        selectedMemberIds
+                                    }
                             )
                         )
                     }
@@ -211,9 +264,9 @@ fun MeetingRegistrationBottomSheet(
                 shape = RoundedCornerShape(14.dp),
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF171714),
+                        containerColor = PickiiCharcoal,
                         contentColor = Color.White,
-                        disabledContainerColor = Color(0xFFE5E7EC),
+                        disabledContainerColor = PickiiDividerAlt,
                         disabledContentColor = Color(0xFFA7ADBC)
                     )
             ) {
@@ -254,7 +307,7 @@ private fun MeetingSheetHeader(onCloseClick: () -> Unit) {
         Text(
             text = "회의 등록",
             modifier = Modifier.weight(1f),
-            color = Color(0xFF18181B),
+            color = PickiiBlackAlt,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -264,7 +317,7 @@ private fun MeetingSheetHeader(onCloseClick: () -> Unit) {
         ) {
             Text(
                 text = "×",
-                color = Color(0xFF667085),
+                color = PickiiGraySlate,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Light
             )
@@ -281,16 +334,37 @@ private fun MeetingTitleSection(
     onTitleChange: (String) -> Unit
 ) {
     Column {
-        SectionTitle(
-            title = "회의명",
-            required = true
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "회의명",
+                    color = PickiiGray700,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = " 필수",
+                    color = Color(0xFFFF7373),
+                    fontSize = 11.sp
+                )
+            }
+
+            Text(
+                text = "${title.length}/$MEETING_TITLE_MAX_LENGTH",
+                color = PickiiGray500,
+                fontSize = 11.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         TextField(
             value = title,
-            onValueChange = onTitleChange,
+            onValueChange = { onTitleChange(it.take(MEETING_TITLE_MAX_LENGTH)) },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -298,7 +372,7 @@ private fun MeetingTitleSection(
             placeholder = {
                 Text(
                     text = "회의명을 입력하세요",
-                    color = Color(0xFF9CA3AF),
+                    color = PickiiGray400,
                     fontSize = 14.sp
                 )
             },
@@ -315,7 +389,7 @@ private fun MeetingTitleSection(
 }
 
 /**
- * 회의 소요 시간을 선택한다.
+ * 회의 소요 시간을 선택한다. 30/60/90/120분만 유효하다(데모 시나리오 명시).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -328,8 +402,7 @@ private fun MeetingDurationSection(
             30 to "30분",
             60 to "1시간",
             90 to "1시간 30분",
-            120 to "2시간",
-            180 to "3시간"
+            120 to "2시간"
         )
 
     Column {
@@ -391,7 +464,7 @@ private fun MeetingDateRangeSection(
             Text(
                 text = "~",
                 modifier = Modifier.padding(horizontal = 8.dp),
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 14.sp
             )
 
@@ -401,6 +474,177 @@ private fun MeetingDateRangeSection(
                 modifier = Modifier.weight(1f),
                 onClick = onClick
             )
+        }
+    }
+}
+
+/**
+ * 하루 중 후보 슬롯을 탐색할 시간대(dayStart~dayEnd)를 선택한다.
+ */
+@Composable
+private fun MeetingTimeRangeSection(
+    dayStartMinute: Int,
+    dayEndMinute: Int,
+    onDayStartChange: (Int) -> Unit,
+    onDayEndChange: (Int) -> Unit
+) {
+    Column {
+        SectionTitle(
+            title = "탐색 시간대",
+            description = "하루 중 후보를 찾을 시간"
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TimeOfDayBox(
+                minuteOfDay = dayStartMinute,
+                modifier = Modifier.weight(1f),
+                onMinuteOfDayChange = onDayStartChange
+            )
+
+            Text(
+                text = "~",
+                modifier = Modifier.padding(horizontal = 8.dp),
+                color = PickiiGray500,
+                fontSize = 14.sp
+            )
+
+            TimeOfDayBox(
+                minuteOfDay = dayEndMinute,
+                modifier = Modifier.weight(1f),
+                onMinuteOfDayChange = onDayEndChange
+            )
+        }
+    }
+}
+
+/**
+ * 자정 기준 분을 시:분으로 표시하고, 클릭하면 네이티브 시간 선택기를 연다.
+ */
+@Composable
+private fun TimeOfDayBox(
+    minuteOfDay: Int,
+    modifier: Modifier = Modifier,
+    onMinuteOfDayChange: (Int) -> Unit
+) {
+    val context = LocalContext.current
+
+    Box(
+        modifier =
+            modifier
+                .height(52.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(PickiiSurfaceGray)
+                .clickable {
+                    TimePickerDialog(
+                        context,
+                        { _, hourOfDay, minute -> onMinuteOfDayChange(hourOfDay * 60 + minute) },
+                        minuteOfDay / 60,
+                        minuteOfDay % 60,
+                        true
+                    ).show()
+                }.padding(horizontal = 14.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = "%02d:%02d".format(minuteOfDay / 60, minuteOfDay % 60),
+            color = PickiiSlateDark,
+            fontSize = 14.sp
+        )
+    }
+}
+
+/**
+ * 응답 마감까지 남길 시간을 프리셋 중에서 고른다(서버 기본값 12시간).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MeetingDeadlineSection(
+    selectedHours: Int,
+    onHoursSelected: (Int) -> Unit
+) {
+    val hourOptions = listOf(6, 12, 24, 48)
+
+    Column {
+        SectionTitle(
+            title = "응답 마감",
+            description = "기본 12시간"
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            hourOptions.forEach { hours ->
+                MeetingSelectChip(
+                    text = "${hours}시간",
+                    selected = selectedHours == hours,
+                    onClick = { onHoursSelected(hours) }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 조율에 참여할 팀원을 고른다. 기본은 전원 선택(체크 해제하면 그 팀원은 응답 대상에서 빠진다).
+ */
+@Composable
+private fun MeetingParticipantsSection(
+    members: List<ChatRoomMemberUiModel>,
+    selectedMemberIds: Set<Long>,
+    onToggleMember: (Long) -> Unit
+) {
+    Column {
+        SectionTitle(
+            title = "참가자",
+            description = "이 회의에 필요한 팀원만 선택"
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            members.forEach { member ->
+                val isSelected = member.memberId in selectedMemberIds
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onToggleMember(member.memberId) }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) PickiiCharcoal else PickiiDividerAlt),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            Text(text = "✓", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Text(
+                        text = member.name,
+                        color = PickiiSlateDark,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         }
     }
 }
@@ -420,7 +664,7 @@ private fun DateBox(
             modifier
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF4F5F7))
+                .background(PickiiSurfaceGray)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
@@ -429,9 +673,9 @@ private fun DateBox(
             text = dateMillis?.let(::formatMeetingDate) ?: placeholder,
             color =
                 if (dateMillis == null) {
-                    Color(0xFFA0A5B1)
+                    PickiiGray500
                 } else {
-                    Color(0xFF292D35)
+                    PickiiSlateDark
                 },
             fontSize = 14.sp
         )
@@ -481,7 +725,7 @@ private fun MeetingDateRangePickerDialog(
             ) {
                 Text(
                     text = "확인",
-                    color = Color(0xFF171714),
+                    color = PickiiCharcoal,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -492,7 +736,7 @@ private fun MeetingDateRangePickerDialog(
             ) {
                 Text(
                     text = "취소",
-                    color = Color(0xFF667085)
+                    color = PickiiGraySlate
                 )
             }
         }
@@ -512,7 +756,7 @@ private fun MeetingDateRangePickerDialog(
                             top = 16.dp,
                             end = 24.dp
                         ),
-                    color = Color(0xFF18181B),
+                    color = PickiiBlackAlt,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -526,7 +770,7 @@ private fun MeetingDateRangePickerDialog(
                             end = 24.dp,
                             bottom = 8.dp
                         ),
-                    color = Color(0xFF667085),
+                    color = PickiiGraySlate,
                     fontSize = 14.sp
                 )
             },
@@ -536,85 +780,7 @@ private fun MeetingDateRangePickerDialog(
 }
 
 /**
- * 생성할 회의 후보 개수를 선택한다.
- */
-@Composable
-private fun MeetingCandidateSection(
-    selectedCount: Int,
-    onCountSelected: (Int) -> Unit
-) {
-    val candidateOptions = listOf(2, 3, 4, 5)
-
-    Column {
-        SectionTitle(
-            title = "회의 후보 수",
-            description = "최대 몇 개까지 추릴까요?"
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            candidateOptions.forEach { count ->
-                MeetingSelectChip(
-                    text = "${count}개",
-                    selected = selectedCount == count,
-                    onClick = {
-                        onCountSelected(count)
-                    },
-                    modifier = Modifier.weight(1f),
-                    useContentPadding = false
-                )
-            }
-        }
-    }
-}
-
-/**
- * 선택 입력 항목인 회의 메모를 입력받는다.
- */
-@Composable
-private fun MeetingMemoSection(
-    memo: String,
-    onMemoChange: (String) -> Unit
-) {
-    Column {
-        SectionTitle(
-            title = "메모",
-            optional = true
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        TextField(
-            value = memo,
-            onValueChange = onMemoChange,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
-            placeholder = {
-                Text(
-                    text = "회의 목적이나 안건을 간단히 적어주세요 (선택)",
-                    color = Color(0xFF9CA3AF),
-                    fontSize = 14.sp
-                )
-            },
-            keyboardOptions =
-                KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Default
-                ),
-            shape = RoundedCornerShape(16.dp),
-            colors = meetingTextFieldColors()
-        )
-    }
-}
-
-/**
- * 소요 시간이나 후보 개수를 선택할 때 사용하는 공통 버튼이다.
+ * 소요 시간을 선택할 때 사용하는 공통 버튼이다.
  */
 @Composable
 private fun MeetingSelectChip(
@@ -631,9 +797,9 @@ private fun MeetingSelectChip(
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     if (selected) {
-                        Color(0xFF171714)
+                        PickiiCharcoal
                     } else {
-                        Color(0xFFF4F5F7)
+                        PickiiSurfaceGray
                     }
                 ).clickable(onClick = onClick)
                 .then(
@@ -651,7 +817,7 @@ private fun MeetingSelectChip(
                 if (selected) {
                     Color.White
                 } else {
-                    Color(0xFF717784)
+                    PickiiGraySecondary
                 },
             fontSize = 13.sp,
             fontWeight =
@@ -680,7 +846,7 @@ private fun SectionTitle(
     ) {
         Text(
             text = title,
-            color = Color(0xFF4B5563),
+            color = PickiiGray700,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -697,7 +863,7 @@ private fun SectionTitle(
             optional -> {
                 Text(
                     text = " 선택",
-                    color = Color(0xFFA0A5B1),
+                    color = PickiiGray500,
                     fontSize = 11.sp
                 )
             }
@@ -706,7 +872,7 @@ private fun SectionTitle(
         if (description != null) {
             Text(
                 text = "  ($description)",
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 10.sp,
                 maxLines = 1
             )
@@ -720,17 +886,17 @@ private fun SectionTitle(
 @Composable
 private fun meetingTextFieldColors() =
     TextFieldDefaults.colors(
-        focusedContainerColor = Color(0xFFF4F5F7),
-        unfocusedContainerColor = Color(0xFFF4F5F7),
-        disabledContainerColor = Color(0xFFF4F5F7),
-        errorContainerColor = Color(0xFFF4F5F7),
-        focusedTextColor = Color(0xFF292D35),
-        unfocusedTextColor = Color(0xFF292D35),
+        focusedContainerColor = PickiiSurfaceGray,
+        unfocusedContainerColor = PickiiSurfaceGray,
+        disabledContainerColor = PickiiSurfaceGray,
+        errorContainerColor = PickiiSurfaceGray,
+        focusedTextColor = PickiiSlateDark,
+        unfocusedTextColor = PickiiSlateDark,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent,
-        cursorColor = Color(0xFF171714)
+        cursorColor = PickiiCharcoal
     )
 
 /**
