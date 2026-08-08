@@ -1,5 +1,6 @@
 package com.example.pickii.ui.calendar.monthly
 
+import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.model.scheduleRecurrenceIncludesDate
 import java.time.DayOfWeek
@@ -82,21 +83,4 @@ data class MonthlyScheduleUiModel(
      */
     val isMultiDay: Boolean
         get() = startDate != endDate
-}
-
-/**
- * 일정 태그 색상 종류다.
- *
- * 실제 Compose Color 변환은 UI 컴포넌트에서 처리한다.
- */
-enum class ScheduleColorType {
-    RED,
-    ORANGE,
-    YELLOW,
-    GREEN,
-    BLUE,
-    PURPLE,
-    PINK,
-    GRAY,
-    BLACK
 }

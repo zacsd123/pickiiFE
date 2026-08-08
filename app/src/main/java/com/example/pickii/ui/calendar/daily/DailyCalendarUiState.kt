@@ -1,6 +1,6 @@
 package com.example.pickii.ui.calendar.daily
 
-import java.time.Duration
+import com.example.pickii.domain.model.ScheduleColorType
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -21,32 +21,10 @@ data class DailyScheduleUiModel(
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,
-    val colorType: DailyScheduleColorType
+    val colorType: ScheduleColorType
 ) {
-    /**
-     * 일정 진행 시간을 분 단위로 반환한다.
-     */
-    val durationMinutes: Long
-        get() =
-            Duration
-                .between(
-                    startTime,
-                    endTime
-                ).toMinutes()
-
     /**
      * 일정이 선택한 날짜에 포함되는지 확인한다.
      */
     fun includesDate(targetDate: LocalDate): Boolean = date == targetDate
-}
-
-/**
- * 일정 블록의 색상 종류다.
- */
-enum class DailyScheduleColorType {
-    RED,
-    GREEN,
-    PURPLE,
-    BLUE,
-    YELLOW
 }

@@ -15,7 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.ui.calendar.monthly.ScheduleColorType
+import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -135,17 +136,5 @@ private fun ScheduleColorDots(
 /**
  * 일정 색상 종류를 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color =
-    when (this) {
-        ScheduleColorType.RED -> Color(0xFFE86F73)
-        ScheduleColorType.ORANGE -> Color(0xFFED9A53)
-        ScheduleColorType.YELLOW -> Color(0xFFF1D354)
-        ScheduleColorType.GREEN -> Color(0xFF7CCF74)
-        ScheduleColorType.BLUE -> Color(0xFF6D9EEB)
-        ScheduleColorType.PURPLE -> Color(0xFFAC8AFA)
-        ScheduleColorType.PINK -> Color(0xFFE38AB0)
-        ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
-        ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
-    }
 
 private const val MAX_VISIBLE_DOT_COUNT = 3

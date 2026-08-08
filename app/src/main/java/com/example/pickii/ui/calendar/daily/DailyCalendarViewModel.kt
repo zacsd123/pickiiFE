@@ -60,7 +60,7 @@ class DailyCalendarViewModel
                             date = state.selectedDate,
                             startTime = schedule.startTime ?: ALL_DAY_START,
                             endTime = schedule.endTime ?: ALL_DAY_END,
-                            colorType = (category?.color ?: ScheduleColorType.BLUE).toDailyScheduleColorType()
+                            colorType = category?.color ?: ScheduleColorType.BLUE
                         )
                     }
             }.onEach { schedules ->
@@ -100,17 +100,4 @@ class DailyCalendarViewModel
         fun addSchedule() = Unit
 
         fun selectSchedule(scheduleId: Long) = Unit
-    }
-
-private fun ScheduleColorType.toDailyScheduleColorType(): DailyScheduleColorType =
-    when (this) {
-        ScheduleColorType.RED -> DailyScheduleColorType.RED
-        ScheduleColorType.ORANGE -> DailyScheduleColorType.YELLOW
-        ScheduleColorType.YELLOW -> DailyScheduleColorType.YELLOW
-        ScheduleColorType.GREEN -> DailyScheduleColorType.GREEN
-        ScheduleColorType.BLUE -> DailyScheduleColorType.BLUE
-        ScheduleColorType.PURPLE -> DailyScheduleColorType.PURPLE
-        ScheduleColorType.PINK -> DailyScheduleColorType.PURPLE
-        ScheduleColorType.GRAY -> DailyScheduleColorType.BLUE
-        ScheduleColorType.BLACK -> DailyScheduleColorType.BLUE
     }
