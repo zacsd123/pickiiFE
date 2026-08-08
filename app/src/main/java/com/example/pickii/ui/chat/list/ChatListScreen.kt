@@ -113,7 +113,7 @@ fun ChatListRoute(
  * @param onChatRoomClick 채팅방 선택 동작
  */
 @Composable
-fun ChatListScreen(
+private fun ChatListScreen(
     uiState: ChatListUiState,
     onTabSelected: (ChatListTab) -> Unit,
     onNotificationClick: (Long) -> Unit,

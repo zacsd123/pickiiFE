@@ -75,7 +75,7 @@ fun PickiiTopBar(
 
 /** 알림 개수 뱃지가 붙은 종 모양 아이콘 버튼. */
 @Composable
-fun NotificationBellButton(
+private fun NotificationBellButton(
     count: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
