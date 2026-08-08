@@ -31,12 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiDivider
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyTextDark
 
 private val PanelBackgroundColor = Color.White
 private val PanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val PanelPrimaryTextColor = Color(0xFF111827)
-private val PanelSecondaryTextColor = Color(0xFF9CA3AF)
-private val PanelDividerColor = Color(0xFFE5E7EB)
+private val PanelPrimaryTextColor = PickiiNavyTextDark
+private val PanelSecondaryTextColor = PickiiGray400
+private val PanelDividerColor = PickiiDivider
 // private val PanelIconBackgroundColor = Color(0xFFF3F4F6)
 
 /**

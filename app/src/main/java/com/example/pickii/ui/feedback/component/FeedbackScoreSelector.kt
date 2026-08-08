@@ -21,10 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGrayText
 
 private val FeedbackScoreSelectedColor = Color(0xFF6685ED)
 private val FeedbackScoreBorderColor = Color(0xFFD8D8D2)
-private val FeedbackScoreDescriptionColor = Color(0xFF85857E)
+private val FeedbackScoreDescriptionColor = PickiiGrayText
 
 @Composable
 fun FeedbackScoreSelector(

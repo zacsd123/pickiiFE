@@ -19,9 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.feedback.FeedbackTabType
+import com.example.pickii.ui.theme.PickiiTextDark
 
 private val FeedbackTabBackgroundColor = Color(0xFFFFFFDB)
-private val FeedbackSelectedTabColor = Color(0xFF1D1D1B)
+private val FeedbackSelectedTabColor = PickiiTextDark
 private val FeedbackUnselectedTextColor = Color(0xFF777771)
 
 @Composable

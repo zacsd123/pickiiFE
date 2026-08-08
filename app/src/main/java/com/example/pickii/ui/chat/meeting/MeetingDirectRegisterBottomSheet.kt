@@ -38,6 +38,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiBlackAlt
+import com.example.pickii.ui.theme.PickiiCharcoal
+import com.example.pickii.ui.theme.PickiiDividerAlt
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray500
+import com.example.pickii.ui.theme.PickiiGraySlate
+import com.example.pickii.ui.theme.PickiiSlateDark
+import com.example.pickii.ui.theme.PickiiSurfaceGray
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -84,12 +92,12 @@ fun MeetingDirectRegisterBottomSheet(
                 Text(
                     text = "회의 직접 등록",
                     modifier = Modifier.weight(1f),
-                    color = Color(0xFF18181B),
+                    color = PickiiBlackAlt,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDismiss) {
-                    Text(text = "×", color = Color(0xFF667085), fontSize = 28.sp, fontWeight = FontWeight.Light)
+                    Text(text = "×", color = PickiiGraySlate, fontSize = 28.sp, fontWeight = FontWeight.Light)
                 }
             }
 
@@ -97,7 +105,7 @@ fun MeetingDirectRegisterBottomSheet(
 
             Text(
                 text = "이미 팀원들끼리 정한 일정이 있을 때만 사용하세요. 조율 없이 바로 팀 일정으로 등록됩니다.",
-                color = Color(0xFF9CA3AF),
+                color = PickiiGray400,
                 fontSize = 12.sp
             )
 
@@ -107,7 +115,7 @@ fun MeetingDirectRegisterBottomSheet(
                 value = title,
                 onValueChange = { title = it.take(DIRECT_REGISTER_TITLE_MAX_LENGTH) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                placeholder = { Text(text = "회의명을 입력하세요", color = Color(0xFF9CA3AF), fontSize = 14.sp) },
+                placeholder = { Text(text = "회의명을 입력하세요", color = PickiiGray400, fontSize = 14.sp) },
                 singleLine = true,
                 keyboardOptions =
                     KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
@@ -128,7 +136,7 @@ fun MeetingDirectRegisterBottomSheet(
                     onTimeChange = { startTime = it }
                 )
                 Spacer(modifier = Modifier.height(1.dp))
-                Text(text = "~", modifier = Modifier.padding(horizontal = 8.dp), color = Color(0xFFA0A5B1))
+                Text(text = "~", modifier = Modifier.padding(horizontal = 8.dp), color = PickiiGray500)
                 DirectRegisterTimeBox(
                     label = "종료",
                     time = endTime,
@@ -149,9 +157,9 @@ fun MeetingDirectRegisterBottomSheet(
                 shape = RoundedCornerShape(14.dp),
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF171714),
+                        containerColor = PickiiCharcoal,
                         contentColor = Color.White,
-                        disabledContainerColor = Color(0xFFE5E7EC),
+                        disabledContainerColor = PickiiDividerAlt,
                         disabledContentColor = Color(0xFFA7ADBC)
                     )
             ) {
@@ -175,7 +183,7 @@ private fun DirectRegisterDateBox(
                 .fillMaxWidth()
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF4F5F7))
+                .background(PickiiSurfaceGray)
                 .clickable {
                     DatePickerDialog(
                         context,
@@ -189,7 +197,7 @@ private fun DirectRegisterDateBox(
     ) {
         Text(
             text = date?.format(DirectRegisterDateFormatter) ?: "날짜 선택",
-            color = if (date == null) Color(0xFFA0A5B1) else Color(0xFF292D35),
+            color = if (date == null) PickiiGray500 else PickiiSlateDark,
             fontSize = 14.sp
         )
     }
@@ -209,7 +217,7 @@ private fun DirectRegisterTimeBox(
             modifier
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF4F5F7))
+                .background(PickiiSurfaceGray)
                 .clickable {
                     TimePickerDialog(
                         context,
@@ -221,6 +229,6 @@ private fun DirectRegisterTimeBox(
                 }.padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text(text = "$label ${time.format(DirectRegisterTimeFormatter)}", color = Color(0xFF292D35), fontSize = 14.sp)
+        Text(text = "$label ${time.format(DirectRegisterTimeFormatter)}", color = PickiiSlateDark, fontSize = 14.sp)
     }
 }

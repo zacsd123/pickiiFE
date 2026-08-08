@@ -47,12 +47,13 @@ import com.example.pickii.R
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.RecruitUiEvent
+import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 
 private val ChatBackgroundColor = Color(0xFFF9FCA8)
 private val ChatPrimaryColor = Color(0xFF1B2130)
 private val ChatSecondaryTextColor = Color(0xFF9BA1B1)
 private val ChatProfileBackgroundColor = Color(0xFFE7E8ED)
-private val ChatUnselectedTabColor = Color(0xFFF1F2F6)
+private val ChatUnselectedTabColor = PickiiSurfaceGrayMuted
 private const val LOAD_MORE_THRESHOLD = 3
 
 /**

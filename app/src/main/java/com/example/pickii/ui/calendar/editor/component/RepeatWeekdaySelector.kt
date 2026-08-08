@@ -16,13 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray600
 import java.time.DayOfWeek
 
 private val SelectedWeekdayBackgroundColor = Color(0xFFFBE1E7)
 private val SelectedWeekdayTextColor = Color(0xFFE86F73)
 
 private val UnselectedWeekdayBackgroundColor = Color(0xFFF1F1F1)
-private val UnselectedWeekdayTextColor = Color(0xFF777777)
+private val UnselectedWeekdayTextColor = PickiiGray600
 
 private val OrderedWeekdays =
     listOf(

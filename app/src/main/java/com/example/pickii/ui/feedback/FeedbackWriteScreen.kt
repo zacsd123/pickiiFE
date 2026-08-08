@@ -34,11 +34,14 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.feedback.component.FeedbackScoreSelector
 import com.example.pickii.ui.feedback.component.FeedbackTextField
+import com.example.pickii.ui.theme.PickiiCream
+import com.example.pickii.ui.theme.PickiiGrayText
+import com.example.pickii.ui.theme.PickiiTextDark
 
 private val WriteBackgroundColor = Color(0xFFF7FFA8)
-private val WriteCardColor = Color(0xFFFFFEF6)
-private val WriteTextColor = Color(0xFF1D1D1B)
-private val WriteDescriptionColor = Color(0xFF85857E)
+private val WriteCardColor = PickiiCream
+private val WriteTextColor = PickiiTextDark
+private val WriteDescriptionColor = PickiiGrayText
 private val WriteInformationColor = Color(0xFFFFFFDF)
 
 /** `POST /feedbacks`(4-10) 요청 본문 중 화면에서 입력받는 항목. */

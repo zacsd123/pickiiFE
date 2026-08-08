@@ -72,6 +72,13 @@ import com.example.pickii.domain.model.MeetingPollStatus
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
+import com.example.pickii.ui.theme.PickiiDivider
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray650
+import com.example.pickii.ui.theme.PickiiGray700
+import com.example.pickii.ui.theme.PickiiInk
+import com.example.pickii.ui.theme.PickiiNavyTextDark
+import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDate
@@ -83,7 +90,6 @@ private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val MyMessageColor = Color(0xFF111111)
 private val OtherMessageColor = Color(0xFFF9FCA8)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
-private val SecondaryTextColor = Color(0xFF9CA3AF)
 private val PickiiYellowColor = Color(0xFFF9FCA8)
 private const val LOAD_MORE_MESSAGES_THRESHOLD = 3
 
@@ -662,12 +668,12 @@ private fun ChatRoomHeader(
                     Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE5E7EB)),
+                        .background(PickiiDivider),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = if (roomType == ChatRoomType.GROUP) "G" else "D",
-                    color = Color(0xFF6B7280),
+                    color = PickiiGray650,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -677,7 +683,7 @@ private fun ChatRoomHeader(
             Text(
                 text = roomTitle,
                 modifier = Modifier.weight(1f),
-                color = Color(0xFF111827),
+                color = PickiiNavyTextDark,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -702,7 +708,7 @@ private fun ChatRoomHeader(
             }
         }
 
-        HorizontalDivider(color = Color(0xFFE5E7EB))
+        HorizontalDivider(color = PickiiDivider)
     }
 }
 
@@ -723,19 +729,19 @@ private fun ChatDateDivider(dateText: String) {
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE5E7EB)
+            color = PickiiDivider
         )
 
         Text(
             text = dateText,
             modifier = Modifier.padding(horizontal = 14.dp),
-            color = SecondaryTextColor,
+            color = PickiiGray400,
             fontSize = 11.sp
         )
 
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE5E7EB)
+            color = PickiiDivider
         )
     }
 }
@@ -779,7 +785,7 @@ private fun ChatNotice(
                 text = "공지",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4B5563)
+                color = PickiiGray700
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -793,14 +799,14 @@ private fun ChatNotice(
                     },
                 modifier = Modifier.weight(1f),
                 fontSize = 12.sp,
-                color = Color(0xFF6B7280),
+                color = PickiiGray650,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
                 text = if (isExpanded) "⌃" else "⌄",
-                color = SecondaryTextColor
+                color = PickiiGray400
             )
         }
 
@@ -826,7 +832,7 @@ private fun ChatNotice(
 
                 Text(
                     text = "작성자: $noticeWriter",
-                    color = SecondaryTextColor,
+                    color = PickiiGray400,
                     fontSize = 11.sp
                 )
 
@@ -834,7 +840,7 @@ private fun ChatNotice(
 
                 Text(
                     text = "등록 일자: $noticeRegisteredAt",
-                    color = SecondaryTextColor,
+                    color = PickiiGray400,
                     fontSize = 11.sp
                 )
             }
@@ -978,7 +984,7 @@ private fun MyChatMessage(
 
                 Text(
                     text = message.createdAt.toChatRoomBubbleTimeText(),
-                    color = SecondaryTextColor,
+                    color = PickiiGray400,
                     fontSize = 10.sp
                 )
             }
@@ -1053,7 +1059,7 @@ private fun OtherChatMessage(
 
             Text(
                 text = message.createdAt.toChatRoomBubbleTimeText(),
-                color = SecondaryTextColor,
+                color = PickiiGray400,
                 fontSize = 10.sp
             )
         }
@@ -1068,12 +1074,12 @@ private fun ChatSenderAvatar(nickname: String) {
             Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE5E7EB)),
+                .background(PickiiDivider),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = nickname.firstOrNull()?.toString().orEmpty(),
-            color = Color(0xFF9CA3AF),
+            color = PickiiGray400,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
@@ -1108,7 +1114,7 @@ private fun MyImageMessage(
 
                 Text(
                     text = message.createdAt.toChatRoomBubbleTimeText(),
-                    color = SecondaryTextColor,
+                    color = PickiiGray400,
                     fontSize = 10.sp
                 )
             }
@@ -1174,7 +1180,7 @@ private fun OtherImageMessage(
 
             Text(
                 text = message.createdAt.toChatRoomBubbleTimeText(),
-                color = SecondaryTextColor,
+                color = PickiiGray400,
                 fontSize = 10.sp
             )
         }
@@ -1252,7 +1258,7 @@ private fun ChatActionMenu(
                         Modifier
                             .size(54.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFF2F3F6)),
+                            .background(PickiiSurfaceGraySoft),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -1266,7 +1272,7 @@ private fun ChatActionMenu(
 
                 Text(
                     text = item.label,
-                    color = Color(0xFF6B7280),
+                    color = PickiiGray650,
                     fontSize = 10.sp,
                     maxLines = 1
                 )
@@ -1274,7 +1280,7 @@ private fun ChatActionMenu(
         }
     }
 
-    HorizontalDivider(color = Color(0xFFE5E7EB))
+    HorizontalDivider(color = PickiiDivider)
 }
 
 /**
@@ -1317,7 +1323,7 @@ private fun ChatMessageInput(
         ) {
             Text(
                 text = if (isActionMenuExpanded) "−" else "+",
-                color = Color(0xFF4B5563),
+                color = PickiiGray700,
                 fontSize = 25.sp
             )
         }
@@ -1339,7 +1345,7 @@ private fun ChatMessageInput(
             singleLine = true,
             textStyle =
                 androidx.compose.ui.text.TextStyle(
-                    color = Color(0xFF111827),
+                    color = PickiiNavyTextDark,
                     fontSize = 14.sp
                 ),
             keyboardOptions =
@@ -1358,7 +1364,7 @@ private fun ChatMessageInput(
                 if (message.isEmpty()) {
                     Text(
                         text = "메시지를 입력하세요",
-                        color = SecondaryTextColor,
+                        color = PickiiGray400,
                         fontSize = 14.sp
                     )
                 }
@@ -1529,7 +1535,7 @@ private fun MeetingPollOptionRow(
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
-                .background(if (selected) Color(0xFF1B1B1B) else Color.White)
+                .background(if (selected) PickiiInk else Color.White)
                 .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
                 .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
@@ -1601,7 +1607,7 @@ private fun MeetingPollResponseCard(
             Text(
                 text = "조율 취소",
                 fontSize = 12.sp,
-                color = Color(0xFF9CA3AF),
+                color = PickiiGray400,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.clickable(onClick = onCancelClick)
             )
@@ -1619,7 +1625,7 @@ private fun MeetingPollResponseCard(
             slotsByDate.forEach { (date, slots) ->
                 Text(
                     text = date.format(SlotDateFormatter),
-                    color = Color(0xFF6B7280),
+                    color = PickiiGray650,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -1674,7 +1680,7 @@ private fun MeetingPollAggregationCard(
             slotsByDate.forEach { (date, slots) ->
                 Text(
                     text = date.format(SlotDateFormatter),
-                    color = Color(0xFF6B7280),
+                    color = PickiiGray650,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -1759,7 +1765,7 @@ private fun MeetingPollConfirmRow(
             )
             Text(
                 text = "가능 ${slot.availableCount}명 · 미응답 ${slot.unansweredCount}명",
-                color = Color(0xFF6B7280),
+                color = PickiiGray650,
                 fontSize = 11.sp
             )
         }
@@ -1768,7 +1774,7 @@ private fun MeetingPollConfirmRow(
             modifier =
                 Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF1B1B1B))
+                    .background(PickiiInk)
                     .clickable(onClick = onConfirmClick)
                     .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
@@ -1804,7 +1810,7 @@ private fun MeetingConfirmedNoticeCard(
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF1B1B1B))
+                    .background(PickiiInk)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
             contentAlignment = Alignment.Center
         ) {

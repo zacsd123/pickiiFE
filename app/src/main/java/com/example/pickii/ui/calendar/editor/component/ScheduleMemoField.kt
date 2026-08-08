@@ -20,12 +20,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiGrayMedium
+import com.example.pickii.ui.theme.PickiiInk
 
 private val MemoFieldBackgroundColor = Color(0xFFFFFFFF)
-private val MemoLabelColor = Color(0xFF777777)
-private val MemoTextColor = Color(0xFF1B1B1B)
-private val MemoPlaceholderColor = Color(0xFFAAAAAA)
-private val MemoCursorColor = Color(0xFF1B1B1B)
+private val MemoLabelColor = PickiiGray600
+private val MemoTextColor = PickiiInk
+private val MemoPlaceholderColor = PickiiGrayMedium
+private val MemoCursorColor = PickiiInk
 
 /**
  * 일정 메모 입력 영역이다.

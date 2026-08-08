@@ -32,18 +32,20 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.common.toComposeColor
+import com.example.pickii.ui.theme.PickiiInk
 import com.example.pickii.ui.theme.PickiiPaletteRed
+import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import java.time.format.DateTimeFormatter
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
-private val SummaryTitleColor = Color(0xFF1B1B1B)
+private val SummaryTitleColor = PickiiInk
 private val SummaryLabelColor = Color(0xFF99999A)
 private val SummaryDescriptionColor = Color(0xFF43434A)
 private val SummaryArrowBackgroundColor = Color(0xFFFFFFFF)
 private val SummaryDividerColor = Color(0xFFE5E5DE)
-private val SummaryIconBackgroundColor = Color(0xFFF1F2F6)
+private val SummaryIconBackgroundColor = PickiiSurfaceGrayMuted
 
-private val EditButtonBackgroundColor = Color(0xFFF1F2F6)
+private val EditButtonBackgroundColor = PickiiSurfaceGrayMuted
 private val EditButtonTextColor = Color(0xFF202330)
 
 private val ScheduleDateFormatter =

@@ -20,13 +20,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiCream
+import com.example.pickii.ui.theme.PickiiGrayText
+import com.example.pickii.ui.theme.PickiiTextDark
 
 private const val FEEDBACK_MAX_LENGTH = 300
 
-private val FeedbackTextFieldCardColor = Color(0xFFFFFEF6)
+private val FeedbackTextFieldCardColor = PickiiCream
 private val FeedbackTextFieldBackgroundColor = Color(0xFFF4F4EE)
-private val FeedbackTextFieldTextColor = Color(0xFF1D1D1B)
-private val FeedbackTextFieldDescriptionColor = Color(0xFF85857E)
+private val FeedbackTextFieldTextColor = PickiiTextDark
+private val FeedbackTextFieldDescriptionColor = PickiiGrayText
 private val FeedbackTextFieldCountColor = Color(0xFF67C784)
 
 @Composable

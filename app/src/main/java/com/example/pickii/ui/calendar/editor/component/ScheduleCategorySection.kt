@@ -25,15 +25,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.ui.common.toComposeColor
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiInk
 
 private val CategorySectionBackgroundColor = Color(0xFFFFFFFF)
-private val CategoryTitleColor = Color(0xFF777777)
+private val CategoryTitleColor = PickiiGray600
 
-private val SelectedCategoryBackgroundColor = Color(0xFF1B1B1B)
+private val SelectedCategoryBackgroundColor = PickiiInk
 private val SelectedCategoryTextColor = Color(0xFFFFFFFF)
 
 private val UnselectedCategoryBackgroundColor = Color(0xFFF1F1F1)
-private val UnselectedCategoryTextColor = Color(0xFF777777)
+private val UnselectedCategoryTextColor = PickiiGray600
 
 /**
  * 일정 태그 선택 영역이다.

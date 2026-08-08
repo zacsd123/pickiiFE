@@ -29,13 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiBorderGray
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val NotificationPanelBackgroundColor = Color.White
 private val NotificationPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val NotificationPrimaryTextColor = Color(0xFF20283A)
-private val NotificationSecondaryTextColor = Color(0xFF9CA3AF)
+private val NotificationPrimaryTextColor = PickiiNavyText
+private val NotificationSecondaryTextColor = PickiiGray400
 private val NotificationDisabledTextColor = Color(0xFFB6BAC4)
-private val NotificationDividerColor = Color(0xFFF0F1F4)
+private val NotificationDividerColor = PickiiSurfaceGrayLight
 private val NotificationCardColor = Color(0xFFFAFAFB)
 private val NotificationCardBorderColor = Color(0xFFE4E6EB)
 private val NotificationSwitchColor = Color(0xFFB7C85B)
@@ -247,12 +251,12 @@ private fun NotificationToggleCard(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = NotificationSwitchColor,
                     uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = Color(0xFFD8DAE0),
+                    uncheckedTrackColor = PickiiBorderGray,
                     uncheckedBorderColor = Color.Transparent,
                     disabledCheckedThumbColor = Color.White,
-                    disabledCheckedTrackColor = Color(0xFFD8DAE0),
+                    disabledCheckedTrackColor = PickiiBorderGray,
                     disabledUncheckedThumbColor = Color.White,
-                    disabledUncheckedTrackColor = Color(0xFFD8DAE0),
+                    disabledUncheckedTrackColor = PickiiBorderGray,
                     disabledUncheckedBorderColor = Color.Transparent
                 )
         )
@@ -309,7 +313,7 @@ private fun NotificationMuteTimeItem(
         if (isSelected) {
             Text(
                 text = "✓",
-                color = Color(0xFF9CA3AF),
+                color = PickiiGray400,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )

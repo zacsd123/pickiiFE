@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGrayDarkText
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantCardColor = Color(0xFFFEFFF2)
@@ -59,7 +61,7 @@ private val AcceptedColor = Color(0xFF82F363)
 private val RejectedColor = Color(0xFFEE7045)
 
 private val AcceptButtonColor = Color(0xFF627FF1)
-private val RejectButtonColor = Color(0xFF171717)
+private val RejectButtonColor = PickiiBlackSoft
 private val DetailButtonColor = Color(0xFFF0F3A0)
 
 private enum class ApplicantSortType(
@@ -228,7 +230,7 @@ private fun ApplicantListHeader(onBackClick: () -> Unit) {
 
         Text(
             text = "지원자 조회",
-            color = Color(0xFF171717),
+            color = PickiiBlackSoft,
             fontSize = 29.sp,
             fontWeight = FontWeight.Bold
         )
@@ -268,7 +270,7 @@ private fun ApplicantFilterSection(
                 ) {
                     Text(
                         text = sortType.displayName,
-                        color = Color(0xFF444444),
+                        color = PickiiGrayDarkText,
                         fontSize = 14.sp
                     )
 
@@ -278,7 +280,7 @@ private fun ApplicantFilterSection(
 
                     Text(
                         text = "⌄",
-                        color = Color(0xFF444444),
+                        color = PickiiGrayDarkText,
                         fontSize = 18.sp
                     )
                 }
@@ -436,7 +438,7 @@ private fun ApplicantCard(
                         Text(
                             text = applicant.nickname,
                             modifier = Modifier.weight(1f),
-                            color = Color(0xFF171717),
+                            color = PickiiBlackSoft,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,

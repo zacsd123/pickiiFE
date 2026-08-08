@@ -31,6 +31,7 @@ import com.example.pickii.ui.calendar.monthly.component.CalendarMonthHeader
 import com.example.pickii.ui.calendar.monthly.component.ScheduleSummaryCard
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.PickiiTopBar
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -38,9 +39,9 @@ import java.util.Locale
 private val MonthlyCalendarBackgroundColor = Color(0xFFF9FCA8)
 private val CalendarContainerColor = Color(0xFFFFFFFF)
 
-private val SelectedDateTitleColor = Color(0xFF1B1B1B)
+private val SelectedDateTitleColor = PickiiInk
 
-private val ActionButtonColor = Color(0xFF1B1B1B)
+private val ActionButtonColor = PickiiInk
 private val ActionButtonTextColor = Color(0xFFFFFFFF)
 
 private val SelectedDateFormatter =

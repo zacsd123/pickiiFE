@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.feedback.FeedbackMemberUiModel
 import com.example.pickii.ui.feedback.FeedbackProjectUiModel
+import com.example.pickii.ui.theme.PickiiCream
 
-private val FeedbackCardColor = Color(0xFFFFFEF6)
+private val FeedbackCardColor = PickiiCream
 private val FeedbackTextColor = Color(0xFF1E1E1C)
 private val FeedbackDescriptionColor = Color(0xFF777771)
 private val FeedbackPrimaryColor = Color.Black

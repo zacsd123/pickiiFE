@@ -30,11 +30,12 @@ import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiTextDark
 import com.example.pickii.ui.theme.PickiiTextGray
 
 private val FeedbackDetailBackgroundColor = Color(0xFFF8F8F5)
 private val FeedbackDetailCardColor = Color.White
-private val FeedbackDetailTextColor = Color(0xFF1D1D1B)
+private val FeedbackDetailTextColor = PickiiTextDark
 private val FeedbackDetailBorderColor = Color(0xFFE4E4DF)
 
 @Composable

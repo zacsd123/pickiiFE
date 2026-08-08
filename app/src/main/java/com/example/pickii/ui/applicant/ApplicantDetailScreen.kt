@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGrayDarkText
 
 private val ApplicantDetailBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantDetailCardColor = Color(0xFFFEFFF2)
@@ -136,7 +138,7 @@ private fun ApplicantDetailHeader(onBackClick: () -> Unit) {
 
         Text(
             text = "지원서 상세",
-            color = Color(0xFF171717),
+            color = PickiiBlackSoft,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
@@ -188,7 +190,7 @@ private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
             ) {
                 Text(
                     text = applicant.nickname,
-                    color = Color(0xFF171717),
+                    color = PickiiBlackSoft,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -339,7 +341,7 @@ private fun ApplicantMessageCard(message: String) {
                     message.ifBlank {
                         "작성된 지원 메시지가 없습니다."
                     },
-                color = Color(0xFF444444),
+                color = PickiiGrayDarkText,
                 fontSize = 12.sp,
                 lineHeight = 21.sp
             )

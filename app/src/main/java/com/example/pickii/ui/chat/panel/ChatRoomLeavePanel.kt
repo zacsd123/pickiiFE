@@ -31,12 +31,14 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val LeavePanelBackgroundColor = Color.White
 private val LeavePanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val LeavePrimaryTextColor = Color(0xFF20283A)
+private val LeavePrimaryTextColor = PickiiNavyText
 private val LeaveSecondaryTextColor = Color(0xFF7E8594)
-private val LeaveDividerColor = Color(0xFFF0F1F4)
+private val LeaveDividerColor = PickiiSurfaceGrayLight
 private val LeaveWarningBackgroundColor = Color(0xFFF9E1E1)
 private val LeaveButtonColor = Color(0xFFD23B32)
 private val LeaveCancelButtonColor = Color(0xFFF3F4F6)

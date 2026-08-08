@@ -27,16 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleRepeatType
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 private val DateTimeSectionBackgroundColor = Color(0xFFFFFFFF)
-private val DateTimeLabelColor = Color(0xFF777777)
-private val DateTimeValueColor = Color(0xFF1B1B1B)
+private val DateTimeLabelColor = PickiiGray600
+private val DateTimeValueColor = PickiiInk
 private val DateTimeDividerColor = Color(0xFFE7E7E1)
 
-private val SwitchCheckedColor = Color(0xFF1B1B1B)
+private val SwitchCheckedColor = PickiiInk
 private val SwitchUncheckedColor = Color(0xFFD2D2CC)
 
 private val DateFormatter =

@@ -28,12 +28,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val MemberListPanelBackgroundColor = Color.White
 private val MemberListPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val MemberListPrimaryTextColor = Color(0xFF20283A)
-private val MemberListSecondaryTextColor = Color(0xFF9CA3AF)
-private val MemberListDividerColor = Color(0xFFF0F1F4)
+private val MemberListPrimaryTextColor = PickiiNavyText
+private val MemberListSecondaryTextColor = PickiiGray400
+private val MemberListDividerColor = PickiiSurfaceGrayLight
 private val LeaderBadgeBackgroundColor = Color(0xFFF2F8A6)
 private val LeaderBadgeTextColor = Color(0xFF4A4F00)
 

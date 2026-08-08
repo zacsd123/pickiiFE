@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiCharcoal
+import com.example.pickii.ui.theme.PickiiGraySecondary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,7 +75,7 @@ fun MeetingConfirmBottomSheet(
                 text = "입력한 내용을 확인해 주세요",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF171714)
+                color = PickiiCharcoal
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -137,7 +139,7 @@ fun MeetingConfirmBottomSheet(
             Text(
                 text = "등록 후 팀원들에게 개인 일정 등록 요청이 전송됩니다. 팀원들이 일정을 등록하면 최적의 회의 시간을 추려드려요.",
                 fontSize = 13.sp,
-                color = Color(0xFF717784)
+                color = PickiiGraySecondary
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -151,7 +153,7 @@ fun MeetingConfirmBottomSheet(
                 shape = RoundedCornerShape(14.dp),
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF171714),
+                        containerColor = PickiiCharcoal,
                         contentColor = Color.White
                     )
             ) {
@@ -190,7 +192,7 @@ private fun MeetingConfirmHeader(
             modifier = Modifier.weight(1f),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF171714)
+            color = PickiiCharcoal
         )
 
         Text(
@@ -203,7 +205,7 @@ private fun MeetingConfirmHeader(
                         vertical = 8.dp
                     ),
             fontSize = 14.sp,
-            color = Color(0xFF717784)
+            color = PickiiGraySecondary
         )
     }
 }
@@ -222,7 +224,7 @@ private fun MeetingConfirmRow(
             modifier = Modifier.width(110.dp),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF717784)
+            color = PickiiGraySecondary
         )
 
         Text(
@@ -231,7 +233,7 @@ private fun MeetingConfirmRow(
             fontSize = 14.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF171714)
+            color = PickiiCharcoal
         )
     }
 }

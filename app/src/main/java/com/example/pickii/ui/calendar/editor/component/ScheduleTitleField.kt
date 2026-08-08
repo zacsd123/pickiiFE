@@ -13,11 +13,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiInk
 
 private val TitleFieldBackgroundColor = Color(0xFFFFFFFF)
-private val TitleTextColor = Color(0xFF1B1B1B)
+private val TitleTextColor = PickiiInk
 private val TitlePlaceholderColor = Color(0xFF929292)
-private val TitleCursorColor = Color(0xFF1B1B1B)
+private val TitleCursorColor = PickiiInk
 
 /**
  * 일정 제목 입력 필드다.

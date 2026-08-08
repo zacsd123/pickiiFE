@@ -51,6 +51,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiBlackAlt
+import com.example.pickii.ui.theme.PickiiCharcoal
+import com.example.pickii.ui.theme.PickiiDividerAlt
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiGray500
+import com.example.pickii.ui.theme.PickiiGray700
+import com.example.pickii.ui.theme.PickiiGraySecondary
+import com.example.pickii.ui.theme.PickiiGraySlate
+import com.example.pickii.ui.theme.PickiiSlateDark
+import com.example.pickii.ui.theme.PickiiSurfaceGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -254,9 +264,9 @@ fun MeetingRegistrationBottomSheet(
                 shape = RoundedCornerShape(14.dp),
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF171714),
+                        containerColor = PickiiCharcoal,
                         contentColor = Color.White,
-                        disabledContainerColor = Color(0xFFE5E7EC),
+                        disabledContainerColor = PickiiDividerAlt,
                         disabledContentColor = Color(0xFFA7ADBC)
                     )
             ) {
@@ -297,7 +307,7 @@ private fun MeetingSheetHeader(onCloseClick: () -> Unit) {
         Text(
             text = "회의 등록",
             modifier = Modifier.weight(1f),
-            color = Color(0xFF18181B),
+            color = PickiiBlackAlt,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -307,7 +317,7 @@ private fun MeetingSheetHeader(onCloseClick: () -> Unit) {
         ) {
             Text(
                 text = "×",
-                color = Color(0xFF667085),
+                color = PickiiGraySlate,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Light
             )
@@ -332,7 +342,7 @@ private fun MeetingTitleSection(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "회의명",
-                    color = Color(0xFF4B5563),
+                    color = PickiiGray700,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -345,7 +355,7 @@ private fun MeetingTitleSection(
 
             Text(
                 text = "${title.length}/$MEETING_TITLE_MAX_LENGTH",
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 11.sp
             )
         }
@@ -362,7 +372,7 @@ private fun MeetingTitleSection(
             placeholder = {
                 Text(
                     text = "회의명을 입력하세요",
-                    color = Color(0xFF9CA3AF),
+                    color = PickiiGray400,
                     fontSize = 14.sp
                 )
             },
@@ -454,7 +464,7 @@ private fun MeetingDateRangeSection(
             Text(
                 text = "~",
                 modifier = Modifier.padding(horizontal = 8.dp),
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 14.sp
             )
 
@@ -499,7 +509,7 @@ private fun MeetingTimeRangeSection(
             Text(
                 text = "~",
                 modifier = Modifier.padding(horizontal = 8.dp),
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 14.sp
             )
 
@@ -528,7 +538,7 @@ private fun TimeOfDayBox(
             modifier
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF4F5F7))
+                .background(PickiiSurfaceGray)
                 .clickable {
                     TimePickerDialog(
                         context,
@@ -542,7 +552,7 @@ private fun TimeOfDayBox(
     ) {
         Text(
             text = "%02d:%02d".format(minuteOfDay / 60, minuteOfDay % 60),
-            color = Color(0xFF292D35),
+            color = PickiiSlateDark,
             fontSize = 14.sp
         )
     }
@@ -617,7 +627,7 @@ private fun MeetingParticipantsSection(
                             Modifier
                                 .size(20.dp)
                                 .clip(CircleShape)
-                                .background(if (isSelected) Color(0xFF171714) else Color(0xFFE5E7EC)),
+                                .background(if (isSelected) PickiiCharcoal else PickiiDividerAlt),
                         contentAlignment = Alignment.Center
                     ) {
                         if (isSelected) {
@@ -629,7 +639,7 @@ private fun MeetingParticipantsSection(
 
                     Text(
                         text = member.name,
-                        color = Color(0xFF292D35),
+                        color = PickiiSlateDark,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -654,7 +664,7 @@ private fun DateBox(
             modifier
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFFF4F5F7))
+                .background(PickiiSurfaceGray)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
@@ -663,9 +673,9 @@ private fun DateBox(
             text = dateMillis?.let(::formatMeetingDate) ?: placeholder,
             color =
                 if (dateMillis == null) {
-                    Color(0xFFA0A5B1)
+                    PickiiGray500
                 } else {
-                    Color(0xFF292D35)
+                    PickiiSlateDark
                 },
             fontSize = 14.sp
         )
@@ -715,7 +725,7 @@ private fun MeetingDateRangePickerDialog(
             ) {
                 Text(
                     text = "확인",
-                    color = Color(0xFF171714),
+                    color = PickiiCharcoal,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -726,7 +736,7 @@ private fun MeetingDateRangePickerDialog(
             ) {
                 Text(
                     text = "취소",
-                    color = Color(0xFF667085)
+                    color = PickiiGraySlate
                 )
             }
         }
@@ -746,7 +756,7 @@ private fun MeetingDateRangePickerDialog(
                             top = 16.dp,
                             end = 24.dp
                         ),
-                    color = Color(0xFF18181B),
+                    color = PickiiBlackAlt,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -760,7 +770,7 @@ private fun MeetingDateRangePickerDialog(
                             end = 24.dp,
                             bottom = 8.dp
                         ),
-                    color = Color(0xFF667085),
+                    color = PickiiGraySlate,
                     fontSize = 14.sp
                 )
             },
@@ -787,9 +797,9 @@ private fun MeetingSelectChip(
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     if (selected) {
-                        Color(0xFF171714)
+                        PickiiCharcoal
                     } else {
-                        Color(0xFFF4F5F7)
+                        PickiiSurfaceGray
                     }
                 ).clickable(onClick = onClick)
                 .then(
@@ -807,7 +817,7 @@ private fun MeetingSelectChip(
                 if (selected) {
                     Color.White
                 } else {
-                    Color(0xFF717784)
+                    PickiiGraySecondary
                 },
             fontSize = 13.sp,
             fontWeight =
@@ -836,7 +846,7 @@ private fun SectionTitle(
     ) {
         Text(
             text = title,
-            color = Color(0xFF4B5563),
+            color = PickiiGray700,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -853,7 +863,7 @@ private fun SectionTitle(
             optional -> {
                 Text(
                     text = " 선택",
-                    color = Color(0xFFA0A5B1),
+                    color = PickiiGray500,
                     fontSize = 11.sp
                 )
             }
@@ -862,7 +872,7 @@ private fun SectionTitle(
         if (description != null) {
             Text(
                 text = "  ($description)",
-                color = Color(0xFFA0A5B1),
+                color = PickiiGray500,
                 fontSize = 10.sp,
                 maxLines = 1
             )
@@ -876,17 +886,17 @@ private fun SectionTitle(
 @Composable
 private fun meetingTextFieldColors() =
     TextFieldDefaults.colors(
-        focusedContainerColor = Color(0xFFF4F5F7),
-        unfocusedContainerColor = Color(0xFFF4F5F7),
-        disabledContainerColor = Color(0xFFF4F5F7),
-        errorContainerColor = Color(0xFFF4F5F7),
-        focusedTextColor = Color(0xFF292D35),
-        unfocusedTextColor = Color(0xFF292D35),
+        focusedContainerColor = PickiiSurfaceGray,
+        unfocusedContainerColor = PickiiSurfaceGray,
+        disabledContainerColor = PickiiSurfaceGray,
+        errorContainerColor = PickiiSurfaceGray,
+        focusedTextColor = PickiiSlateDark,
+        unfocusedTextColor = PickiiSlateDark,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent,
-        cursorColor = Color(0xFF171714)
+        cursorColor = PickiiCharcoal
     )
 
 /**

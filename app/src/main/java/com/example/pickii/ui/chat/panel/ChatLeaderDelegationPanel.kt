@@ -32,16 +32,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiBlackSoft
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val LeaderDelegationPanelBackgroundColor = Color.White
 private val LeaderDelegationPanelScrimColor =
     Color.Black.copy(alpha = 0.35f)
 
-private val LeaderDelegationPrimaryTextColor = Color(0xFF20283A)
-private val LeaderDelegationSecondaryTextColor = Color(0xFF9CA3AF)
-private val LeaderDelegationDividerColor = Color(0xFFF0F1F4)
+private val LeaderDelegationPrimaryTextColor = PickiiNavyText
+private val LeaderDelegationSecondaryTextColor = PickiiGray400
+private val LeaderDelegationDividerColor = PickiiSurfaceGrayLight
 private val LeaderDelegationSelectedColor = Color(0xFFF7F8FA)
-private val LeaderDelegationButtonColor = Color(0xFF171717)
+private val LeaderDelegationButtonColor = PickiiBlackSoft
 private val LeaderDelegationButtonTextColor = Color(0xFFF2F77F)
 
 /**

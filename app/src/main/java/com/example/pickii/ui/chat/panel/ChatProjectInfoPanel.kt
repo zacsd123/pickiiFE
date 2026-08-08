@@ -29,10 +29,11 @@ import com.example.pickii.ui.calendar.editor.component.ScheduleCategorySection
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiNavyText
 
 private val ProjectInfoPanelBackgroundColor = Color.White
 private val ProjectInfoPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val ProjectInfoPrimaryTextColor = Color(0xFF20283A)
+private val ProjectInfoPrimaryTextColor = PickiiNavyText
 private val ProjectInfoSecondaryTextColor = Color(0xFF8E95A3)
 private val ProjectInfoCardColor = Color(0xFFF6F7F9)
 private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)

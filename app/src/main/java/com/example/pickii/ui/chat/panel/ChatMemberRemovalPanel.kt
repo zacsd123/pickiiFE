@@ -32,12 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
+import com.example.pickii.ui.theme.PickiiGray400
+import com.example.pickii.ui.theme.PickiiNavyText
+import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
 private val MemberRemovalPanelBackgroundColor = Color.White
 private val MemberRemovalPanelScrimColor = Color.Black.copy(alpha = 0.35f)
-private val MemberRemovalPrimaryTextColor = Color(0xFF20283A)
-private val MemberRemovalSecondaryTextColor = Color(0xFF9CA3AF)
-private val MemberRemovalDividerColor = Color(0xFFF0F1F4)
+private val MemberRemovalPrimaryTextColor = PickiiNavyText
+private val MemberRemovalSecondaryTextColor = PickiiGray400
+private val MemberRemovalDividerColor = PickiiSurfaceGrayLight
 private val MemberRemovalSelectedColor = Color(0xFFFFF4F3)
 private val MemberRemovalButtonColor = Color(0xFFD23B32)
 private val MemberRemovalDisabledButtonColor = Color(0xFFE2E3E7)
