@@ -13,12 +13,14 @@ import java.time.YearMonth
  * @property selectedDate 사용자가 선택한 날짜
  * @property schedules 캘린더에 표시할 일정 목록
  * @property expandedScheduleId 상세 정보가 펼쳐진 일정 ID
+ * @property notificationCount 상단 헤더에 표시할 미읽음 알림 수
  */
 data class MonthlyCalendarUiState(
     val displayedYearMonth: YearMonth = YearMonth.of(2026, 7),
     val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
     val schedules: List<MonthlyScheduleUiModel> = emptyList(),
-    val expandedScheduleId: Long? = null
+    val expandedScheduleId: Long? = null,
+    val notificationCount: Int = 0
 ) {
     /**
      * 현재 선택한 날짜에 포함되는 일정 목록이다.

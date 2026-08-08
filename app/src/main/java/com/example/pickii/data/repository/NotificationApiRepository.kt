@@ -2,6 +2,8 @@ package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.NotificationApiService
 import com.example.pickii.data.remote.dto.NotificationDto
+import com.example.pickii.data.remote.dto.RegisterDeviceRequest
+import com.example.pickii.data.remote.dto.UnregisterDeviceRequest
 import com.example.pickii.domain.model.NotificationEntry
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.util.network.safeApiCall
@@ -13,6 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val NOTIFICATIONS_PAGE_SIZE = 50
+private const val DEVICE_PLATFORM = "ANDROID"
 
 /** `9-1`~`9-4`, `9-7` API로 [NotificationRepository]를 구현한다. */
 @Singleton
@@ -42,6 +45,14 @@ class NotificationApiRepository
 
         override suspend fun getUnreadCount(): Result<Int> =
             safeApiCall(json) { apiService.getUnreadCount() }.map { it.data.unreadCount }
+
+        override suspend fun registerDevice(fcmToken: String): Result<Unit> =
+            safeApiCallUnit(json) {
+                apiService.registerDevice(RegisterDeviceRequest(fcmToken = fcmToken, platform = DEVICE_PLATFORM))
+            }
+
+        override suspend fun unregisterDevice(fcmToken: String): Result<Unit> =
+            safeApiCallUnit(json) { apiService.unregisterDevice(UnregisterDeviceRequest(fcmToken = fcmToken)) }
 
         private fun NotificationDto.toDomain(): NotificationEntry =
             NotificationEntry(

@@ -59,7 +59,7 @@ class CalendarApiRepository
             }
 
         override suspend fun addSchedule(schedule: CalendarSchedule): Result<Unit> =
-            if (schedule.repeatType == ScheduleRepeatType.NONE) {
+            if (schedule.isSingleDay) {
                 safeApiCall(json) { apiService.createSingleSchedule(schedule.toSingleRequest()) }
                     .map { created -> _schedules.update { it + schedule.copy(id = created.data.scheduleId) } }
             } else {
@@ -68,7 +68,7 @@ class CalendarApiRepository
             }
 
         override suspend fun updateSchedule(schedule: CalendarSchedule): Result<Unit> =
-            if (schedule.repeatType == ScheduleRepeatType.NONE) {
+            if (schedule.isSingleDay) {
                 safeApiCallUnit(json) { apiService.updateSingleSchedule(schedule.id, schedule.toSingleRequest()) }
                     .onSuccess { _schedules.update { current -> current.mergeById(listOf(schedule)) { it.id } } }
             } else {
@@ -113,6 +113,13 @@ class CalendarApiRepository
                     }
                 }
 
+        /**
+         * 반복이 없고(startDate == endDate) 하루짜리인 일정만 단발(`/single`) 엔드포인트로 보낸다.
+         * 그 외(진짜 반복이거나, 반복 없이 기간만 있는 경우)는 반복(`/recurring`) 엔드포인트로 보낸다.
+         */
+        private val CalendarSchedule.isSingleDay: Boolean
+            get() = repeatType == ScheduleRepeatType.NONE && startDate == endDate
+
         private fun CalendarSchedule.toSingleRequest(): SingleScheduleRequest =
             SingleScheduleRequest(
                 title = title,
@@ -139,8 +146,8 @@ class CalendarApiRepository
             val (repeatType, repeatWeekdays) = parseRrule(rrule)
             val start = (date ?: startDate)?.let(LocalDate::parse) ?: LocalDate.now()
             val end = (date ?: endDate)?.let(LocalDate::parse) ?: start
-            val parsedStartTime = startTime?.let { LocalTime.parse(it, TimeFormat) }
-            val parsedEndTime = endTime?.let { LocalTime.parse(it, TimeFormat) }
+            val parsedStartTime = startTime?.let { runCatching { LocalTime.parse(it, TimeFormat) }.getOrNull() }
+            val parsedEndTime = endTime?.let { runCatching { LocalTime.parse(it, TimeFormat) }.getOrNull() }
             val isAllDay = parsedStartTime == ALL_DAY_START && parsedEndTime == ALL_DAY_END
             return CalendarSchedule(
                 id = scheduleId,
@@ -199,7 +206,10 @@ private fun buildRrule(
         }
         ScheduleRepeatType.MONTHLY -> "FREQ=MONTHLY"
         ScheduleRepeatType.YEARLY -> "FREQ=YEARLY"
-        ScheduleRepeatType.NONE -> ""
+        // 반복 없이 기간(startDate != endDate)만 있는 경우에도 이 분기를 탄다(isSingleDay 참고).
+        // 서버가 반복 없는 기간 일정을 표현할 방법이 없어(단발은 하루만, 반복은 rrule 필수),
+        // 매일 반복으로 저장해 연속된 기간처럼 보이게 한다. 재조회 시 '매일 반복'으로 표시될 수 있다.
+        ScheduleRepeatType.NONE -> "FREQ=DAILY"
     }
 
 private fun parseRrule(rrule: String?): Pair<ScheduleRepeatType, Set<DayOfWeek>> {

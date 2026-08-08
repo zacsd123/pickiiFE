@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +29,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,31 +45,46 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.pickii.R
+import com.example.pickii.domain.model.MeetingPollDetail
+import com.example.pickii.domain.model.MeetingPollSlot
+import com.example.pickii.domain.model.MeetingPollStatus
+import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
 import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val MyMessageColor = Color(0xFF111111)
-private val OtherMessageColor = Color(0xFFF0F1F4)
+private val OtherMessageColor = Color(0xFFF9FCA8)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
 private val SecondaryTextColor = Color(0xFF9CA3AF)
 private val PickiiYellowColor = Color(0xFFF9FCA8)
-private const val MEETING_DURATION_MILLIS = 2 * 60 * 60 * 1000L
 private const val LOAD_MORE_MESSAGES_THRESHOLD = 3
 
 /**
@@ -81,9 +101,21 @@ fun ChatRoomRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(roomId) {
         viewModel.initializeRoom(roomId = roomId)
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refreshMeetings()
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     OneShotEventEffect(flow = viewModel.events) { event ->
@@ -107,7 +139,7 @@ fun ChatRoomRoute(
         onAddClick = viewModel::toggleActionMenu,
         onNoticeClick = viewModel::toggleNotice,
         onNoticeRegister = viewModel::registerNotice,
-        onMeetingSend = viewModel::sendMeetingNotice,
+        onMeetingSend = viewModel::createMeetingPoll,
         onSendImages = viewModel::sendImageMessages,
         onLoadMoreMessages = viewModel::loadMoreMessages,
         modifier = modifier,
@@ -116,7 +148,19 @@ fun ChatRoomRoute(
         onNotificationEnabledChange = viewModel::updateNotificationSetting,
         onLeaveChatRoomRequested = viewModel::leaveChatRoom,
         onDeleteMeeting = viewModel::deleteMeeting,
-        onNavigateToMemberProfile = onNavigateToMemberProfile
+        onAttendMeeting = { meetingId -> viewModel.updateMeetingAttendance(meetingId, attending = true) },
+        onAbsentMeeting = { meetingId -> viewModel.updateMeetingAttendance(meetingId, attending = false) },
+        onNavigateToMemberProfile = onNavigateToMemberProfile,
+        onAcknowledgeMeetingNotice = viewModel::onAcknowledgeMeetingNotice,
+        onToggleMeetingPollSlot = viewModel::toggleMeetingPollSlot,
+        onToggleMeetingPollNoneAvailable = viewModel::toggleMeetingPollNoneAvailable,
+        onSubmitMeetingPollResponse = viewModel::submitMeetingPollResponse,
+        onConfirmSlotClick = viewModel::onConfirmSlotClick,
+        onForceConfirmConfirm = viewModel::onForceConfirmConfirm,
+        onForceConfirmDismiss = viewModel::onForceConfirmDismiss,
+        onCancelMeetingPoll = viewModel::cancelMeetingPoll,
+        onRegisterScheduleDirectly = viewModel::registerScheduleDirectly,
+        onSelectProjectColor = viewModel::onSelectProjectColor
     )
 }
 
@@ -141,7 +185,19 @@ private fun ChatRoomScreen(
     onNotificationEnabledChange: (Boolean) -> Unit,
     onLeaveChatRoomRequested: () -> Unit,
     onDeleteMeeting: (Long) -> Unit,
-    onNavigateToMemberProfile: (Long) -> Unit
+    onAttendMeeting: (Long) -> Unit,
+    onAbsentMeeting: (Long) -> Unit,
+    onNavigateToMemberProfile: (Long) -> Unit,
+    onAcknowledgeMeetingNotice: (Long) -> Unit,
+    onToggleMeetingPollSlot: (Long, Long) -> Unit,
+    onToggleMeetingPollNoneAvailable: (Long) -> Unit,
+    onSubmitMeetingPollResponse: (Long) -> Unit,
+    onConfirmSlotClick: (Long, Long) -> Unit,
+    onForceConfirmConfirm: () -> Unit,
+    onForceConfirmDismiss: () -> Unit,
+    onCancelMeetingPoll: (Long) -> Unit,
+    onRegisterScheduleDirectly: (String, LocalDate, LocalTime, LocalTime) -> Unit,
+    onSelectProjectColor: (Long) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -211,6 +267,10 @@ private fun ChatRoomScreen(
     }
 
     var showMeetingManagementSheet by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showDirectRegisterSheet by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -304,7 +364,18 @@ private fun ChatRoomScreen(
 
                     ChatMessageItem(
                         message = message,
-                        isLastOfRun = uiState.messages.isLastOfConsecutiveRun(index)
+                        isLastOfRun = uiState.messages.isLastOfConsecutiveRun(index),
+                        pollDetail = uiState.pollDetails[message.meetingNotice?.pollId],
+                        isAcknowledged = message.meetingNotice?.pollId in uiState.acknowledgedPollIds,
+                        myPollSelection = uiState.myPollSelections[message.meetingNotice?.pollId].orEmpty(),
+                        isCurrentUserLeader = uiState.isCurrentUserLeader,
+                        participantNames = uiState.members.map { it.name },
+                        onAcknowledgeMeetingNotice = onAcknowledgeMeetingNotice,
+                        onToggleMeetingPollSlot = onToggleMeetingPollSlot,
+                        onToggleMeetingPollNoneAvailable = onToggleMeetingPollNoneAvailable,
+                        onSubmitMeetingPollResponse = onSubmitMeetingPollResponse,
+                        onConfirmSlotClick = onConfirmSlotClick,
+                        onCancelMeetingPoll = onCancelMeetingPoll
                     )
                 }
 
@@ -317,6 +388,7 @@ private fun ChatRoomScreen(
                 visible = uiState.isActionMenuExpanded
             ) {
                 ChatActionMenu(
+                    isCurrentUserLeader = uiState.isCurrentUserLeader,
                     onPhotoClick = {
                         showPhotoSourceSheet = true
                     },
@@ -328,6 +400,9 @@ private fun ChatRoomScreen(
                     },
                     onMeetingManagementClick = {
                         showMeetingManagementSheet = true
+                    },
+                    onDirectRegisterClick = {
+                        showDirectRegisterSheet = true
                     }
                 )
             }
@@ -399,10 +474,13 @@ private fun ChatRoomScreen(
         if (isProjectInfoPanelVisible) {
             ChatProjectInfoPanel(
                 projectInfo = uiState.projectInfo,
+                scheduleCategories = uiState.scheduleCategories,
+                selectedCategoryId = uiState.selectedProjectCategoryId,
                 onBackClick = {
                     isProjectInfoPanelVisible = false
                     isChatRoomInfoPanelVisible = true
-                }
+                },
+                onSelectColor = onSelectProjectColor
             )
         }
 
@@ -461,17 +539,14 @@ private fun ChatRoomScreen(
                     showMeetingManagementSheet = false
                 },
                 onDeleteMeeting = onDeleteMeeting,
-                onMoveToAbsent = { _, _ ->
-                    // TODO: 참여자를 불참으로 변경
-                },
-                onMoveToParticipant = { _, _ ->
-                    // TODO: 불참자를 참여로 변경
-                }
+                onAttendClick = onAttendMeeting,
+                onAbsentClick = onAbsentMeeting
             )
         }
 
         if (showQuickMeetingSheet) {
             MeetingRegistrationBottomSheet(
+                members = uiState.members,
                 onDismiss = {
                     showQuickMeetingSheet = false
                 },
@@ -479,6 +554,16 @@ private fun ChatRoomScreen(
                     meetingToConfirm = meeting
                     showQuickMeetingSheet = false
                     showMeetingConfirmSheet = true
+                }
+            )
+        }
+
+        if (showDirectRegisterSheet) {
+            MeetingDirectRegisterBottomSheet(
+                onDismiss = { showDirectRegisterSheet = false },
+                onRegisterClick = { title, date, startTime, endTime ->
+                    onRegisterScheduleDirectly(title, date, startTime, endTime)
+                    showDirectRegisterSheet = false
                 }
             )
         }
@@ -499,6 +584,7 @@ private fun ChatRoomScreen(
             if (showMeetingConfirmSheet) {
                 MeetingConfirmBottomSheet(
                     meeting = meeting,
+                    totalMemberCount = uiState.members.size,
                     // < 버튼을 눌렀을 때
                     onPreviousClick = {
                         showMeetingConfirmSheet = false
@@ -553,6 +639,17 @@ private fun ChatRoomScreen(
             )
         }
     }
+
+    if (uiState.pendingForceConfirm != null) {
+        ConfirmDialog(
+            title = "아직 응답하지 않은 팀원이 있어요",
+            body = "그래도 이 시간으로 확정할까요?",
+            confirmLabel = "확정",
+            dismissLabel = "취소",
+            onConfirm = onForceConfirmConfirm,
+            onDismiss = onForceConfirmDismiss
+        )
+    }
 }
 
 /**
@@ -593,10 +690,10 @@ private fun ChatRoomHeader(
                         .clickable(onClick = onBackClick),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "‹",
-                    fontSize = 34.sp,
-                    color = Color(0xFF4B5563)
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = Color.Black
                 )
             }
 
@@ -790,12 +887,25 @@ private fun ChatNotice(
 }
 
 /**
- * 메시지 작성자에 따라 말풍선을 좌우로 배치한다.
+ * 메시지 작성자에 따라 말풍선을 좌우로 배치한다. 회의 조율 관련 타입은 [ChatRoomUiState.pollDetails] 등
+ * 라이브 poll 상태를 받아 등록 공지(카드1) 아래에 응답 카드(카드2)/집계 카드(카드3)를 이어서 그린다.
  */
+@Suppress("LongParameterList")
 @Composable
 private fun ChatMessageItem(
     message: ChatMessageUiModel,
-    isLastOfRun: Boolean
+    isLastOfRun: Boolean,
+    pollDetail: MeetingPollDetail?,
+    isAcknowledged: Boolean,
+    myPollSelection: Set<Long>,
+    isCurrentUserLeader: Boolean,
+    participantNames: List<String>,
+    onAcknowledgeMeetingNotice: (Long) -> Unit,
+    onToggleMeetingPollSlot: (Long, Long) -> Unit,
+    onToggleMeetingPollNoneAvailable: (Long) -> Unit,
+    onSubmitMeetingPollResponse: (Long) -> Unit,
+    onConfirmSlotClick: (Long, Long) -> Unit,
+    onCancelMeetingPoll: (Long) -> Unit
 ) {
     when (message.type) {
         ChatMessageType.TEXT -> {
@@ -814,12 +924,54 @@ private fun ChatMessageItem(
 
         ChatMessageType.MEETING_NOTICE -> {
             message.meetingNotice?.let { notice ->
-                MeetingRegistrationNoticeCard(
-                    meetingNotice = notice,
-                    onRegisterClick = {
-                        // TODO
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    MeetingRegistrationNoticeCard(
+                        meetingNotice = notice,
+                        isAcknowledged = isAcknowledged,
+                        onAcknowledgeClick = { onAcknowledgeMeetingNotice(notice.pollId) }
+                    )
+
+                    if (isAcknowledged && pollDetail != null) {
+                        // 3단계(집계)는 전원 응답 또는 마감 시각 도달 시 자동으로 열린다. 서버엔 이 상태를
+                        // 별도로 표시하는 필드가 없어(status는 COLLECTING/CONFIRMED/CANCELLED뿐) 클라이언트가
+                        // 매초 다시 계산한다.
+                        var nowMillis by remember(notice.pollId) { mutableStateOf(System.currentTimeMillis()) }
+                        LaunchedEffect(notice.pollId, notice.deadlineMillis) {
+                            while (true) {
+                                nowMillis = System.currentTimeMillis()
+                                if (nowMillis >= notice.deadlineMillis) break
+                                delay(1000)
+                            }
+                        }
+                        val isAggregationReady =
+                            pollDetail.respondedCount >= pollDetail.totalMembers || nowMillis >= notice.deadlineMillis
+
+                        MeetingPollResponseCard(
+                            poll = pollDetail,
+                            deadlineMillis = notice.deadlineMillis,
+                            mySelection = myPollSelection,
+                            isCurrentUserLeader = isCurrentUserLeader,
+                            onToggleSlot = { slotId -> onToggleMeetingPollSlot(notice.pollId, slotId) },
+                            onToggleNoneAvailable = { onToggleMeetingPollNoneAvailable(notice.pollId) },
+                            onSubmitClick = { onSubmitMeetingPollResponse(notice.pollId) },
+                            onCancelClick = { onCancelMeetingPoll(notice.pollId) }
+                        )
+
+                        if (isAggregationReady) {
+                            MeetingPollAggregationCard(
+                                poll = pollDetail,
+                                isCurrentUserLeader = isCurrentUserLeader,
+                                onConfirmClick = { slotId -> onConfirmSlotClick(notice.pollId, slotId) }
+                            )
+                        }
                     }
-                )
+                }
+            }
+        }
+
+        ChatMessageType.MEETING_CONFIRMED -> {
+            message.meetingConfirmed?.let { confirmed ->
+                MeetingConfirmedNoticeCard(meetingConfirmed = confirmed, participantNames = participantNames)
             }
         }
 
@@ -1076,39 +1228,47 @@ private fun OtherImageMessage(
  */
 data class ChatActionItem(
     @DrawableRes val iconRes: Int,
-    val label: String
+    val label: String,
+    val onClick: () -> Unit
 )
 
 @Composable
 private fun ChatActionMenu(
+    isCurrentUserLeader: Boolean,
     onPhotoClick: () -> Unit,
     onNoticeRegisterClick: () -> Unit,
     onQuickMeetingClick: () -> Unit,
-    onMeetingManagementClick: () -> Unit
+    onMeetingManagementClick: () -> Unit,
+    onDirectRegisterClick: () -> Unit
 ) {
     val actionItems =
-        listOf(
-            ChatActionItem(
-                iconRes = R.drawable.ic_file,
-                label = "사진/카메라"
-            ),
-            ChatActionItem(
-                iconRes = R.drawable.ic_notice,
-                label = "공지 등록"
-            ),
-            ChatActionItem(
-                iconRes = R.drawable.ic_quick_meeting,
-                label = "빠른 회의"
-            ),
-            ChatActionItem(
-                iconRes = R.drawable.ic_meeting_schedule,
-                label = "회의 조율"
-            ),
-            ChatActionItem(
-                iconRes = R.drawable.ic_meeting_manage,
-                label = "회의 관리"
+        buildList {
+            add(ChatActionItem(iconRes = R.drawable.ic_file, label = "사진/카메라", onClick = onPhotoClick))
+            add(ChatActionItem(iconRes = R.drawable.ic_notice, label = "공지 등록", onClick = onNoticeRegisterClick))
+            add(
+                ChatActionItem(
+                    iconRes = R.drawable.ic_meeting_schedule,
+                    label = "회의 일정 잡기",
+                    onClick = onQuickMeetingClick
+                )
             )
-        )
+            add(
+                ChatActionItem(
+                    iconRes = R.drawable.ic_meeting_manage,
+                    label = "회의 관리",
+                    onClick = onMeetingManagementClick
+                )
+            )
+            if (isCurrentUserLeader) {
+                add(
+                    ChatActionItem(
+                        iconRes = R.drawable.ic_meeting_schedule,
+                        label = "회의 직접 등록",
+                        onClick = onDirectRegisterClick
+                    )
+                )
+            }
+        }
 
     Row(
         modifier =
@@ -1121,20 +1281,12 @@ private fun ChatActionMenu(
                 ),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        actionItems.forEachIndexed { index, item ->
+        actionItems.forEach { item ->
             Column(
                 modifier =
                     Modifier
                         .weight(1f)
-                        .clickable {
-                            when (index) {
-                                0 -> onPhotoClick()
-                                1 -> onNoticeRegisterClick()
-                                2 -> onQuickMeetingClick()
-                                3 -> println("회의 조율 클릭")
-                                4 -> onMeetingManagementClick()
-                            }
-                        },
+                        .clickable(onClick = item.onClick),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -1289,20 +1441,10 @@ private fun ChatMessageInput(
 @Composable
 private fun MeetingRegistrationNoticeCard(
     meetingNotice: MeetingNoticeUiModel,
-    onRegisterClick: () -> Unit
+    isAcknowledged: Boolean,
+    onAcknowledgeClick: () -> Unit
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFFF9FCA8))
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 24.dp
-                ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    MeetingCardContainer {
         Text(
             text = "[회의 등록 공지]",
             fontSize = 18.sp,
@@ -1310,39 +1452,31 @@ private fun MeetingRegistrationNoticeCard(
             color = Color.Black
         )
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "${meetingNotice.requesterName}님이 회의를 요청했어요.",
+            text = "팀장 (${meetingNotice.requesterName})이 ${meetingNotice.pollId} 회의를 요청했어요",
             fontSize = 14.sp,
             color = Color.Black
         )
 
-        Spacer(
-            modifier = Modifier.height(4.dp)
-        )
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "캘린더에 개인 일정을 등록해 주세요.",
+            text = "캘린더에 개인 일정을 모두 등록해주세요",
             fontSize = 14.sp,
             color = Color.Black
         )
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         var remainingTime by remember {
-            mutableStateOf("02:00:00")
+            mutableStateOf("00:00:00")
         }
 
-        LaunchedEffect(meetingNotice.createdTimeMillis) {
+        LaunchedEffect(meetingNotice.deadlineMillis) {
             while (true) {
-                val remain =
-                    MEETING_DURATION_MILLIS -
-                        (System.currentTimeMillis() - meetingNotice.createdTimeMillis)
+                val remain = meetingNotice.deadlineMillis - System.currentTimeMillis()
 
                 if (remain <= 0L) {
                     remainingTime = "00:00:00"
@@ -1366,33 +1500,374 @@ private fun MeetingRegistrationNoticeCard(
             color = Color(0xFF7486D8)
         )
 
-        Spacer(
-            modifier = Modifier.height(20.dp)
+        Spacer(modifier = Modifier.height(20.dp))
+
+        MeetingCardButton(
+            label = "등록했어요",
+            enabled = !isAcknowledged,
+            onClick = onAcknowledgeClick
         )
+    }
+}
+
+/** 카드1~3이 공유하는 노란 라운드 카드 컨테이너. */
+@Composable
+private fun MeetingCardContainer(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color(0xFFF9FCA8))
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = content
+    )
+}
+
+/** 카드1~3이 공유하는 흰색 알약형 액션 버튼. 눌린 뒤에는(enabled = false) 옅게 표시한다. */
+@Composable
+private fun MeetingCardButton(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color.White)
+                .alpha(if (enabled) 1f else 0.5f)
+                .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+    }
+}
+
+private val SlotDateFormatter = DateTimeFormatter.ofPattern("M월 d일 (E)", java.util.Locale.KOREAN)
+private val SlotTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+/** 카드3(집계)에서 프로젝트장에게 "확정" 후보로 보여줄 상위 슬롯 개수(가능 인원 많은 순). */
+private const val MAX_CONFIRM_CANDIDATES = 2
+
+/** 카드2/3이 공유하는 선택 가능한 옵션 행. [selected]면 어두운 배경으로 강조한다. */
+@Composable
+private fun MeetingPollOptionRow(
+    label: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (selected) Color(0xFF1B1B1B) else Color.White)
+                .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+    ) {
+        Text(
+            text = label,
+            color = if (selected) Color.White else Color.Black,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+/**
+ * 카드2([회의 일정 조율]). 7-11의 전체 슬롯 그리드를 날짜별로 세로 나열한다(API 문서가 "후보를 자르지
+ * 않는다"고 명시함). 기본은 전부 가능(흰색)이고, 탭해서 불가로 표시한 슬롯만 어둡게 강조한다. 상단에
+ * 응답 현황(N/M명)과 마감 카운트다운을 보여주고, 프로젝트장에게는 "조율 취소"(7-14)를 함께 노출한다.
+ */
+@Suppress("LongParameterList")
+@Composable
+private fun MeetingPollResponseCard(
+    poll: MeetingPollDetail,
+    deadlineMillis: Long,
+    mySelection: Set<Long>,
+    isCurrentUserLeader: Boolean,
+    onToggleSlot: (Long) -> Unit,
+    onToggleNoneAvailable: () -> Unit,
+    onSubmitClick: () -> Unit,
+    onCancelClick: () -> Unit
+) {
+    val isCollecting = poll.status == MeetingPollStatus.COLLECTING
+    val allSlotIds = poll.slots.map { it.slotId }.toSet()
+    val isNoneAvailableSelected = allSlotIds.isNotEmpty() && mySelection == allSlotIds
+    val slotsByDate = poll.slots.groupBy { it.startAt.toLocalDate() }.toSortedMap()
+
+    var remainingTime by remember { mutableStateOf("00:00:00") }
+    LaunchedEffect(deadlineMillis) {
+        while (true) {
+            val remain = deadlineMillis - System.currentTimeMillis()
+            if (remain <= 0L) {
+                remainingTime = "00:00:00"
+                break
+            }
+            val hour = remain / 1000 / 3600
+            val minute = (remain / 1000 % 3600) / 60
+            val second = remain / 1000 % 60
+            remainingTime = "%02d:%02d:%02d".format(hour, minute, second)
+            delay(1000)
+        }
+    }
+
+    MeetingCardContainer {
+        Text(text = "[회의 일정 조율]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "가능한 시간을 모두 선택해 주세요.\n(복수 선택 가능)",
+            fontSize = 13.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "${poll.respondedCount}/${poll.totalMembers}명 응답 · 마감까지 $remainingTime",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF7486D8)
+        )
+        if (isCurrentUserLeader && isCollecting) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "조율 취소",
+                fontSize = 12.sp,
+                color = Color(0xFF9CA3AF),
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable(onClick = onCancelClick)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            MeetingPollOptionRow(
+                label = "회의 가능한 날짜 없음",
+                selected = isNoneAvailableSelected,
+                enabled = isCollecting,
+                onClick = onToggleNoneAvailable
+            )
+
+            slotsByDate.forEach { (date, slots) ->
+                Text(
+                    text = date.format(SlotDateFormatter),
+                    color = Color(0xFF6B7280),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                slots.forEach { slot ->
+                    MeetingPollOptionRow(
+                        label =
+                            "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)} " +
+                                "· ${slot.availableCount}명",
+                        selected = slot.slotId in mySelection,
+                        enabled = isCollecting,
+                        onClick = { onToggleSlot(slot.slotId) }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        MeetingCardButton(label = "제출하기", enabled = isCollecting, onClick = onSubmitClick)
+    }
+}
+
+/**
+ * 카드3(집계, [회의 일정 조율] 다음 단계). 전원 응답 또는 마감 시각 도달 시 자동으로 나타난다(트리거는
+ * [ChatMessageItem]에서 계산). 전체 슬롯을 참여 가능 인원 비율로 히트맵 표시하고(진할수록 가능 인원 많음),
+ * 칸마다 "가능 N / 미응답 M"을 보여준다. 프로젝트장에게만 가능 인원 많은 순 후보 + "확정"(7-13) 버튼을
+ * 추가로 보여준다 — 실제 팀 투표 API는 없고(7-13은 프로젝트장 단독 확정만 지원) 자동 확정도 하지 않는다.
+ */
+@Composable
+private fun MeetingPollAggregationCard(
+    poll: MeetingPollDetail,
+    isCurrentUserLeader: Boolean,
+    onConfirmClick: (Long) -> Unit
+) {
+    val slotsByDate = poll.slots.groupBy { it.startAt.toLocalDate() }.toSortedMap()
+    val rankedCandidates =
+        poll.slots
+            .sortedWith(compareByDescending<MeetingPollSlot> { it.availableCount }.thenBy { it.unansweredCount })
+            .take(MAX_CONFIRM_CANDIDATES)
+
+    MeetingCardContainer {
+        Text(text = "[최종 일정 조율]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "응답이 마감됐어요. 참여 가능한 인원이 많을수록 진하게 표시돼요.",
+            fontSize = 13.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            slotsByDate.forEach { (date, slots) ->
+                Text(
+                    text = date.format(SlotDateFormatter),
+                    color = Color(0xFF6B7280),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                slots.forEach { slot ->
+                    MeetingPollHeatmapRow(slot = slot, totalMembers = poll.totalMembers)
+                }
+            }
+        }
+
+        if (isCurrentUserLeader && poll.status == MeetingPollStatus.COLLECTING && rankedCandidates.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider(color = Color(0x33000000))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "가능 인원 많은 순 — 하나를 골라 확정하세요",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                rankedCandidates.forEach { slot ->
+                    MeetingPollConfirmRow(slot = slot, onConfirmClick = { onConfirmClick(slot.slotId) })
+                }
+            }
+        }
+    }
+}
+
+/** 히트맵 한 칸. [totalMembers] 대비 [MeetingPollSlot.availableCount] 비율로 배경 농도를 정한다. */
+@Composable
+private fun MeetingPollHeatmapRow(
+    slot: MeetingPollSlot,
+    totalMembers: Int
+) {
+    val ratio = if (totalMembers > 0) (slot.availableCount.toFloat() / totalMembers).coerceIn(0f, 1f) else 0f
+    val backgroundColor = lerp(Color.White, Color(0xFF4C6FFF), ratio)
+    val textColor = if (ratio > 0.55f) Color.White else Color.Black
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(backgroundColor)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+    ) {
+        Text(
+            text =
+                "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)} " +
+                    "· 가능 ${slot.availableCount} / 미응답 ${slot.unansweredCount}",
+            color = textColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+/** 프로젝트장 전용 확정 후보 행. */
+@Composable
+private fun MeetingPollConfirmRow(
+    slot: MeetingPollSlot,
+    onConfirmClick: () -> Unit
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text =
+                    "${slot.startAt.toLocalDate().format(SlotDateFormatter)} " +
+                        "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)}",
+                color = Color.Black,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "가능 ${slot.availableCount}명 · 미응답 ${slot.unansweredCount}명",
+                color = Color(0xFF6B7280),
+                fontSize = 11.sp
+            )
+        }
+
+        Box(
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFF1B1B1B))
+                    .clickable(onClick = onConfirmClick)
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+        ) {
+            Text(text = "확정", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/** 카드4([회의 일정 확정]). 읽기 전용 — 확정된 슬롯 시각과 채팅방 멤버 전체 이름을 보여준다. */
+@Composable
+private fun MeetingConfirmedNoticeCard(
+    meetingConfirmed: MeetingConfirmedUiModel,
+    participantNames: List<String>
+) {
+    val start =
+        Instant.ofEpochMilli(meetingConfirmed.slotStartMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val end =
+        Instant.ofEpochMilli(meetingConfirmed.slotEndMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+    MeetingCardContainer {
+        Text(text = "[회의 일정 확정]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "회의 일정이 확정되었어요. 일정을 수정할 경우, 회의 관리에서 할 수 있어요.",
+            fontSize = 13.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         Box(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White)
-                    .clickable {
-                        onRegisterClick()
-                    },
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF1B1B1B))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text =
-                    if (meetingNotice.isRegistered) {
-                        "등록 완료"
-                    } else {
-                        "등록했어요"
-                    },
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text =
+                        "${start.toLocalDate().format(SlotDateFormatter)} " +
+                            "${start.format(SlotTimeFormatter)}~${end.format(SlotTimeFormatter)}",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (participantNames.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "참여자: ${participantNames.joinToString(", ")}",
+                        color = Color(0xFFB0B0AA),
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
     }
 }

@@ -6,5 +6,5 @@ data class NotificationSettingUiState(
     val commentNotificationEnabled: Boolean = true,
     val scheduleNotificationEnabled: Boolean = true,
     val matchingNotificationEnabled: Boolean = true,
-    val marketingNotificationEnabled: Boolean = false,
+    val marketingNotificationEnabled: Boolean = false
 )

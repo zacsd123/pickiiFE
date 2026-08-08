@@ -36,20 +36,21 @@ fun FeedbackTextField(
     placeholder: String,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(FeedbackTextFieldCardColor)
-            .padding(18.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(FeedbackTextFieldCardColor)
+                .padding(18.dp)
     ) {
         Text(
             text = title,
             color = FeedbackTextFieldTextColor,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -58,25 +59,26 @@ fun FeedbackTextField(
             text = description,
             color = FeedbackTextFieldDescriptionColor,
             fontSize = 10.sp,
-            lineHeight = 15.sp,
+            lineHeight = 15.sp
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(130.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(FeedbackTextFieldBackgroundColor)
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(130.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(FeedbackTextFieldBackgroundColor)
+                    .padding(14.dp)
         ) {
             if (value.isEmpty()) {
                 Text(
                     text = placeholder,
                     color = FeedbackTextFieldDescriptionColor,
                     fontSize = 12.sp,
-                    lineHeight = 18.sp,
+                    lineHeight = 18.sp
                 )
             }
 
@@ -88,11 +90,12 @@ fun FeedbackTextField(
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                textStyle = TextStyle(
-                    color = FeedbackTextFieldTextColor,
-                    fontSize = 13.sp,
-                    lineHeight = 19.sp,
-                ),
+                textStyle =
+                    TextStyle(
+                        color = FeedbackTextFieldTextColor,
+                        fontSize = 13.sp,
+                        lineHeight = 19.sp
+                    )
             )
         }
 
@@ -102,7 +105,7 @@ fun FeedbackTextField(
             text = "${value.length}자",
             color = FeedbackTextFieldCountColor,
             fontSize = 10.sp,
-            modifier = Modifier.align(Alignment.End),
+            modifier = Modifier.align(Alignment.End)
         )
     }
 }

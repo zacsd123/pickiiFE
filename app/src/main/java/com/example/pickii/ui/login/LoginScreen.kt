@@ -19,32 +19,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,8 +74,7 @@ private val ActionButtonHeight = 52.dp
  *
  * @param onNavigateHome 로그인에 성공하고 프로필(이력서)이 있을 때 호출되는 콜백
  * @param onNavigateOnboarding 로그인에 성공했지만 프로필이 없을 때(최초 로그인) 호출되는 콜백
- * @param onNavigateToPasswordReset "아이디/비밀번호 찾기" 시트에서 "비밀번호 재설정"을 눌렀을 때 호출되는 콜백
- * @param onNavigateToFindId "아이디/비밀번호 찾기" 시트에서 "아이디 찾기"를 눌렀을 때 호출되는 콜백
+ * @param onNavigateToPasswordReset "비밀번호 재설정" 링크를 눌렀을 때 호출되는 콜백
  * @param onSignUpClick 회원가입 버튼 클릭 콜백
  * @param onGuestClick 비회원으로 둘러보기를 완료했을 때 호출되는 콜백
  */
@@ -90,7 +83,6 @@ fun LoginScreen(
     onNavigateHome: () -> Unit = {},
     onNavigateOnboarding: () -> Unit = {},
     onNavigateToPasswordReset: () -> Unit = {},
-    onNavigateToFindId: () -> Unit = {},
     onSignUpClick: () -> Unit = {},
     onGuestClick: () -> Unit = {},
     viewModel: LoginViewModel = hiltViewModel()
@@ -110,6 +102,7 @@ fun LoginScreen(
         onLoginClick = {
             viewModel.onLoginClick(onNavigateHome = onNavigateHome, onNavigateOnboarding = onNavigateOnboarding)
         },
+        onErrorDialogDismiss = viewModel::onErrorDialogDismiss,
         onKakaoLoginClick = {
             scope.launch {
                 KakaoAuthClient
@@ -132,7 +125,6 @@ fun LoginScreen(
             }
         },
         onNavigateToPasswordReset = onNavigateToPasswordReset,
-        onNavigateToFindId = onNavigateToFindId,
         onSignUpClick = onSignUpClick,
         onGuestClick = { viewModel.onGuestClick(onComplete = onGuestClick) }
     )
@@ -151,12 +143,10 @@ private fun LoginScreenContent(
     onLoginClick: () -> Unit,
     onKakaoLoginClick: () -> Unit,
     onNavigateToPasswordReset: () -> Unit,
-    onNavigateToFindId: () -> Unit,
     onSignUpClick: () -> Unit,
-    onGuestClick: () -> Unit
+    onGuestClick: () -> Unit,
+    onErrorDialogDismiss: () -> Unit = {}
 ) {
-    var isAccountRecoverySheetVisible by remember { mutableStateOf(false) }
-
     Box(
         modifier =
             Modifier
@@ -234,13 +224,13 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.account_recovery_sheet_title),
+                text = stringResource(R.string.account_recovery_button_reset_password),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clickable { isAccountRecoverySheetVisible = true },
+                        .clickable(onClick = onNavigateToPasswordReset),
                 textAlign = TextAlign.End
             )
 
@@ -334,95 +324,18 @@ private fun LoginScreenContent(
             )
         }
 
-        if (isAccountRecoverySheetVisible) {
-            AccountRecoveryBottomSheet(
-                onDismiss = { isAccountRecoverySheetVisible = false },
-                onFindIdClick = {
-                    isAccountRecoverySheetVisible = false
-                    onNavigateToFindId()
-                },
-                onResetPasswordClick = {
-                    isAccountRecoverySheetVisible = false
-                    onNavigateToPasswordReset()
+        if (uiState.errorMessage != null) {
+            AlertDialog(
+                onDismissRequest = onErrorDialogDismiss,
+                title = { Text(text = stringResource(R.string.login_error_title)) },
+                text = { Text(text = uiState.errorMessage) },
+                confirmButton = {
+                    TextButton(onClick = onErrorDialogDismiss) {
+                        Text(text = stringResource(R.string.login_error_confirm))
+                    }
                 }
             )
         }
-    }
-}
-
-/** "아이디/비밀번호 찾기" 바텀시트. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AccountRecoveryBottomSheet(
-    onDismiss: () -> Unit,
-    onFindIdClick: () -> Unit,
-    onResetPasswordClick: () -> Unit
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.account_recovery_sheet_title),
-                color = Color.Black,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                textAlign = TextAlign.Center
-            )
-
-            RecoveryOptionButton(
-                icon = Icons.Filled.Person,
-                text = stringResource(R.string.account_recovery_button_find_id),
-                background = PickiiFieldBackground,
-                contentColor = Color.Black,
-                onClick = onFindIdClick
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            RecoveryOptionButton(
-                icon = Icons.Filled.Key,
-                text = stringResource(R.string.account_recovery_button_reset_password),
-                background = Color.Black,
-                contentColor = Color.White,
-                onClick = onResetPasswordClick
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}
-
-@Composable
-private fun RecoveryOptionButton(
-    icon: ImageVector,
-    text: String,
-    background: Color,
-    contentColor: Color,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(ActionButtonHeight)
-                .clip(RoundedCornerShape(FieldCornerRadius))
-                .background(background)
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = contentColor, fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -529,7 +442,6 @@ private fun LoginScreenPreview() {
             onLoginClick = {},
             onKakaoLoginClick = {},
             onNavigateToPasswordReset = {},
-            onNavigateToFindId = {},
             onSignUpClick = {},
             onGuestClick = {}
         )

@@ -149,6 +149,10 @@ class RecruitApplyViewModel
                 }
                 return
             }
+            if (_uiState.value.message.isBlank()) {
+                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_ai_draft_message_required))
+                return
+            }
             _uiState.update { it.copy(isSubmitConfirmDialogVisible = true) }
         }
 

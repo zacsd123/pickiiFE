@@ -39,7 +39,11 @@ class TokenAuthenticator
             route: Route?,
             response: Response
         ): Request? {
-            if (response.request.url.encodedPath.endsWith(REFRESH_ENDPOINT_PATH)) return null
+            if (response.request.url.encodedPath
+                    .endsWith(REFRESH_ENDPOINT_PATH)
+            ) {
+                return null
+            }
             if (responseCount(response) >= MAX_REFRESH_ATTEMPTS) return null
 
             val failedToken = response.request.header("Authorization")?.removePrefix("Bearer ")

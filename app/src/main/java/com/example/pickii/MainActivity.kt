@@ -48,7 +48,6 @@ import com.example.pickii.ui.chat.ChatRoute
 import com.example.pickii.ui.common.LoginRequiredDialog
 import com.example.pickii.ui.common.PickiiBottomNav
 import com.example.pickii.ui.common.PickiiBottomNavTab
-import com.example.pickii.ui.findid.FindIdScreen
 import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
 import com.example.pickii.ui.memberprofile.MemberProfileScreen
@@ -77,6 +76,7 @@ private const val NAV_TRANSITION_DURATION_MS = 200
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private var notificationChatRoomId by mutableStateOf<Long?>(null)
+    private var pendingNotificationTap by mutableStateOf<PendingNotificationTap?>(null)
 
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -90,24 +90,28 @@ class MainActivity : ComponentActivity() {
         hideSystemNavigationBar()
         requestNotificationPermissionIfNeeded()
         notificationChatRoomId = intent.chatRoomIdExtra()
+        pendingNotificationTap = intent.pendingNotificationTapExtras()
 
         setContent {
             PickiiTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     PickiiNavHost(
                         notificationChatRoomId = notificationChatRoomId,
-                        onNotificationChatRoomConsumed = { notificationChatRoomId = null }
+                        onNotificationChatRoomConsumed = { notificationChatRoomId = null },
+                        pendingNotificationTap = pendingNotificationTap,
+                        onNotificationTapConsumed = { pendingNotificationTap = null }
                     )
                 }
             }
         }
     }
 
-    /** 채팅 알림을 탭했을 때(싱글톱이라 기존 인스턴스가 재사용됨) 새 방 id를 반영한다. */
+    /** 알림(채팅/FCM)을 탭했을 때(싱글톱이라 기존 인스턴스가 재사용됨) 새 딥링크 정보를 반영한다. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         notificationChatRoomId = intent.chatRoomIdExtra()
+        pendingNotificationTap = intent.pendingNotificationTapExtras()
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -138,6 +142,11 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** 채팅 알림을 탭해 들어왔을 때, 바로 열어야 할 채팅방 id를 담는 인텐트 extra 키. */
         const val EXTRA_CHAT_ROOM_ID = "extra_chat_room_id"
+
+        /** FCM 알림을 탭해 들어왔을 때 딥링크 라우팅에 쓰는 인텐트 extra 키(9-1 응답과 동일한 필드). */
+        const val EXTRA_NOTIFICATION_TYPE = "extra_notification_type"
+        const val EXTRA_NOTIFICATION_REFERENCE_TYPE = "extra_notification_reference_type"
+        const val EXTRA_NOTIFICATION_REFERENCE_ID = "extra_notification_reference_id"
     }
 }
 
@@ -146,11 +155,29 @@ private fun Intent.chatRoomIdExtra(): Long? {
     return value.takeIf { it != -1L }
 }
 
+/** FCM 알림 탭으로 앱에 진입했을 때 전달되는 딥링크 정보(9-1의 type/referenceType/referenceId와 동일한 의미). */
+private data class PendingNotificationTap(
+    val type: String,
+    val referenceType: String?,
+    val referenceId: String?
+)
+
+private fun Intent.pendingNotificationTapExtras(): PendingNotificationTap? {
+    val type = getStringExtra(MainActivity.EXTRA_NOTIFICATION_TYPE) ?: return null
+    return PendingNotificationTap(
+        type = type,
+        referenceType = getStringExtra(MainActivity.EXTRA_NOTIFICATION_REFERENCE_TYPE),
+        referenceId = getStringExtra(MainActivity.EXTRA_NOTIFICATION_REFERENCE_ID)
+    )
+}
+
 /** 앱의 전체 화면 전환을 담당하는 내비게이션 그래프. */
 @Composable
 private fun PickiiNavHost(
     notificationChatRoomId: Long? = null,
-    onNotificationChatRoomConsumed: () -> Unit = {}
+    onNotificationChatRoomConsumed: () -> Unit = {},
+    pendingNotificationTap: PendingNotificationTap? = null,
+    onNotificationTapConsumed: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     val currentRoute =
@@ -184,6 +211,22 @@ private fun PickiiNavHost(
             pendingChatRoomId = notificationChatRoomId
             navController.navigateToTab(PickiiDestination.Chat.route)
             onNotificationChatRoomConsumed()
+        }
+    }
+
+    // FCM 알림을 탭해 들어온 경우(앱이 꺼져 있었을 수도 있음). 위 채팅방 딥링크와 같은 이유로 홈 도달 후 처리한다.
+    LaunchedEffect(pendingNotificationTap, currentRoute) {
+        val tap = pendingNotificationTap
+        if (tap != null && currentRoute == PickiiDestination.Home.route) {
+            navigateForNotificationTap(
+                navController = navController,
+                type = tap.type,
+                referenceType = tap.referenceType,
+                referenceId = tap.referenceId,
+                onSetPendingChatRoomId = { pendingChatRoomId = it },
+                onSetPendingMyPageScreen = { pendingMyPageScreen = it }
+            )
+            onNotificationTapConsumed()
         }
     }
 
@@ -287,7 +330,8 @@ private fun PickiiNavHost(
                 SplashScreen(
                     onTimeout = {
                         // 자동 로그인: 저장된 Access Token이 아직 유효하면 로그인 화면을 건너뛴다.
-                        val destination = if (isLoggedIn) PickiiDestination.Home.route else PickiiDestination.Login.route
+                        val destination =
+                            if (isLoggedIn) PickiiDestination.Home.route else PickiiDestination.Login.route
                         navController.navigate(destination) {
                             popUpTo(PickiiDestination.Splash.route) { inclusive = true }
                         }
@@ -302,7 +346,6 @@ private fun PickiiNavHost(
                         navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
                     },
                     onNavigateToPasswordReset = { navController.navigate(PickiiDestination.PasswordReset.route) },
-                    onNavigateToFindId = { navController.navigate(PickiiDestination.FindId.route) },
                     onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
                     onGuestClick = { navController.navigateToHomeClearingBackStack() }
                 )
@@ -312,12 +355,6 @@ private fun PickiiNavHost(
                 PasswordResetScreen(
                     onBackClick = { navController.popBackStack() },
                     onComplete = { navController.popBackStack() }
-                )
-            }
-
-            composable(PickiiDestination.FindId.route) {
-                FindIdScreen(
-                    onBackClick = { navController.popBackStack() }
                 )
             }
 
@@ -364,36 +401,14 @@ private fun PickiiNavHost(
                 NotificationRoute(
                     onCloseClick = { navController.popBackStack() },
                     onNotificationClick = { notification ->
-                        val referenceId = notification.referenceId
-                        when (notification.type) {
-                            // 새 지원자 알림: 공고 상세가 아니라 그 공고의 지원자 확인 화면으로 바로 이동한다.
-                            NotificationType.APPLY ->
-                                referenceId?.let { postId ->
-                                    navController.navigate(PickiiDestination.ApplicantList(postId).route)
-                                }
-
-                            // 지원 수락 알림: 마이페이지의 "지원 현황"으로 바로 이동한다.
-                            NotificationType.ACCEPT -> {
-                                pendingMyPageScreen = MyPageScreenType.APPLICATIONS
-                                navController.navigateToTab(PickiiDestination.MyPage.route)
-                            }
-
-                            // 그 외(새 댓글 등)는 referenceType 기준으로 이동한다.
-                            else ->
-                                when (notification.referenceType) {
-                                    "RECRUIT" ->
-                                        referenceId?.let {
-                                            navController.navigate(PickiiDestination.RecruitDetail(it).route)
-                                        }
-
-                                    "CHATROOM", "CHAT" ->
-                                        referenceId?.toLongOrNull()?.let { roomId ->
-                                            pendingChatRoomId = roomId
-                                            navController.navigateToTab(PickiiDestination.Chat.route)
-                                        }
-                                    // PROJECT 등 그 외/미확인 referenceType은 ENUM.md 확인 전까지 이동하지 않는다.
-                                }
-                        }
+                        navigateForNotificationTap(
+                            navController = navController,
+                            type = notification.typeRaw,
+                            referenceType = notification.referenceType,
+                            referenceId = notification.referenceId,
+                            onSetPendingChatRoomId = { pendingChatRoomId = it },
+                            onSetPendingMyPageScreen = { pendingMyPageScreen = it }
+                        )
                     }
                 )
             }
@@ -415,7 +430,11 @@ private fun PickiiNavHost(
                             inclusive = false
                         )
                     },
-                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() },
+                    onNavigateToChatRoom = { roomId ->
+                        pendingChatRoomId = roomId
+                        navController.navigateToTab(PickiiDestination.Chat.route)
+                    }
                 )
             }
 
@@ -433,6 +452,10 @@ private fun PickiiNavHost(
                 RecruitApplyScreen(
                     onBackClick = { navController.popBackStack() },
                     onGoHomeClick = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                    onViewApplicationStatusClick = {
+                        pendingMyPageScreen = MyPageScreenType.APPLICATIONS
+                        navController.navigateToTab(PickiiDestination.MyPage.route)
+                    },
                     onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
                 )
             }
@@ -468,7 +491,13 @@ private fun PickiiNavHost(
                     onNavigateToMemberProfile = { memberId ->
                         navController.navigate(PickiiDestination.MemberProfile(memberId.toString()).route)
                     },
-                    initialRoomId = pendingChatRoomId
+                    onNotificationBellClick = {
+                        navController.navigate(PickiiDestination.Notification.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    initialRoomId = pendingChatRoomId,
+                    onInitialRoomConsumed = { pendingChatRoomId = null }
                 )
             }
 
@@ -481,7 +510,12 @@ private fun PickiiNavHost(
             ) {
                 CalendarRoute(
                     onScheduleClick = { },
-                    onTopLevelScreenChange = { isCalendarTopLevel = it }
+                    onTopLevelScreenChange = { isCalendarTopLevel = it },
+                    onNotificationClick = {
+                        navController.navigate(PickiiDestination.Notification.route) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -510,7 +544,8 @@ private fun PickiiNavHost(
                     },
                     onLoggedOut = { navController.navigateToLoginClearingBackStack() },
                     onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) },
-                    initialScreen = pendingMyPageScreen
+                    initialScreen = pendingMyPageScreen,
+                    onInitialScreenConsumed = { pendingMyPageScreen = null }
                 )
             }
 
@@ -564,6 +599,64 @@ private fun NavHostController.navigateToTab(route: String) {
         launchSingleTop = true
         popUpTo(PickiiDestination.Home.route) { saveState = true }
         restoreState = true
+    }
+}
+
+/**
+ * 알림(인앱 목록 클릭 또는 FCM 탭)의 type/referenceType/referenceId(9-1과 동일한 필드)로 화면을 이동한다.
+ * [NotificationRoute]의 클릭과 FCM 탭 진입([PendingNotificationTap]) 두 경로가 이 로직을 공유한다.
+ *
+ * 실기기에서 확인한 실제 서버 값(2026-08-08) 기준: `type`은 APPLY/ACCEPT/MEETING/PROJECT, `referenceType`은
+ * RECRUIT/CHATROOM/PROJECT/FEEDBACK을 내려준다. [NotificationType]은 아이콘 표시용으로만 쓰고, 이동 분기는
+ * 서버가 내려준 원본 문자열([type])로 직접 판단한다 — [NotificationType]에 없는 값(MEETING, REJECT, FEEDBACK 등)도
+ * 놓치지 않기 위해서다.
+ */
+private fun navigateForNotificationTap(
+    navController: NavHostController,
+    type: String,
+    referenceType: String?,
+    referenceId: String?,
+    onSetPendingChatRoomId: (Long) -> Unit,
+    onSetPendingMyPageScreen: (MyPageScreenType) -> Unit
+) {
+    when (type) {
+        // 새 지원자 알림: 공고 상세가 아니라 그 공고의 지원자 확인 화면으로 바로 이동한다.
+        "APPLY" ->
+            referenceId?.let { postId ->
+                navController.navigate(PickiiDestination.ApplicantList(postId).route)
+            }
+
+        // 지원 수락/거절 알림: 마이페이지의 "지원 현황"으로 바로 이동한다.
+        "ACCEPT", "REJECT" -> {
+            onSetPendingMyPageScreen(MyPageScreenType.APPLICATIONS)
+            navController.navigateToTab(PickiiDestination.MyPage.route)
+        }
+
+        // 상호평가 피드백 알림: 별도 상세 화면이 없어 마이페이지의 "상호평가/피드백"으로 이동한다.
+        "FEEDBACK" -> {
+            onSetPendingMyPageScreen(MyPageScreenType.FEEDBACK)
+            navController.navigateToTab(PickiiDestination.MyPage.route)
+        }
+
+        // 그 외(새 댓글, 채팅, 회의 조율/프로젝트 생성 등)는 referenceType 기준으로 이동한다.
+        else ->
+            when (referenceType) {
+                "RECRUIT" ->
+                    referenceId?.let {
+                        navController.navigate(PickiiDestination.RecruitDetail(it).route)
+                    }
+
+                "CHATROOM", "CHAT" ->
+                    referenceId?.toLongOrNull()?.let { roomId ->
+                        onSetPendingChatRoomId(roomId)
+                        navController.navigateToTab(PickiiDestination.Chat.route)
+                    }
+
+                // 회의 조율(MEETING)/프로젝트 생성(PROJECT) 알림: referenceId가 projectId라 특정 방/투표로 바로
+                // 딥링크할 방법이 없다(chatRoomId·pollId를 알려주는 API가 없음). 채팅 목록까지만 안내한다.
+                "PROJECT" -> navController.navigateToTab(PickiiDestination.Chat.route)
+                // 그 외/미확인 referenceType은 이동하지 않는다.
+            }
     }
 }
 

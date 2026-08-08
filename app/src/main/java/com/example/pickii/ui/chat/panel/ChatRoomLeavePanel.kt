@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -209,12 +212,10 @@ private fun ChatRoomLeaveHeader(onBackClick: () -> Unit) {
                     .clickable(onClick = onBackClick),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = Color.Black,
                 modifier = Modifier.size(24.dp)
             )
         }

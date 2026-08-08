@@ -30,6 +30,7 @@ private enum class CalendarScreenType {
 fun CalendarRoute(
     onScheduleClick: (Long) -> Unit,
     onTopLevelScreenChange: (Boolean) -> Unit,
+    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var currentScreen by rememberSaveable {
@@ -72,7 +73,8 @@ fun CalendarRoute(
                     editingScheduleId = scheduleId
                     editorEntryKey++
                     currentScreen = CalendarScreenType.EDITOR.name
-                }
+                },
+                onNotificationClick = onNotificationClick
             )
         }
 

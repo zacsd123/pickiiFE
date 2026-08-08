@@ -1,7 +1,6 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,16 +15,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.domain.model.ScheduleCategory
+import com.example.pickii.ui.calendar.editor.component.ScheduleCategorySection
 
 private val ProjectInfoPanelBackgroundColor = Color.White
 private val ProjectInfoPanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -40,7 +42,10 @@ private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)
 @Composable
 fun ChatProjectInfoPanel(
     projectInfo: ChatProjectInfoUiModel,
-    onBackClick: () -> Unit
+    scheduleCategories: List<ScheduleCategory>,
+    selectedCategoryId: Long?,
+    onBackClick: () -> Unit,
+    onSelectColor: (Long) -> Unit
 ) {
     BackHandler(
         enabled = true,
@@ -105,6 +110,22 @@ fun ChatProjectInfoPanel(
                         value = projectInfo.leaderName
                     )
                 }
+
+                if (scheduleCategories.isNotEmpty()) {
+                    Text(
+                        text = "이 프로젝트 캘린더 색상",
+                        color = ProjectInfoSecondaryTextColor,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    ScheduleCategorySection(
+                        categories = scheduleCategories,
+                        selectedCategoryId = selectedCategoryId,
+                        onCategoryClick = { categoryId -> categoryId?.let(onSelectColor) },
+                        onManageClick = {}
+                    )
+                }
             }
         }
     }
@@ -132,12 +153,10 @@ private fun ProjectInfoHeader(onBackClick: () -> Unit) {
                     .clickable(onClick = onBackClick),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_back
-                    ),
-                contentDescription = "뒤로가기",
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = Color.Black,
                 modifier = Modifier.size(24.dp)
             )
         }

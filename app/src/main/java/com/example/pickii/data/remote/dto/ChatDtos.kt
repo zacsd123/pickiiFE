@@ -34,12 +34,18 @@ data class ChatRoomMemberDto(
     val nickname: String
 )
 
-/** 메시지 한 건. `GET /chatrooms/{id}/messages` 응답 항목 및 `/sub/chatrooms/{id}` 실시간 수신 바디에 공용으로 쓴다. */
+/**
+ * 메시지 한 건. `GET /chatrooms/{id}/messages` 응답 항목 및 `/sub/chatrooms/{id}` 실시간 수신 바디에 공용으로 쓴다.
+ *
+ * [senderId]/[senderNickname]은 회의 조율 개설 알림 같은 시스템 메시지에서는 보내는 사람이 없어 응답에서
+ * 아예 빠질 수 있다(0.4 Null Policy). 필수로 선언하면 그런 메시지를 받을 때마다 역직렬화가 실패해
+ * 앱이 죽으므로(MissingFieldException) 선택 필드로 둔다.
+ */
 @Serializable
 data class ChatMessageDto(
     val messageId: String,
-    val senderId: Long,
-    val senderNickname: String,
+    val senderId: Long? = null,
+    val senderNickname: String? = null,
     val type: String,
     val message: String? = null,
     val imageUrl: String? = null,

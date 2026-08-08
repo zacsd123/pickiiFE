@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,7 +33,6 @@ import com.example.pickii.ui.calendar.editor.component.ScheduleTitleField
 private val EditorBackgroundColor = Color(0xFFF7F7F2)
 private val EditorHeaderBackgroundColor = Color(0xFFFFFFFF)
 private val EditorHeaderTitleColor = Color(0xFF1B1B1B)
-private val EditorBackButtonColor = Color(0xFF1B1B1B)
 
 private val SaveButtonEnabledColor = Color(0xFF1B1B1B)
 private val SaveButtonDisabledColor = Color(0xFFD6D6D0)
@@ -203,19 +205,17 @@ private fun ScheduleEditorHeader(
                 ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "‹",
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
             modifier =
                 Modifier
                     .clickable(
                         onClick = onBackClick
                     ).padding(
                         end = 16.dp
-                    ),
-            color = EditorBackButtonColor,
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 34.sp
+                    )
         )
 
         Text(

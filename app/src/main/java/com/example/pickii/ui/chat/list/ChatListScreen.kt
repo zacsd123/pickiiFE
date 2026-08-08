@@ -45,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.OneShotEventEffect
+import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.RecruitUiEvent
 
 private val ChatBackgroundColor = Color(0xFFF9FCA8)
@@ -64,6 +65,7 @@ private const val LOAD_MORE_THRESHOLD = 3
 @Composable
 fun ChatListRoute(
     onChatRoomClick: (Long) -> Unit,
+    onNotificationBellClick: () -> Unit,
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -90,6 +92,7 @@ fun ChatListRoute(
         uiState = uiState,
         onTabSelected = viewModel::selectTab,
         onNotificationClick = viewModel::toggleNotification,
+        onNotificationBellClick = onNotificationBellClick,
         onLoadNextPage = viewModel::loadNextPage,
         onChatRoomClick = { chatRoom ->
             viewModel.markChatRoomAsRead(chatRoom.id)
@@ -114,6 +117,7 @@ fun ChatListScreen(
     uiState: ChatListUiState,
     onTabSelected: (ChatListTab) -> Unit,
     onNotificationClick: (Long) -> Unit,
+    onNotificationBellClick: () -> Unit,
     onLoadNextPage: (ChatListTab) -> Unit,
     onChatRoomClick: (ChatRoomPreviewUiModel) -> Unit
 ) {
@@ -149,7 +153,14 @@ fun ChatListScreen(
                 .background(ChatBackgroundColor)
                 .padding(horizontal = 28.dp)
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PickiiTopBar(
+            notificationCount = uiState.notificationCount,
+            onNotificationClick = onNotificationBellClick
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = stringResource(R.string.chat_title),

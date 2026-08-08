@@ -38,6 +38,9 @@ import javax.inject.Singleton
 private const val ERROR_CODE_INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
 private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
+/** 발신자 정보가 없는 시스템 메시지(예: 회의 조율 개설 알림)에 표시할 기본 발신자명. */
+private const val SYSTEM_SENDER_NICKNAME = "시스템"
+
 /** `8. Chat` REST API로 [ChatRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
 @Singleton
 class ChatApiRepository
@@ -179,8 +182,8 @@ class ChatApiRepository
         private fun ChatMessageDto.toDomain(): ChatMessage =
             ChatMessage(
                 messageId = messageId,
-                senderId = senderId,
-                senderNickname = senderNickname,
+                senderId = senderId ?: 0L,
+                senderNickname = senderNickname ?: SYSTEM_SENDER_NICKNAME,
                 type = type.toChatMessageContentType(),
                 text = message,
                 imageUrl = imageUrl,

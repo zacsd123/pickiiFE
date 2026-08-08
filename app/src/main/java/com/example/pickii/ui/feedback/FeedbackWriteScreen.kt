@@ -1,7 +1,5 @@
 package com.example.pickii.ui.feedback
 
-import com.example.pickii.ui.feedback.component.FeedbackTextField
-import com.example.pickii.ui.feedback.component.FeedbackScoreSelector
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.feedback.component.FeedbackScoreSelector
+import com.example.pickii.ui.feedback.component.FeedbackTextField
 
 private val WriteBackgroundColor = Color(0xFFF7FFA8)
 private val WriteCardColor = Color(0xFFFFFEF6)
@@ -48,7 +51,7 @@ data class FeedbackWriteInput(
     val cooperation: Int,
     val deadline: Int,
     val strength: String,
-    val weakness: String,
+    val weakness: String
 )
 
 /** 서버가 요구하는 주관식 후기 최소 길이(4-10 명세: 30~500자). */
@@ -60,7 +63,7 @@ fun FeedbackWriteScreen(
     memberName: String,
     onBackClick: () -> Unit,
     onSubmitClick: (FeedbackWriteInput) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var responsibilityScore by remember { mutableIntStateOf(0) }
     var communicationScore by remember { mutableIntStateOf(0) }
@@ -83,30 +86,33 @@ fun FeedbackWriteScreen(
     BackHandler(onBack = onBackClick)
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(WriteBackgroundColor),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(WriteBackgroundColor)
     ) {
         FeedbackWriteHeader(
-            onBackClick = onBackClick,
+            onBackClick = onBackClick
         )
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentPadding = PaddingValues(
-                start = 18.dp,
-                end = 18.dp,
-                top = 18.dp,
-                bottom = 32.dp,
-            ),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            contentPadding =
+                PaddingValues(
+                    start = 18.dp,
+                    end = 18.dp,
+                    top = 18.dp,
+                    bottom = 32.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
                 FeedbackTargetCard(
                     projectTitle = projectTitle,
-                    memberName = memberName,
+                    memberName = memberName
                 )
             }
 
@@ -116,7 +122,7 @@ fun FeedbackWriteScreen(
                     score = responsibilityScore,
                     onScoreChange = {
                         responsibilityScore = it
-                    },
+                    }
                 )
             }
 
@@ -126,7 +132,7 @@ fun FeedbackWriteScreen(
                     score = communicationScore,
                     onScoreChange = {
                         communicationScore = it
-                    },
+                    }
                 )
             }
 
@@ -136,7 +142,7 @@ fun FeedbackWriteScreen(
                     score = participationScore,
                     onScoreChange = {
                         participationScore = it
-                    },
+                    }
                 )
             }
 
@@ -146,7 +152,7 @@ fun FeedbackWriteScreen(
                     score = cooperationScore,
                     onScoreChange = {
                         cooperationScore = it
-                    },
+                    }
                 )
             }
 
@@ -156,33 +162,35 @@ fun FeedbackWriteScreen(
                     score = deadlineScore,
                     onScoreChange = {
                         deadlineScore = it
-                    },
+                    }
                 )
             }
 
             item {
                 FeedbackTextField(
                     title = "함께한 팀원에 대한 칭찬을 남겨주세요.",
-                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
-                        "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
+                    description =
+                        "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
+                            "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
                     placeholder = "자유롭게 작성해주세요...",
                     value = goodPoint,
                     onValueChange = {
                         goodPoint = it
-                    },
+                    }
                 )
             }
 
             item {
                 FeedbackTextField(
                     title = "함께한 팀원이 개선할 점을 남겨주세요.",
-                    description = "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
-                        "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
+                    description =
+                        "작성한 후기는 원문 그대로 공개되지 않고, AI가 핵심 내용을 정리해 상대방에게 전달합니다. " +
+                            "최소 ${FEEDBACK_TEXT_MIN_LENGTH}자 이상 작성해주세요.",
                     placeholder = "자유롭게 작성해주세요...",
                     value = improvementPoint,
                     onValueChange = {
                         improvementPoint = it
-                    },
+                    }
                 )
             }
 
@@ -202,10 +210,10 @@ fun FeedbackWriteScreen(
                                 cooperation = cooperationScore,
                                 deadline = deadlineScore,
                                 strength = goodPoint,
-                                weakness = improvementPoint,
+                                weakness = improvementPoint
                             )
                         )
-                    },
+                    }
                 )
             }
         }
@@ -213,24 +221,23 @@ fun FeedbackWriteScreen(
 }
 
 @Composable
-private fun FeedbackWriteHeader(
-    onBackClick: () -> Unit,
-) {
+private fun FeedbackWriteHeader(onBackClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp
+                ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "‹",
-            color = WriteTextColor,
-            fontSize = 32.sp,
-            modifier = Modifier.clickable(onClick = onBackClick),
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
+            modifier = Modifier.clickable(onClick = onBackClick)
         )
 
         Spacer(modifier = Modifier.size(12.dp))
@@ -239,7 +246,7 @@ private fun FeedbackWriteHeader(
             text = "상호 평가 작성",
             color = WriteTextColor,
             fontSize = 21.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -247,20 +254,21 @@ private fun FeedbackWriteHeader(
 @Composable
 private fun FeedbackTargetCard(
     projectTitle: String,
-    memberName: String,
+    memberName: String
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(WriteCardColor)
-            .padding(18.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(WriteCardColor)
+                .padding(18.dp)
     ) {
         Text(
             text = projectTitle,
             color = WriteTextColor,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -269,7 +277,7 @@ private fun FeedbackTargetCard(
             text = "${memberName}에 대한 상호 평가를 작성해주세요.",
             color = WriteDescriptionColor,
             fontSize = 13.sp,
-            lineHeight = 19.sp,
+            lineHeight = 19.sp
         )
     }
 }
@@ -278,47 +286,48 @@ private fun FeedbackTargetCard(
 private fun FeedbackScoreQuestion(
     question: String,
     score: Int,
-    onScoreChange: (Int) -> Unit,
+    onScoreChange: (Int) -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(WriteCardColor)
-            .padding(18.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(WriteCardColor)
+                .padding(18.dp)
     ) {
         Text(
             text = question,
             color = WriteTextColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 21.sp,
+            lineHeight = 21.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         FeedbackScoreSelector(
             selectedScore = score,
-            onScoreSelect = onScoreChange,
+            onScoreSelect = onScoreChange
         )
     }
 }
 
-
 @Composable
 private fun FeedbackPrivacyInformation() {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(WriteInformationColor)
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(WriteInformationColor)
+                .padding(16.dp)
     ) {
         Text(
             text = "작성 전 확인해주세요.",
             color = WriteTextColor,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -327,7 +336,7 @@ private fun FeedbackPrivacyInformation() {
             text = "작성한 평가는 익명으로 처리되며, 여러 팀원의 의견과 함께 종합되어 전달됩니다.",
             color = WriteDescriptionColor,
             fontSize = 11.sp,
-            lineHeight = 17.sp,
+            lineHeight = 17.sp
         )
 
         Spacer(modifier = Modifier.height(5.dp))
@@ -336,7 +345,7 @@ private fun FeedbackPrivacyInformation() {
             text = "제출 이후에는 수정하거나 삭제할 수 없습니다.",
             color = WriteDescriptionColor,
             fontSize = 11.sp,
-            lineHeight = 17.sp,
+            lineHeight = 17.sp
         )
     }
 }
@@ -344,31 +353,31 @@ private fun FeedbackPrivacyInformation() {
 @Composable
 private fun FeedbackSubmitButton(
     isEnabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(15.dp))
-            .background(
-                if (isEnabled) {
-                    WriteTextColor
-                } else {
-                    Color(0xFFD5D5CF)
-                },
-            )
-            .clickable(
-                enabled = isEnabled,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .clip(RoundedCornerShape(15.dp))
+                .background(
+                    if (isEnabled) {
+                        WriteTextColor
+                    } else {
+                        Color(0xFFD5D5CF)
+                    }
+                ).clickable(
+                    enabled = isEnabled,
+                    onClick = onClick
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "평가 제출하기",
             color = Color.White,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -376,7 +385,7 @@ private fun FeedbackSubmitButton(
 @Preview(
     showBackground = true,
     widthDp = 390,
-    heightDp = 844,
+    heightDp = 844
 )
 @Composable
 private fun FeedbackWriteScreenPreview() {
@@ -384,6 +393,6 @@ private fun FeedbackWriteScreenPreview() {
         projectTitle = "서비스 기획 공모전",
         memberName = "김OO님",
         onBackClick = {},
-        onSubmitClick = {},
+        onSubmitClick = {}
     )
 }

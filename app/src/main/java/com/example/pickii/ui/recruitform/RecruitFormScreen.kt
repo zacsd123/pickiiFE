@@ -147,7 +147,7 @@ private fun RecruitFormScreenContent(
     onShortIntroChange: (String) -> Unit,
     onDetailContentChange: (String) -> Unit,
     onGenerateAiDraftClick: () -> Unit,
-        onDismissAiDialog: () -> Unit,
+    onDismissAiDialog: () -> Unit,
     onSubmitClick: () -> Unit,
     onDismissSubmitConfirm: () -> Unit,
     onConfirmSubmit: () -> Unit,
@@ -319,7 +319,7 @@ private fun FormBody(
             uiState.availableCategories.forEach { category ->
                 SelectableChip(
                     label = category.label,
-                    selected = category == uiState.category,
+                    selected = category in uiState.categories,
                     enabled = true,
                     onClick = { onCategorySelect(category) }
                 )
@@ -338,7 +338,7 @@ private fun FormBody(
             uiState.availableTopics.forEach { topic ->
                 SelectableChip(
                     label = topic.label,
-                    selected = topic == uiState.topic,
+                    selected = topic in uiState.topics,
                     enabled = true,
                     onClick = { onTopicSelect(topic) }
                 )
@@ -367,7 +367,8 @@ private fun FormBody(
                     .fillMaxWidth()
                     .height(90.dp),
             placeholder = {
-                val categoryLabel = uiState.category?.label ?: stringResource(R.string.recruit_form_label_category)
+                val categoryLabel =
+                    uiState.categories.firstOrNull()?.label ?: stringResource(R.string.recruit_form_label_category)
                 Text(
                     text = stringResource(R.string.recruit_form_placeholder_short_intro, categoryLabel),
                     color = PickiiTextGray

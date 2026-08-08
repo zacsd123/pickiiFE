@@ -60,8 +60,8 @@ data class RecruitFormUiState(
     val title: String = "",
     val maxParticipants: Int? = null,
     val onCampus: CampusScope? = CampusScope.INTERNAL,
-    val category: RecruitCategory? = null,
-    val topic: RecruitTopic? = null,
+    val categories: Set<RecruitCategory> = emptySet(),
+    val topics: Set<RecruitTopic> = emptySet(),
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val shortIntro: String = "",
@@ -80,8 +80,8 @@ data class RecruitFormUiState(
             isTitleValid &&
                 maxParticipants != null &&
                 onCampus != null &&
-                category != null &&
-                topic != null &&
+                categories.isNotEmpty() &&
+                topics.isNotEmpty() &&
                 startDate != null &&
                 endDate != null &&
                 shortIntro.isNotBlank() &&
@@ -163,8 +163,8 @@ class RecruitFormViewModel
                     title = post.title,
                     maxParticipants = post.maxParticipants,
                     onCampus = post.onCampus,
-                    category = post.category,
-                    topic = post.topic,
+                    categories = post.categories.toSet(),
+                    topics = post.topics.toSet(),
                     startDate = post.startDate,
                     endDate = post.endDate,
                     shortIntro = post.shortIntro,
@@ -190,14 +190,20 @@ class RecruitFormViewModel
             _uiState.update { it.copy(onCampus = scope) }
         }
 
-        /** 카테고리를 단일 선택한다. */
+        /** 카테고리 선택을 토글한다(복수 선택 가능). */
         fun onCategorySelect(category: RecruitCategory) {
-            _uiState.update { it.copy(category = category) }
+            _uiState.update {
+                val selected = it.categories
+                it.copy(categories = if (category in selected) selected - category else selected + category)
+            }
         }
 
-        /** 주제를 단일 선택한다. */
+        /** 주제 선택을 토글한다(복수 선택 가능). */
         fun onTopicSelect(topic: RecruitTopic) {
-            _uiState.update { it.copy(topic = topic) }
+            _uiState.update {
+                val selected = it.topics
+                it.copy(topics = if (topic in selected) selected - topic else selected + topic)
+            }
         }
 
         /** 진행 기간의 시작일을 바꾼다. */
@@ -294,8 +300,7 @@ class RecruitFormViewModel
             val state = _uiState.value
             val maxParticipants = state.maxParticipants ?: return
             val onCampus = state.onCampus ?: return
-            val category = state.category ?: return
-            val topic = state.topic ?: return
+            if (state.categories.isEmpty() || state.topics.isEmpty()) return
             val startDate = state.startDate ?: return
             val endDate = state.endDate ?: return
 
@@ -305,8 +310,8 @@ class RecruitFormViewModel
                         title = state.title,
                         maxParticipants = maxParticipants,
                         onCampus = onCampus,
-                        categoryIds = listOf(category.id),
-                        topicIds = listOf(topic.id),
+                        categoryIds = state.categories.map { it.id },
+                        topicIds = state.topics.map { it.id },
                         startDate = startDate,
                         endDate = endDate,
                         shortIntro = state.shortIntro,
@@ -323,8 +328,7 @@ class RecruitFormViewModel
             val targetPostId = postId ?: return
             val maxParticipants = state.maxParticipants ?: return
             val onCampus = state.onCampus ?: return
-            val category = state.category ?: return
-            val topic = state.topic ?: return
+            if (state.categories.isEmpty() || state.topics.isEmpty()) return
             val startDate = state.startDate ?: return
             val endDate = state.endDate ?: return
 
@@ -335,8 +339,8 @@ class RecruitFormViewModel
                         title = state.title,
                         maxParticipants = maxParticipants,
                         onCampus = onCampus,
-                        categoryIds = listOf(category.id),
-                        topicIds = listOf(topic.id),
+                        categoryIds = state.categories.map { it.id },
+                        topicIds = state.topics.map { it.id },
                         startDate = startDate,
                         endDate = endDate,
                         shortIntro = state.shortIntro,

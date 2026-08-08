@@ -15,14 +15,14 @@ import com.example.pickii.ui.common.RecruitUiEvent
 private enum class FeedbackScreenType {
     LIST,
     WRITE,
-    DETAIL,
+    DETAIL
 }
 
 @Composable
 fun FeedbackRoute(
     onExit: () -> Unit,
     onNotificationClick: () -> Unit = {},
-    viewModel: FeedbackViewModel = hiltViewModel(),
+    viewModel: FeedbackViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -65,20 +65,22 @@ fun FeedbackRoute(
                     currentScreen = FeedbackScreenType.DETAIL
                 },
                 onNotificationClick = onNotificationClick,
-                onCloseClick = onExit,
+                onCloseClick = onExit
             )
         }
 
         FeedbackScreenType.WRITE -> {
-            val selectedProject = uiState.projects.firstOrNull { project ->
-                project.id == selectedProjectId
-            }
-
-            val selectedMember = selectedProject
-                ?.members
-                ?.firstOrNull { member ->
-                    member.id == selectedMemberId
+            val selectedProject =
+                uiState.projects.firstOrNull { project ->
+                    project.id == selectedProjectId
                 }
+
+            val selectedMember =
+                selectedProject
+                    ?.members
+                    ?.firstOrNull { member ->
+                        member.id == selectedMemberId
+                    }
 
             FeedbackWriteScreen(
                 projectTitle = selectedProject?.title.orEmpty(),
@@ -95,10 +97,10 @@ fun FeedbackRoute(
                             projectId = projectId,
                             memberId = memberId,
                             input = input,
-                            onComplete = { currentScreen = FeedbackScreenType.LIST },
+                            onComplete = { currentScreen = FeedbackScreenType.LIST }
                         )
                     }
-                },
+                }
             )
         }
 
@@ -108,7 +110,7 @@ fun FeedbackRoute(
                 onCloseClick = {
                     currentScreen = FeedbackScreenType.LIST
                 },
-                onNotificationClick = onNotificationClick,
+                onNotificationClick = onNotificationClick
             )
         }
     }

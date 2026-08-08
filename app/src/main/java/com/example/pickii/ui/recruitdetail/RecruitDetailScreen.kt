@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,32 +22,41 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.RecruitComment
@@ -59,6 +69,7 @@ import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.toFullDisplayString
@@ -98,10 +109,23 @@ fun RecruitDetailScreen(
     onEditClick: (postId: String) -> Unit = {},
     onDeletedNavigateHome: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
+    onNavigateToChatRoom: (roomId: Long) -> Unit = {},
     viewModel: RecruitDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refresh()
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
@@ -115,11 +139,19 @@ fun RecruitDetailScreen(
         }
     }
 
+    OneShotEventEffect(flow = viewModel.navigateToChatRoom) { roomId ->
+        onNavigateToChatRoom(roomId)
+    }
+
     RecruitDetailScreenContent(
         uiState = uiState,
         onBackClick = onBackClick,
         onScrapClick = viewModel::onScrapClick,
         onAuthorClick = { uiState.post?.let { onAuthorProfileClick(it.authorId) } },
+        onCommentAuthorClick = viewModel::onCommentAuthorClick,
+        onDismissCommentAuthorMenu = viewModel::onDismissCommentAuthorMenu,
+        onCommentAuthorProfileClick = onAuthorProfileClick,
+        onCommentAuthorChatClick = viewModel::onCommentAuthorChatClick,
         onApplyClick = {
             when {
                 !uiState.isLoggedIn -> viewModel.onLoginPromptRequested()
@@ -155,6 +187,10 @@ private fun RecruitDetailScreenContent(
     onBackClick: () -> Unit,
     onScrapClick: () -> Unit,
     onAuthorClick: () -> Unit,
+    onCommentAuthorClick: (RecruitComment) -> Unit,
+    onDismissCommentAuthorMenu: () -> Unit,
+    onCommentAuthorProfileClick: (authorId: String) -> Unit,
+    onCommentAuthorChatClick: () -> Unit,
     onApplyClick: () -> Unit,
     onEditClick: () -> Unit,
     onCloseRecruitingClick: () -> Unit,
@@ -228,7 +264,8 @@ private fun RecruitDetailScreenContent(
                             item = item,
                             currentUserId = uiState.currentUser?.id,
                             onReplyClick = onReplyClick,
-                            onDeleteClick = onDeleteCommentClick
+                            onDeleteClick = onDeleteCommentClick,
+                            onAuthorClick = onCommentAuthorClick
                         )
                     }
                 }
@@ -282,6 +319,95 @@ private fun RecruitDetailScreenContent(
                 onDismiss = onDismissDeletePostDialog
             )
         }
+
+        uiState.commentAuthorMenuTarget?.let { target ->
+            CommentAuthorMenuBottomSheet(
+                nickname = target.authorNickname,
+                onProfileClick = {
+                    onDismissCommentAuthorMenu()
+                    onCommentAuthorProfileClick(target.authorId)
+                },
+                onChatClick = onCommentAuthorChatClick,
+                onDismiss = onDismissCommentAuthorMenu
+            )
+        }
+    }
+}
+
+/** 댓글 작성자 닉네임을 눌렀을 때 뜨는 "프로필 보기 / 1:1 채팅하기" 메뉴. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CommentAuthorMenuBottomSheet(
+    nickname: String,
+    onProfileClick: () -> Unit,
+    onChatClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = Color.White
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = nickname,
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            CommentAuthorMenuRow(
+                icon = Icons.Filled.Person,
+                label = stringResource(R.string.recruit_comment_author_menu_profile),
+                onClick = onProfileClick
+            )
+
+            CommentAuthorMenuRow(
+                icon = Icons.AutoMirrored.Filled.Chat,
+                label = stringResource(R.string.recruit_comment_author_menu_chat),
+                onClick = onChatClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun CommentAuthorMenuRow(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .clickable(onClick = onClick)
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(PickiiFieldBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(20.dp))
+        }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Text(text = label, color = Color.Black, fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -295,9 +421,12 @@ private fun DetailTopBar(onBackClick: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.Black)
-        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
+            modifier = Modifier.clickable(onClick = onBackClick)
+        )
 
         Box(
             modifier =
@@ -438,10 +567,13 @@ private fun PostInfoCard(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             InfoBadge(text = post.onCampus.label)
-            post.category?.let { InfoBadge(text = it.label) }
-            post.topic?.let { InfoBadge(text = it.label) }
+            post.categories.forEach { InfoBadge(text = it.label) }
+            post.topics.forEach { InfoBadge(text = it.label) }
             InfoBadge(text = post.status.label)
         }
 
@@ -475,7 +607,8 @@ private fun PostInfoCard(
                 isClosed = post.status == RecruitStatus.CLOSED,
                 onEditClick = onEditClick,
                 onCloseRecruitingClick = onCloseRecruitingClick,
-                onReopenRecruitingClick = onReopenRecruitingClick
+                onReopenRecruitingClick = onReopenRecruitingClick,
+                onDeletePostClick = onDeletePostClick
             )
         } else {
             Box(
@@ -528,27 +661,36 @@ private fun AuthorActionButtons(
     isClosed: Boolean,
     onEditClick: () -> Unit,
     onCloseRecruitingClick: () -> Unit,
-    onReopenRecruitingClick: () -> Unit
+    onReopenRecruitingClick: () -> Unit,
+    onDeletePostClick: () -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        AuthorActionButton(
-            text = stringResource(R.string.recruit_detail_button_edit),
-            onClick = onEditClick,
-            modifier = Modifier.weight(1f)
-        )
-        if (isClosed) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_reopen_recruiting),
-                onClick = onReopenRecruitingClick,
+                text = stringResource(R.string.recruit_detail_button_edit),
+                onClick = onEditClick,
                 modifier = Modifier.weight(1f)
             )
-        } else {
-            AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_close_recruiting),
-                onClick = onCloseRecruitingClick,
-                modifier = Modifier.weight(1f)
-            )
+            if (isClosed) {
+                AuthorActionButton(
+                    text = stringResource(R.string.recruit_detail_button_reopen_recruiting),
+                    onClick = onReopenRecruitingClick,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                AuthorActionButton(
+                    text = stringResource(R.string.recruit_detail_button_close_recruiting),
+                    onClick = onCloseRecruitingClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
+        AuthorActionButton(
+            text = stringResource(R.string.recruit_detail_button_delete_post),
+            onClick = onDeletePostClick,
+            contentColor = PickiiPaletteRed,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -557,7 +699,8 @@ private fun AuthorActionButtons(
 private fun AuthorActionButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentColor: Color = Color.Black
 ) {
     Box(
         modifier =
@@ -568,7 +711,7 @@ private fun AuthorActionButton(
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = text, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        Text(text = text, color = contentColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -604,7 +747,8 @@ private fun CommentRow(
     item: CommentDisplayItem,
     currentUserId: String?,
     onReplyClick: (RecruitComment) -> Unit,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
+    onAuthorClick: (RecruitComment) -> Unit
 ) {
     val comment = item.comment
     // comment.isAuthor는 "이 댓글의 작성자가 공고 작성자인지"를 뜻하는 서버 값(작성자 배지용)이지,
@@ -634,7 +778,13 @@ private fun CommentRow(
             )
         } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = nicknameText, color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = nicknameText,
+                    color = Color.Black,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onAuthorClick(comment) }
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = comment.createdAt.toLocalDate().toDisplayString(), color = PickiiTextGray, fontSize = 11.sp)
             }
@@ -767,6 +917,10 @@ private fun RecruitDetailScreenPreview() {
             onBackClick = {},
             onScrapClick = {},
             onAuthorClick = {},
+            onCommentAuthorClick = {},
+            onDismissCommentAuthorMenu = {},
+            onCommentAuthorProfileClick = {},
+            onCommentAuthorChatClick = {},
             onApplyClick = {},
             onEditClick = {},
             onCloseRecruitingClick = {},

@@ -6,6 +6,7 @@ import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.ChatRoomSummary
 import com.example.pickii.domain.repository.ChatRepository
+import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.ui.common.RecruitUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -29,7 +30,8 @@ private const val ERROR_CODE_USER_NOT_FOUND = "USER_NOT_FOUND"
 class ChatListViewModel
     @Inject
     constructor(
-        private val chatRepository: ChatRepository
+        private val chatRepository: ChatRepository,
+        private val notificationRepository: NotificationRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(ChatListUiState())
         val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
@@ -44,6 +46,16 @@ class ChatListViewModel
         fun refreshAll() {
             refresh(ChatListTab.GROUP)
             refresh(ChatListTab.DIRECT)
+            loadNotificationCount()
+        }
+
+        /** 상단 헤더에 표시할 미읽음 알림 수를 불러온다(예: 알림 화면을 봤다 돌아왔을 때). */
+        fun loadNotificationCount() {
+            viewModelScope.launch {
+                notificationRepository.getUnreadCount().onSuccess { count ->
+                    _uiState.update { it.copy(notificationCount = count) }
+                }
+            }
         }
 
         /**

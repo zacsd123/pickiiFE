@@ -16,6 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthGrid
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthHeader
 import com.example.pickii.ui.calendar.monthly.component.ScheduleSummaryCard
+import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.PickiiTopBar
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -54,8 +60,10 @@ fun MonthlyCalendarScreen(
     onDateClick: (LocalDate) -> Unit,
     onScheduleClick: (Long) -> Unit,
     onEditScheduleClick: (Long) -> Unit,
+    onDeleteScheduleClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
+    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val selectedDateSchedules =
@@ -63,6 +71,7 @@ fun MonthlyCalendarScreen(
             .filter { schedule ->
                 schedule.includesDate(uiState.selectedDate)
             }
+    var pendingDeleteScheduleId by remember { mutableStateOf<Long?>(null) }
 
     Box(
         modifier =
@@ -81,6 +90,13 @@ fun MonthlyCalendarScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item {
+                PickiiTopBar(
+                    notificationCount = uiState.notificationCount,
+                    onNotificationClick = onNotificationClick
+                )
+            }
+
             item {
                 CalendarMonthHeader(
                     displayedYearMonth = uiState.displayedYearMonth,
@@ -137,10 +153,28 @@ fun MonthlyCalendarScreen(
                         },
                         onEditClick = {
                             onEditScheduleClick(schedule.id)
+                        },
+                        onDeleteClick = {
+                            pendingDeleteScheduleId = schedule.id
                         }
                     )
                 }
             }
+        }
+
+        val deleteTargetId = pendingDeleteScheduleId
+        if (deleteTargetId != null) {
+            ConfirmDialog(
+                title = "일정을 삭제할까요?",
+                body = "삭제하면 되돌릴 수 없습니다.",
+                confirmLabel = "삭제",
+                dismissLabel = "취소",
+                onConfirm = {
+                    onDeleteScheduleClick(deleteTargetId)
+                    pendingDeleteScheduleId = null
+                },
+                onDismiss = { pendingDeleteScheduleId = null }
+            )
         }
     }
 }

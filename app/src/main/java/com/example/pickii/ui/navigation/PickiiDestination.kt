@@ -25,9 +25,6 @@ sealed class PickiiDestination(
     /** 비로그인 상태 비밀번호 재설정 화면. */
     data object PasswordReset : PickiiDestination("password-reset")
 
-    /** 아이디 찾기 화면. */
-    data object FindId : PickiiDestination("find-id")
-
     /** 홈 화면. */
     data object Home : PickiiDestination("home")
 

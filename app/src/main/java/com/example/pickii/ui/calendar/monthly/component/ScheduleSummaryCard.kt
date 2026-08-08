@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
 import com.example.pickii.ui.calendar.monthly.ScheduleColorType
+import com.example.pickii.ui.theme.PickiiPaletteRed
 import java.time.format.DateTimeFormatter
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
@@ -60,6 +61,7 @@ fun ScheduleSummaryCard(
     isExpanded: Boolean,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -94,7 +96,8 @@ fun ScheduleSummaryCard(
         ) {
             ScheduleExpandedContent(
                 schedule = schedule,
-                onEditClick = onEditClick
+                onEditClick = onEditClick,
+                onDeleteClick = onDeleteClick
             )
         }
     }
@@ -169,6 +172,7 @@ private fun ScheduleSummaryHeader(
 private fun ScheduleExpandedContent(
     schedule: MonthlyScheduleUiModel,
     onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -268,24 +272,47 @@ private fun ScheduleExpandedContent(
             )
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp)
-                    .background(
-                        color = EditButtonBackgroundColor,
-                        shape = RoundedCornerShape(16.dp)
-                    ).clickable(onClick = onEditClick)
-                    .padding(vertical = 14.dp),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "일정 수정하기",
-                color = EditButtonTextColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            color = EditButtonBackgroundColor,
+                            shape = RoundedCornerShape(16.dp)
+                        ).clickable(onClick = onEditClick)
+                        .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "일정 수정하기",
+                    color = EditButtonTextColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            color = EditButtonBackgroundColor,
+                            shape = RoundedCornerShape(16.dp)
+                        ).clickable(onClick = onDeleteClick)
+                        .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "삭제",
+                    color = PickiiPaletteRed,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

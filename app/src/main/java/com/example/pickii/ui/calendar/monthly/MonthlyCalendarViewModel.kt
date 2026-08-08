@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
+import com.example.pickii.domain.repository.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +32,8 @@ private val ScheduleTimeFormatter =
 class MonthlyCalendarViewModel
     @Inject
     constructor(
-        private val calendarRepository: CalendarRepository
+        private val calendarRepository: CalendarRepository,
+        private val notificationRepository: NotificationRepository
     ) : ViewModel() {
         private val _uiState =
             MutableStateFlow(
@@ -46,6 +48,16 @@ class MonthlyCalendarViewModel
             observeCalendarData()
             viewModelScope.launch { calendarRepository.loadCategories() }
             loadMonth(_uiState.value.displayedYearMonth)
+            loadNotificationCount()
+        }
+
+        /** 상단 헤더에 표시할 미읽음 알림 수를 불러온다(예: 알림 화면을 봤다 돌아왔을 때). */
+        fun loadNotificationCount() {
+            viewModelScope.launch {
+                notificationRepository.getUnreadCount().onSuccess { count ->
+                    _uiState.update { it.copy(notificationCount = count) }
+                }
+            }
         }
 
         private fun loadMonth(yearMonth: YearMonth) {
@@ -196,6 +208,19 @@ class MonthlyCalendarViewModel
          */
         fun toggleSchedule(scheduleId: Long) {
             toggleScheduleDetail(scheduleId)
+        }
+
+        /**
+         * 일정을 삭제한다.
+         */
+        fun deleteSchedule(scheduleId: Long) {
+            viewModelScope.launch {
+                calendarRepository.deleteSchedule(scheduleId).onSuccess {
+                    if (_uiState.value.expandedScheduleId == scheduleId) {
+                        closeScheduleDetail()
+                    }
+                }
+            }
         }
     }
 

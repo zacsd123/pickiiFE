@@ -9,6 +9,7 @@ import com.example.pickii.data.remote.api.CalendarApiService
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
+import com.example.pickii.data.remote.api.MeetingPollApiService
 import com.example.pickii.data.remote.api.MyPageActivityApiService
 import com.example.pickii.data.remote.api.NotificationApiService
 import com.example.pickii.data.remote.api.NotificationSettingsApiService
@@ -118,4 +119,9 @@ object NetworkModule {
     @Singleton
     fun provideCalendarApiService(retrofit: Retrofit): CalendarApiService =
         retrofit.create(CalendarApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMeetingPollApiService(retrofit: Retrofit): MeetingPollApiService =
+        retrofit.create(MeetingPollApiService::class.java)
 }

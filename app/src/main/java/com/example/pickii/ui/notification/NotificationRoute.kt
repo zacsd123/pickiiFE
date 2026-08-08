@@ -9,7 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun NotificationRoute(
     onCloseClick: () -> Unit,
     onNotificationClick: (NotificationItemUiModel) -> Unit = {},
-    viewModel: NotificationViewModel = hiltViewModel(),
+    viewModel: NotificationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -19,6 +19,6 @@ fun NotificationRoute(
         onNotificationClick = { notification ->
             viewModel.readNotification(notification.id)
             onNotificationClick(notification)
-        },
+        }
     )
 }

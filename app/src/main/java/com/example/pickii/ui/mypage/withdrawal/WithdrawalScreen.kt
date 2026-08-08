@@ -142,7 +142,8 @@ private fun WithdrawalScreenContent(
                     Text(text = stringResource(R.string.mypage_withdraw_placeholder_password), color = PickiiTextGray)
                 },
                 singleLine = true,
-                visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation =
+                    if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 shape = RoundedCornerShape(FieldCornerRadius),
                 colors = fieldColors()
             )

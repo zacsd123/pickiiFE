@@ -24,18 +24,28 @@ data class ChatMessageUiModel(
     val isReadByCounterpart: Boolean = false,
     val type: ChatMessageType = ChatMessageType.TEXT,
     val meetingNotice: MeetingNoticeUiModel? = null,
+    val meetingConfirmed: MeetingConfirmedUiModel? = null,
     val imageUri: String? = null
 )
 
 enum class ChatMessageType {
     TEXT,
     MEETING_NOTICE,
+    MEETING_CONFIRMED,
     IMAGE
 }
 
 data class MeetingNoticeUiModel(
     val meetingTitle: String,
     val requesterName: String,
-    val createdTimeMillis: Long,
-    val isRegistered: Boolean
+    val pollId: Long,
+    val deadlineMillis: Long
+)
+
+data class MeetingConfirmedUiModel(
+    val meetingTitle: String,
+    val pollId: Long,
+    val slotStartMillis: Long,
+    val slotEndMillis: Long,
+    val scheduleId: Long
 )

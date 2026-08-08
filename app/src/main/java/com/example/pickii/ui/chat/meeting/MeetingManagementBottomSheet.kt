@@ -44,39 +44,33 @@ private val MeetingCardBackgroundColor = Color.White
 private val MeetingPrimaryColor = Color(0xFF1B2130)
 private val MeetingSecondaryColor = Color(0xFF9BA1B1)
 private val MeetingPointColor = Color(0xFF675CFF)
-private val MeetingMemberBackgroundColor = Color(0xFFF6F7FC)
+private val MeetingAttendColor = Color(0xFFE9E9FF)
+private val MeetingAbsentColor = Color(0xFFFFE3E3)
 private val MeetingDeleteColor = Color(0xFFFF4D4D)
 private val MeetingDeleteBackgroundColor = Color(0xFFFFF3F3)
 
 /**
- * 회의 관리 화면에 표시할 회의 정보다.
+ * 회의 관리 화면에 표시할 확정된 팀 일정 정보다(7-15).
+ *
+ * 서버가 참여자별 참석/불참 목록을 내려주지 않아(7-15/7-20 모두 본인 처리만 가능), 팀원별 참석 현황 대신
+ * 본인의 참석/불참 액션만 제공한다.
  */
 data class ManagedMeetingUiModel(
     val id: Long,
     val title: String,
     val date: String,
     val startTime: String,
-    val endTime: String,
-    val participants: List<MeetingMemberUiModel>,
-    val absentees: List<MeetingMemberUiModel>
+    val endTime: String
 )
 
 /**
- * 회의 참여자 정보를 나타낸다.
- */
-data class MeetingMemberUiModel(
-    val id: Long,
-    val name: String
-)
-
-/**
- * 예정된 회의와 참여 여부를 관리하는 바텀시트다.
+ * 확정된 회의(팀 일정) 목록과 내 참석 여부를 관리하는 바텀시트다.
  *
- * @param meetings 예정된 회의 목록
+ * @param meetings 확정된 회의 목록
  * @param onDismiss 바텀시트를 닫을 때 실행할 동작
  * @param onDeleteMeeting 회의를 삭제할 때 실행할 동작
- * @param onMoveToAbsent 참여자를 불참자로 변경할 때 실행할 동작
- * @param onMoveToParticipant 불참자를 참여자로 변경할 때 실행할 동작
+ * @param onAttendClick 참석으로 표시할 때 실행할 동작
+ * @param onAbsentClick 불참으로 표시할 때 실행할 동작
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,14 +78,8 @@ fun MeetingManagementBottomSheet(
     meetings: List<ManagedMeetingUiModel>,
     onDismiss: () -> Unit,
     onDeleteMeeting: (Long) -> Unit,
-    onMoveToAbsent: (
-        meetingId: Long,
-        memberId: Long
-    ) -> Unit,
-    onMoveToParticipant: (
-        meetingId: Long,
-        memberId: Long
-    ) -> Unit
+    onAttendClick: (Long) -> Unit,
+    onAbsentClick: (Long) -> Unit
 ) {
     val sheetState =
         rememberModalBottomSheetState(
@@ -151,17 +139,11 @@ fun MeetingManagementBottomSheet(
                             onDeleteMeeting = {
                                 onDeleteMeeting(meeting.id)
                             },
-                            onMoveToAbsent = { memberId ->
-                                onMoveToAbsent(
-                                    meeting.id,
-                                    memberId
-                                )
+                            onAttendClick = {
+                                onAttendClick(meeting.id)
                             },
-                            onMoveToParticipant = { memberId ->
-                                onMoveToParticipant(
-                                    meeting.id,
-                                    memberId
-                                )
+                            onAbsentClick = {
+                                onAbsentClick(meeting.id)
                             }
                         )
                     }
@@ -201,7 +183,7 @@ private fun MeetingManagementHeader(
             )
 
             Text(
-                text = "예정된 회의 ${meetingCount}건",
+                text = "확정된 회의 ${meetingCount}건",
                 color = MeetingSecondaryColor,
                 fontSize = 14.sp
             )
@@ -233,8 +215,8 @@ private fun MeetingManagementHeader(
 private fun MeetingManagementCard(
     meeting: ManagedMeetingUiModel,
     onDeleteMeeting: () -> Unit,
-    onMoveToAbsent: (Long) -> Unit,
-    onMoveToParticipant: (Long) -> Unit
+    onAttendClick: () -> Unit,
+    onAbsentClick: () -> Unit
 ) {
     var isExpanded by rememberSaveable(meeting.id) {
         mutableStateOf(false)
@@ -277,28 +259,29 @@ private fun MeetingManagementCard(
                     modifier = Modifier.height(16.dp)
                 )
 
-                MeetingMemberSection(
-                    title = "참여",
-                    count = meeting.participants.size,
-                    isParticipantSection = true,
-                    members = meeting.participants,
-                    onStatusClick = onMoveToAbsent
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    MeetingAttendanceButton(
+                        text = "참석",
+                        backgroundColor = MeetingAttendColor,
+                        contentColor = MeetingPointColor,
+                        onClick = onAttendClick,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    MeetingAttendanceButton(
+                        text = "불참",
+                        backgroundColor = MeetingAbsentColor,
+                        contentColor = MeetingDeleteColor,
+                        onClick = onAbsentClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
                 Spacer(
-                    modifier = Modifier.height(18.dp)
-                )
-
-                MeetingMemberSection(
-                    title = "불참",
-                    count = meeting.absentees.size,
-                    isParticipantSection = false,
-                    members = meeting.absentees,
-                    onStatusClick = onMoveToParticipant
-                )
-
-                Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier = Modifier.height(12.dp)
                 )
 
                 MeetingDeleteButton(
@@ -376,14 +359,6 @@ private fun MeetingSummaryContent(
             }
         }
 
-        MeetingParticipantCountBadge(
-            participantCount = meeting.participants.size
-        )
-
-        Spacer(
-            modifier = Modifier.width(12.dp)
-        )
-
         Image(
             painter =
                 painterResource(
@@ -406,211 +381,29 @@ private fun MeetingSummaryContent(
 }
 
 @Composable
-private fun MeetingParticipantCountBadge(participantCount: Int) {
-    Row(
+private fun MeetingAttendanceButton(
+    text: String,
+    backgroundColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
         modifier =
-            Modifier
+            modifier
+                .height(44.dp)
                 .background(
-                    color = Color(0xFFF1F0FF),
-                    shape = RoundedCornerShape(20.dp)
-                ).padding(
-                    horizontal = 10.dp,
-                    vertical = 6.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
+                    color = backgroundColor,
+                    shape = RoundedCornerShape(14.dp)
+                ).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter =
-                painterResource(
-                    id = R.drawable.ic_people
-                ),
-            contentDescription = null,
-            modifier = Modifier.size(16.dp)
-        )
-
-        Spacer(
-            modifier = Modifier.width(4.dp)
-        )
-
         Text(
-            text = "${participantCount}명",
-            color = MeetingPointColor,
+            text = text,
+            color = contentColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
-    }
-}
-
-@Composable
-private fun MeetingMemberSection(
-    title: String,
-    count: Int,
-    isParticipantSection: Boolean,
-    members: List<MeetingMemberUiModel>,
-    onStatusClick: (Long) -> Unit
-) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id =
-                            if (isParticipantSection) {
-                                R.drawable.ic_profile
-                            } else {
-                                R.drawable.ic_person_off
-                            }
-                    ),
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-
-            Spacer(
-                modifier = Modifier.width(7.dp)
-            )
-
-            Text(
-                text = title,
-                color = MeetingPrimaryColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = "${count}명",
-                color =
-                    if (isParticipantSection) {
-                        MeetingPointColor
-                    } else {
-                        MeetingSecondaryColor
-                    },
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
-        if (members.isEmpty()) {
-            Text(
-                text = "해당하는 팀원이 없습니다.",
-                modifier =
-                    Modifier.padding(
-                        vertical = 12.dp
-                    ),
-                color = MeetingSecondaryColor,
-                fontSize = 13.sp
-            )
-        } else {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                members.forEach { member ->
-                    MeetingMemberItem(
-                        member = member,
-                        isParticipant = isParticipantSection,
-                        onStatusClick = {
-                            onStatusClick(member.id)
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MeetingMemberItem(
-    member: MeetingMemberUiModel,
-    isParticipant: Boolean,
-    onStatusClick: () -> Unit
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MeetingMemberBackgroundColor,
-                    shape = RoundedCornerShape(16.dp)
-                ).padding(
-                    horizontal = 14.dp,
-                    vertical = 10.dp
-                ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(30.dp)
-                    .background(
-                        color = Color(0xFFE8E9F2),
-                        shape = CircleShape
-                    ),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_profile
-                    ),
-                contentDescription = null,
-                modifier = Modifier.size(17.dp)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.width(10.dp)
-        )
-
-        Text(
-            text = member.name,
-            modifier = Modifier.weight(1f),
-            color =
-                if (isParticipant) {
-                    MeetingPrimaryColor
-                } else {
-                    MeetingSecondaryColor
-                },
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium
-        )
-
-        Box(
-            modifier =
-                Modifier
-                    .size(28.dp)
-                    .background(
-                        color =
-                            if (isParticipant) {
-                                Color(0xFFFFE3E3)
-                            } else {
-                                Color(0xFFE9E9FF)
-                            },
-                        shape = CircleShape
-                    ).clickable(onClick = onStatusClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (isParticipant) "−" else "+",
-                color =
-                    if (isParticipant) {
-                        MeetingDeleteColor
-                    } else {
-                        MeetingPointColor
-                    },
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
     }
 }
 
@@ -664,7 +457,7 @@ private fun EmptyMeetingManagementContent() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "예정된 회의가 없습니다.",
+            text = "확정된 회의가 없습니다.",
             color = MeetingSecondaryColor,
             fontSize = 15.sp
         )

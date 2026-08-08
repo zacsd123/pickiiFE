@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,6 +36,7 @@ import java.util.Locale
 @Composable
 fun MeetingConfirmBottomSheet(
     meeting: QuickMeetingForm,
+    totalMemberCount: Int,
     onPreviousClick: () -> Unit,
     onCancelClick: () -> Unit,
     onSendClick: () -> Unit
@@ -102,15 +106,28 @@ fun MeetingConfirmBottomSheet(
                 )
 
                 MeetingConfirmRow(
-                    label = "후보 일정 개수",
-                    value = "${meeting.candidateCount}개"
+                    label = "탐색 시간대",
+                    value =
+                        "%02d:%02d ~ %02d:%02d".format(
+                            meeting.dayStartMinuteOfDay / 60,
+                            meeting.dayStartMinuteOfDay % 60,
+                            meeting.dayEndMinuteOfDay / 60,
+                            meeting.dayEndMinuteOfDay % 60
+                        )
                 )
 
                 MeetingConfirmRow(
-                    label = "메모",
+                    label = "응답 마감",
+                    value = "${meeting.deadlineHours}시간 후"
+                )
+
+                MeetingConfirmRow(
+                    label = "참가자",
                     value =
-                        meeting.memo.ifBlank {
-                            "작성된 메모가 없습니다."
+                        if (meeting.memberIds.isEmpty()) {
+                            "전원 (${totalMemberCount}명)"
+                        } else {
+                            "${meeting.memberIds.size}명"
                         }
                 )
             }
@@ -157,15 +174,15 @@ private fun MeetingConfirmHeader(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "‹",
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
             modifier =
                 Modifier
                     .width(40.dp)
                     .clickable(onClick = onPreviousClick)
-                    .padding(vertical = 4.dp),
-            fontSize = 32.sp,
-            color = Color(0xFF171714)
+                    .padding(vertical = 4.dp)
         )
 
         Text(

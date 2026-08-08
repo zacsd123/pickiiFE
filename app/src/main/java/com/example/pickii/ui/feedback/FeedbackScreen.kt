@@ -34,25 +34,26 @@ fun FeedbackScreen(
     onTabClick: (FeedbackTabType) -> Unit,
     onWriteFeedbackClick: (
         projectId: Long,
-        memberId: Long,
+        memberId: Long
     ) -> Unit,
     onReceivedFeedbackClick: (projectId: Long) -> Unit,
     onNotificationClick: () -> Unit,
     onCloseClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onCloseClick)
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(PickiiPaletteBaseWhite),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(PickiiPaletteBaseWhite)
     ) {
         FeedbackHeaderSection(
             selectedTab = uiState.selectedTab,
             onTabClick = onTabClick,
             onNotificationClick = onNotificationClick,
-            onBackClick = onCloseClick,
+            onBackClick = onCloseClick
         )
 
         when {
@@ -63,7 +64,7 @@ fun FeedbackScreen(
             uiState.selectedTab == FeedbackTabType.RECEIVED && uiState.projects.isEmpty() -> {
                 EmptyStateMessage(
                     message = stringResource(R.string.mypage_feedback_empty),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -71,7 +72,7 @@ fun FeedbackScreen(
                 WritableFeedbackContent(
                     projects = uiState.projects,
                     onWriteFeedbackClick = onWriteFeedbackClick,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -79,7 +80,7 @@ fun FeedbackScreen(
                 ReceivedFeedbackContent(
                     projects = uiState.projects,
                     onReceivedFeedbackClick = onReceivedFeedbackClick,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -91,34 +92,35 @@ private fun FeedbackHeaderSection(
     selectedTab: FeedbackTabType,
     onTabClick: (FeedbackTabType) -> Unit,
     onNotificationClick: () -> Unit,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-            ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp
+                )
     ) {
         PickiiTopBar(
             notificationCount = 0,
-            onNotificationClick = onNotificationClick,
+            onNotificationClick = onNotificationClick
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         BackHeader(
             title = stringResource(R.string.mypage_feedback_title),
-            onBackClick = onBackClick,
+            onBackClick = onBackClick
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         FeedbackTab(
             selectedTab = selectedTab,
-            onTabClick = onTabClick,
+            onTabClick = onTabClick
         )
     }
 }
@@ -128,19 +130,20 @@ private fun WritableFeedbackContent(
     projects: List<FeedbackProjectUiModel>,
     onWriteFeedbackClick: (
         projectId: Long,
-        memberId: Long,
+        memberId: Long
     ) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 10.dp,
-            bottom = 32.dp,
-        ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 10.dp,
+                bottom = 32.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
             FeedbackTipCard()
@@ -148,11 +151,11 @@ private fun WritableFeedbackContent(
 
         items(
             items = projects,
-            key = { project -> project.id },
+            key = { project -> project.id }
         ) { project ->
             WritableFeedbackCard(
                 project = project,
-                onWriteFeedbackClick = onWriteFeedbackClick,
+                onWriteFeedbackClick = onWriteFeedbackClick
             )
         }
     }
@@ -162,27 +165,28 @@ private fun WritableFeedbackContent(
 private fun ReceivedFeedbackContent(
     projects: List<FeedbackProjectUiModel>,
     onReceivedFeedbackClick: (projectId: Long) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 18.dp,
-            bottom = 32.dp,
-        ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 18.dp,
+                bottom = 32.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(
             items = projects,
-            key = { project -> project.id },
+            key = { project -> project.id }
         ) { project ->
             ReceivedFeedbackCard(
                 project = project,
                 onClick = {
                     onReceivedFeedbackClick(project.id)
-                },
+                }
             )
         }
     }
@@ -191,47 +195,50 @@ private fun ReceivedFeedbackContent(
 @Preview(
     showBackground = true,
     widthDp = 390,
-    heightDp = 844,
+    heightDp = 844
 )
 @Composable
 private fun FeedbackScreenPreview() {
     FeedbackScreen(
-        uiState = FeedbackUiState(
-            selectedTab = FeedbackTabType.WRITE,
-            projects = listOf(
-                FeedbackProjectUiModel(
-                    id = 1L,
-                    title = "서비스 기획 공모전",
-                    startDate = "7월 4일",
-                    endDate = "7월 6일",
-                    remainingDays = 2,
-                    completedCount = 1,
-                    totalCount = 3,
-                    canReadFeedback = true,
-                    members = listOf(
-                        FeedbackMemberUiModel(
+        uiState =
+            FeedbackUiState(
+                selectedTab = FeedbackTabType.WRITE,
+                projects =
+                    listOf(
+                        FeedbackProjectUiModel(
                             id = 1L,
-                            name = "김OO님",
-                            isCompleted = false,
-                        ),
-                        FeedbackMemberUiModel(
-                            id = 2L,
-                            name = "이OO님",
-                            isCompleted = false,
-                        ),
-                        FeedbackMemberUiModel(
-                            id = 3L,
-                            name = "박OO님",
-                            isCompleted = true,
-                        ),
-                    ),
-                ),
+                            title = "서비스 기획 공모전",
+                            startDate = "7월 4일",
+                            endDate = "7월 6일",
+                            remainingDays = 2,
+                            completedCount = 1,
+                            totalCount = 3,
+                            canReadFeedback = true,
+                            members =
+                                listOf(
+                                    FeedbackMemberUiModel(
+                                        id = 1L,
+                                        name = "김OO님",
+                                        isCompleted = false
+                                    ),
+                                    FeedbackMemberUiModel(
+                                        id = 2L,
+                                        name = "이OO님",
+                                        isCompleted = false
+                                    ),
+                                    FeedbackMemberUiModel(
+                                        id = 3L,
+                                        name = "박OO님",
+                                        isCompleted = true
+                                    )
+                                )
+                        )
+                    )
             ),
-        ),
         onTabClick = {},
         onWriteFeedbackClick = { _, _ -> },
         onReceivedFeedbackClick = {},
         onNotificationClick = {},
-        onCloseClick = {},
+        onCloseClick = {}
     )
 }

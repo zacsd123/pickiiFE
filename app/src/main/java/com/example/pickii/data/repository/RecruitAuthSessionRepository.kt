@@ -7,11 +7,13 @@ import com.example.pickii.data.remote.dto.LoginRequest
 import com.example.pickii.data.remote.dto.LogoutRequest
 import com.example.pickii.data.remote.dto.SocialLoginRequest
 import com.example.pickii.domain.model.CurrentUser
+import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.util.decodeJwtSubject
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,6 +47,7 @@ class RecruitAuthSessionRepository
         private val tokenStore: TokenStore,
         private val deviceIdProvider: DeviceIdProvider,
         private val profileRepository: ProfileRepository,
+        private val notificationRepository: NotificationRepository,
         private val json: Json
     ) : SessionRepository {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -120,10 +124,20 @@ class RecruitAuthSessionRepository
         }
 
         override suspend fun logout(): Result<Unit> {
+            unregisterDeviceToken()
             val result =
                 safeApiCallUnit(json) { authApiService.logout(LogoutRequest(deviceIdProvider.getDeviceId())) }
             clearSession()
             return result
+        }
+
+        /**
+         * `clearSession()`이 Access Token을 지우기 전에 호출해야 한다 — 토큰이 사라진 뒤에는
+         * `DELETE /devices` 요청 자체가 401로 거부된다.
+         */
+        private suspend fun unregisterDeviceToken() {
+            val token = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull() ?: return
+            notificationRepository.unregisterDevice(token)
         }
 
         override suspend fun clearSession() {

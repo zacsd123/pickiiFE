@@ -4,6 +4,7 @@ import com.example.pickii.data.repository.AccountApiRepository
 import com.example.pickii.data.repository.ApplicantApiRepository
 import com.example.pickii.data.repository.ChatApiRepository
 import com.example.pickii.data.repository.FeedbackApiRepository
+import com.example.pickii.data.repository.MeetingPollApiRepository
 import com.example.pickii.data.repository.MyPageActivityApiRepository
 import com.example.pickii.data.repository.NotificationApiRepository
 import com.example.pickii.data.repository.NotificationSettingsApiRepository
@@ -17,6 +18,7 @@ import com.example.pickii.domain.repository.ApplicantRepository
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.FeedbackRepository
 import com.example.pickii.domain.repository.MasterDataRepository
+import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.NotificationSettingsRepository
@@ -95,4 +97,9 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindNotificationRepository(impl: NotificationApiRepository): NotificationRepository
+
+    /** [MeetingPollRepository]를 [MeetingPollApiRepository]로 바인딩한다. */
+    @Binds
+    @Singleton
+    abstract fun bindMeetingPollRepository(impl: MeetingPollApiRepository): MeetingPollRepository
 }
