@@ -65,7 +65,7 @@ class RecruitMasterDataRepository
             techStacksMutex.withLock {
                 cachedTechStacks?.let { return@withLock Result.success(it) }
                 safeApiCall(json) { masterDataApiService.getTechStacks() }
-                    .map { envelope -> envelope.data.map { TechStack(id = it.techStackId, name = it.name) } }
+                    .map { envelope -> envelope.data.map { TechStack(name = it.name) } }
                     .onSuccess { cachedTechStacks = it }
             }
 
@@ -73,7 +73,7 @@ class RecruitMasterDataRepository
             licenseOptionsMutex.withLock {
                 cachedLicenseOptions?.let { return@withLock Result.success(it) }
                 safeApiCall(json) { masterDataApiService.getLicenses() }
-                    .map { envelope -> envelope.data.map { LicenseOption(id = it.licenseId, name = it.name) } }
+                    .map { envelope -> envelope.data.map { LicenseOption(name = it.name) } }
                     .onSuccess { cachedLicenseOptions = it }
             }
 
@@ -81,10 +81,7 @@ class RecruitMasterDataRepository
             linkCategoriesMutex.withLock {
                 cachedLinkCategories?.let { return@withLock Result.success(it) }
                 safeApiCall(json) { masterDataApiService.getLinkCategories() }
-                    .map { envelope ->
-                        envelope.data.map {
-                            LinkCategory(id = it.linkCategoryId, name = it.name, iconUrl = it.picUrl.orEmpty())
-                        }
-                    }.onSuccess { cachedLinkCategories = it }
+                    .map { envelope -> envelope.data.map { LinkCategory(name = it.name) } }
+                    .onSuccess { cachedLinkCategories = it }
             }
     }

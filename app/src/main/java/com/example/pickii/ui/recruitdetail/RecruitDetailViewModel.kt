@@ -210,11 +210,6 @@ class RecruitDetailViewModel
             _uiState.update { it.copy(isLoginPromptVisible = false) }
         }
 
-        /** 이미 지원한 게시글에 다시 지원을 시도했을 때 안내 토스트를 띄운다. */
-        fun onAlreadyAppliedNoticeRequested() {
-            emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_detail_toast_already_applied))
-        }
-
         /** 스크랩 상태를 토글한다. 비로그인 상태면 로그인 유도 팝업을 띄운다. */
         fun onScrapClick() {
             if (!_uiState.value.isLoggedIn) {

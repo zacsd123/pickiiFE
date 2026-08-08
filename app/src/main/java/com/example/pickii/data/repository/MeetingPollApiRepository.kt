@@ -18,11 +18,11 @@ import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -177,7 +177,7 @@ private fun String.toMeetingPollStatus(): MeetingPollStatus =
     runCatching { MeetingPollStatus.valueOf(this) }.getOrDefault(MeetingPollStatus.COLLECTING)
 
 private fun parseIsoDateTime(value: String): LocalDateTime =
-    runCatching { OffsetDateTime.parse(value).toLocalDateTime() }.getOrDefault(LocalDateTime.now())
+    runCatching { parseIsoOffsetDateTime(value) }.getOrDefault(LocalDateTime.now())
 
 private fun parseIsoDate(value: String): LocalDate =
     runCatching {

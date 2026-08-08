@@ -19,7 +19,6 @@ data class PageEnvelope<T>(
 @Serializable
 data class PageInfo(
     val currentPage: Int,
-    val pageSize: Int,
     val totalElements: Int,
     val totalPages: Int,
     val hasNext: Boolean

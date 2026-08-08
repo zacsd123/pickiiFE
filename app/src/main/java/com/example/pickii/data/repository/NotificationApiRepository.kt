@@ -6,11 +6,11 @@ import com.example.pickii.data.remote.dto.RegisterDeviceRequest
 import com.example.pickii.data.remote.dto.UnregisterDeviceRequest
 import com.example.pickii.domain.model.NotificationEntry
 import com.example.pickii.domain.repository.NotificationRepository
+import com.example.pickii.util.network.invalidIdException
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,7 +66,3 @@ class NotificationApiRepository
                 sentAt = parseIsoOffsetDateTime(sentAt)
             )
     }
-
-private fun invalidIdException(id: String) = IllegalArgumentException("잘못된 id: $id")
-
-private fun parseIsoOffsetDateTime(value: String): LocalDateTime = OffsetDateTime.parse(value).toLocalDateTime()

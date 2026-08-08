@@ -17,7 +17,6 @@ val PickiiTextGray = Color(0xFF9B9B9B)
 val PickiiFieldBackground = Color(0xFFF3F3EE)
 val PickiiBlue = Color(0xFF3B82F6)
 val PickiiDisabledGray = Color(0xFFE0E0E0)
-val PickiiSettingBackground = Color(0xFFF5F5F5)
 
 val PickiiNavYellow = Color(0xFFF9FCA8)
 

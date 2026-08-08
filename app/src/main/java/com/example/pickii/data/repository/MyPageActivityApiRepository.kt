@@ -16,11 +16,11 @@ import com.example.pickii.domain.model.MyScrap
 import com.example.pickii.domain.model.MyScrapPage
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.repository.MyPageActivityRepository
+import com.example.pickii.util.network.invalidIdException
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -135,12 +135,8 @@ class MyPageActivityApiRepository
             )
     }
 
-private fun invalidIdException(id: String) = IllegalArgumentException("잘못된 id: $id")
-
 private fun String.toApplyStatus(): ApplyStatus =
     runCatching { ApplyStatus.valueOf(this) }.getOrDefault(ApplyStatus.WAITING)
 
 private fun String.toRecruitStatus(): RecruitStatus =
     runCatching { RecruitStatus.valueOf(this) }.getOrDefault(RecruitStatus.OPEN)
-
-private fun parseIsoOffsetDateTime(value: String): LocalDateTime = OffsetDateTime.parse(value).toLocalDateTime()

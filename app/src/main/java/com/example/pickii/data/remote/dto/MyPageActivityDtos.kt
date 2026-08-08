@@ -38,9 +38,6 @@ data class MyScrapDto(
     val recruitId: Long,
     val title: String,
     val authorNickname: String,
-    val onCampus: Boolean = false,
     val status: String,
-    val maxMembers: Int = 0,
-    val availableSlots: Int = 0,
     val scrappedAt: String
 )

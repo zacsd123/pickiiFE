@@ -12,8 +12,7 @@ data class NotificationDto(
     val referenceType: String? = null,
     val referenceId: Long? = null,
     val isRead: Boolean,
-    val sentAt: String,
-    val readAt: String? = null
+    val sentAt: String
 )
 
 /** `GET /notifications/unread-count`(9-7) 응답. */

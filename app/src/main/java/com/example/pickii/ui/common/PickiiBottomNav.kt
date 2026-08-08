@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.pickii.R
 import com.example.pickii.ui.theme.PickiiNavYellow
 
 /** 캡슐 모양 배경/인디케이터의 모서리 둥글기. */
@@ -76,15 +75,6 @@ private val PickiiBottomNavItems: List<Pair<PickiiBottomNavTab, ImageVector>> =
         PickiiBottomNavTab.CHAT to Icons.Filled.ChatBubbleOutline,
         PickiiBottomNavTab.MY_PAGE to Icons.Filled.Person
     )
-
-/** 탭에 표시할 라벨 문자열 리소스. */
-private fun pickiiBottomNavLabelRes(tab: PickiiBottomNavTab): Int =
-    when (tab) {
-        PickiiBottomNavTab.HOME -> R.string.nav_home
-        PickiiBottomNavTab.CALENDAR -> R.string.nav_calendar
-        PickiiBottomNavTab.CHAT -> R.string.nav_chat
-        PickiiBottomNavTab.MY_PAGE -> R.string.nav_mypage
-    }
 
 /**
  * 여러 화면에서 공유하는 하단 탭 내비게이션 바.

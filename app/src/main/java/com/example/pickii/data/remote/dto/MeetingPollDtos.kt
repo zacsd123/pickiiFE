@@ -19,10 +19,7 @@ data class CreateMeetingPollRequest(
 @Serializable
 data class MeetingPollCreatedDto(
     val pollId: Long,
-    val status: String,
     val deadline: String,
-    val totalMembers: Int,
-    val respondedCount: Int,
     val slotCount: Int
 )
 
@@ -32,7 +29,6 @@ data class MeetingPollDetailDto(
     val pollId: Long,
     val title: String,
     val status: String,
-    val durationMin: Int,
     val deadline: String,
     val totalMembers: Int,
     val respondedCount: Int,
@@ -47,7 +43,6 @@ data class MeetingPollSlotDto(
     val startAt: String,
     val endAt: String,
     val myAvailable: Boolean,
-    val prefilledByCalendar: Boolean,
     val availableCount: Int,
     val unansweredCount: Int
 )
@@ -76,8 +71,6 @@ data class ConfirmMeetingPollRequest(
 /** `PATCH /meeting-polls/{pollId}/confirm`(7-13) 응답. */
 @Serializable
 data class ConfirmMeetingPollResponseDto(
-    val pollId: Long,
-    val status: String,
     val scheduleId: Long
 )
 

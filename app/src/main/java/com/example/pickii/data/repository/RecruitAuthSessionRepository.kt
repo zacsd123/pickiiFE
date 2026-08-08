@@ -32,10 +32,9 @@ import javax.inject.Singleton
 /**
  * `POST /auth/login`으로 실제 로그인을 수행하는 Repository.
  *
- * 로그인 응답에는 경험치/프로필 보유 여부가 없다(Member Profile API는 연동 범위 밖). 지원 화면의
+ * 로그인 응답에는 프로필 보유 여부가 없다(Member Profile API는 연동 범위 밖). 지원 화면의
  * "프로필 필요" 안내가 로그인 직후에는 부정확할 수 있음을 감수하고 기본값으로 채운다.
  */
-private const val DEFAULT_EXPERIENCE = 0
 private const val DEFAULT_HAS_PROFILE = true
 private const val SOCIAL_PROVIDER_KAKAO = "KAKAO"
 
@@ -92,7 +91,6 @@ class RecruitAuthSessionRepository
                     CurrentUser(
                         id = body.memberId.toString(),
                         nickname = body.nickname,
-                        experience = DEFAULT_EXPERIENCE,
                         hasProfile = DEFAULT_HAS_PROFILE
                     )
                 _currentUser.value = user
@@ -171,7 +169,6 @@ class RecruitAuthSessionRepository
             return CurrentUser(
                 id = memberId?.toString().orEmpty(),
                 nickname = nickname,
-                experience = DEFAULT_EXPERIENCE,
                 hasProfile = hasProfile
             )
         }

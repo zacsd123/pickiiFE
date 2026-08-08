@@ -116,7 +116,6 @@ data class ApplyAiDraftResponseDto(
 /** `POST /recruits/{id}/scrap` 응답. */
 @Serializable
 data class ScrapResponseDto(
-    val recruitId: Long,
     val isScrapped: Boolean
 )
 
@@ -130,7 +129,5 @@ data class ProjectCreateRequest(
 @Serializable
 data class ProjectCreateResponseDto(
     val projectId: Long,
-    val chatRoomId: Long,
-    val recruitStatus: String,
-    val memberCount: Int
+    val chatRoomId: Long
 )

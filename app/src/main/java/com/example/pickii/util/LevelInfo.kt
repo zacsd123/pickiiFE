@@ -7,14 +7,10 @@ private const val EXP_PER_LEVEL = 100
  * 경험치([exp])로부터 레벨/진행률을 계산한 결과.
  *
  * @param level 현재 레벨(1부터 시작)
- * @param expInLevel 현재 레벨 안에서 쌓은 경험치
- * @param expToNextLevel 다음 레벨까지 필요한 총 경험치
  * @param progress 경험치 바에 표시할 0f~1f 사이 진행률
  */
 data class LevelInfo(
     val level: Int,
-    val expInLevel: Int,
-    val expToNextLevel: Int,
     val progress: Float
 )
 
@@ -25,8 +21,6 @@ fun calculateLevel(exp: Int): LevelInfo {
     val expInLevel = safeExp % EXP_PER_LEVEL
     return LevelInfo(
         level = level,
-        expInLevel = expInLevel,
-        expToNextLevel = EXP_PER_LEVEL,
         progress = expInLevel / EXP_PER_LEVEL.toFloat()
     )
 }

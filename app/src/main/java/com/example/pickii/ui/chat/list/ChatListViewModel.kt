@@ -3,7 +3,6 @@ package com.example.pickii.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
-import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.ChatRoomSummary
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.NotificationRepository
@@ -20,8 +19,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val CHAT_LIST_PAGE_SIZE = 10
-private const val ERROR_CODE_CANNOT_CHAT_SELF = "CANNOT_CHAT_SELF"
-private const val ERROR_CODE_USER_NOT_FOUND = "USER_NOT_FOUND"
 
 /**
  * 채팅 목록 화면의 상태와 사용자 동작을 관리한다.
@@ -153,29 +150,6 @@ class ChatListViewModel
                     groupChatRooms = currentState.groupChatRooms.markAsRead(chatRoomId),
                     directChatRooms = currentState.directChatRooms.markAsRead(chatRoomId)
                 )
-            }
-        }
-
-        /** 상대 회원과의 1:1 채팅방을 생성(또는 기존 채팅방을 조회)하고 해당 채팅방으로 이동하는 이벤트를 발행한다. */
-        fun startDirectChat(targetMemberId: Long) {
-            viewModelScope.launch {
-                chatRepository
-                    .createDirectChatRoom(targetMemberId)
-                    .onSuccess { result ->
-                        _navigationEvents.send(ChatNavigationEvent.OpenRoom(result.chatRoomId))
-                    }.onFailure { error ->
-                        val messageRes =
-                            if (error is ApiException) {
-                                when (error.code) {
-                                    ERROR_CODE_CANNOT_CHAT_SELF -> R.string.chat_toast_cannot_chat_self
-                                    ERROR_CODE_USER_NOT_FOUND -> R.string.chat_toast_user_not_found
-                                    else -> R.string.chat_toast_generic_error
-                                }
-                            } else {
-                                R.string.chat_toast_generic_error
-                            }
-                        emitEvent(RecruitUiEvent.ShowToast(messageRes))
-                    }
             }
         }
 

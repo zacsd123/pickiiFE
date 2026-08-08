@@ -3,12 +3,10 @@ package com.example.pickii.domain.model
 import java.time.LocalDateTime
 
 /** 지원 상태(4-4 지원 현황 조회, 4-8 지원자 수락/거절 기준). */
-enum class ApplyStatus(
-    val label: String
-) {
-    WAITING("대기"),
-    ACCEPTED("수락"),
-    REJECTED("거절")
+enum class ApplyStatus {
+    WAITING,
+    ACCEPTED,
+    REJECTED
 }
 
 /** 내가 지원한 공고 한 건(`GET /users/me/applies`). */

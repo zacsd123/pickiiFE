@@ -12,16 +12,11 @@ data class FeedbackProject(
     val remainingDays: Int,
     val memberCount: Int,
     val evaluatedCount: Int,
-    val requiredCount: Int,
     val isAiFeedbackAvailable: Boolean
 )
 
 data class FeedbackProjectPage(
-    val items: List<FeedbackProject>,
-    val currentPage: Int,
-    val totalPages: Int,
-    val totalElements: Int,
-    val hasNext: Boolean
+    val items: List<FeedbackProject>
 )
 
 /** 평가 대상 팀원 한 명(4-9). */
