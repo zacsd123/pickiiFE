@@ -75,7 +75,7 @@ class ChatListViewModel
                     .onSuccess { page ->
                         _uiState.update { state ->
                             state
-                                .withRooms(tab, page.rooms.map { it.toPreviewUiModel() })
+                                .withRooms(tab, page.rooms.map { it.toPreviewUiModel() }.distinctBy { it.id })
                                 .withPageInfo(tab, currentPage = page.currentPage, hasNext = page.hasNext)
                                 .withLoading(tab, isLoading = false)
                         }
@@ -101,7 +101,9 @@ class ChatListViewModel
                     .getChatRooms(type = tab.toChatRoomType(), page = nextPage, size = CHAT_LIST_PAGE_SIZE)
                     .onSuccess { page ->
                         _uiState.update { current ->
-                            val appended = current.roomsOf(tab) + page.rooms.map { it.toPreviewUiModel() }
+                            val appended =
+                                (current.roomsOf(tab) + page.rooms.map { it.toPreviewUiModel() })
+                                    .distinctBy { it.id }
                             current
                                 .withRooms(tab, appended)
                                 .withPageInfo(tab, currentPage = page.currentPage, hasNext = page.hasNext)

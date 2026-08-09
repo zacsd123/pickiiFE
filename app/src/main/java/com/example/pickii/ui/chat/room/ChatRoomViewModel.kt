@@ -3,6 +3,7 @@ package com.example.pickii.ui.chat
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.BuildConfig
 import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.ChatMessageDto
@@ -772,7 +773,7 @@ class ChatRoomViewModel
                     },
                 meetingNotice = meetingNotice,
                 meetingConfirmed = meetingConfirmed,
-                imageUri = imageUrl
+                imageUri = imageUrl?.toAbsoluteImageUrl()
             )
         }
 
@@ -806,7 +807,7 @@ class ChatRoomViewModel
                     },
                 meetingNotice = meetingNotice,
                 meetingConfirmed = meetingConfirmed,
-                imageUri = imageUrl
+                imageUri = imageUrl?.toAbsoluteImageUrl()
             )
         }
 
@@ -849,3 +850,12 @@ class ChatRoomViewModel
     }
 
 private val MeetingTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+/** 이미지 업로드(8-4) 응답의 `imageUrl`이 `/static-uploads/...`처럼 API_BASE_URL(`.../api/v1/`) 기준
+ * 상대경로라서(실제 파일은 `.../api/v1/static-uploads/...`에 있음, origin 바로 아래가 아니다 — 직접
+ * curl로 확인함), 실제 로드하려면 API_BASE_URL을 그대로 앞에 붙여야 한다. */
+private val ApiBaseUrlNoTrailingSlash: String by lazy { BuildConfig.API_BASE_URL.trimEnd('/') }
+
+/** 서버가 내려준 이미지 경로를 실제 로드 가능한 절대 URL로 바꾼다. 이미 절대 URL이면 그대로 둔다. */
+private fun String.toAbsoluteImageUrl(): String =
+    if (startsWith("http://") || startsWith("https://")) this else ApiBaseUrlNoTrailingSlash + this
