@@ -67,6 +67,8 @@ data class ManagedMeetingUiModel(
  * 확정된 회의(팀 일정) 목록과 내 참석 여부를 관리하는 바텀시트다.
  *
  * @param meetings 확정된 회의 목록
+ * @param isCurrentUserLeader 현재 사용자가 프로젝트장인지 여부. 참석/불참은 팀원 누구나 자신의 것을
+ * 바꿀 수 있지만(7-20), 회의 삭제(7-18)는 프로젝트장만 할 수 있어 이 값으로 삭제 버튼 노출을 가른다.
  * @param onDismiss 바텀시트를 닫을 때 실행할 동작
  * @param onDeleteMeeting 회의를 삭제할 때 실행할 동작
  * @param onAttendClick 참석으로 표시할 때 실행할 동작
@@ -76,6 +78,7 @@ data class ManagedMeetingUiModel(
 @Composable
 fun MeetingManagementBottomSheet(
     meetings: List<ManagedMeetingUiModel>,
+    isCurrentUserLeader: Boolean,
     onDismiss: () -> Unit,
     onDeleteMeeting: (Long) -> Unit,
     onAttendClick: (Long) -> Unit,
@@ -136,6 +139,7 @@ fun MeetingManagementBottomSheet(
                     ) { meeting ->
                         MeetingManagementCard(
                             meeting = meeting,
+                            isCurrentUserLeader = isCurrentUserLeader,
                             onDeleteMeeting = {
                                 onDeleteMeeting(meeting.id)
                             },
@@ -214,6 +218,7 @@ private fun MeetingManagementHeader(
 @Composable
 private fun MeetingManagementCard(
     meeting: ManagedMeetingUiModel,
+    isCurrentUserLeader: Boolean,
     onDeleteMeeting: () -> Unit,
     onAttendClick: () -> Unit,
     onAbsentClick: () -> Unit
@@ -280,13 +285,15 @@ private fun MeetingManagementCard(
                     )
                 }
 
-                Spacer(
-                    modifier = Modifier.height(12.dp)
-                )
+                if (isCurrentUserLeader) {
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
 
-                MeetingDeleteButton(
-                    onClick = onDeleteMeeting
-                )
+                    MeetingDeleteButton(
+                        onClick = onDeleteMeeting
+                    )
+                }
             }
         }
     }
