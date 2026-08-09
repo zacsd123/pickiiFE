@@ -179,12 +179,23 @@ private fun ChatListTab.toChatRoomType(): ChatRoomType =
         ChatListTab.DIRECT -> ChatRoomType.DIRECT
     }
 
+/**
+ * 8-1 목록 응답의 `lastMessage`는 마지막 메시지가 사진(IMAGE)이면 본문 텍스트가 없어 null로 내려온다
+ * (서버가 이미지용 미리보기 문구를 따로 안 만들어줌 — 직접 확인함). `lastMessageAt`은 있는데
+ * `lastMessage`만 비어 있으면 메시지가 없는 방이 아니라 마지막 메시지가 사진이라는 뜻이므로 클라이언트가
+ * 대체 문구를 채운다.
+ */
 private fun ChatRoomSummary.toPreviewUiModel(): ChatRoomPreviewUiModel =
     ChatRoomPreviewUiModel(
         id = chatRoomId,
         type = type,
         roomName = title,
-        lastMessage = (lastMessage ?: "").truncateForChatListPreview(),
+        lastMessage =
+            when {
+                !lastMessage.isNullOrBlank() -> lastMessage.truncateForChatListPreview()
+                lastMessageAt != null -> "사진을 보냈습니다."
+                else -> ""
+            },
         lastMessageTime = lastMessageAt?.toChatListPreviewTimeText().orEmpty(),
         participantSummary = null,
         unreadCount = unreadCount,
