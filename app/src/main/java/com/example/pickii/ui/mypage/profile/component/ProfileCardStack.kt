@@ -94,7 +94,10 @@ fun ProfileCardStack(
             val lastIndex = maxOf(oldTop, newTop)
             val t = progress.value
 
-            for (j in 0..lastIndex) {
+            val firstVisibleIndex = maxOf(0, lastIndex - 2)
+
+
+            for (j in firstVisibleIndex..lastIndex) {
                 val leanDirection = if (j % 2 == 0) -1f else 1f
                 val oldDepth = if (j <= oldTop) (oldTop - j).toFloat() else -1f
                 val newDepth = if (j <= newTop) (newTop - j).toFloat() else -1f

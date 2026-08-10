@@ -249,6 +249,7 @@ class RecruitApiRepository
             RecruitPostSummary(
                 id = recruitId.toString(),
                 title = title,
+                authorId = authorId.toString(),
                 authorNickname = authorNickname,
                 maxParticipants = maxMembers,
                 availableSlots = availableSlots,

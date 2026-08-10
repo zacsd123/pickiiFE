@@ -6,12 +6,14 @@ import java.time.LocalDateTime
 data class RecruitPostSummary(
     val id: String,
     val title: String,
+    val authorId: String,
     val authorNickname: String,
     val maxParticipants: Int,
     val availableSlots: Int,
     val status: RecruitStatus,
     val createdAt: LocalDateTime
 ) {
-    /** 현재까지 모집된 인원. 목록 API는 이 값을 직접 주지 않아 [maxParticipants]/[availableSlots]로 계산한다. */
-    val currentParticipants: Int get() = maxParticipants - availableSlots
+    /** 현재까지 모집된 인원. */
+    val currentParticipants: Int
+        get() = maxParticipants - availableSlots
 }

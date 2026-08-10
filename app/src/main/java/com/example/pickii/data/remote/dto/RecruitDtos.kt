@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class RecruitSummaryDto(
     val recruitId: Long,
     val title: String,
+    val authorId: Long,
     val authorNickname: String,
     val maxMembers: Int,
     val availableSlots: Int,

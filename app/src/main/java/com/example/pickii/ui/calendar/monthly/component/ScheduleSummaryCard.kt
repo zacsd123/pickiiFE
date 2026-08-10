@@ -36,6 +36,10 @@ import com.example.pickii.ui.theme.PickiiInk
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+import com.example.pickii.R
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
 private val SummaryTitleColor = PickiiInk
@@ -157,12 +161,17 @@ private fun ScheduleSummaryHeader(
                     ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = if (isExpanded) "⌃" else "⌄",
-                color = SummaryTitleColor,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 24.sp
+            Icon(
+                painter = painterResource(
+                    id = if (isExpanded) {
+                        R.drawable.ic_chevron_up
+                    } else {
+                        R.drawable.ic_chevron_down
+                    }
+                ),
+                contentDescription = if (isExpanded) "접기" else "펼치기",
+                tint = Color.Black,
+                modifier = Modifier.size(20.dp)
             )
         }
     }
