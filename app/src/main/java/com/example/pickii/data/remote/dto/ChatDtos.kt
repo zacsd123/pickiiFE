@@ -89,14 +89,14 @@ data class UpdateChatRoomNotificationRequest(
 )
 
 /**
- * (미확정/추정) `PATCH /chatrooms/{chatRoomId}/leader` 요청.
+ * (미확정/추정) `PATCH /projects/{projectId}/leader` 요청.
  *
  * 8번 API 명세서에 없는 엔드포인트다. `.../notification`, `.../read`의 PATCH 컨벤션을 따라 추정했으며,
  * 백엔드 확인 후 경로/바디가 바뀔 수 있다.
  */
 @Serializable
 data class DelegateChatRoomLeaderRequest(
-    val newLeaderMemberId: Long
+    val newLeaderId: Long
 )
 
 /** WebSocket `/pub/chatrooms/{chatRoomId}/messages` 발행 바디. */

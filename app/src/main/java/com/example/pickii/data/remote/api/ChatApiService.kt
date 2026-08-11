@@ -78,15 +78,15 @@ interface ChatApiService {
     // 백엔드 확인 전까지 실제 경로가 다를 수 있다. ChatRepository 뒤에 격리돼 있어 변경 시 이 파일과
     // ChatApiRepository만 고치면 된다.
 
-    @PATCH("chatrooms/{chatRoomId}/leader")
+    @PATCH("projects/{projectId}/leader")
     suspend fun delegateLeader(
-        @Path("chatRoomId") chatRoomId: Long,
+        @Path("projectId") projectId: Long,
         @Body request: DelegateChatRoomLeaderRequest
     ): Response<Unit>
 
-    @DELETE("chatrooms/{chatRoomId}/members/{memberId}")
+    @DELETE("projects/{projectId}/members/{memberId}")
     suspend fun removeMember(
-        @Path("chatRoomId") chatRoomId: Long,
+        @Path("projectId") projectId: Long,
         @Path("memberId") memberId: Long
     ): Response<Unit>
 }
