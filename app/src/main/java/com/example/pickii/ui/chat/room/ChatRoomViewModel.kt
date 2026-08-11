@@ -307,9 +307,10 @@ class ChatRoomViewModel
          */
         fun delegateLeader(memberId: Long) {
             val roomId = _uiState.value.roomId
+            val projectId = _uiState.value.projectId ?: return
             viewModelScope.launch {
                 chatRepository
-                    .delegateLeader(roomId, memberId)
+                    .delegateLeader(projectId, memberId)
                     .onSuccess { refreshDetail(roomId) }
                     .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
             }
@@ -320,9 +321,10 @@ class ChatRoomViewModel
          */
         fun removeMember(memberId: Long) {
             val roomId = _uiState.value.roomId
+            val projectId = _uiState.value.projectId ?: return
             viewModelScope.launch {
                 chatRepository
-                    .removeMember(roomId, memberId)
+                    .removeMember(projectId, memberId)
                     .onSuccess { refreshDetail(roomId) }
                     .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
             }

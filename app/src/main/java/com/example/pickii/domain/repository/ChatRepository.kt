@@ -49,15 +49,15 @@ interface ChatRepository {
         enabled: Boolean
     ): Result<Unit>
 
-    /** (미확정) 팀장 위임. */
+    /** (미확정) 팀장 위임. `PATCH /projects/{projectId}/leader`라 채팅방 id가 아니라 프로젝트 id를 받는다. */
     suspend fun delegateLeader(
-        chatRoomId: Long,
+        projectId: Long,
         newLeaderMemberId: Long
     ): Result<Unit>
 
-    /** (미확정) 팀원 내보내기. */
+    /** (미확정) 팀원 내보내기. `DELETE /projects/{projectId}/members/{memberId}`라 채팅방 id가 아니라 프로젝트 id를 받는다. */
     suspend fun removeMember(
-        chatRoomId: Long,
+        projectId: Long,
         memberId: Long
     ): Result<Unit>
 }

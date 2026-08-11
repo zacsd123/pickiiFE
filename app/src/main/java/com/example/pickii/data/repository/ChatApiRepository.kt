@@ -140,17 +140,17 @@ class ChatApiRepository
             }
 
         override suspend fun delegateLeader(
-            chatRoomId: Long,
+            projectId: Long,
             newLeaderMemberId: Long
         ): Result<Unit> =
             safeApiCallUnit(json) {
-                chatApiService.delegateLeader(chatRoomId, DelegateChatRoomLeaderRequest(newLeaderMemberId))
+                chatApiService.delegateLeader(projectId, DelegateChatRoomLeaderRequest(newLeaderMemberId))
             }
 
         override suspend fun removeMember(
-            chatRoomId: Long,
+            projectId: Long,
             memberId: Long
-        ): Result<Unit> = safeApiCallUnit(json) { chatApiService.removeMember(chatRoomId, memberId) }
+        ): Result<Unit> = safeApiCallUnit(json) { chatApiService.removeMember(projectId, memberId) }
 
         private fun ChatRoomSummaryDto.toDomain(): ChatRoomSummary =
             ChatRoomSummary(
