@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,7 +50,7 @@ fun ChatProjectInfoPanel(
     selectedCategoryId: Long?,
     isCurrentUserLeader: Boolean,
     onBackClick: () -> Unit,
-    onSelectColor: (Long) -> Unit,
+    onSelectColor: (Long?) -> Unit,
     onCloseProjectClick: () -> Unit
 ) {
     var isCloseConfirmVisible by remember { mutableStateOf(false) }
@@ -71,6 +73,7 @@ fun ChatProjectInfoPanel(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(
                         horizontal = 20.dp,
                         vertical = 20.dp
@@ -114,7 +117,7 @@ fun ChatProjectInfoPanel(
                 ScheduleCategorySection(
                     categories = scheduleCategories,
                     selectedCategoryId = selectedCategoryId,
-                    onCategoryClick = { categoryId -> categoryId?.let(onSelectColor) },
+                    onCategoryClick = onSelectColor,
                     onManageClick = {}
                 )
             }

@@ -155,6 +155,7 @@
     <string name="chat_project_close_dialog_title">프로젝트를 종료할까요?</string>
     <string name="chat_project_close_dialog_body">종료 후에는 되돌릴 수 없고, 상호평가가 시작돼요.</string>
     <string name="chat_toast_project_closed">프로젝트를 종료했어요.</string>
+    <string name="chat_toast_meeting_saved_to_calendar">내 캘린더에 저장했어요.</string>
 
     <string name="signup_title">회원가입하기</string>
     <string name="signup_label_nickname">닉네임</string>

@@ -2,6 +2,7 @@ package com.example.pickii.ui.passwordreset
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.EmailPurpose
 import com.example.pickii.domain.repository.SignupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,9 @@ import javax.inject.Inject
 private val PASSWORD_REGEX = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,20}$")
 
 private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
+
+/** 서버에 이미 유효한 인증코드가 남아있어 재발송이 거부됐을 때의 에러 코드. */
+private const val ERROR_CODE_EMAIL_CODE_ALREADY_SENT = "TOO_MANY_REQUESTS"
 
 /** [PasswordResetScreen]에 표시되는 상태. */
 data class PasswordResetUiState(
@@ -78,7 +82,7 @@ class PasswordResetViewModel
 
         fun onSendEmailCodeClick() {
             val email = _uiState.value.email
-            if (email.isBlank()) return
+            if (email.isBlank() || _uiState.value.isSendingEmailCode) return
             _uiState.update { it.copy(isSendingEmailCode = true) }
             viewModelScope.launch {
                 signupRepository
@@ -93,9 +97,11 @@ class PasswordResetViewModel
                             )
                         }
                     }.onFailure { error ->
+                        val codeAlreadySent = error is ApiException && error.code == ERROR_CODE_EMAIL_CODE_ALREADY_SENT
                         _uiState.update {
                             it.copy(
                                 isSendingEmailCode = false,
+                                isEmailCodeSent = it.isEmailCodeSent || codeAlreadySent,
                                 emailMessage = error.message ?: DEFAULT_ERROR_MESSAGE,
                                 isEmailMessageError = true
                             )

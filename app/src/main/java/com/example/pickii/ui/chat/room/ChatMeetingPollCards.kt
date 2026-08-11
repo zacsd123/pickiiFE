@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -164,9 +163,6 @@ private fun MeetingCardButton(
 
 private val SlotDateFormatter = DateTimeFormatter.ofPattern("M월 d일 (E)", java.util.Locale.KOREAN)
 private val SlotTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-
-/** 카드3(집계)에서 프로젝트장에게 "확정" 후보로 보여줄 상위 슬롯 개수(가능 인원 많은 순). */
-private const val MAX_CONFIRM_CANDIDATES = 2
 
 /** 카드2/3이 공유하는 선택 가능한 옵션 행("회의 가능한 날짜 없음" 등). [selected]면 어두운 배경으로
  * 강조한다 — 개별 시간 슬롯의 "가능" 체크([MeetingPollTimeChip])와는 다른 의미라 색을 구분했다. */
@@ -392,9 +388,9 @@ internal fun MeetingPollResponseCard(
 
 /**
  * 카드3(집계, [회의 일정 조율] 다음 단계). 전원 응답 또는 마감 시각 도달 시 자동으로 나타난다(트리거는
- * [ChatMessageItem]에서 계산). 전체 슬롯을 참여 가능 인원 비율로 히트맵 표시하고(진할수록 가능 인원 많음),
- * 칸마다 "가능 N / 미응답 M"을 보여준다. 프로젝트장에게만 가능 인원 많은 순 후보 + "확정"(7-13) 버튼을
- * 추가로 보여준다 — 실제 팀 투표 API는 없고(7-13은 프로젝트장 단독 확정만 지원) 자동 확정도 하지 않는다.
+ * [ChatMessageItem]에서 계산). 카드2와 동일하게 날짜별로 접고 펼치는 구조를 쓰고, 각 슬롯을 참여 가능
+ * 인원 비율로 배경 농도가 다른 칩으로 보여준다(진할수록 가능 인원 많음). 프로젝트장에게는 칩 자체가
+ * 클릭 가능해 탭하면 바로 그 슬롯으로 확정(7-13)된다 — 실제 팀 투표 API는 없고 자동 확정도 하지 않는다.
  */
 @Composable
 internal fun MeetingPollAggregationCard(
@@ -403,134 +399,126 @@ internal fun MeetingPollAggregationCard(
     onConfirmClick: (Long) -> Unit
 ) {
     val slotsByDate = poll.slots.groupBy { it.startAt.toLocalDate() }.toSortedMap()
-    val rankedCandidates =
-        poll.slots
-            .sortedWith(compareByDescending<MeetingPollSlot> { it.availableCount }.thenBy { it.unansweredCount })
-            .take(MAX_CONFIRM_CANDIDATES)
+    var expandedDates by remember { mutableStateOf(setOf<LocalDate>()) }
+    val canConfirm = isCurrentUserLeader && poll.status == MeetingPollStatus.COLLECTING
 
     MeetingCardContainer {
         Text(text = "[최종 일정 조율]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "응답이 마감됐어요. 참여 가능한 인원이 많을수록 진하게 표시돼요.",
+            text =
+                if (canConfirm) {
+                    "응답이 마감됐어요. 진할수록 가능한 인원이 많아요.\n칩을 눌러 확정해 주세요."
+                } else {
+                    "응답이 마감됐어요. 참여 가능한 인원이 많을수록 진하게 표시돼요."
+                },
             fontSize = 13.sp,
             color = Color.Black,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             slotsByDate.forEach { (date, slots) ->
-                Text(
-                    text = date.format(SlotDateFormatter),
-                    color = PickiiGray650,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                slots.forEach { slot ->
-                    MeetingPollHeatmapRow(slot = slot, totalMembers = poll.totalMembers)
-                }
-            }
-        }
-
-        if (isCurrentUserLeader && poll.status == MeetingPollStatus.COLLECTING && rankedCandidates.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Color(0x33000000))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "가능 인원 많은 순 — 하나를 골라 확정하세요",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                rankedCandidates.forEach { slot ->
-                    MeetingPollConfirmRow(slot = slot, onConfirmClick = { onConfirmClick(slot.slotId) })
+                val isDateExpanded = date in expandedDates
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    expandedDates =
+                                        if (isDateExpanded) expandedDates - date else expandedDates + date
+                                },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = date.format(SlotDateFormatter),
+                            color = PickiiGray650,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = if (isDateExpanded) "⌃" else "⌄",
+                            color = PickiiGray400
+                        )
+                    }
+                    AnimatedVisibility(visible = isDateExpanded) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            slots.forEach { slot ->
+                                MeetingPollHeatmapChip(
+                                    slot = slot,
+                                    totalMembers = poll.totalMembers,
+                                    enabled = canConfirm,
+                                    onClick = { onConfirmClick(slot.slotId) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-/** 히트맵 한 칸. [totalMembers] 대비 [MeetingPollSlot.availableCount] 비율로 배경 농도를 정한다. */
+/**
+ * 카드3에서 시간 슬롯 하나를 나타내는 칩. [MeetingPollSlot.availableCount]가 [totalMembers]에서 차지하는
+ * 비율로 배경 농도가 진해진다(카드2의 [MeetingPollTimeChip]과 같은 칩 형태를 재사용해 시각 언어를
+ * 통일했다). 프로젝트장에게만 클릭 가능해 탭하면 그 슬롯으로 바로 확정한다.
+ */
 @Composable
-private fun MeetingPollHeatmapRow(
+private fun MeetingPollHeatmapChip(
     slot: MeetingPollSlot,
-    totalMembers: Int
+    totalMembers: Int,
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
     val ratio = if (totalMembers > 0) (slot.availableCount.toFloat() / totalMembers).coerceIn(0f, 1f) else 0f
     val backgroundColor = lerp(Color.White, Color(0xFF4C6FFF), ratio)
     val textColor = if (ratio > 0.55f) Color.White else Color.Black
 
-    Box(
+    Column(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(backgroundColor)
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .border(
+                    width = 1.dp,
+                    color = if (ratio > 0f) backgroundColor else PickiiBorderGray,
+                    shape = RoundedCornerShape(12.dp)
+                ).then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text =
-                "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)} " +
-                    "· 가능 ${slot.availableCount} / 미응답 ${slot.unansweredCount}",
+            text = "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)}",
             color = textColor,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
         )
+        Text(
+            text = "가능 ${slot.availableCount} · 미응답 ${slot.unansweredCount}",
+            color = textColor,
+            fontSize = 10.sp
+        )
     }
 }
 
-/** 프로젝트장 전용 확정 후보 행. */
-@Composable
-private fun MeetingPollConfirmRow(
-    slot: MeetingPollSlot,
-    onConfirmClick: () -> Unit
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Color.White)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text =
-                    "${slot.startAt.toLocalDate().format(SlotDateFormatter)} " +
-                        "${slot.startAt.format(SlotTimeFormatter)}~${slot.endAt.format(SlotTimeFormatter)}",
-                color = Color.Black,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "가능 ${slot.availableCount}명 · 미응답 ${slot.unansweredCount}명",
-                color = PickiiGray650,
-                fontSize = 11.sp
-            )
-        }
-
-        Box(
-            modifier =
-                Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(PickiiInk)
-                    .clickable(onClick = onConfirmClick)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
-        ) {
-            Text(text = "확정", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-/** 카드4([회의 일정 확정]). 읽기 전용 — 확정된 슬롯 시각과 채팅방 멤버 전체 이름을 보여준다. */
+/**
+ * 카드4([회의 일정 확정]). 확정된 슬롯 시각과 채팅방 멤버 전체 이름을 보여주고, "내 캘린더에 저장"
+ * 버튼으로 이 일정을 본인 개인 캘린더에 저장할 수 있다. 다른 멤버 대신 저장해줄 API가 없어(권한상
+ * 본인 캘린더만 쓸 수 있음) 각자 이 버튼을 눌러야 한다 — 알려진 제약.
+ */
 @Composable
 internal fun MeetingConfirmedNoticeCard(
     meetingConfirmed: MeetingConfirmedUiModel,
-    participantNames: List<String>
+    participantNames: List<String>,
+    isSaved: Boolean,
+    onSaveClick: () -> Unit
 ) {
     val start =
         Instant.ofEpochMilli(meetingConfirmed.slotStartMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
@@ -576,5 +564,12 @@ internal fun MeetingConfirmedNoticeCard(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        MeetingCardButton(
+            label = if (isSaved) "내 캘린더에 저장됨" else "내 캘린더에 저장",
+            enabled = !isSaved,
+            onClick = onSaveClick
+        )
     }
 }

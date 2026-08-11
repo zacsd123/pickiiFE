@@ -2,6 +2,7 @@ package com.example.pickii.ui.mypage.withdrawal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.EmailPurpose
 import com.example.pickii.domain.repository.AccountRepository
 import com.example.pickii.domain.repository.SessionRepository
@@ -15,6 +16,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
+
+/** 서버에 이미 유효한 인증코드가 남아있어 재발송이 거부됐을 때의 에러 코드. */
+private const val ERROR_CODE_EMAIL_CODE_ALREADY_SENT = "TOO_MANY_REQUESTS"
 
 /**
  * 회원 탈퇴 화면(15번, 1-9). 이메일 인증(`purpose = WITHDRAWAL`) → 비밀번호 → 동의 2건 → [AccountRepository.withdraw].
@@ -47,7 +51,7 @@ class WithdrawalViewModel
 
         fun onSendEmailCodeClick() {
             val email = _uiState.value.email
-            if (email.isBlank()) return
+            if (email.isBlank() || _uiState.value.isSendingEmailCode) return
             _uiState.update { it.copy(isSendingEmailCode = true) }
             viewModelScope.launch {
                 signupRepository
@@ -62,9 +66,11 @@ class WithdrawalViewModel
                             )
                         }
                     }.onFailure { error ->
+                        val codeAlreadySent = error is ApiException && error.code == ERROR_CODE_EMAIL_CODE_ALREADY_SENT
                         _uiState.update {
                             it.copy(
                                 isSendingEmailCode = false,
+                                isEmailCodeSent = it.isEmailCodeSent || codeAlreadySent,
                                 emailMessage = error.message ?: DEFAULT_ERROR_MESSAGE,
                                 isEmailMessageError = true
                             )

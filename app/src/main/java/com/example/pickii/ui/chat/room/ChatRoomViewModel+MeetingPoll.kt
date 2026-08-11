@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.PublishChatMessage
+import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.toDisplayString
@@ -46,8 +47,15 @@ internal fun ChatRoomViewModel.loadScheduleCategories() {
 /**
  * 이 프로젝트의 팀 일정이 내 캘린더에서 보일 색상을 지정한다(7-19). 되읽기 API가 없어 성공하면
  * 방금 고른 값을 로컬 상태로만 반영한다(앱을 다시 켜면 선택 표시가 초기화됨 — 알려진 제약).
+ *
+ * "없음"(categoryId == null)은 API 자체가 해제를 표현할 방법이 없어(요청 바디가 non-null Long),
+ * 서버 호출 없이 로컬 상태만 초기화한다 — 이미 이 값 전체가 로컬 상태로만 관리되는 것과 같은 원칙.
  */
-internal fun ChatRoomViewModel.onSelectProjectColor(categoryId: Long) {
+internal fun ChatRoomViewModel.onSelectProjectColor(categoryId: Long?) {
+    if (categoryId == null) {
+        _uiState.update { it.copy(selectedProjectCategoryId = null) }
+        return
+    }
     val projectId = _uiState.value.projectId ?: return
     viewModelScope.launch {
         meetingPollRepository
@@ -109,6 +117,38 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
 internal fun ChatRoomViewModel.onAcknowledgeMeetingNotice(pollId: Long) {
     if (pollId in _uiState.value.acknowledgedPollIds) return
     _uiState.update { it.copy(acknowledgedPollIds = it.acknowledgedPollIds + pollId) }
+}
+
+/**
+ * 확정된 회의 일정(카드4)을 내 개인 캘린더에도 저장한다. 다른 멤버 대신 저장해줄 API가 없어(권한상
+ * 본인 캘린더만 쓸 수 있음) 채팅방에 있는 각자가 이 버튼을 눌러야 한다 — 알려진 제약.
+ */
+internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfirmedUiModel) {
+    if (confirmed.scheduleId in _uiState.value.savedMeetingScheduleIds) return
+    val start = Instant.ofEpochMilli(confirmed.slotStartMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val end = Instant.ofEpochMilli(confirmed.slotEndMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+    viewModelScope.launch {
+        calendarRepository
+            .addSchedule(
+                CalendarSchedule(
+                    id = 0L,
+                    title = confirmed.meetingTitle,
+                    categoryId = _uiState.value.selectedProjectCategoryId,
+                    startDate = start.toLocalDate(),
+                    endDate = end.toLocalDate(),
+                    startTime = start.toLocalTime(),
+                    endTime = end.toLocalTime()
+                )
+            ).onSuccess {
+                _uiState.update {
+                    it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + confirmed.scheduleId)
+                }
+                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_meeting_saved_to_calendar))
+            }.onFailure {
+                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+            }
+    }
 }
 
 /**
