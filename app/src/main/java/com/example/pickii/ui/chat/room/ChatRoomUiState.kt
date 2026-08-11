@@ -46,6 +46,8 @@ fun ProjectStatus.toDisplayText(): String =
  * @property isNoticeExpanded 공지 내용 표시 여부
  * @property pollDetails 채팅에 등장한 회의 조율(poll)의 최신 상태(7-11 재조회 결과), pollId 기준
  * @property acknowledgedPollIds "등록했어요"를 눌러 응답 카드를 펼쳐본 poll id 목록(로컬 상태, API 없음)
+ * @property savedMeetingScheduleIds "내 캘린더에 저장"을 눌러 저장한 확정 일정의 scheduleId 목록(로컬 상태,
+ * 되읽기 API 없어 앱을 다시 켜면 초기화됨 — 알려진 제약)
  * @property myPollSelections poll별 지금 화면에서 체크 중인 불가 슬롯 id 목록(제출 전 임시 상태)
  * @property pendingForceConfirm 미응답자가 있는 채로 확정을 시도해 확인이 필요한 (pollId, slotId)
  * @property scheduleCategories 개인 캘린더 카테고리 목록(7-19 프로젝트 색상 지정에서 그대로 재사용)
@@ -86,6 +88,7 @@ data class ChatRoomUiState(
     val meetings: List<ManagedMeetingUiModel> = emptyList(),
     val pollDetails: Map<Long, MeetingPollDetail> = emptyMap(),
     val acknowledgedPollIds: Set<Long> = emptySet(),
+    val savedMeetingScheduleIds: Set<Long> = emptySet(),
     val myPollSelections: Map<Long, Set<Long>> = emptyMap(),
     val pendingForceConfirm: Pair<Long, Long>? = null,
     val scheduleCategories: List<ScheduleCategory> = emptyList(),

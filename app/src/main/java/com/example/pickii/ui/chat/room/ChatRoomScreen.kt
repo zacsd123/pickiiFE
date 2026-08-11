@@ -190,7 +190,8 @@ fun ChatRoomRoute(
         onCancelMeetingPoll = viewModel::cancelMeetingPoll,
         onRegisterScheduleDirectly = viewModel::registerScheduleDirectly,
         onSelectProjectColor = viewModel::onSelectProjectColor,
-        onCloseProjectClick = viewModel::closeProject
+        onCloseProjectClick = viewModel::closeProject,
+        onSaveMeetingToMyCalendar = viewModel::onSaveMeetingToMyCalendar
     )
 }
 
@@ -227,8 +228,9 @@ private fun ChatRoomScreen(
     onForceConfirmDismiss: () -> Unit,
     onCancelMeetingPoll: (Long) -> Unit,
     onRegisterScheduleDirectly: (String, LocalDate, LocalTime, LocalTime) -> Unit,
-    onSelectProjectColor: (Long) -> Unit,
-    onCloseProjectClick: () -> Unit
+    onSelectProjectColor: (Long?) -> Unit,
+    onCloseProjectClick: () -> Unit,
+    onSaveMeetingToMyCalendar: (MeetingConfirmedUiModel) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -347,12 +349,14 @@ private fun ChatRoomScreen(
                         myPollSelection = uiState.myPollSelections[message.meetingNotice?.pollId].orEmpty(),
                         isCurrentUserLeader = uiState.isCurrentUserLeader,
                         participantNames = uiState.members.map { it.name },
+                        savedMeetingScheduleIds = uiState.savedMeetingScheduleIds,
                         onAcknowledgeMeetingNotice = onAcknowledgeMeetingNotice,
                         onToggleMeetingPollSlot = onToggleMeetingPollSlot,
                         onToggleMeetingPollNoneAvailable = onToggleMeetingPollNoneAvailable,
                         onSubmitMeetingPollResponse = onSubmitMeetingPollResponse,
                         onConfirmSlotClick = onConfirmSlotClick,
-                        onCancelMeetingPoll = onCancelMeetingPoll
+                        onCancelMeetingPoll = onCancelMeetingPoll,
+                        onSaveMeetingToMyCalendar = onSaveMeetingToMyCalendar
                     )
                 }
 
@@ -361,36 +365,43 @@ private fun ChatRoomScreen(
                 }
             }
 
-            AnimatedVisibility(
-                visible = uiState.isActionMenuExpanded
-            ) {
-                ChatActionMenu(
-                    isCurrentUserLeader = uiState.isCurrentUserLeader,
-                    onPhotoClick = {
-                        activeSheet = ChatRoomSheet.PhotoSource
-                    },
-                    onNoticeRegisterClick = {
-                        activeSheet = ChatRoomSheet.NoticeRegistration
-                    },
-                    onQuickMeetingClick = {
-                        activeSheet = ChatRoomSheet.QuickMeeting
-                    },
-                    onMeetingManagementClick = {
-                        activeSheet = ChatRoomSheet.MeetingManagement
-                    },
-                    onDirectRegisterClick = {
-                        activeSheet = ChatRoomSheet.DirectRegister
-                    }
+            val isChatWriteDisabled =
+                uiState.roomType == ChatRoomType.GROUP && uiState.projectStatus == ProjectStatus.END
+
+            if (isChatWriteDisabled) {
+                ChatMessageInputDisabled()
+            } else {
+                AnimatedVisibility(
+                    visible = uiState.isActionMenuExpanded
+                ) {
+                    ChatActionMenu(
+                        isCurrentUserLeader = uiState.isCurrentUserLeader,
+                        onPhotoClick = {
+                            activeSheet = ChatRoomSheet.PhotoSource
+                        },
+                        onNoticeRegisterClick = {
+                            activeSheet = ChatRoomSheet.NoticeRegistration
+                        },
+                        onQuickMeetingClick = {
+                            activeSheet = ChatRoomSheet.QuickMeeting
+                        },
+                        onMeetingManagementClick = {
+                            activeSheet = ChatRoomSheet.MeetingManagement
+                        },
+                        onDirectRegisterClick = {
+                            activeSheet = ChatRoomSheet.DirectRegister
+                        }
+                    )
+                }
+
+                ChatMessageInput(
+                    message = uiState.messageInput,
+                    isActionMenuExpanded = uiState.isActionMenuExpanded,
+                    onMessageChange = onMessageChange,
+                    onAddClick = onAddClick,
+                    onSendClick = onSendClick
                 )
             }
-
-            ChatMessageInput(
-                message = uiState.messageInput,
-                isActionMenuExpanded = uiState.isActionMenuExpanded,
-                onMessageChange = onMessageChange,
-                onAddClick = onAddClick,
-                onSendClick = onSendClick
-            )
         }
 
         if (activePanel == ChatRoomPanel.INFO) {
@@ -863,12 +874,14 @@ private fun ChatMessageItem(
     myPollSelection: Set<Long>,
     isCurrentUserLeader: Boolean,
     participantNames: List<String>,
+    savedMeetingScheduleIds: Set<Long>,
     onAcknowledgeMeetingNotice: (Long) -> Unit,
     onToggleMeetingPollSlot: (Long, Long) -> Unit,
     onToggleMeetingPollNoneAvailable: (Long) -> Unit,
     onSubmitMeetingPollResponse: (Long) -> Unit,
     onConfirmSlotClick: (Long, Long) -> Unit,
-    onCancelMeetingPoll: (Long) -> Unit
+    onCancelMeetingPoll: (Long) -> Unit,
+    onSaveMeetingToMyCalendar: (MeetingConfirmedUiModel) -> Unit
 ) {
     when (message.type) {
         ChatMessageType.TEXT -> {
@@ -936,7 +949,12 @@ private fun ChatMessageItem(
 
         ChatMessageType.MEETING_CONFIRMED -> {
             message.meetingConfirmed?.let { confirmed ->
-                MeetingConfirmedNoticeCard(meetingConfirmed = confirmed, participantNames = participantNames)
+                MeetingConfirmedNoticeCard(
+                    meetingConfirmed = confirmed,
+                    participantNames = participantNames,
+                    isSaved = confirmed.scheduleId in savedMeetingScheduleIds,
+                    onSaveClick = { onSaveMeetingToMyCalendar(confirmed) }
+                )
             }
         }
 
@@ -1056,6 +1074,30 @@ private fun ChatActionMenu(
     }
 
     HorizontalDivider(color = PickiiDivider)
+}
+
+/**
+ * 종료된 프로젝트의 채팅방에서 입력창 대신 보여주는 안내 바. 더 이상 채팅을 작성할 수 없음을 알린다.
+ */
+@Composable
+private fun ChatMessageInputDisabled() {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 16.dp
+                ),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "종료된 프로젝트예요. 더 이상 채팅을 보낼 수 없어요.",
+            color = PickiiGray400,
+            fontSize = 14.sp
+        )
+    }
 }
 
 /**
