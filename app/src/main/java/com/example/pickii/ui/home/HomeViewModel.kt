@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** 서버 목록 조회 한 페이지 크기. */
-private const val POSTS_PAGE_SIZE = 10
+private const val POSTS_PAGE_SIZE = 6
 
 /** 페이지네이션에 한 번에 표시할 페이지 번호 개수. */
 private const val PAGE_WINDOW_SIZE = 5

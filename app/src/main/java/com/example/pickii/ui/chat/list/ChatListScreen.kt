@@ -152,7 +152,7 @@ private fun ChatListScreen(
             Modifier
                 .fillMaxSize()
                 .background(ChatBackgroundColor)
-                .padding(horizontal = 28.dp)
+                .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -428,6 +428,8 @@ private fun DetailTopBar(onBackClick: () -> Unit) {
             modifier = Modifier.clickable(onClick = onBackClick)
         )
 
+        Spacer(modifier = Modifier.width(10.dp))
+
         Box(
             modifier =
                 Modifier
@@ -448,22 +450,6 @@ private fun DetailTopBar(onBackClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
         )
-
-        Box(
-            modifier =
-                Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(PickiiFieldBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Notifications,
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(18.dp)
-            )
-        }
     }
 }
 
