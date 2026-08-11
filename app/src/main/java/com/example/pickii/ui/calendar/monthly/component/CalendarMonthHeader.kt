@@ -51,9 +51,7 @@ fun CalendarMonthHeader(
         modifier = modifier.fillMaxWidth()
     ) {
         CalendarYearSelector(
-            year = displayedYearMonth.year,
-            onPreviousMonthClick = onPreviousMonthClick,
-            onNextMonthClick = onNextMonthClick
+            year = displayedYearMonth.year
         )
 
         Spacer(
@@ -74,48 +72,19 @@ fun CalendarMonthHeader(
 @Composable
 private fun CalendarYearSelector(
     year: Int,
-    onPreviousMonthClick: () -> Unit,
-    onNextMonthClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Text(
+        text = year.toString(),
         modifier =
             modifier
                 .fillMaxWidth()
                 .padding(start = 28.dp),
-        // << 값은 24~36dp 정도
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "‹",
-            modifier =
-                Modifier
-                    .clickable(onClick = onPreviousMonthClick)
-                    .padding(4.dp),
-            color = CalendarYearColor,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Medium
-        )
-
-        Text(
-            text = year.toString(),
-            color = CalendarYearColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Text(
-            text = "›",
-            modifier =
-                Modifier
-                    .clickable(onClick = onNextMonthClick)
-                    .padding(4.dp),
-            color = CalendarYearColor,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
+        color = CalendarYearColor,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = TextAlign.Start
+    )
 }
 
 /**

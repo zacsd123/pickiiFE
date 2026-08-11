@@ -115,7 +115,6 @@ fun ProfileEditScreen(
         onLicenseNameChange = viewModel::onLicenseNameChange,
         onLicenseDateChange = viewModel::onLicenseDateChange,
         onAboutMeChange = viewModel::onAboutMeChange,
-        onContactEmailChange = viewModel::onContactEmailChange,
         onSaveClick = { viewModel.onSaveClick(onSaved = onSaved) }
     )
 }
@@ -153,7 +152,6 @@ private fun ProfileEditScreenContent(
     onLicenseNameChange: (String, String) -> Unit,
     onLicenseDateChange: (String, YearMonth) -> Unit,
     onAboutMeChange: (String) -> Unit,
-    onContactEmailChange: (String) -> Unit,
     onSaveClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
@@ -190,13 +188,20 @@ private fun ProfileEditScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
             FieldLabel(stringResource(R.string.onboarding_label_university))
-            SearchDropdownField(
-                query = uiState.universityQuery,
-                onQueryChange = onUniversityQueryChange,
-                suggestions = uiState.universitySuggestions,
-                onSelect = onUniversitySelect,
-                itemLabel = { it.name },
-                placeholder = stringResource(R.string.onboarding_placeholder_university)
+
+            OutlinedTextField(
+                value = uiState.universityQuery,
+                onValueChange = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(FieldCornerRadius),
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        disabledContainerColor = PickiiFieldBackground,
+                        disabledBorderColor = Color.Transparent,
+                        disabledTextColor = PickiiTextGray
+                    )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -358,16 +363,6 @@ private fun ProfileEditScreenContent(
                 colors = fieldColors()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            FieldLabel(stringResource(R.string.mypage_profile_edit_label_contact_email))
-            OutlinedTextField(
-                value = uiState.contactEmail,
-                onValueChange = onContactEmailChange,
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(FieldCornerRadius),
-                colors = fieldColors()
-            )
 
             Spacer(modifier = Modifier.height(24.dp))
             Box(

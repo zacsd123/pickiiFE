@@ -73,6 +73,10 @@ import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
@@ -791,9 +795,17 @@ private fun ChatNotice(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Text(
-                text = if (isExpanded) "⌃" else "⌄",
-                color = PickiiGray400
+            Icon(
+                painter = painterResource(
+                    id = if (isExpanded) {
+                        R.drawable.ic_chevron_up
+                    } else {
+                        R.drawable.ic_chevron_down
+                    }
+                ),
+                contentDescription = if (isExpanded) "접기" else "펼치기",
+                tint = PickiiGray400,
+                modifier = Modifier.size(20.dp)
             )
         }
 

@@ -26,7 +26,7 @@ fun StatusBadge(
             modifier
                 .clip(RoundedCornerShape(50))
                 .background(containerColor)
-                .padding(horizontal = 10.dp, vertical = 4.dp)
+                .padding(horizontal = 7.dp, vertical = 2.dp)
     ) {
         Text(text = label, color = contentColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
     }

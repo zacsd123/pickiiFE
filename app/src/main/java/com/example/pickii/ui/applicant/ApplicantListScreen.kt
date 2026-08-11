@@ -278,10 +278,11 @@ private fun ApplicantFilterSection(
                         modifier = Modifier.width(5.dp)
                     )
 
-                    Text(
-                        text = "⌄",
-                        color = PickiiGrayDarkText,
-                        fontSize = 18.sp
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_chevron_down),
+                        contentDescription = "정렬 메뉴 열기",
+                        tint = PickiiGrayDarkText,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
