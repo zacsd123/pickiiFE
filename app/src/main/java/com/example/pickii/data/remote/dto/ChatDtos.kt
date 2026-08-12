@@ -30,7 +30,9 @@ data class ChatRoomDetailDto(
 @Serializable
 data class ChatRoomMemberDto(
     val memberId: Long,
-    val nickname: String
+    val nickname: String,
+    /** 참여자 경험치(레벨 아바타 계산용). 필드명 미확정 — 백엔드 확정 전 추정치. */
+    val exp: Int = 0
 )
 
 /**
@@ -45,6 +47,9 @@ data class ChatMessageDto(
     val messageId: String,
     val senderId: Long? = null,
     val senderNickname: String? = null,
+    /** 발신자 경험치(레벨 아바타 계산용). senderId/senderNickname과 동일하게 시스템 메시지에서 빠질 수 있어 선택 필드다.
+     * 필드명 미확정 — 백엔드 확정 전 추정치. */
+    val senderExp: Int? = null,
     val type: String,
     val message: String? = null,
     val imageUrl: String? = null,

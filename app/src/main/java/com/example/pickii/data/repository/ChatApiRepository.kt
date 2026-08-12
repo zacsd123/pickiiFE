@@ -182,6 +182,7 @@ class ChatApiRepository
                         ChatMember(
                             memberId = member.memberId,
                             nickname = member.nickname,
+                            exp = member.exp,
                             isLeader =
                                 if (leaderId != null) {
                                     member.memberId == leaderId
@@ -203,6 +204,7 @@ class ChatApiRepository
                 messageId = messageId,
                 senderId = senderId ?: 0L,
                 senderNickname = senderNickname ?: SYSTEM_SENDER_NICKNAME,
+                senderExp = senderExp ?: 0,
                 type = type.toChatMessageContentType(),
                 text = message,
                 imageUrl = imageUrl,

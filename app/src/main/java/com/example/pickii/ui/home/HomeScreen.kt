@@ -24,7 +24,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +53,7 @@ import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.PickiiTopBar
@@ -480,21 +480,7 @@ private fun PostCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(PickiiFieldBackground),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = null,
-                    tint = PickiiTextGray,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            LevelAvatar(exp = post.authorExperience, size = 36.dp)
 
             StatusBadge(
                 label = post.status.label,

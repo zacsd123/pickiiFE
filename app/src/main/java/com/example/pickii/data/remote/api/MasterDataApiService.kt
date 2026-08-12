@@ -1,6 +1,7 @@
 package com.example.pickii.data.remote.api
 
 import com.example.pickii.data.remote.dto.ApiEnvelope
+import com.example.pickii.data.remote.dto.ApplyKeywordCategoryDto
 import com.example.pickii.data.remote.dto.CategoryDto
 import com.example.pickii.data.remote.dto.LicenseOptionDto
 import com.example.pickii.data.remote.dto.LinkCategoryDto
@@ -32,4 +33,8 @@ interface MasterDataApiService {
 
     @GET("link-categories")
     suspend fun getLinkCategories(): Response<ApiEnvelope<List<LinkCategoryDto>>>
+
+    /** `GET /apply-keywords`(5-7). 인증 불필요, 카테고리별로 중첩된 지원 키워드 목록. */
+    @GET("apply-keywords")
+    suspend fun getApplyKeywords(): Response<ApiEnvelope<List<ApplyKeywordCategoryDto>>>
 }

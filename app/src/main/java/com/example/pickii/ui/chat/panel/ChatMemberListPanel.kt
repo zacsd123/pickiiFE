@@ -14,19 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
 import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiNavyText
@@ -193,30 +192,7 @@ private fun MemberProfileImage(member: ChatRoomMemberUiModel) {
         modifier = Modifier.size(52.dp),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        color =
-                            createMemberProfileColor(
-                                memberId = member.memberId
-                            )
-                    ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text =
-                    member.name
-                        .firstOrNull()
-                        ?.toString()
-                        .orEmpty(),
-                color = MemberListPrimaryTextColor,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        LevelAvatar(exp = member.exp, size = 48.dp)
 
         if (member.isLeader) {
             Text(
@@ -226,25 +202,4 @@ private fun MemberProfileImage(member: ChatRoomMemberUiModel) {
             )
         }
     }
-}
-
-/**
- * 팀원별 임시 프로필 색상을 생성한다.
- */
-fun createMemberProfileColor(memberId: Long): Color {
-    val colors =
-        listOf(
-            Color(0xFFC9B7FF),
-            Color(0xFFF0B3C6),
-            Color(0xFFF2C58F),
-            Color(0xFFB8E3D1),
-            Color(0xFFB9D7FA)
-        )
-
-    val colorIndex =
-        (memberId % colors.size)
-            .toInt()
-            .coerceAtLeast(0)
-
-    return colors[colorIndex]
 }

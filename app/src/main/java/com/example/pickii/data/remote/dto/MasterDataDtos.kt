@@ -34,3 +34,11 @@ data class LicenseOptionDto(
 data class LinkCategoryDto(
     val name: String
 )
+
+/** `GET /apply-keywords`(5-7) 응답의 카테고리 하나. 카테고리 안에 키워드가 중첩된 Nested 구조다. */
+@Serializable
+data class ApplyKeywordCategoryDto(
+    val categoryId: Int,
+    val category: String,
+    val keywords: List<ApplicantKeywordDto>
+)

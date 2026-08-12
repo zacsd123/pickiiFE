@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,7 +114,8 @@ fun OnboardingScreen(
         onDismissSkipDialog = viewModel::onDismissSkipDialog,
         onConfirmSkip = { viewModel.onConfirmSkip(onSkipped = onFinished) },
         onAiRetryClick = { viewModel.onAiRetryClick(onCompleted = onFinished) },
-        onAiDialogDismiss = viewModel::onAiDialogDismiss
+        onAiDialogDismiss = viewModel::onAiDialogDismiss,
+        onRetryLoadMasterDataClick = viewModel::onRetryLoadMasterDataClick
     )
 }
 
@@ -154,7 +156,8 @@ private fun OnboardingScreenContent(
     onDismissSkipDialog: () -> Unit,
     onConfirmSkip: () -> Unit,
     onAiRetryClick: () -> Unit,
-    onAiDialogDismiss: () -> Unit
+    onAiDialogDismiss: () -> Unit,
+    onRetryLoadMasterDataClick: () -> Unit
 ) {
     Box(
         modifier =
@@ -182,6 +185,22 @@ private fun OnboardingScreenContent(
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(text = subtitle, color = PickiiTextGray, fontSize = 12.sp)
+            }
+
+            if (uiState.masterDataErrorMessage != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = uiState.masterDataErrorMessage, color = Color.Red, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "다시 시도",
+                        color = Color.Black,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = onRetryLoadMasterDataClick)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -351,24 +370,38 @@ private fun SchoolInfoStep(
     )
 }
 
-/** 2단계: 관심 분야(주제) 다중 선택. 칩 길이가 제각각이라 고정 3열 대신 [FlowRow]로 자연스럽게 줄바꿈한다. */
+/**
+ * 2단계: 관심 분야(주제) 다중 선택. 칩 길이가 제각각이라 고정 3열 대신 [FlowRow]로 자연스럽게 줄바꿈한다.
+ * 최대 [MAX_TOPIC_SELECTION]개까지만 선택 가능하다 — 이미 다 찬 상태에서는 미선택 칩을 비활성화한다.
+ */
 @Composable
 private fun InterestTopicStep(
     uiState: OnboardingUiState,
     onTopicToggle: (Int) -> Unit
 ) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        uiState.availableTopics.forEach { topic ->
-            SelectableChip(
-                label = topic.label,
-                selected = topic.id in uiState.selectedTopicIds,
-                enabled = true,
-                onClick = { onTopicToggle(topic.id) }
-            )
+    Column {
+        Text(
+            text = "${uiState.selectedTopicIds.size}/$MAX_TOPIC_SELECTION",
+            color = PickiiTextGray,
+            fontSize = 12.sp
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            uiState.availableTopics.forEach { topic ->
+                val isSelected = topic.id in uiState.selectedTopicIds
+                SelectableChip(
+                    label = topic.label,
+                    selected = isSelected,
+                    enabled = isSelected || uiState.selectedTopicIds.size < MAX_TOPIC_SELECTION,
+                    onClick = { onTopicToggle(topic.id) }
+                )
+            }
         }
     }
 }
@@ -764,7 +797,8 @@ private fun OnboardingStep1Preview() {
             onDismissSkipDialog = {},
             onConfirmSkip = {},
             onAiRetryClick = {},
-            onAiDialogDismiss = {}
+            onAiDialogDismiss = {},
+            onRetryLoadMasterDataClick = {}
         )
     }
 }

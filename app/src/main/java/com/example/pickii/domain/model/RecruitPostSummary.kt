@@ -8,6 +8,7 @@ data class RecruitPostSummary(
     val title: String,
     val authorId: String,
     val authorNickname: String,
+    val authorExperience: Int = 0,
     val maxParticipants: Int,
     val availableSlots: Int,
     val status: RecruitStatus,

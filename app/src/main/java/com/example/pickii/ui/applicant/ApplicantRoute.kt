@@ -17,6 +17,7 @@ import com.example.pickii.ui.common.RecruitUiEvent
 fun ApplicantRoute(
     onBackClick: () -> Unit,
     onNavigateToChatRoom: (roomId: String) -> Unit,
+    onNavigateToMemberProfile: (memberId: String) -> Unit,
     viewModel: ApplicantListViewModel = hiltViewModel()
 ) {
     var currentScreen by remember {
@@ -48,6 +49,7 @@ fun ApplicantRoute(
                             applicantId = applicantId
                         )
                 },
+                onProfileClick = { memberId -> onNavigateToMemberProfile(memberId.toString()) },
                 viewModel = viewModel
             )
         }
@@ -74,7 +76,8 @@ fun ApplicantRoute(
                     viewModel.rejectApplicant(
                         applicantId = applicantId
                     )
-                }
+                },
+                onProfileClick = { memberId -> onNavigateToMemberProfile(memberId.toString()) }
             )
         }
     }

@@ -10,5 +10,6 @@ data class ApplicantEntry(
     val message: String,
     val keywords: List<String>,
     val status: ApplyStatus,
-    val appliedAt: LocalDateTime
+    val appliedAt: LocalDateTime,
+    val exp: Int = 0
 )

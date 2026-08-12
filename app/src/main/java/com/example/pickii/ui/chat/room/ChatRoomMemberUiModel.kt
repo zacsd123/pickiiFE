@@ -10,5 +10,6 @@ package com.example.pickii.ui.chat
 data class ChatRoomMemberUiModel(
     val memberId: Long,
     val name: String,
-    val isLeader: Boolean = false
+    val isLeader: Boolean = false,
+    val exp: Int = 0
 )

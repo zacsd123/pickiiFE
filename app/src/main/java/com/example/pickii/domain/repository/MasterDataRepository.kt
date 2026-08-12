@@ -1,5 +1,6 @@
 package com.example.pickii.domain.repository
 
+import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.LicenseOption
 import com.example.pickii.domain.model.LinkCategory
 import com.example.pickii.domain.model.RecruitCategory
@@ -26,4 +27,7 @@ interface MasterDataRepository {
 
     /** 전체 외부 링크 플랫폼 목록을 조회한다. 최초 조회 후 캐싱한다. */
     suspend fun getLinkCategories(): Result<List<LinkCategory>>
+
+    /** 지원 키워드 목록을 카테고리별로 조회한다(전체 카테고리 통틀어 최대 5개까지 선택 가능). 최초 조회 후 캐싱한다. */
+    suspend fun getApplyKeywords(): Result<List<ApplyKeywordCategory>>
 }

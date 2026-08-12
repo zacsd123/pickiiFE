@@ -3,7 +3,6 @@ package com.example.pickii.ui.chat
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,13 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
 import com.example.pickii.ui.theme.PickiiDivider
 import com.example.pickii.ui.theme.PickiiGray400
@@ -264,26 +262,11 @@ private fun ChatRoomMemberProfile(member: ChatRoomMemberUiModel) {
         Box(
             contentAlignment = Alignment.TopCenter
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .padding(top = 8.dp)
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(createMemberProfileColor(memberId = member.memberId)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text =
-                        member.name
-                            .firstOrNull()
-                            ?.toString()
-                            .orEmpty(),
-                    color = PanelPrimaryTextColor,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            LevelAvatar(
+                exp = member.exp,
+                modifier = Modifier.padding(top = 8.dp),
+                size = 52.dp
+            )
 
             if (member.isLeader) {
                 Text(

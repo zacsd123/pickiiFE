@@ -33,6 +33,9 @@ class FcmService : FirebaseMessagingService() {
     @Inject
     lateinit var fcmTokenRegistrar: FcmTokenRegistrar
 
+    @Inject
+    lateinit var activeChatRoomTracker: ActiveChatRoomTracker
+
     override fun onCreate() {
         super.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -56,6 +59,7 @@ class FcmService : FirebaseMessagingService() {
         val title = message.notification?.title ?: return
         val body = message.notification?.body.orEmpty()
         if (!hasNotificationPermission()) return
+        if (isForActiveChatRoom(message)) return
 
         val intent =
             Intent(this, MainActivity::class.java).apply {
@@ -87,6 +91,14 @@ class FcmService : FirebaseMessagingService() {
                 .build()
 
         NotificationManagerCompat.from(this).notify(requestCode, notification)
+    }
+
+    /** 지금 열려 있는 채팅방으로 온 메시지 알림인지 확인한다(그 방을 보고 있는 동안엔 알림을 띄우지 않는다). */
+    private fun isForActiveChatRoom(message: RemoteMessage): Boolean {
+        val referenceType = message.data[DATA_KEY_REFERENCE_TYPE]
+        if (referenceType != "CHATROOM" && referenceType != "CHAT") return false
+        val referenceRoomId = message.data[DATA_KEY_REFERENCE_ID]?.toLongOrNull() ?: return false
+        return referenceRoomId == activeChatRoomTracker.activeRoomId
     }
 
     private fun hasNotificationPermission(): Boolean {

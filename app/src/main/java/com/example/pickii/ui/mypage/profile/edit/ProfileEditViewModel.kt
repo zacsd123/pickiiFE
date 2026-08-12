@@ -32,6 +32,9 @@ import javax.inject.Inject
 /** 학교 검색 디바운스 간격(ms). */
 private const val UNIVERSITY_SEARCH_DEBOUNCE_MS = 300L
 
+/** 관심 분야는 최대 이 개수까지만 선택할 수 있다. */
+internal const val MAX_TOPIC_SELECTION = 3
+
 /** 기존 이력서를 불러와 한 화면 스크롤 폼으로 수정하고, [ProfileRepository.updateProfile]로 저장한다(4-3). */
 @HiltViewModel
 class ProfileEditViewModel
@@ -52,25 +55,39 @@ class ProfileEditViewModel
 
         private fun loadMasterData() {
             viewModelScope.launch {
-                masterDataRepository.getTopics().onSuccess { topics ->
-                    _uiState.update { it.copy(availableTopics = topics) }
-                }
+                masterDataRepository
+                    .getTopics()
+                    .onSuccess { topics -> _uiState.update { it.copy(availableTopics = topics) } }
+                    .onFailure { onMasterDataLoadFailed() }
             }
             viewModelScope.launch {
-                masterDataRepository.getTechStacks().onSuccess { stacks ->
-                    _uiState.update { it.copy(availableTechStacks = stacks) }
-                }
+                masterDataRepository
+                    .getTechStacks()
+                    .onSuccess { stacks -> _uiState.update { it.copy(availableTechStacks = stacks) } }
+                    .onFailure { onMasterDataLoadFailed() }
             }
             viewModelScope.launch {
-                masterDataRepository.getLinkCategories().onSuccess { categories ->
-                    _uiState.update { it.copy(availableLinkCategories = categories) }
-                }
+                masterDataRepository
+                    .getLinkCategories()
+                    .onSuccess { categories -> _uiState.update { it.copy(availableLinkCategories = categories) } }
+                    .onFailure { onMasterDataLoadFailed() }
             }
             viewModelScope.launch {
-                masterDataRepository.getLicenseOptions().onSuccess { options ->
-                    _uiState.update { it.copy(availableLicenseOptions = options) }
-                }
+                masterDataRepository
+                    .getLicenseOptions()
+                    .onSuccess { options -> _uiState.update { it.copy(availableLicenseOptions = options) } }
+                    .onFailure { onMasterDataLoadFailed() }
             }
+        }
+
+        private fun onMasterDataLoadFailed() {
+            _uiState.update { it.copy(errorMessage = "목록을 불러오지 못했어요. 다시 시도해주세요.") }
+        }
+
+        /** 목록 로드 실패 배너의 "다시 시도" 버튼을 클릭한다. */
+        fun onRetryLoadMasterDataClick() {
+            _uiState.update { it.copy(errorMessage = null) }
+            loadMasterData()
         }
 
         private fun loadProfile() {
@@ -165,10 +182,17 @@ class ProfileEditViewModel
             _uiState.update { it.copy(major = value.take(PROFILE_EDIT_MAX_MAJOR_LENGTH)) }
         }
 
+        /** 관심 분야 칩을 토글한다. 이미 [MAX_TOPIC_SELECTION]개를 선택한 상태에서는 새로 선택할 수 없다. */
         fun onTopicToggle(topicId: Int) {
-            _uiState.update {
-                val selected = it.selectedTopicIds
-                it.copy(selectedTopicIds = if (topicId in selected) selected - topicId else selected + topicId)
+            _uiState.update { state ->
+                val selected = state.selectedTopicIds
+                val updated =
+                    when {
+                        topicId in selected -> selected - topicId
+                        selected.size >= MAX_TOPIC_SELECTION -> selected
+                        else -> selected + topicId
+                    }
+                state.copy(selectedTopicIds = updated)
             }
         }
 

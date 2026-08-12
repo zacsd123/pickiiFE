@@ -9,6 +9,8 @@ data class RecruitSummaryDto(
     val title: String,
     val authorId: Long,
     val authorNickname: String,
+    /** 작성자 경험치(레벨 아바타 계산용). 목록 응답 필드명 미확정 — 상세(authorEXP) 관례를 따름. */
+    val authorEXP: Int = 0,
     val maxMembers: Int,
     val availableSlots: Int,
     val status: String,
@@ -100,7 +102,7 @@ data class CommentCreateResponseDto(
 @Serializable
 data class ApplyRequest(
     val message: String,
-    val keywordIds: List<Int>? = null
+    val keywordIds: List<Long>? = null
 )
 
 /** `POST /recruits/{id}/applies/ai-draft` 요청/응답. */
