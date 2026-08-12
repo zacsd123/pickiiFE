@@ -17,8 +17,8 @@ import java.time.YearMonth
  * @property notificationCount 상단 헤더에 표시할 미읽음 알림 수
  */
 data class MonthlyCalendarUiState(
-    val displayedYearMonth: YearMonth = YearMonth.of(2026, 7),
-    val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
+    val displayedYearMonth: YearMonth = YearMonth.now(),
+    val selectedDate: LocalDate = LocalDate.now(),
     val schedules: List<MonthlyScheduleUiModel> = emptyList(),
     val expandedScheduleId: Long? = null,
     val notificationCount: Int = 0

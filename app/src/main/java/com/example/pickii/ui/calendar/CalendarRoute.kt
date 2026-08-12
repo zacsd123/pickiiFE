@@ -47,7 +47,7 @@ fun CalendarRoute(
 
     var selectedDateText by rememberSaveable {
         mutableStateOf(
-            LocalDate.of(2026, 7, 4).toString()
+            LocalDate.now().toString()
         )
     }
 

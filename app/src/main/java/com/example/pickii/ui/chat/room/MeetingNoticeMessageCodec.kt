@@ -74,3 +74,41 @@ fun decodeMeetingConfirmedMessage(content: String): DecodedMeetingConfirmed? {
         scheduleId = scheduleId
     )
 }
+
+private const val DIRECT_MEETING_PREFIX = "PICKII_DIRECT_MEETING"
+
+/**
+ * 조율 없이 팀장이 바로 등록한 팀 일정(7-16)도 구조화된 정보(확정 슬롯 시각 등)가 필요해 같은 방식으로
+ * 인코딩해 보낸다. 실제 poll이 없어 pollId는 필요 없다 — 받는 즉시 그 자체로 카드 하나만 뜬다
+ * ([MeetingConfirmedUiModel]과 같은 화면 모델을 재사용하되 [ChatMessageType.DIRECT_MEETING]으로 구분한다).
+ */
+fun encodeDirectMeetingMessage(
+    title: String,
+    slotStartMillis: Long,
+    slotEndMillis: Long,
+    scheduleId: Long
+): String =
+    "$DIRECT_MEETING_PREFIX$title$FIELD_SEPARATOR$slotStartMillis$FIELD_SEPARATOR" +
+        "$slotEndMillis$FIELD_SEPARATOR$scheduleId"
+
+data class DecodedDirectMeeting(
+    val title: String,
+    val slotStartMillis: Long,
+    val slotEndMillis: Long,
+    val scheduleId: Long
+)
+
+fun decodeDirectMeetingMessage(content: String): DecodedDirectMeeting? {
+    if (!content.startsWith(DIRECT_MEETING_PREFIX)) return null
+    val parts = content.removePrefix(DIRECT_MEETING_PREFIX).split(FIELD_SEPARATOR)
+    if (parts.size != 4) return null
+    val slotStartMillis = parts[1].toLongOrNull() ?: return null
+    val slotEndMillis = parts[2].toLongOrNull() ?: return null
+    val scheduleId = parts[3].toLongOrNull() ?: return null
+    return DecodedDirectMeeting(
+        title = parts[0],
+        slotStartMillis = slotStartMillis,
+        slotEndMillis = slotEndMillis,
+        scheduleId = scheduleId
+    )
+}

@@ -33,7 +33,7 @@
     <string name="home_button_reset">초기화</string>
     <string name="home_button_search">검색</string>
     <string name="home_recruit_posts_title">모집 글 (%1$d)</string>
-    <string name="home_button_register_post">+ 공고 등록</string>
+    <string name="home_button_register_post">공고 등록</string>
     <string name="home_button_detail">상세보기</string>
     <string name="home_button_apply">지원하기</string>
 
@@ -50,7 +50,7 @@
     <string name="common_ai_dialog_button_close">닫기</string>
 
     <string name="recruit_detail_label_author">글 작성자</string>
-    <string name="recruit_detail_label_author_experience">%1$s · 경험치 %2$d</string>
+    <string name="recruit_detail_label_author_experience">%1$s · Lv.%2$d</string>
     <string name="recruit_detail_label_written_at">작성: %1$s</string>
     <string name="recruit_detail_label_period_and_capacity">%1$s ~ %2$s | 지원 가능 %3$d명</string>
     <string name="recruit_detail_label_short_intro">간단 소개</string>
@@ -86,6 +86,7 @@
 
     <string name="recruit_apply_banner_notice">*작성한 메시지는 본인의 프로필과 함께 공고 작성자에게 전달됩니다</string>
     <string name="recruit_apply_label_message">전달 메시지</string>
+    <string name="recruit_apply_label_keywords">지원 키워드</string>
     <string name="recruit_apply_placeholder_message">자유롭게 작성해주세요...</string>
     <string name="recruit_apply_banner_tip_title">⏱ 시간 절약 꿀 TIP!</string>
     <string name="recruit_apply_banner_tip_subtitle">AI가 지원 메시지 생성을 도와줄 수 있어요!</string>
@@ -209,18 +210,18 @@
     <string name="onboarding_placeholder_start_date">시작 연월</string>
     <string name="onboarding_placeholder_end_date">종료 연월</string>
     <string name="onboarding_placeholder_experience_desc">활동 내용을 입력해주세요</string>
-    <string name="onboarding_button_add_experience">+ 경험 추가</string>
+    <string name="onboarding_button_add_experience">경험 추가</string>
     <string name="onboarding_placeholder_skill_name">기술/툴 이름을 입력해주세요</string>
     <string name="onboarding_skill_not_selected_hint">목록에서 선택해주세요</string>
     <string name="onboarding_skill_level_high">상</string>
     <string name="onboarding_skill_level_mid">중</string>
     <string name="onboarding_skill_level_low">하</string>
-    <string name="onboarding_button_add_skill">+ Skill &amp; Tool 추가</string>
+    <string name="onboarding_button_add_skill">Skill &amp; Tool 추가</string>
     <string name="onboarding_placeholder_link_url">링크 URL을 입력해주세요</string>
-    <string name="onboarding_button_add_link">+ 링크 추가</string>
+    <string name="onboarding_button_add_link">링크 추가</string>
     <string name="onboarding_placeholder_license_name">자격증 이름을 입력해주세요</string>
     <string name="onboarding_placeholder_acquired_date">취득 연월</string>
-    <string name="onboarding_button_add_license">+ 자격증 추가</string>
+    <string name="onboarding_button_add_license">자격증 추가</string>
 
     <string name="account_recovery_button_reset_password">비밀번호 재설정</string>
 

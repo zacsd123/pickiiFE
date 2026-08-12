@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
@@ -79,6 +80,7 @@ private enum class ApplicantSortType(
 fun ApplicantListScreen(
     onBackClick: () -> Unit,
     onApplicantDetailClick: (Long) -> Unit,
+    onProfileClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ApplicantListViewModel = hiltViewModel()
 ) {
@@ -188,6 +190,9 @@ fun ApplicantListScreen(
                         },
                         onChatClick = {
                             viewModel.createDirectChat(applicant.memberId)
+                        },
+                        onProfileClick = {
+                            onProfileClick(applicant.memberId)
                         }
                     )
                 }
@@ -278,10 +283,11 @@ private fun ApplicantFilterSection(
                         modifier = Modifier.width(5.dp)
                     )
 
-                    Text(
-                        text = "⌄",
-                        color = PickiiGrayDarkText,
-                        fontSize = 18.sp
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_chevron_down),
+                        contentDescription = "정렬 메뉴 열기",
+                        tint = PickiiGrayDarkText,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
@@ -384,7 +390,8 @@ private fun ApplicantCard(
     onAcceptClick: () -> Unit,
     onRejectClick: () -> Unit,
     onDetailClick: () -> Unit,
-    onChatClick: () -> Unit
+    onChatClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     Card(
         modifier =
@@ -418,10 +425,13 @@ private fun ApplicantCard(
                     )
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onProfileClick),
                 verticalAlignment = Alignment.Top
             ) {
-                ApplicantProfilePlaceholder()
+                ApplicantProfilePlaceholder(exp = applicant.exp)
 
                 Spacer(
                     modifier = Modifier.width(14.dp)
@@ -493,25 +503,8 @@ private fun ApplicantCard(
 }
 
 @Composable
-private fun ApplicantProfilePlaceholder() {
-    Surface(
-        modifier = Modifier.size(56.dp),
-        shape = CircleShape,
-        color = Color(0xFFF3F3FA)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_profile
-                    ),
-                contentDescription = "기본 프로필 이미지",
-                modifier = Modifier.size(28.dp)
-            )
-        }
-    }
+private fun ApplicantProfilePlaceholder(exp: Int) {
+    LevelAvatar(exp = exp, size = 56.dp)
 }
 
 @Composable

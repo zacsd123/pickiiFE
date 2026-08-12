@@ -1,5 +1,15 @@
 package com.example.pickii.ui.mypage.profile
 
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.material3.Icon
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,8 +57,8 @@ import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
-import com.example.pickii.ui.common.AvatarPlaceholder
 import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.SelectableChip
@@ -78,6 +87,23 @@ fun ProfileViewScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refresh()
+                }
+            }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
@@ -187,7 +213,7 @@ private fun CharacterCard(profile: MemberProfile) {
     ProfileCardFrame(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AvatarPlaceholder(size = 112.dp)
+                LevelAvatar(exp = profile.exp, size = 112.dp)
                 Spacer(modifier = Modifier.height(16.dp))
                 LevelProgressBar(exp = profile.exp, modifier = Modifier.width(160.dp))
                 Spacer(modifier = Modifier.height(12.dp))
@@ -221,7 +247,7 @@ private fun TopicSchoolLinksCard(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     topicLabels.take(3).forEach { label ->
-                        SelectableChip(label = label, selected = true, enabled = false, onClick = {})
+                        ProfileTopicChip(label = label)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -343,17 +369,63 @@ private fun CardInfoRow(
 
 @Composable
 private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
-    Column(
+    val context = LocalContext.current
+
+    Box(
         modifier =
             Modifier
+                .size(42.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(PickiiProfileCardGoldMid.copy(alpha = 0.15f))
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .background(PickiiYellowLight)
+                .clickable {
+                    val url =
+                        if (
+                            link.url.startsWith("http://") ||
+                            link.url.startsWith("https://")
+                        ) {
+                            link.url
+                        } else {
+                            "https://${link.url}"
+                        }
+
+                    val intent =
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(url)
+                        )
+
+                    context.startActivity(intent)
+                },
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = link.linkName, color = PickiiProfileCardGoldBright, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        Text(text = link.url, color = Color.White, fontSize = 11.sp)
+        Icon(
+            painter = painterResource(
+                id = getLinkIcon(link.linkName)
+            ),
+            contentDescription = link.linkName,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
+
+private fun getLinkIcon(linkName: String): Int =
+    when (linkName.lowercase()) {
+        "git" ->
+            R.drawable.ic_github
+
+        "notion" ->
+            R.drawable.ic_notion
+
+        "linkedin" ->
+            R.drawable.ic_linkedin
+
+        "홈페이지" ->
+            R.drawable.ic_link
+
+        else ->
+            R.drawable.ic_link
+    }
 
 @Composable
 private fun SkillToolRow(entry: SkillToolEntry) {
@@ -435,4 +507,27 @@ fun ProfileViewScreenContentPre() {
         onBackClick = {},
         onEditClick = {}
     )
+}
+
+@Composable
+private fun ProfileTopicChip(
+    label: String
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(PickiiYellowLight)
+                .padding(
+                    horizontal = 10.dp,
+                    vertical = 6.dp
+                )
+    ) {
+        Text(
+            text = label,
+            color = Color.Black,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }

@@ -14,6 +14,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -276,12 +278,17 @@ private fun PickiiNavHost(
         )
     }
 
+    // 바텀 네브바를 Scaffold의 bottomBar로 그린다. 예약된 공간의 배경은 투명하게 둬서(검정 캡슐만 보이도록)
+    // 색이 칠해진 띠처럼 보이지 않게 하면서도, 스크롤 콘텐츠가 캡슐 높이만큼 자동으로 여유를 두고 멈추게 한다.
     Scaffold(
         containerColor = PickiiYellowLight,
         bottomBar = {
             val tab = currentTab
             if (isBottomNavVisible && tab != null) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().background(Color.Transparent),
+                    contentAlignment = Alignment.Center
+                ) {
                     PickiiBottomNav(
                         selectedTab = tab,
                         onTabSelect = { tab ->
@@ -562,6 +569,9 @@ private fun PickiiNavHost(
                     onNavigateToChatRoom = { roomId ->
                         pendingChatRoomId = roomId.toLongOrNull()
                         navController.navigateToTab(PickiiDestination.Chat.route)
+                    },
+                    onNavigateToMemberProfile = { memberId ->
+                        navController.navigate(PickiiDestination.MemberProfile(memberId).route)
                     }
                 )
             }
@@ -623,7 +633,9 @@ private fun navigateForNotificationTap(
         // 새 지원자 알림: 공고 상세가 아니라 그 공고의 지원자 확인 화면으로 바로 이동한다.
         "APPLY" ->
             referenceId?.let { postId ->
-                navController.navigate(PickiiDestination.ApplicantList(postId).route)
+                navController.navigate(PickiiDestination.ApplicantList(postId).route) {
+                    popUpTo(PickiiDestination.Home.route)
+                }
             }
 
         // 지원 수락/거절 알림: 마이페이지의 "지원 현황"으로 바로 이동한다.
@@ -643,7 +655,9 @@ private fun navigateForNotificationTap(
             when (referenceType) {
                 "RECRUIT" ->
                     referenceId?.let {
-                        navController.navigate(PickiiDestination.RecruitDetail(it).route)
+                        navController.navigate(PickiiDestination.RecruitDetail(it).route) {
+                            popUpTo(PickiiDestination.Home.route)
+                        }
                     }
 
                 "CHATROOM", "CHAT" ->

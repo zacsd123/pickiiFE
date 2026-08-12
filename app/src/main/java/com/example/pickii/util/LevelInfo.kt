@@ -1,7 +1,7 @@
 package com.example.pickii.util
 
-// TODO: 레벨 산출 공식 기획/백엔드 확정 필요 — 현재는 exp 100당 1레벨로 클라이언트에서 임의 계산한다.
-private const val EXP_PER_LEVEL = 100
+/** 레벨 구간 임계값(경험치). 이 값을 초과해야 다음 레벨이다 — 0~20:1레벨, 21~60:2레벨, 61~120:3레벨, 121 이상:4레벨(상한 없음). */
+private val LEVEL_THRESHOLDS = listOf(20, 60, 120)
 
 /**
  * 경험치([exp])로부터 레벨/진행률을 계산한 결과.
@@ -17,10 +17,14 @@ data class LevelInfo(
 /** [exp]로 레벨/경험치 바 진행률을 계산한다. */
 fun calculateLevel(exp: Int): LevelInfo {
     val safeExp = exp.coerceAtLeast(0)
-    val level = 1 + safeExp / EXP_PER_LEVEL
-    val expInLevel = safeExp % EXP_PER_LEVEL
-    return LevelInfo(
-        level = level,
-        progress = expInLevel / EXP_PER_LEVEL.toFloat()
-    )
+    val level = 1 + LEVEL_THRESHOLDS.count { safeExp > it }
+    val lowerBound = LEVEL_THRESHOLDS.lastOrNull { safeExp > it } ?: 0
+    val upperBound = LEVEL_THRESHOLDS.firstOrNull { safeExp <= it }
+    val progress =
+        if (upperBound == null) {
+            1f
+        } else {
+            (safeExp - lowerBound).toFloat() / (upperBound - lowerBound)
+        }
+    return LevelInfo(level = level, progress = progress)
 }

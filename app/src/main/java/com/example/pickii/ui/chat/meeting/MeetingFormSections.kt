@@ -59,7 +59,10 @@ internal fun MeetingDurationSection(
             30 to "30분",
             60 to "1시간",
             90 to "1시간 30분",
-            120 to "2시간"
+            120 to "2시간",
+            150 to "2시간 30분",
+            180 to "3시간",
+            181 to "3시간 +"
         )
 
     Column {

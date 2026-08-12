@@ -146,6 +146,14 @@ fun MeetingRegistrationBottomSheet(
                 onCloseClick = onDismiss
             )
 
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "회의 시간을 조율하면 팀원들에게 알림이 가고, 팀원들이 가능한 시간을 선택하면 확정할 수 있어요.",
+                color = PickiiGray400,
+                fontSize = 12.sp
+            )
+
             Spacer(modifier = Modifier.height(18.dp))
 
             MeetingTitleSection(

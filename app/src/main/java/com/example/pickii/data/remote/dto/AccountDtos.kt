@@ -3,11 +3,10 @@ package com.example.pickii.data.remote.dto
 import kotlinx.serialization.Serializable
 
 /**
- * 로그인 상태 비밀번호 변경 요청.
+ * 로그인 상태 비밀번호 변경 요청(1-12, `PATCH auth/password`).
  *
- * 사진 목업 기준(현재 비밀번호 입력칸 포함)으로 만든 가정 엔드포인트(`PATCH users/me/password`)다.
- * 실제 1-12(`PATCH auth/password`, 이메일 인증코드 기반, 현재 비밀번호 불필요)와는 다른 별도 경로이며,
- * 백엔드에 아직 이 필드를 받는 엔드포인트가 없어 호출 시 실패할 수 있다(백엔드팀에 추가 요청 예정).
+ * 실제 스펙 확인 결과 이메일 재입력/인증코드는 필요 없고(서버가 로그인 사용자의 이메일을 안다),
+ * 본인 확인은 현재 비밀번호로 한다 — 이 DTO 형태가 스펙과 일치한다.
  */
 @Serializable
 data class ChangePasswordRequest(

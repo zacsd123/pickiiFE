@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
+import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.AiDialogState
@@ -30,11 +32,16 @@ private const val MAX_MESSAGE_LENGTH = 300
 /** 서버가 이미 지원한 공고에 다시 지원했을 때 내려주는 에러 코드. */
 private const val ERROR_CODE_ALREADY_APPLIED = "ALREADY_APPLIED"
 
+/** 지원 키워드는 전체 카테고리를 통틀어 최대 이 개수까지만 선택할 수 있다(5-7 정책). */
+internal const val MAX_KEYWORD_SELECTION = 5
+
 /** [RecruitApplyScreen]에 표시되는 상태. */
 data class RecruitApplyUiState(
     val post: RecruitPost? = null,
     val currentUser: CurrentUser? = null,
     val message: String = "",
+    val availableKeywordCategories: List<ApplyKeywordCategory> = emptyList(),
+    val selectedKeywordIds: Set<Long> = emptySet(),
     val aiDialogState: AiDialogState = AiDialogState.Hidden,
     val isSubmitConfirmDialogVisible: Boolean = false,
     val isCompletionDialogVisible: Boolean = false,
@@ -59,7 +66,8 @@ class RecruitApplyViewModel
     constructor(
         savedStateHandle: SavedStateHandle,
         private val recruitRepository: RecruitRepository,
-        private val sessionRepository: SessionRepository
+        private val sessionRepository: SessionRepository,
+        private val masterDataRepository: MasterDataRepository
     ) : ViewModel() {
         private val postId: String = requireNotNull(savedStateHandle.get<String>(ARG_POST_ID)) { "postId가 필요합니다." }
 
@@ -72,6 +80,30 @@ class RecruitApplyViewModel
         init {
             loadPost()
             observeCurrentUser()
+            loadApplyKeywords()
+        }
+
+        /** 지원 키워드 선택지를 카테고리별로 불러온다(5-7). */
+        private fun loadApplyKeywords() {
+            viewModelScope.launch {
+                masterDataRepository.getApplyKeywords().onSuccess { categories ->
+                    _uiState.update { it.copy(availableKeywordCategories = categories) }
+                }
+            }
+        }
+
+        /** 지원 키워드 칩을 토글한다. 이미 [MAX_KEYWORD_SELECTION]개를 선택한 상태에서는 새로 선택할 수 없다. */
+        fun onKeywordToggle(keywordId: Long) {
+            _uiState.update { state ->
+                val selected = state.selectedKeywordIds
+                val updated =
+                    when {
+                        keywordId in selected -> selected - keywordId
+                        selected.size >= MAX_KEYWORD_SELECTION -> selected
+                        else -> selected + keywordId
+                    }
+                state.copy(selectedKeywordIds = updated)
+            }
         }
 
         /** 이 화면이 보여줄 게시글을 [RecruitRepository]에서 한 번 조회한다. */
@@ -162,7 +194,11 @@ class RecruitApplyViewModel
             _uiState.update { it.copy(isSubmitConfirmDialogVisible = false) }
             viewModelScope.launch {
                 recruitRepository
-                    .submitApplication(postId = post.id, message = _uiState.value.message)
+                    .submitApplication(
+                        postId = post.id,
+                        message = _uiState.value.message,
+                        keywordIds = _uiState.value.selectedKeywordIds.toList()
+                    )
                     .onSuccess {
                         _uiState.update { it.copy(isCompletionDialogVisible = true) }
                     }.onFailure { error ->

@@ -1,5 +1,6 @@
 package com.example.pickii.ui.home
 
+import androidx.compose.ui.draw.alpha
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +24,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +53,7 @@ import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.ui.common.CampusScopeToggle
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.PickiiTopBar
@@ -102,7 +103,11 @@ fun HomeScreen(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    event.messageRes,
+                    Toast.LENGTH_SHORT
+                ).show()
         }
     }
 
@@ -227,6 +232,9 @@ private fun HomeScreenContent(
                 rowPosts.forEach { post ->
                     PostCard(
                         post = post,
+                        isAuthor =
+                            uiState.currentUserId != null &&
+                                uiState.currentUserId == post.authorId,
                         onDetailClick = { onPostDetailClick(post.id) },
                         onApplyClick = { onPostApplyClick(post.id) },
                         modifier = Modifier.weight(1f)
@@ -450,50 +458,50 @@ private fun RegisterPostButton(onClick: () -> Unit) {
 @Composable
 private fun PostCard(
     post: RecruitPostSummary,
+    isAuthor: Boolean,
     onDetailClick: () -> Unit,
     onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val isClosed = post.status == RecruitStatus.CLOSED
+
     Column(
         modifier =
             modifier
+                .alpha(if (isClosed) 0.75f else 1f)
                 .clickable(onClick = onDetailClick)
                 .clip(RoundedCornerShape(16.dp))
                 .background(PickiiPostCardBackground)
                 .padding(16.dp)
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(PickiiFieldBackground),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                tint = PickiiTextGray,
-                modifier = Modifier.size(18.dp)
+            LevelAvatar(exp = post.authorExperience, size = 36.dp)
+
+            StatusBadge(
+                label = post.status.label,
+                containerColor = recruitStatusColor(post.status),
+                contentColor =
+                    if (post.status == RecruitStatus.CLOSED) {
+                        Color.Black
+                    } else {
+                        Color.White
+                    }
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = post.title,
-                color = Color.Black,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-            StatusBadge(
-                label = post.status.label,
-                containerColor = recruitStatusColor(post.status),
-                contentColor = if (post.status == RecruitStatus.CLOSED) Color.Black else Color.White
-            )
-        }
+        Text(
+            text = post.title,
+            color = Color.Black,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -532,22 +540,33 @@ private fun PostCard(
                     fontWeight = FontWeight.Medium
                 )
             }
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .height(PostActionButtonHeight)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(PickiiBlue)
-                        .clickable(onClick = onApplyClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.home_button_apply),
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
+
+            if (!isAuthor) {
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .height(PostActionButtonHeight)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (isClosed) PickiiFieldBackground else PickiiBlue
+                            )
+                            .then(
+                                if (!isClosed) {
+                                    Modifier.clickable(onClick = onApplyClick)
+                                } else {
+                                    Modifier
+                                }
+                            ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.home_button_apply),
+                        color = if (isClosed) PickiiTextGray else Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }

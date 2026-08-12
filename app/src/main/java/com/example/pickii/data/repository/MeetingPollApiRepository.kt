@@ -158,6 +158,7 @@ class MeetingPollApiRepository
                 startAt = parseIsoDateTime(startAt),
                 endAt = parseIsoDateTime(endAt),
                 myAvailable = myAvailable,
+                prefilledByCalendar = prefilledByCalendar,
                 availableCount = availableCount,
                 unansweredCount = unansweredCount
             )

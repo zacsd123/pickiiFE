@@ -64,6 +64,7 @@ import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.ui.common.CharacterCounterText
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LoginRequiredDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
@@ -71,6 +72,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
+import com.example.pickii.util.calculateLevel
 import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.toFullDisplayString
 
@@ -133,7 +135,7 @@ fun RecruitDetailScreen(
                 Toast
                     .makeText(
                         context,
-                        context.getString(event.messageRes),
+                        event.messageRes,
                         Toast.LENGTH_SHORT
                     ).show()
         }
@@ -481,6 +483,9 @@ private fun PostInfoCard(
     onReopenRecruitingClick: () -> Unit,
     onDeletePostClick: () -> Unit
 ) {
+
+    val isClosed = post.status == RecruitStatus.CLOSED
+
     Column(
         modifier =
             Modifier
@@ -491,21 +496,7 @@ private fun PostInfoCard(
                 .padding(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(AvatarSize)
-                        .clip(CircleShape)
-                        .background(PickiiFieldBackground),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = null,
-                    tint = PickiiTextGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            LevelAvatar(exp = post.authorExperience, size = AvatarSize)
 
             Spacer(modifier = Modifier.width(10.dp))
 
@@ -520,7 +511,7 @@ private fun PostInfoCard(
                         stringResource(
                             R.string.recruit_detail_label_author_experience,
                             post.authorNickname,
-                            post.authorExperience
+                            calculateLevel(post.authorExperience).level
                         ),
                     color = Color.Black,
                     fontSize = 15.sp,
@@ -597,19 +588,29 @@ private fun PostInfoCard(
                 onDeletePostClick = onDeletePostClick
             )
         } else {
+            val isClosed = post.status == RecruitStatus.CLOSED
+
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(ApplyButtonHeight)
                         .clip(RoundedCornerShape(CardCornerRadius))
-                        .background(PickiiBlue)
-                        .clickable(onClick = onApplyClick),
+                        .background(
+                            if (isClosed) PickiiFieldBackground else PickiiBlue
+                        )
+                        .then(
+                            if (!isClosed) {
+                                Modifier.clickable(onClick = onApplyClick)
+                            } else {
+                                Modifier
+                            }
+                        ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = stringResource(R.string.recruit_detail_button_apply),
-                    color = Color.White,
+                    color = if (isClosed) PickiiTextGray else Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )

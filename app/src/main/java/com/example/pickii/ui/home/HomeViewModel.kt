@@ -1,5 +1,6 @@
 package com.example.pickii.ui.home
 
+import com.example.pickii.domain.repository.SessionRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
@@ -42,6 +43,7 @@ data class HomeUiState(
     val selectedCategory: RecruitCategory? = null,
     val selectedTopics: Set<RecruitTopic> = emptySet(),
     val posts: List<RecruitPostSummary> = emptyList(),
+    val currentUserId: String? = null,
     val currentPage: Int = 1,
     val totalPages: Int = 1,
     val totalElements: Int = 0,
@@ -61,7 +63,8 @@ class HomeViewModel
         private val recruitRepository: RecruitRepository,
         private val masterDataRepository: MasterDataRepository,
         private val notificationRepository: NotificationRepository,
-        private val profileRepository: ProfileRepository
+        private val profileRepository: ProfileRepository,
+        private val sessionRepository: SessionRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(HomeUiState())
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -72,6 +75,17 @@ class HomeViewModel
         init {
             loadFilterOptions()
             loadSchoolName()
+            observeCurrentUser()
+        }
+
+        private fun observeCurrentUser() {
+            viewModelScope.launch {
+                sessionRepository.currentUser.collect { user ->
+                    _uiState.update {
+                        it.copy(currentUserId = user?.id)
+                    }
+                }
+            }
         }
 
         /** 상단 헤더에 표시할 학교명을 내 프로필에서 불러온다. */

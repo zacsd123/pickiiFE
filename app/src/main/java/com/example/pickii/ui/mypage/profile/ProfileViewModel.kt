@@ -31,7 +31,7 @@ class ProfileViewModel
             refresh()
         }
 
-        private fun refresh() {
+        fun refresh() {
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true) }
                 profileRepository
