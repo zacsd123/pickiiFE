@@ -8,6 +8,7 @@ data class ApplicantUiModel(
     val memberId: Long,
     // 프로필
     val nickname: String,
+    val exp: Int = 0,
     // 지원 정보
     val appliedDate: String,
     val applicationMessage: String,

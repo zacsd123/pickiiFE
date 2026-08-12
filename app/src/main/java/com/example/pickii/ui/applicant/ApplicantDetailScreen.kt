@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.R
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
 
@@ -54,6 +55,7 @@ fun ApplicantDetailScreen(
     onBackClick: () -> Unit,
     onAcceptClick: (Long) -> Unit,
     onRejectClick: (Long) -> Unit,
+    onProfileClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -69,6 +71,7 @@ fun ApplicantDetailScreen(
             ApplicantDetailContent(
                 applicant = applicant,
                 onBackClick = onBackClick,
+                onProfileClick = onProfileClick,
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -79,6 +82,7 @@ fun ApplicantDetailScreen(
 private fun ApplicantDetailContent(
     applicant: ApplicantUiModel,
     onBackClick: () -> Unit,
+    onProfileClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -101,7 +105,8 @@ private fun ApplicantDetailContent(
         )
 
         ApplicantSummaryCard(
-            applicant = applicant
+            applicant = applicant,
+            onProfileClick = onProfileClick
         )
 
         ApplicantMessageCard(
@@ -146,11 +151,15 @@ private fun ApplicantDetailHeader(onBackClick: () -> Unit) {
 }
 
 @Composable
-private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
+private fun ApplicantSummaryCard(
+    applicant: ApplicantUiModel,
+    onProfileClick: (Long) -> Unit
+) {
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .clickable { onProfileClick(applicant.memberId) }
                 .shadow(
                     elevation = 5.dp,
                     shape = RoundedCornerShape(15.dp),
@@ -179,7 +188,7 @@ private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
                     ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ApplicantDetailProfileImage()
+            ApplicantDetailProfileImage(exp = applicant.exp)
 
             Spacer(
                 modifier = Modifier.width(12.dp)
@@ -222,25 +231,8 @@ private fun ApplicantSummaryCard(applicant: ApplicantUiModel) {
 }
 
 @Composable
-private fun ApplicantDetailProfileImage() {
-    Surface(
-        modifier = Modifier.size(52.dp),
-        shape = CircleShape,
-        color = Color(0xFFF3F3FA)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter =
-                    painterResource(
-                        id = R.drawable.ic_profile
-                    ),
-                contentDescription = "기본 프로필 이미지",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
+private fun ApplicantDetailProfileImage(exp: Int) {
+    LevelAvatar(exp = exp, size = 52.dp)
 }
 
 @Composable

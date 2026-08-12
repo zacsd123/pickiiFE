@@ -48,7 +48,8 @@ class ApplicantApiRepository
                 message = message,
                 keywords = keywords.map { it.content },
                 status = status.toApplyStatus(),
-                appliedAt = parseIsoOffsetDateTime(createdAt)
+                appliedAt = parseIsoOffsetDateTime(createdAt),
+                exp = exp
             )
     }
 

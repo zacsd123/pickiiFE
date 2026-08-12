@@ -8,6 +8,7 @@ import java.time.LocalDateTime
  * @property id 메시지 식별자
  * @property senderId 작성자 회원 식별자
  * @property senderNickname 메시지 작성자 닉네임
+ * @property senderExp 작성자 경험치(레벨 아바타 계산용)
  * @property content 메시지 내용
  * @property createdAt 메시지 전송 시각
  * @property isMine 현재 사용자가 보낸 메시지인지 여부
@@ -18,6 +19,7 @@ data class ChatMessageUiModel(
     val id: String,
     val senderId: Long = 0L,
     val senderNickname: String = "",
+    val senderExp: Int = 0,
     val content: String,
     val createdAt: LocalDateTime,
     val isMine: Boolean,
@@ -32,6 +34,10 @@ enum class ChatMessageType {
     TEXT,
     MEETING_NOTICE,
     MEETING_CONFIRMED,
+
+    /** 조율 없이 팀장이 바로 등록한 팀 일정(7-16). [ChatMessageUiModel.meetingConfirmed]를 그대로 담아 쓰되,
+     * MEETING_CONFIRMED와 달리 등록공지 카드 없이 이 메시지 자체가 카드 하나로 곧장 렌더링된다. */
+    DIRECT_MEETING,
     IMAGE
 }
 

@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.BuildConfig
 import com.example.pickii.R
+import com.example.pickii.data.local.SavedMeetingScheduleStore
+import com.example.pickii.data.notification.ActiveChatRoomTracker
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.ChatMessageDto
 import com.example.pickii.data.remote.dto.PublishChatMessage
@@ -54,7 +56,9 @@ class ChatRoomViewModel
         private val sessionRepository: SessionRepository,
         internal val meetingPollRepository: MeetingPollRepository,
         internal val calendarRepository: CalendarRepository,
-        private val projectRepository: ProjectRepository
+        private val projectRepository: ProjectRepository,
+        private val activeChatRoomTracker: ActiveChatRoomTracker,
+        internal val savedMeetingScheduleStore: SavedMeetingScheduleStore
     ) : ViewModel() {
         internal val _uiState = MutableStateFlow(ChatRoomUiState())
         val uiState: StateFlow<ChatRoomUiState> = _uiState.asStateFlow()
@@ -77,7 +81,15 @@ class ChatRoomViewModel
          */
         fun initializeRoom(roomId: Long) {
             if (_uiState.value.roomId == roomId) return
+            activeChatRoomTracker.onRoomEntered(roomId)
             _uiState.value = ChatRoomUiState(roomId = roomId, isLoading = true)
+
+            // 되읽기 API가 없어(ChatRoomUiState.savedMeetingScheduleIds 참고) 기기에 저장해둔 목록으로 채워야
+            // 채팅방을 나갔다 다시 들어와도 이미 저장한 일정에 "저장" 버튼이 다시 뜨지 않는다.
+            viewModelScope.launch {
+                val savedIds = savedMeetingScheduleStore.getSavedIds()
+                _uiState.update { it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + savedIds) }
+            }
 
             viewModelScope.launch {
                 val detail =
@@ -96,16 +108,18 @@ class ChatRoomViewModel
                             size = MESSAGE_PAGE_SIZE
                         ).getOrNull()
                 val allFetchedMessages = historyPage?.messages.orEmpty().map { it.toUiModel() }
-                val messages =
+                val (messages, confirmedMeetings) =
                     allFetchedMessages
                         .filterNot { it.isMeetingPollServerNotice() }
                         .sortedBy { it.createdAt }
+                        .partitionConfirmedMeetings()
 
                 _uiState.update { state ->
                     state
                         .applyDetail(detail)
                         .copy(
                             messages = messages,
+                            confirmedMeetings = state.confirmedMeetings + confirmedMeetings,
                             nextMessageCursor = historyPage?.nextCursor,
                             hasMoreMessages = historyPage?.hasNext == true,
                             isLoading = false
@@ -144,10 +158,11 @@ class ChatRoomViewModel
                 chatRepository
                     .getMessages(state.roomId, cursor = cursor, size = MESSAGE_PAGE_SIZE)
                     .onSuccess { page ->
-                        val newMessages =
+                        val (newMessages, newConfirmedMeetings) =
                             page.messages
                                 .map { it.toUiModel() }
                                 .filterNot { it.isMeetingPollServerNotice() }
+                                .partitionConfirmedMeetings()
                         _uiState.update { current ->
                             val merged =
                                 (current.messages + newMessages)
@@ -155,6 +170,7 @@ class ChatRoomViewModel
                                     .sortedBy { it.createdAt }
                             current.copy(
                                 messages = merged,
+                                confirmedMeetings = current.confirmedMeetings + newConfirmedMeetings,
                                 nextMessageCursor = page.nextCursor,
                                 hasMoreMessages = page.hasNext,
                                 isLoadingMoreMessages = false
@@ -188,18 +204,26 @@ class ChatRoomViewModel
                     if (_uiState.value.roomId != roomId) return@collect
                     val newMessage = dto.toUiModel()
 
-                    // 서버가 poll 개설/확정 시 자동으로 보내는 안내 문구는 이미 [MeetingRegistrationNoticeCard]/
-                    // [MeetingConfirmedNoticeCard]와 내용이 겹쳐서 화면에 중복으로 보이지 않게 걸러낸다. 읽음
-                    // 처리는 그대로 해서 안 보이는 메시지 때문에 안 읽음 배지가 남지 않게 한다.
+                    // 서버가 poll 개설/확정 시 자동으로 보내는 안내 문구는 이미 [MeetingProgressCard]와 내용이
+                    // 겹쳐서 화면에 중복으로 보이지 않게 걸러낸다. 읽음 처리는 그대로 해서 안 보이는 메시지
+                    // 때문에 안 읽음 배지가 남지 않게 한다.
                     if (!newMessage.isMeetingPollServerNotice()) {
-                        _uiState.update { state ->
-                            if (state.messages.any { it.id == newMessage.id }) {
-                                state
-                            } else {
-                                state.copy(messages = (state.messages + newMessage).sortedBy { it.createdAt })
+                        val confirmed = newMessage.meetingConfirmed
+                        if (newMessage.type == ChatMessageType.MEETING_CONFIRMED && confirmed != null) {
+                            // 확정 브로드캐스트는 새 메시지로 쌓지 않고 원래 등록공지 카드가 쓸 상태로만 흡수한다.
+                            _uiState.update { state ->
+                                state.copy(confirmedMeetings = state.confirmedMeetings + (confirmed.pollId to confirmed))
                             }
+                        } else {
+                            _uiState.update { state ->
+                                if (state.messages.any { it.id == newMessage.id }) {
+                                    state
+                                } else {
+                                    state.copy(messages = (state.messages + newMessage).sortedBy { it.createdAt })
+                                }
+                            }
+                            ensurePollDetailsLoaded(listOf(newMessage))
                         }
-                        ensurePollDetailsLoaded(listOf(newMessage))
                     }
 
                     if (!newMessage.isMine) {
@@ -378,6 +402,7 @@ class ChatRoomViewModel
         override fun onCleared() {
             super.onCleared()
             chatStompClient.disconnectAsync()
+            activeChatRoomTracker.onRoomExited(_uiState.value.roomId)
         }
 
         private fun refreshDetail(roomId: Long) {
@@ -404,7 +429,8 @@ class ChatRoomViewModel
                     ChatRoomMemberUiModel(
                         memberId = member.memberId,
                         name = member.nickname,
-                        isLeader = member.isLeader
+                        isLeader = member.isLeader,
+                        exp = member.exp
                     )
                 }
             val leader = members.firstOrNull { it.isLeader }
@@ -444,23 +470,37 @@ class ChatRoomViewModel
         /**
          * 서버가 poll 개설(7-10)/확정(7-13) 시 그룹 채팅방에 자동으로 보내는 SYSTEM 문구인지 판별한다.
          * 이 문구엔 pollId 등 구조화된 정보가 없어([MeetingNoticeMessageCodec] 문서 참고) 클라이언트가
-         * 직접 브로드캐스트하는 카드([MeetingRegistrationNoticeCard]/[MeetingConfirmedNoticeCard])로 대체했고,
-         * 서버 쪽 원문은 내용이 겹쳐 화면에서 숨긴다. 참석/불참 등 다른 SYSTEM 메시지는 그대로 보여준다.
+         * 직접 브로드캐스트하는 카드([MeetingProgressCard])로 대체했고, 서버 쪽 원문은 내용이 겹쳐 화면에서
+         * 숨긴다. 참석/불참 등 다른 SYSTEM 메시지는 그대로 보여준다.
          */
         private fun ChatMessageUiModel.isMeetingPollServerNotice(): Boolean =
             type == ChatMessageType.TEXT &&
                 (content.contains("회의 시간 조율이 시작되었습니다") || content.contains("확정되었습니다"))
+
+        /**
+         * [MEETING_CONFIRMED] 타입 메시지를 리스트에서 걷어내고, 그 안의 확정 정보만 pollId 기준으로 뽑아낸다.
+         * 확정 안내는 이제 별도 카드가 아니라 원래 회의 등록 카드([MeetingProgressCard])의 내부 상태로 합쳐서
+         * 보여주므로, 화면에 보일 리스트에는 남기지 않는다.
+         */
+        private fun List<ChatMessageUiModel>.partitionConfirmedMeetings():
+            Pair<List<ChatMessageUiModel>, Map<Long, MeetingConfirmedUiModel>> {
+            val confirmed = mapNotNull { it.meetingConfirmed }.associateBy { it.pollId }
+            val remaining = filterNot { it.type == ChatMessageType.MEETING_CONFIRMED }
+            return remaining to confirmed
+        }
 
         /** REST 히스토리 조회(8-3)로 얻은 메시지를 화면 표시 모델로 바꾼다. */
         private fun DomainChatMessage.toUiModel(): ChatMessageUiModel {
             val rawContent = text.orEmpty()
             val meetingNotice = decodeMeetingNoticeMessage(rawContent)?.toUiModel(senderNickname)
             val meetingConfirmed = decodeMeetingConfirmedMessage(rawContent)?.toUiModel()
-            val isEncoded = meetingNotice != null || meetingConfirmed != null
+            val directMeeting = decodeDirectMeetingMessage(rawContent)?.toUiModel()
+            val isEncoded = meetingNotice != null || meetingConfirmed != null || directMeeting != null
             return ChatMessageUiModel(
                 id = messageId,
                 senderId = senderId,
                 senderNickname = senderNickname,
+                senderExp = senderExp,
                 content = if (isEncoded) "" else rawContent,
                 createdAt = createdAt,
                 isMine = senderId == currentMemberId,
@@ -471,11 +511,12 @@ class ChatRoomViewModel
                     when {
                         meetingNotice != null -> ChatMessageType.MEETING_NOTICE
                         meetingConfirmed != null -> ChatMessageType.MEETING_CONFIRMED
+                        directMeeting != null -> ChatMessageType.DIRECT_MEETING
                         type == ChatMessageContentType.IMAGE -> ChatMessageType.IMAGE
                         else -> ChatMessageType.TEXT
                     },
                 meetingNotice = meetingNotice,
-                meetingConfirmed = meetingConfirmed,
+                meetingConfirmed = meetingConfirmed ?: directMeeting,
                 imageUri = imageUrl?.toAbsoluteImageUrl()
             )
         }
@@ -486,11 +527,13 @@ class ChatRoomViewModel
             val rawContent = message.orEmpty()
             val meetingNotice = decodeMeetingNoticeMessage(rawContent)?.toUiModel(nickname)
             val meetingConfirmed = decodeMeetingConfirmedMessage(rawContent)?.toUiModel()
-            val isEncoded = meetingNotice != null || meetingConfirmed != null
+            val directMeeting = decodeDirectMeetingMessage(rawContent)?.toUiModel()
+            val isEncoded = meetingNotice != null || meetingConfirmed != null || directMeeting != null
             return ChatMessageUiModel(
                 id = messageId,
                 senderId = senderId ?: 0L,
                 senderNickname = nickname,
+                senderExp = senderExp ?: 0,
                 content = if (isEncoded) "" else rawContent,
                 createdAt =
                     runCatching {
@@ -505,11 +548,12 @@ class ChatRoomViewModel
                     when {
                         meetingNotice != null -> ChatMessageType.MEETING_NOTICE
                         meetingConfirmed != null -> ChatMessageType.MEETING_CONFIRMED
+                        directMeeting != null -> ChatMessageType.DIRECT_MEETING
                         type == "IMAGE" -> ChatMessageType.IMAGE
                         else -> ChatMessageType.TEXT
                     },
                 meetingNotice = meetingNotice,
-                meetingConfirmed = meetingConfirmed,
+                meetingConfirmed = meetingConfirmed ?: directMeeting,
                 imageUri = imageUrl?.toAbsoluteImageUrl()
             )
         }
@@ -526,6 +570,17 @@ class ChatRoomViewModel
             MeetingConfirmedUiModel(
                 meetingTitle = title,
                 pollId = pollId,
+                slotStartMillis = slotStartMillis,
+                slotEndMillis = slotEndMillis,
+                scheduleId = scheduleId
+            )
+
+        // 실제 poll이 없어 pollId가 의미 없다 — DIRECT_MEETING 타입만 보고 다르게 렌더링되므로
+        // scheduleId를 채워 넣어도(그 자체로 유일값) 무해하다.
+        private fun DecodedDirectMeeting.toUiModel(): MeetingConfirmedUiModel =
+            MeetingConfirmedUiModel(
+                meetingTitle = title,
+                pollId = scheduleId,
                 slotStartMillis = slotStartMillis,
                 slotEndMillis = slotEndMillis,
                 scheduleId = scheduleId

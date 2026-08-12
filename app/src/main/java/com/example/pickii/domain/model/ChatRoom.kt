@@ -54,7 +54,8 @@ data class ChatRoomDetail(
 data class ChatMember(
     val memberId: Long,
     val nickname: String,
-    val isLeader: Boolean
+    val isLeader: Boolean,
+    val exp: Int = 0
 )
 
 /** `POST /chatrooms/direct`(8-5) 결과. */

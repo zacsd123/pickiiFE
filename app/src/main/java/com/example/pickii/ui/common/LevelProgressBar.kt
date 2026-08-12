@@ -22,6 +22,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.calculateLevel
+import kotlin.math.roundToInt
 
 /** 레벨/경험치 바. 레벨 산출 공식은 기획/백엔드 확정 전까지 임시([com.example.pickii.util.calculateLevel] 참고). */
 @Composable
@@ -30,6 +31,7 @@ fun LevelProgressBar(
     modifier: Modifier = Modifier
 ) {
     val levelInfo = calculateLevel(exp)
+    val percent = (levelInfo.progress.coerceIn(0f, 1f) * 100).roundToInt()
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -56,5 +58,12 @@ fun LevelProgressBar(
                         .background(PickiiBlue)
             )
         }
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = "$percent%",
+            color = PickiiTextGray,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

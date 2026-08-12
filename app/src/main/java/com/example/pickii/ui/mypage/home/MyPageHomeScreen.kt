@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.AvatarPlaceholder
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.PickiiTopBar
@@ -229,7 +230,7 @@ private fun ProfileSummaryCard(
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onProfileClick),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AvatarPlaceholder()
+                LevelAvatar(exp = uiState.exp)
 
                 Spacer(modifier = Modifier.width(12.dp))
 

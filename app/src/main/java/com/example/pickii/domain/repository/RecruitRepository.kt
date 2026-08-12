@@ -81,10 +81,11 @@ interface RecruitRepository {
     /** 모집 글 스크랩을 취소한다. */
     suspend fun unscrapPost(postId: String): Result<Unit>
 
-    /** 모집 글에 지원한다. */
+    /** 모집 글에 지원한다. [keywordIds]는 지원 키워드 선택 목록(전체 카테고리 통틀어 최대 5개)이다. */
     suspend fun submitApplication(
         postId: String,
-        message: String
+        message: String,
+        keywordIds: List<Long> = emptyList()
     ): Result<Unit>
 
     /**

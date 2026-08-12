@@ -147,9 +147,23 @@ class WithdrawalViewModel
                         _uiState.update { it.copy(isSubmitting = false, isComplete = true) }
                     }.onFailure { error ->
                         _uiState.update {
-                            it.copy(isSubmitting = false, errorMessage = error.message ?: DEFAULT_ERROR_MESSAGE)
+                            it.copy(
+                                isSubmitting = false,
+                                errorMessage = error.message ?: DEFAULT_ERROR_MESSAGE,
+                                isEmailVerified = false,
+                                emailVerificationToken = null,
+                                isEmailCodeSent = false,
+                                emailCode = "",
+                                emailMessage = "인증이 만료됐어요. 이메일 인증을 다시 진행해주세요.",
+                                isEmailMessageError = true
+                            )
                         }
                     }
             }
+        }
+
+        /** 화면에 재진입할 때 이전에 입력했던 내용을 모두 지운다. */
+        fun resetState() {
+            _uiState.value = WithdrawalUiState()
         }
     }

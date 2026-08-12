@@ -18,7 +18,9 @@ data class ApplicantDto(
     val message: String,
     val keywords: List<ApplicantKeywordDto> = emptyList(),
     val status: String,
-    val createdAt: String
+    val createdAt: String,
+    /** 지원자 경험치(레벨 아바타 계산용). 필드명 미확정 — 백엔드 확정 전 추정치. */
+    val exp: Int = 0
 )
 
 /** `PATCH /applies/{applyId}/status`(4-8) 요청. */

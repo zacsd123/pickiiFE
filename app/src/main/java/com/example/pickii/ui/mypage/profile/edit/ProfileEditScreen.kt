@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -115,7 +116,8 @@ fun ProfileEditScreen(
         onLicenseNameChange = viewModel::onLicenseNameChange,
         onLicenseDateChange = viewModel::onLicenseDateChange,
         onAboutMeChange = viewModel::onAboutMeChange,
-        onSaveClick = { viewModel.onSaveClick(onSaved = onSaved) }
+        onSaveClick = { viewModel.onSaveClick(onSaved = onSaved) },
+        onRetryLoadMasterDataClick = viewModel::onRetryLoadMasterDataClick
     )
 }
 
@@ -152,7 +154,8 @@ private fun ProfileEditScreenContent(
     onLicenseNameChange: (String, String) -> Unit,
     onLicenseDateChange: (String, YearMonth) -> Unit,
     onAboutMeChange: (String) -> Unit,
-    onSaveClick: () -> Unit
+    onSaveClick: () -> Unit,
+    onRetryLoadMasterDataClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
         if (uiState.isLoading) {
@@ -223,16 +226,23 @@ private fun ProfileEditScreenContent(
 
             Spacer(modifier = Modifier.height(24.dp))
             FieldLabel(stringResource(R.string.onboarding_step2_title))
+            Text(
+                text = "${uiState.selectedTopicIds.size}/$MAX_TOPIC_SELECTION",
+                color = PickiiTextGray,
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 uiState.availableTopics.forEach { topic ->
+                    val isSelected = topic.id in uiState.selectedTopicIds
                     SelectableChip(
                         label = topic.label,
-                        selected = topic.id in uiState.selectedTopicIds,
-                        enabled = true,
+                        selected = isSelected,
+                        enabled = isSelected || uiState.selectedTopicIds.size < MAX_TOPIC_SELECTION,
                         onClick = { onTopicToggle(topic.id) }
                     )
                 }
@@ -385,7 +395,18 @@ private fun ProfileEditScreenContent(
 
             if (uiState.errorMessage != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = uiState.errorMessage, color = Color.Red, fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = uiState.errorMessage, color = Color.Red, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "다시 시도",
+                        color = Color.Black,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = onRetryLoadMasterDataClick)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

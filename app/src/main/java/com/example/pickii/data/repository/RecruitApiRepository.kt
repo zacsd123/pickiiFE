@@ -184,10 +184,16 @@ class RecruitApiRepository
 
         override suspend fun submitApplication(
             postId: String,
-            message: String
+            message: String,
+            keywordIds: List<Long>
         ): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) { recruitApiService.submitApplication(id, ApplyRequest(message = message)) }
+            return safeApiCallUnit(json) {
+                recruitApiService.submitApplication(
+                    id,
+                    ApplyRequest(message = message, keywordIds = keywordIds.ifEmpty { null })
+                )
+            }
         }
 
         override suspend fun generateAiDraft(
@@ -251,6 +257,7 @@ class RecruitApiRepository
                 title = title,
                 authorId = authorId.toString(),
                 authorNickname = authorNickname,
+                authorExperience = authorEXP,
                 maxParticipants = maxMembers,
                 availableSlots = availableSlots,
                 status = status.toRecruitStatus(),

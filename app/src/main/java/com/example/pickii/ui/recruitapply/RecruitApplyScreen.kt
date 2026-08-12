@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.ui.common.AiDialogState
@@ -104,6 +105,7 @@ fun RecruitApplyScreen(
     RecruitApplyScreenContent(
         uiState = uiState,
         onMessageChange = viewModel::onMessageChange,
+        onKeywordToggle = viewModel::onKeywordToggle,
         onAiHelpClick = viewModel::onAiHelpClick,
         onAiRetryClick = viewModel::onAiRetryClick,
         onAiDialogDismiss = viewModel::onAiDialogDismiss,
@@ -124,6 +126,7 @@ fun RecruitApplyScreen(
 private fun RecruitApplyScreenContent(
     uiState: RecruitApplyUiState,
     onMessageChange: (String) -> Unit,
+    onKeywordToggle: (Long) -> Unit,
     onAiHelpClick: () -> Unit,
     onAiRetryClick: () -> Unit,
     onAiDialogDismiss: () -> Unit,
@@ -183,6 +186,15 @@ private fun RecruitApplyScreenContent(
                     max = MAX_MESSAGE_LENGTH,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                if (uiState.availableKeywordCategories.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ApplyKeywordSection(
+                        categories = uiState.availableKeywordCategories,
+                        selectedKeywordIds = uiState.selectedKeywordIds,
+                        onKeywordToggle = onKeywordToggle
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -454,6 +466,81 @@ private fun MessageField(
     )
 }
 
+/**
+ * 지원 키워드를 카테고리별로 보여주고 선택/해제할 수 있는 영역. 전체 카테고리를 통틀어
+ * 최대 [MAX_KEYWORD_SELECTION]개까지 선택 가능하다(5-7 정책).
+ */
+@Composable
+private fun ApplyKeywordSection(
+    categories: List<ApplyKeywordCategory>,
+    selectedKeywordIds: Set<Long>,
+    onKeywordToggle: (Long) -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.recruit_apply_label_keywords),
+                color = Color.Black,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "${selectedKeywordIds.size}/$MAX_KEYWORD_SELECTION",
+                color = PickiiTextGray,
+                fontSize = 12.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            categories.forEach { category ->
+                Column {
+                    Text(text = category.category, color = PickiiTextGray, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        category.keywords.forEach { keyword ->
+                            KeywordChip(
+                                label = keyword.content,
+                                selected = keyword.keywordId in selectedKeywordIds,
+                                onClick = { onKeywordToggle(keyword.keywordId) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 선택 시 검은 배경, 미선택 시 흰 배경으로 바뀌는 지원 키워드 칩. */
+@Composable
+private fun KeywordChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .background(if (selected) Color.Black else PickiiFieldBackground)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = if (selected) Color.White else Color.Black,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
 /** "AI로부터 도움받기"를 안내하는 배너. */
 @Composable
 private fun AiHelpBanner(onAiHelpClick: () -> Unit) {
@@ -547,6 +634,7 @@ private fun RecruitApplyScreenPreview() {
         RecruitApplyScreenContent(
             uiState = RecruitApplyUiState(),
             onMessageChange = {},
+            onKeywordToggle = {},
             onAiHelpClick = {},
             onAiRetryClick = {},
             onAiDialogDismiss = {},

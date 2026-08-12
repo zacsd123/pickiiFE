@@ -36,6 +36,7 @@ data class MeetingPollSlot(
     val startAt: LocalDateTime,
     val endAt: LocalDateTime,
     val myAvailable: Boolean,
+    val prefilledByCalendar: Boolean,
     val availableCount: Int,
     val unansweredCount: Int
 )

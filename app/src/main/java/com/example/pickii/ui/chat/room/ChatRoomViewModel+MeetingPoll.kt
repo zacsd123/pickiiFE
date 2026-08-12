@@ -109,10 +109,13 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
 }
 
 /**
- * 카드1("등록했어요") 버튼을 누른 표시만 남긴다(버튼이 옅게 바뀌며 비활성화됨). 카드2/3은 더 이상
- * 이 클릭에 의존하지 않고 [ensurePollDetailsLoaded]가 항상 미리 채워두므로, 이 함수는 실제로
- * "개인 캘린더에 등록했다"는 로컬 표시일 뿐이다(서버가 그 여부를 추적하지 않는다, 7-11 "개인
- * 일정 등록은 필수가 아니다").
+ * 카드1("등록했어요") 버튼을 누른 표시를 남긴다(버튼이 옅게 바뀌며 비활성화됨). 이 표시가 있어야
+ * 카드2(응답 폼)가 뜬다 — 아직 응답 안 한 채 방에 새로 들어왔을 때 캘린더 등록 없이 곧장 슬롯
+ * 선택 화면이 뜨는 걸 막기 위한 게이트다. 서버가 이 클릭 자체를 추적하진 않는다(7-11 "개인 일정
+ * 등록은 필수가 아니다") — 실제 캘린더 반영은 [ensurePollDetailsLoaded]가 항상 미리 불러오는
+ * `GET /meeting-polls/{pollId}`의 `prefilledByCalendar` 값으로 이미 처리된다. 이미 응답을
+ * 제출했거나(`myResponded`) 조율이 끝난 경우는 이 로컬 플래그와 무관하게 항상 카드가 보이므로
+ * (렌더링 조건 참고, `ChatRoomScreen.kt`), 세션이 바뀌어도 응답/종료 상태 자체는 숨겨지지 않는다.
  */
 internal fun ChatRoomViewModel.onAcknowledgeMeetingNotice(pollId: Long) {
     if (pollId in _uiState.value.acknowledgedPollIds) return
@@ -144,6 +147,7 @@ internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfi
                 _uiState.update {
                     it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + confirmed.scheduleId)
                 }
+                savedMeetingScheduleStore.markSaved(confirmed.scheduleId)
                 emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_meeting_saved_to_calendar))
             }.onFailure {
                 emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
@@ -369,11 +373,23 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
         emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
         return
     }
+    val roomId = _uiState.value.roomId
+
     viewModelScope.launch {
         meetingPollRepository
             .registerScheduleDirectly(projectId, title, date, startTime, endTime)
-            .onSuccess {
+            .onSuccess { scheduleId ->
                 emitEvent(RecruitUiEvent.ShowToast(R.string.meeting_poll_toast_confirmed))
+                // 조율 흐름과 마찬가지로 구조화된 정보를 실제 채팅 메시지로 브로드캐스트해, 서버 echo로
+                // 돌아온 메시지가 팀원 전원 화면에 "내 캘린더에 저장" 카드로 뜨게 한다.
+                val directMeetingContent =
+                    encodeDirectMeetingMessage(
+                        title = title,
+                        slotStartMillis = LocalDateTime.of(date, startTime).toEpochMillis(),
+                        slotEndMillis = LocalDateTime.of(date, endTime).toEpochMillis(),
+                        scheduleId = scheduleId
+                    )
+                chatStompClient.sendMessage(roomId, PublishChatMessage(type = "TEXT", message = directMeetingContent))
                 loadMeetings()
             }.onFailure {
                 emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))

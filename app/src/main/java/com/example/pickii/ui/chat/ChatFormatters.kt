@@ -32,3 +32,13 @@ fun List<ChatMessageUiModel>.isLastOfConsecutiveRun(index: Int): Boolean {
     if (current.type == ChatMessageType.MEETING_NOTICE || next.type == ChatMessageType.MEETING_NOTICE) return true
     return next.senderId != current.senderId || next.isMine != current.isMine
 }
+
+/**
+ * [index]번 메시지가 "연속된 같은 발신자 묶음"의 처음인지 여부. 상대방 발신자 이름은 묶음의 첫 메시지에만 노출한다.
+ */
+fun List<ChatMessageUiModel>.isFirstOfConsecutiveRun(index: Int): Boolean {
+    val current = this[index]
+    val previous = getOrNull(index - 1) ?: return true
+    if (current.type == ChatMessageType.MEETING_NOTICE || previous.type == ChatMessageType.MEETING_NOTICE) return true
+    return previous.senderId != current.senderId || previous.isMine != current.isMine
+}

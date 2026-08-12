@@ -60,7 +60,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.MeetingPollDetail
-import com.example.pickii.domain.model.MeetingPollStatus
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
@@ -82,6 +81,7 @@ private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
 private val PickiiYellowColor = Color(0xFFF9FCA8)
 private const val LOAD_MORE_MESSAGES_THRESHOLD = 3
+private const val NEAR_BOTTOM_THRESHOLD = 2
 
 /** 오른쪽에서 슬라이드인하는 채팅방 정보/설정 패널 종류(상호 배타적). */
 private enum class ChatRoomPanel {
@@ -246,7 +246,12 @@ private fun ChatRoomScreen(
         }
 
     LaunchedEffect(shouldLoadMoreMessages, uiState.hasMoreMessages) {
-        if (shouldLoadMoreMessages && uiState.hasMoreMessages && uiState.messages.isNotEmpty()) {
+        if (
+            shouldLoadMoreMessages &&
+            uiState.hasMoreMessages &&
+            !uiState.isLoadingMoreMessages &&
+            uiState.messages.isNotEmpty()
+        ) {
             onLoadMoreMessages()
         }
     }
@@ -272,10 +277,47 @@ private fun ChatRoomScreen(
         }
     }
 
+    // messages.size 변화 하나만으로는 과거 로그 prepend(loadMoreMessages)와 새 메시지 append(소켓 수신,
+    // 내가 보낸 메시지 echo 포함)를 구분할 수 없다. 이전 프레임의 첫/마지막 메시지 id를 기억해뒀다가 비교해서
+    // 셋을 구분한다: prepend면 스크롤하지 않는다(LazyColumn이 key = { messages[index].id }로 안정적 키를
+    // 쓰고 있어서 위에 아이템이 추가돼도 보던 위치가 자동 유지된다) — 예전엔 여기서 무조건 맨 아래로
+    // 스크롤시켜서, 위로 스크롤해 과거 로그를 불러올 때마다 다시 맨 아래로 튕기고 그게 "맨 위 근처" 로드
+    // 조건을 재충족시켜 전체 히스토리를 연쇄로 다 불러와버리는 버그가 있었다.
+    var previousFirstMessageId by remember { mutableStateOf<String?>(null) }
+    var previousLastMessageId by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(uiState.messages.size) {
-        if (uiState.messages.isNotEmpty()) {
-            listState.animateScrollToItem(uiState.messages.lastIndex)
+        val messages = uiState.messages
+        if (messages.isEmpty()) {
+            previousFirstMessageId = null
+            previousLastMessageId = null
+            return@LaunchedEffect
         }
+
+        val newFirstId = messages.first().id
+        val newLastId = messages.last().id
+        val isInitialLoad = previousFirstMessageId == null
+        val isTailAppend =
+            !isInitialLoad && newFirstId == previousFirstMessageId && newLastId != previousLastMessageId
+
+        when {
+            isInitialLoad -> listState.scrollToItem(messages.lastIndex)
+
+            isTailAppend -> {
+                val appendedMessage = messages.last()
+                val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val wasNearBottom = messages.lastIndex - lastVisibleIndex <= NEAR_BOTTOM_THRESHOLD
+                if (appendedMessage.isMine || wasNearBottom) {
+                    listState.animateScrollToItem(messages.lastIndex)
+                }
+            }
+
+            // 과거 로그가 앞에 붙은 경우(또는 첫/마지막이 동시에 바뀐 모호한 경우) — 스크롤하지 않는다.
+            else -> Unit
+        }
+
+        previousFirstMessageId = newFirstId
+        previousLastMessageId = newLastId
     }
 
     val context = LocalContext.current
@@ -305,6 +347,7 @@ private fun ChatRoomScreen(
             ChatRoomHeader(
                 roomTitle = uiState.roomTitle,
                 roomType = uiState.roomType,
+                personalChatMemberName = uiState.personalChatMemberName,
                 onBackClick = onBackClick,
                 onMenuClick = {
                     activePanel = ChatRoomPanel.INFO
@@ -343,8 +386,10 @@ private fun ChatRoomScreen(
 
                     ChatMessageItem(
                         message = message,
+                        isFirstOfRun = uiState.messages.isFirstOfConsecutiveRun(index),
                         isLastOfRun = uiState.messages.isLastOfConsecutiveRun(index),
                         pollDetail = uiState.pollDetails[message.meetingNotice?.pollId],
+                        confirmedMeeting = uiState.confirmedMeetings[message.meetingNotice?.pollId],
                         isAcknowledged = message.meetingNotice?.pollId in uiState.acknowledgedPollIds,
                         myPollSelection = uiState.myPollSelections[message.meetingNotice?.pollId].orEmpty(),
                         isCurrentUserLeader = uiState.isCurrentUserLeader,
@@ -625,9 +670,15 @@ private fun ChatRoomScreen(
 private fun ChatRoomHeader(
     roomTitle: String,
     roomType: ChatRoomType,
+    personalChatMemberName: String,
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit
 ) {
+    val displayTitle = if (roomType == ChatRoomType.DIRECT && personalChatMemberName.isNotBlank()) {
+        personalChatMemberName
+    } else {
+        roomTitle
+    }
     Column(
         modifier =
             Modifier
@@ -683,7 +734,7 @@ private fun ChatRoomHeader(
             Spacer(modifier = Modifier.width(10.dp))
 
             Text(
-                text = roomTitle,
+                text = displayTitle,
                 modifier = Modifier.weight(1f),
                 color = PickiiNavyTextDark,
                 fontSize = 16.sp,
@@ -861,15 +912,18 @@ private fun ChatNotice(
 }
 
 /**
- * 메시지 작성자에 따라 말풍선을 좌우로 배치한다. 회의 조율 관련 타입은 [ChatRoomUiState.pollDetails] 등
- * 라이브 poll 상태를 받아 등록 공지(카드1) 아래에 응답 카드(카드2)/집계 카드(카드3)를 이어서 그린다.
+ * 메시지 작성자에 따라 말풍선을 좌우로 배치한다. 회의 조율 관련 타입([ChatMessageType.MEETING_NOTICE])은
+ * [ChatRoomUiState.pollDetails]/[ChatRoomUiState.confirmedMeetings] 등 라이브 상태를 받아 카드 하나
+ * ([MeetingProgressCard])의 내부 내용을 등록공지→응답→집계→확정(또는 취소)으로 갱신한다.
  */
 @Suppress("LongParameterList")
 @Composable
 private fun ChatMessageItem(
     message: ChatMessageUiModel,
+    isFirstOfRun: Boolean,
     isLastOfRun: Boolean,
     pollDetail: MeetingPollDetail?,
+    confirmedMeeting: MeetingConfirmedUiModel?,
     isAcknowledged: Boolean,
     myPollSelection: Set<Long>,
     isCurrentUserLeader: Boolean,
@@ -893,6 +947,7 @@ private fun ChatMessageItem(
             } else {
                 OtherChatMessage(
                     message = message,
+                    isFirstOfRun = isFirstOfRun,
                     isLastOfRun = isLastOfRun
                 )
             }
@@ -900,56 +955,32 @@ private fun ChatMessageItem(
 
         ChatMessageType.MEETING_NOTICE -> {
             message.meetingNotice?.let { notice ->
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    MeetingRegistrationNoticeCard(
-                        meetingNotice = notice,
-                        isAcknowledged = isAcknowledged,
-                        onAcknowledgeClick = { onAcknowledgeMeetingNotice(notice.pollId) }
-                    )
-
-                    if (pollDetail != null) {
-                        // 3단계(집계)는 전원 응답, 마감 시각 도달, 또는 이미 확정된 경우 자동으로 열린다.
-                        // 취소된 조율은 집계를 볼 이유가 없어 제외한다. 서버 status만으로는 "마감 시각
-                        // 지남"을 즉시 반영 못 해서 클라이언트가 매초 다시 계산한다.
-                        var nowMillis by remember(notice.pollId) { mutableStateOf(System.currentTimeMillis()) }
-                        LaunchedEffect(notice.pollId, notice.deadlineMillis) {
-                            while (true) {
-                                nowMillis = System.currentTimeMillis()
-                                if (nowMillis >= notice.deadlineMillis) break
-                                delay(1000)
-                            }
-                        }
-                        val isAggregationReady =
-                            pollDetail.status == MeetingPollStatus.CONFIRMED ||
-                                pollDetail.respondedCount >= pollDetail.totalMembers ||
-                                nowMillis >= notice.deadlineMillis
-
-                        MeetingPollResponseCard(
-                            poll = pollDetail,
-                            deadlineMillis = notice.deadlineMillis,
-                            mySelection = myPollSelection,
-                            isCurrentUserLeader = isCurrentUserLeader,
-                            onToggleSlot = { slotId -> onToggleMeetingPollSlot(notice.pollId, slotId) },
-                            onToggleNoneAvailable = { onToggleMeetingPollNoneAvailable(notice.pollId) },
-                            onSubmitClick = { onSubmitMeetingPollResponse(notice.pollId) },
-                            onCancelClick = { onCancelMeetingPoll(notice.pollId) }
-                        )
-
-                        if (isAggregationReady) {
-                            MeetingPollAggregationCard(
-                                poll = pollDetail,
-                                isCurrentUserLeader = isCurrentUserLeader,
-                                onConfirmClick = { slotId -> onConfirmSlotClick(notice.pollId, slotId) }
-                            )
-                        }
-                    }
-                }
+                MeetingProgressCard(
+                    meetingNotice = notice,
+                    pollDetail = pollDetail,
+                    isAcknowledged = isAcknowledged,
+                    myPollSelection = myPollSelection,
+                    confirmedMeeting = confirmedMeeting,
+                    participantNames = participantNames,
+                    isCurrentUserLeader = isCurrentUserLeader,
+                    isSaved = confirmedMeeting?.scheduleId?.let { it in savedMeetingScheduleIds } == true,
+                    onAcknowledgeClick = { onAcknowledgeMeetingNotice(notice.pollId) },
+                    onToggleSlot = { slotId -> onToggleMeetingPollSlot(notice.pollId, slotId) },
+                    onToggleNoneAvailable = { onToggleMeetingPollNoneAvailable(notice.pollId) },
+                    onSubmitClick = { onSubmitMeetingPollResponse(notice.pollId) },
+                    onCancelClick = { onCancelMeetingPoll(notice.pollId) },
+                    onConfirmClick = { slotId -> onConfirmSlotClick(notice.pollId, slotId) },
+                    onSaveClick = { confirmedMeeting?.let(onSaveMeetingToMyCalendar) }
+                )
             }
         }
 
-        ChatMessageType.MEETING_CONFIRMED -> {
+        // ChatRoomViewModel이 이 타입 메시지를 uiState.messages에 절대 넣지 않는다(confirmedMeetings로 흡수).
+        ChatMessageType.MEETING_CONFIRMED -> Unit
+
+        ChatMessageType.DIRECT_MEETING -> {
             message.meetingConfirmed?.let { confirmed ->
-                MeetingConfirmedNoticeCard(
+                DirectMeetingCard(
                     meetingConfirmed = confirmed,
                     participantNames = participantNames,
                     isSaved = confirmed.scheduleId in savedMeetingScheduleIds,
@@ -970,6 +1001,7 @@ private fun ChatMessageItem(
                     OtherImageMessage(
                         message = message,
                         imageUri = uri,
+                        isFirstOfRun = isFirstOfRun,
                         isLastOfRun = isLastOfRun
                     )
                 }

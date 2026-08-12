@@ -57,8 +57,8 @@ import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
-import com.example.pickii.ui.common.AvatarPlaceholder
 import com.example.pickii.ui.common.BackHeader
+import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.SelectableChip
@@ -213,7 +213,7 @@ private fun CharacterCard(profile: MemberProfile) {
     ProfileCardFrame(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AvatarPlaceholder(size = 112.dp)
+                LevelAvatar(exp = profile.exp, size = 112.dp)
                 Spacer(modifier = Modifier.height(16.dp))
                 LevelProgressBar(exp = profile.exp, modifier = Modifier.width(160.dp))
                 Spacer(modifier = Modifier.height(12.dp))

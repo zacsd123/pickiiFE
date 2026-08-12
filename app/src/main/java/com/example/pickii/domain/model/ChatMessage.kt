@@ -7,6 +7,7 @@ data class ChatMessage(
     val messageId: String,
     val senderId: Long,
     val senderNickname: String,
+    val senderExp: Int = 0,
     val type: ChatMessageContentType,
     val text: String?,
     val imageUrl: String?,

@@ -1,6 +1,8 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.MasterDataApiService
+import com.example.pickii.domain.model.ApplyKeywordCategory
+import com.example.pickii.domain.model.ApplyKeywordItem
 import com.example.pickii.domain.model.LicenseOption
 import com.example.pickii.domain.model.LinkCategory
 import com.example.pickii.domain.model.RecruitCategory
@@ -40,6 +42,9 @@ class RecruitMasterDataRepository
 
         private val linkCategoriesMutex = Mutex()
         private var cachedLinkCategories: List<LinkCategory>? = null
+
+        private val applyKeywordsMutex = Mutex()
+        private var cachedApplyKeywords: List<ApplyKeywordCategory>? = null
 
         override suspend fun getCategories(): Result<List<RecruitCategory>> =
             categoriesMutex.withLock {
@@ -83,5 +88,23 @@ class RecruitMasterDataRepository
                 safeApiCall(json) { masterDataApiService.getLinkCategories() }
                     .map { envelope -> envelope.data.map { LinkCategory(name = it.name) } }
                     .onSuccess { cachedLinkCategories = it }
+            }
+
+        override suspend fun getApplyKeywords(): Result<List<ApplyKeywordCategory>> =
+            applyKeywordsMutex.withLock {
+                cachedApplyKeywords?.let { return@withLock Result.success(it) }
+                safeApiCall(json) { masterDataApiService.getApplyKeywords() }
+                    .map { envelope ->
+                        envelope.data.map { categoryDto ->
+                            ApplyKeywordCategory(
+                                categoryId = categoryDto.categoryId,
+                                category = categoryDto.category,
+                                keywords =
+                                    categoryDto.keywords.map { keywordDto ->
+                                        ApplyKeywordItem(keywordId = keywordDto.keywordId, content = keywordDto.content)
+                                    }
+                            )
+                        }
+                    }.onSuccess { cachedApplyKeywords = it }
             }
     }

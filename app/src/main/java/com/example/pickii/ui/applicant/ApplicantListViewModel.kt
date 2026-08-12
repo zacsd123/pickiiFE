@@ -128,6 +128,7 @@ class ApplicantListViewModel
                 id = applyId.toLong(),
                 memberId = memberId.toLong(),
                 nickname = nickname,
+                exp = exp,
                 appliedDate = appliedAt.toLocalDate().toDisplayString(),
                 applicationMessage = message,
                 keywords = keywords,
