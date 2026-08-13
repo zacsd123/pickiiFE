@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.MeetingPollDetail
 import com.example.pickii.domain.model.ScheduleCategory
 
@@ -54,6 +55,7 @@ fun ProjectStatus.toDisplayText(): String =
  * @property pendingForceConfirm 미응답자가 있는 채로 확정을 시도해 확인이 필요한 (pollId, slotId)
  * @property scheduleCategories 개인 캘린더 카테고리 목록(7-19 프로젝트 색상 지정에서 그대로 재사용)
  * @property selectedProjectCategoryId 이번 세션에서 이 프로젝트에 지정한 카테고리(되읽기 API가 없어 로컬 상태만)
+ * @property myCalendarSchedules 회의 조율 날짜 선택기에서 이미 등록된 날짜를 비활성화하기 위해 불러온 내 캘린더 일정
  */
 
 data class ChatRoomUiState(
@@ -95,5 +97,6 @@ data class ChatRoomUiState(
     val myPollSelections: Map<Long, Set<Long>> = emptyMap(),
     val pendingForceConfirm: Pair<Long, Long>? = null,
     val scheduleCategories: List<ScheduleCategory> = emptyList(),
-    val selectedProjectCategoryId: Long? = null
+    val selectedProjectCategoryId: Long? = null,
+    val myCalendarSchedules: List<CalendarSchedule> = emptyList()
 )

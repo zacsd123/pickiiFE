@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.ui.theme.PickiiBlackAlt
 import com.example.pickii.ui.theme.PickiiCharcoal
 import com.example.pickii.ui.theme.PickiiDividerAlt
@@ -64,6 +65,7 @@ private const val DEFAULT_DEADLINE_HOURS = 12
 @Composable
 fun MeetingRegistrationBottomSheet(
     members: List<ChatRoomMemberUiModel>,
+    registeredSchedules: List<CalendarSchedule> = emptyList(),
     onDismiss: () -> Unit,
     onNextClick: (QuickMeetingForm) -> Unit
 ) {
@@ -273,6 +275,7 @@ fun MeetingRegistrationBottomSheet(
         MeetingDateRangePickerDialog(
             initialStartDateMillis = startDateMillis,
             initialEndDateMillis = endDateMillis,
+            registeredSchedules = registeredSchedules,
             onDismiss = {
                 showDatePicker = false
             },

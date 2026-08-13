@@ -496,7 +496,7 @@ private fun PostInfoCard(
                 .padding(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            LevelAvatar(exp = post.authorExperience, size = AvatarSize)
+            LevelAvatar(exp = if (post.isAuthorUnknown) 0 else post.authorExperience, size = AvatarSize)
 
             Spacer(modifier = Modifier.width(10.dp))
 
@@ -510,13 +510,17 @@ private fun PostInfoCard(
                     text =
                         stringResource(
                             R.string.recruit_detail_label_author_experience,
-                            post.authorNickname,
-                            calculateLevel(post.authorExperience).level
+                            if (post.isAuthorUnknown) {
+                                stringResource(R.string.unknown_author_nickname)
+                            } else {
+                                post.authorNickname
+                            },
+                            if (post.isAuthorUnknown) 0 else calculateLevel(post.authorExperience).level
                         ),
                     color = Color.Black,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable(onClick = onAuthorClick)
+                    modifier = Modifier.clickable(enabled = !post.isAuthorUnknown, onClick = onAuthorClick)
                 )
                 Text(
                     text =

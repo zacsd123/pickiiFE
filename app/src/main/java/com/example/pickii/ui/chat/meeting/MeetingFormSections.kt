@@ -20,10 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.ui.theme.PickiiBlackAlt
 import com.example.pickii.ui.theme.PickiiCharcoal
 import com.example.pickii.ui.theme.PickiiDividerAlt
@@ -42,6 +47,8 @@ import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGray
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneOffset
 import java.util.Date
 import java.util.Locale
 
@@ -350,13 +357,26 @@ private fun DateBox(
 internal fun MeetingDateRangePickerDialog(
     initialStartDateMillis: Long?,
     initialEndDateMillis: Long?,
+    registeredSchedules: List<CalendarSchedule> = emptyList(),
     onDismiss: () -> Unit,
     onConfirm: (Long, Long) -> Unit
 ) {
+    val latestRegisteredSchedules by rememberUpdatedState(registeredSchedules)
+    val selectableDates =
+        remember {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val candidate = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate()
+                    return latestRegisteredSchedules.none { it.includesDate(candidate) }
+                }
+            }
+        }
+
     val dateRangePickerState =
         rememberDateRangePickerState(
             initialSelectedStartDateMillis = initialStartDateMillis,
-            initialSelectedEndDateMillis = initialEndDateMillis
+            initialSelectedEndDateMillis = initialEndDateMillis,
+            selectableDates = selectableDates
         )
 
     DatePickerDialog(

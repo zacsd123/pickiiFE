@@ -41,6 +41,14 @@ import com.example.pickii.ui.theme.PickiiNavYellow
 /** 캡슐 모양 배경/인디케이터의 모서리 둥글기. */
 private val NavCapsuleCornerRadius = 20.dp
 
+/** PickiiBottomNav 렌더링 높이(86dp) = 바깥 마진(16dp*2) + 안쪽 패딩(10dp*2) + 아이템 높이(아이콘18dp+세로패딩8dp*2).
+ * 패딩/아이콘 크기 변경 시 이 값도 같이 갱신할 것. */
+val PickiiBottomNavHeight = 86.dp
+
+/** 오버레이로 뜨는 [PickiiBottomNav] 뒤로 화면 마지막 콘텐츠가 가려지지 않도록 각 최상위 탭 화면이
+ * 하단 여백으로 더해야 하는 값(네브바 높이 + 여유 16dp). */
+val PickiiBottomNavOverlaySpacing = PickiiBottomNavHeight + 16.dp
+
 /** 앱 전반에서 공유하는 하단 탭 내비게이션 바의 탭. 화면이 아직 없는 탭은 선택 상태만 바뀐다. */
 enum class PickiiBottomNavTab {
     HOME,

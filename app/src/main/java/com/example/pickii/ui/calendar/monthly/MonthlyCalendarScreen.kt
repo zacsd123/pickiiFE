@@ -30,6 +30,7 @@ import com.example.pickii.ui.calendar.monthly.component.CalendarMonthGrid
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthHeader
 import com.example.pickii.ui.calendar.monthly.component.ScheduleSummaryCard
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.theme.PickiiInk
 import java.time.LocalDate
@@ -87,7 +88,7 @@ fun MonthlyCalendarScreen(
                     start = 16.dp,
                     end = 16.dp,
                     top = 16.dp,
-                    bottom = 120.dp
+                    bottom = PickiiBottomNavOverlaySpacing
                 ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

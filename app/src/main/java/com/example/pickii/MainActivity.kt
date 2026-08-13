@@ -16,10 +16,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -278,56 +280,17 @@ private fun PickiiNavHost(
         )
     }
 
-    // 바텀 네브바를 Scaffold의 bottomBar로 그린다. 예약된 공간의 배경은 투명하게 둬서(검정 캡슐만 보이도록)
-    // 색이 칠해진 띠처럼 보이지 않게 하면서도, 스크롤 콘텐츠가 캡슐 높이만큼 자동으로 여유를 두고 멈추게 한다.
-    Scaffold(
-        containerColor = PickiiYellowLight,
-        bottomBar = {
-            val tab = currentTab
-            if (isBottomNavVisible && tab != null) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().background(Color.Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    PickiiBottomNav(
-                        selectedTab = tab,
-                        onTabSelect = { tab ->
-                            when (tab) {
-                                PickiiBottomNavTab.HOME -> {
-                                    if (currentRoute != PickiiDestination.Home.route) {
-                                        navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
-                                    }
-                                }
-                                PickiiBottomNavTab.CALENDAR -> {
-                                    if (currentRoute != PickiiDestination.Calender.route) {
-                                        navController.navigateToTab(PickiiDestination.Calender.route)
-                                    }
-                                }
-                                PickiiBottomNavTab.CHAT -> {
-                                    if (!isLoggedIn) {
-                                        showChatLoginPrompt = true
-                                    } else if (currentRoute != PickiiDestination.Chat.route) {
-                                        navController.navigateToTab(PickiiDestination.Chat.route)
-                                    }
-                                }
-                                PickiiBottomNavTab.MY_PAGE -> {
-                                    if (!isLoggedIn) {
-                                        showMyPageLoginPrompt = true
-                                    } else if (currentRoute != PickiiDestination.MyPage.route) {
-                                        navController.navigateToTab(PickiiDestination.MyPage.route)
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
+    // 바텀 네브바를 콘텐츠 위에 오버레이로 띄운다(Scaffold가 공간을 예약하지 않음). 배경이 없어 아이콘/인디케이터만
+    // 떠 보이고, 각 최상위 탭 화면이 PickiiBottomNavOverlaySpacing만큼 스스로 하단 여백을 더해 마지막 콘텐츠가
+    // 가려지지 않게 한다.
+    Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
         NavHost(
             navController = navController,
             startDestination = PickiiDestination.Splash.route,
-            modifier = Modifier.padding(innerPadding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
             enterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
             exitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
             popEnterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
@@ -572,6 +535,46 @@ private fun PickiiNavHost(
                     },
                     onNavigateToMemberProfile = { memberId ->
                         navController.navigate(PickiiDestination.MemberProfile(memberId).route)
+                    }
+                )
+            }
+        }
+
+        val tab = currentTab
+        if (isBottomNavVisible && tab != null) {
+            Box(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                PickiiBottomNav(
+                    selectedTab = tab,
+                    onTabSelect = { selectedTab ->
+                        when (selectedTab) {
+                            PickiiBottomNavTab.HOME -> {
+                                if (currentRoute != PickiiDestination.Home.route) {
+                                    navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
+                                }
+                            }
+                            PickiiBottomNavTab.CALENDAR -> {
+                                if (currentRoute != PickiiDestination.Calender.route) {
+                                    navController.navigateToTab(PickiiDestination.Calender.route)
+                                }
+                            }
+                            PickiiBottomNavTab.CHAT -> {
+                                if (!isLoggedIn) {
+                                    showChatLoginPrompt = true
+                                } else if (currentRoute != PickiiDestination.Chat.route) {
+                                    navController.navigateToTab(PickiiDestination.Chat.route)
+                                }
+                            }
+                            PickiiBottomNavTab.MY_PAGE -> {
+                                if (!isLoggedIn) {
+                                    showMyPageLoginPrompt = true
+                                } else if (currentRoute != PickiiDestination.MyPage.route) {
+                                    navController.navigateToTab(PickiiDestination.MyPage.route)
+                                }
+                            }
+                        }
                     }
                 )
             }

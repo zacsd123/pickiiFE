@@ -43,6 +43,7 @@ import com.example.pickii.ui.common.AvatarPlaceholder
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -114,6 +115,7 @@ private fun MyPageHomeScreenContent(
                 .background(PickiiYellowLight)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
+                .padding(bottom = PickiiBottomNavOverlaySpacing)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -255,7 +255,7 @@ class RecruitApiRepository
             RecruitPostSummary(
                 id = recruitId.toString(),
                 title = title,
-                authorId = authorId.toString(),
+                authorId = authorId?.toString().orEmpty(),
                 authorNickname = authorNickname,
                 authorExperience = authorEXP,
                 maxParticipants = maxMembers,
@@ -271,7 +271,7 @@ class RecruitApiRepository
             RecruitPost(
                 id = recruitId.toString(),
                 title = title,
-                authorId = authorId.toString(),
+                authorId = authorId?.toString().orEmpty(),
                 authorNickname = authorNickname,
                 authorExperience = authorEXP,
                 onCampus = if (onCampus) CampusScope.INTERNAL else CampusScope.EXTERNAL,

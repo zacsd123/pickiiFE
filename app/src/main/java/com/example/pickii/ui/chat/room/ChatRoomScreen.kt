@@ -191,7 +191,8 @@ fun ChatRoomRoute(
         onRegisterScheduleDirectly = viewModel::registerScheduleDirectly,
         onSelectProjectColor = viewModel::onSelectProjectColor,
         onCloseProjectClick = viewModel::closeProject,
-        onSaveMeetingToMyCalendar = viewModel::onSaveMeetingToMyCalendar
+        onSaveMeetingToMyCalendar = viewModel::onSaveMeetingToMyCalendar,
+        onQuickMeetingSheetOpen = viewModel::loadMyCalendarSchedulesForMeetingPicker
     )
 }
 
@@ -230,7 +231,8 @@ private fun ChatRoomScreen(
     onRegisterScheduleDirectly: (String, LocalDate, LocalTime, LocalTime) -> Unit,
     onSelectProjectColor: (Long?) -> Unit,
     onCloseProjectClick: () -> Unit,
-    onSaveMeetingToMyCalendar: (MeetingConfirmedUiModel) -> Unit
+    onSaveMeetingToMyCalendar: (MeetingConfirmedUiModel) -> Unit,
+    onQuickMeetingSheetOpen: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -265,6 +267,14 @@ private fun ChatRoomScreen(
 
     /** 아래에서 올라오는 바텀시트 중 현재 열린 것(상호 배타적, 하나만 열린다). */
     var activeSheet by remember { mutableStateOf<ChatRoomSheet>(ChatRoomSheet.None) }
+
+    // 회의 조율 날짜 선택기가 이미 등록된 날짜를 비활성화할 수 있도록, 시트가 열릴 때(최초 진입/"이전" 되돌아오기
+    // 둘 다) 내 캘린더 일정을 미리 불러온다.
+    LaunchedEffect(activeSheet) {
+        if (activeSheet == ChatRoomSheet.QuickMeeting) {
+            onQuickMeetingSheetOpen()
+        }
+    }
 
     var pendingCameraUri by remember {
         mutableStateOf<Uri?>(null)
@@ -568,6 +578,7 @@ private fun ChatRoomScreen(
         if (activeSheet == ChatRoomSheet.QuickMeeting) {
             MeetingRegistrationBottomSheet(
                 members = uiState.members,
+                registeredSchedules = uiState.myCalendarSchedules,
                 onDismiss = {
                     activeSheet = ChatRoomSheet.None
                 },
