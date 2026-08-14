@@ -26,4 +26,8 @@ data class RecruitPost(
     val status: RecruitStatus,
     val createdAt: LocalDateTime,
     val isScrapped: Boolean = false
-)
+) {
+    /** 서버가 authorId를 안 내려줄 때(탈퇴 등) 빈 문자열로 채워진다 — 작성자를 알 수 없다는 뜻. */
+    val isAuthorUnknown: Boolean
+        get() = authorId.isBlank()
+}

@@ -123,6 +123,18 @@ internal fun ChatRoomViewModel.onAcknowledgeMeetingNotice(pollId: Long) {
 }
 
 /**
+ * 회의 조율 날짜 선택기를 열기 전, 이미 등록된 날짜를 비활성화할 수 있도록 이번 달부터 2개월치 내 캘린더
+ * 일정을 미리 불러온다. 날짜 선택기가 이 범위를 벗어난 달로 넘어가면 그 달의 일정은 반영되지 않는다.
+ */
+internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
+    viewModelScope.launch {
+        val now = YearMonth.now()
+        (0..2).forEach { offset -> calendarRepository.loadSchedules(now.plusMonths(offset.toLong())) }
+        _uiState.update { it.copy(myCalendarSchedules = calendarRepository.schedules.value) }
+    }
+}
+
+/**
  * 확정된 회의 일정(카드4)을 내 개인 캘린더에도 저장한다. 다른 멤버 대신 저장해줄 API가 없어(권한상
  * 본인 캘린더만 쓸 수 있음) 채팅방에 있는 각자가 이 버튼을 눌러야 한다 — 알려진 제약.
  */

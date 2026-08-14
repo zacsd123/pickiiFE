@@ -17,4 +17,8 @@ data class RecruitPostSummary(
     /** 현재까지 모집된 인원. */
     val currentParticipants: Int
         get() = maxParticipants - availableSlots
+
+    /** 서버가 authorId를 안 내려줄 때(탈퇴 등) 빈 문자열로 채워진다 — 작성자를 알 수 없다는 뜻. */
+    val isAuthorUnknown: Boolean
+        get() = authorId.isBlank()
 }

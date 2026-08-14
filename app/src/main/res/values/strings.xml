@@ -51,6 +51,7 @@
 
     <string name="recruit_detail_label_author">글 작성자</string>
     <string name="recruit_detail_label_author_experience">%1$s · Lv.%2$d</string>
+    <string name="unknown_author_nickname">알 수 없음</string>
     <string name="recruit_detail_label_written_at">작성: %1$s</string>
     <string name="recruit_detail_label_period_and_capacity">%1$s ~ %2$s | 지원 가능 %3$d명</string>
     <string name="recruit_detail_label_short_intro">간단 소개</string>

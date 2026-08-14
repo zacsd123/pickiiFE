@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
@@ -83,18 +85,18 @@ fun CalendarMonthGrid(
 }
 
 /**
- * 월요일부터 일요일까지 요일 이름을 표시한다.
+ * 일요일부터 토요일까지 요일 이름을 표시한다.
  */
 @Composable
 private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
     val weekdayLabels =
         listOf(
+            "S",
             "M",
             "T",
             "W",
             "T",
             "F",
-            "S",
             "S"
         )
 
@@ -104,7 +106,7 @@ private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         weekdayLabels.forEachIndexed { index, label ->
-            val isWeekend = index >= WEEKEND_START_INDEX
+            val isWeekend = index in WEEKEND_INDICES
 
             Text(
                 text = label,
@@ -115,7 +117,9 @@ private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
                         WeekdayTextColor
                     },
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(42.dp)
             )
         }
     }
@@ -131,7 +135,7 @@ private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
     val lastDate = yearMonth.atEndOfMonth()
 
     val leadingEmptyCount =
-        calculateMondayBasedIndex(firstDate.dayOfWeek)
+        calculateSundayBasedIndex(firstDate.dayOfWeek)
 
     val dates =
         buildList<LocalDate?> {
@@ -157,9 +161,9 @@ private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
 }
 
 /**
- * DayOfWeek 값을 월요일 시작 기준 0부터 6까지로 변환한다.
+ * DayOfWeek 값을 일요일 시작 기준 0부터 6까지로 변환한다.
  */
-private fun calculateMondayBasedIndex(dayOfWeek: DayOfWeek): Int = dayOfWeek.value - 1
+private fun calculateSundayBasedIndex(dayOfWeek: DayOfWeek): Int = dayOfWeek.value % 7
 
 private const val DAYS_PER_WEEK = 7
-private const val WEEKEND_START_INDEX = 5
+private val WEEKEND_INDICES = setOf(0, 6)

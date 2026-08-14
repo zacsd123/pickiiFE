@@ -56,6 +56,7 @@ import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PaginationRow
+import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.common.SelectableChip
@@ -158,6 +159,7 @@ private fun HomeScreenContent(
                 .background(PickiiYellowLight)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
+                .padding(bottom = PickiiBottomNavOverlaySpacing)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -480,7 +482,7 @@ private fun PostCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            LevelAvatar(exp = post.authorExperience, size = 36.dp)
+            LevelAvatar(exp = if (post.isAuthorUnknown) 0 else post.authorExperience, size = 36.dp)
 
             StatusBadge(
                 label = post.status.label,
@@ -506,7 +508,10 @@ private fun PostCard(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "${post.authorNickname}, ${post.createdAt.toCompactDisplayString()}",
+            text =
+                "${
+                    if (post.isAuthorUnknown) stringResource(R.string.unknown_author_nickname) else post.authorNickname
+                }, ${post.createdAt.toCompactDisplayString()}",
             color = PickiiTextGray,
             fontSize = 12.sp
         )

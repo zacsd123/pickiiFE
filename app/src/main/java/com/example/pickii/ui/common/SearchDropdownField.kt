@@ -46,15 +46,22 @@ fun <T> SearchDropdownField(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    var menuVisible by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         OutlinedTextField(
             value = query,
-            onValueChange = onQueryChange,
+            onValueChange = { newQuery ->
+                onQueryChange(newQuery)
+                if (isFocused) menuVisible = true
+            },
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onFocusChanged { isFocused = it.isFocused },
+                    .onFocusChanged { focusState ->
+                        isFocused = focusState.isFocused
+                        menuVisible = focusState.isFocused
+                    },
             placeholder = { Text(text = placeholder, color = PickiiTextGray) },
             singleLine = true,
             shape = RoundedCornerShape(SearchFieldCornerRadius),
@@ -68,8 +75,8 @@ fun <T> SearchDropdownField(
         )
 
         DropdownMenu(
-            expanded = isFocused && suggestions.isNotEmpty(),
-            onDismissRequest = { isFocused = false },
+            expanded = menuVisible && suggestions.isNotEmpty(),
+            onDismissRequest = { menuVisible = false },
             properties = PopupProperties(focusable = false)
         ) {
             suggestions.forEach { item ->
@@ -77,7 +84,7 @@ fun <T> SearchDropdownField(
                     text = { Text(text = itemLabel(item)) },
                     onClick = {
                         onSelect(item)
-                        isFocused = false
+                        menuVisible = false
                     }
                 )
             }
