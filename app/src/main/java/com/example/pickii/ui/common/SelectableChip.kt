@@ -45,7 +45,7 @@ fun SelectableChip(
                         else -> Color.Black
                     }
                 ).then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 14.dp, vertical = 5.dp)
     ) {
         Text(text = label, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }

@@ -1,6 +1,6 @@
 package com.example.pickii.di
 
-import com.example.pickii.data.repository.FakeCalendarRepository
+import com.example.pickii.data.repository.CalendarApiRepository
 import com.example.pickii.domain.repository.CalendarRepository
 import dagger.Binds
 import dagger.Module
@@ -14,10 +14,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class CalendarRepositoryModule {
-
     @Binds
     @Singleton
-    abstract fun bindCalendarRepository(
-        fakeCalendarRepository: FakeCalendarRepository,
-    ): CalendarRepository
+    abstract fun bindCalendarRepository(calendarApiRepository: CalendarApiRepository): CalendarRepository
 }

@@ -2,6 +2,8 @@ package com.example.pickii.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickii.data.remote.dto.ApiException
+import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,12 +13,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
+
 /** [LoginScreen]에 표시되는 입력 값과 토글 상태. */
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isPasswordVisible: Boolean = false,
-    val isAutoLoginChecked: Boolean = false
+    val isAutoLoginChecked: Boolean = false,
+    val errorMessage: String? = null
 )
 
 /** 로그인 화면의 입력 상태를 보관하고, [SessionRepository]를 통해 실제 로그인/비회원 전환을 처리한다. */
@@ -24,17 +29,22 @@ data class LoginUiState(
 class LoginViewModel
     @Inject
     constructor(
-        private val sessionRepository: SessionRepository
+        private val sessionRepository: SessionRepository,
+        private val profileRepository: ProfileRepository
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
         fun onEmailChange(value: String) {
-            _uiState.update { it.copy(email = value) }
+            _uiState.update { it.copy(email = value, errorMessage = null) }
         }
 
         fun onPasswordChange(value: String) {
-            _uiState.update { it.copy(password = value) }
+            _uiState.update { it.copy(password = value, errorMessage = null) }
+        }
+
+        fun onErrorDialogDismiss() {
+            _uiState.update { it.copy(errorMessage = null) }
         }
 
         fun onTogglePasswordVisibility() {
@@ -46,14 +56,60 @@ class LoginViewModel
         }
 
         /**
-         * 입력된 이메일/비밀번호로 로그인을 시도하고, 성공했을 때만 [onSuccess]를 호출한다.
+         * 입력된 이메일/비밀번호로 로그인을 시도하고, 성공하면 프로필(이력서) 보유 여부에 따라
+         * [onNavigateHome] 또는 [onNavigateOnboarding]을 호출한다.
          *
-         * @param onSuccess 로그인 성공 시 호출되는 콜백(화면 전환 등 내비게이션 용도)
+         * @param onNavigateHome 로그인 성공 + 프로필 보유 시 호출되는 콜백
+         * @param onNavigateOnboarding 로그인 성공 + 프로필 미보유 시 호출되는 콜백(최초 로그인 온보딩)
          */
-        fun onLoginClick(onSuccess: () -> Unit) {
+        fun onLoginClick(
+            onNavigateHome: () -> Unit,
+            onNavigateOnboarding: () -> Unit
+        ) {
             viewModelScope.launch {
                 val state = _uiState.value
-                sessionRepository.login(state.email, state.password).onSuccess { onSuccess() }
+                sessionRepository
+                    .login(state.email, state.password, state.isAutoLoginChecked)
+                    .onSuccess {
+                        if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
+                    }.onFailure { error ->
+                        _uiState.update { it.copy(errorMessage = error.message ?: DEFAULT_ERROR_MESSAGE) }
+                    }
+            }
+        }
+
+        /**
+         * 카카오 액세스 토큰으로 로그인을 시도한다.
+         *
+         * 이 계정에 카카오가 연동돼 있지 않으면([SessionRepository.loginWithKakao] 참고) [onNotLinked]를,
+         * 그 밖의 실패면 [onError]를 호출한다.
+         *
+         * @param kakaoAccessToken 카카오 SDK 로그인으로 받은 액세스 토큰
+         * @param onNavigateHome 로그인 성공 + 프로필 보유 시 호출되는 콜백
+         * @param onNavigateOnboarding 로그인 성공 + 프로필 미보유 시 호출되는 콜백(최초 로그인 온보딩)
+         * @param onNotLinked 이 계정에 카카오가 아직 연동되지 않아 실패했을 때 호출되는 콜백
+         * @param onError 그 밖의 이유로 실패했을 때 호출되는 콜백
+         */
+        @Suppress("LongParameterList")
+        fun onKakaoLoginClick(
+            kakaoAccessToken: String,
+            onNavigateHome: () -> Unit,
+            onNavigateOnboarding: () -> Unit,
+            onNotLinked: () -> Unit,
+            onError: () -> Unit
+        ) {
+            viewModelScope.launch {
+                sessionRepository
+                    .loginWithKakao(kakaoAccessToken, _uiState.value.isAutoLoginChecked)
+                    .onSuccess {
+                        if (profileRepository.hasResume()) onNavigateHome() else onNavigateOnboarding()
+                    }.onFailure { error ->
+                        if (error is ApiException && error.code == "NOT_LINKED_ACCOUNT") {
+                            onNotLinked()
+                        } else {
+                            onError()
+                        }
+                    }
             }
         }
 

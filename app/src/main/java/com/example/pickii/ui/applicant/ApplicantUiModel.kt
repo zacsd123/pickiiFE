@@ -5,16 +5,14 @@ package com.example.pickii.ui.applicant
  */
 data class ApplicantUiModel(
     val id: Long,
-
+    val memberId: Long,
     // 프로필
     val nickname: String,
-    val major: String,
-    val grade: Int,
-
+    val exp: Int = 0,
     // 지원 정보
     val appliedDate: String,
     val applicationMessage: String,
-
+    val keywords: List<String>,
     // 현재 지원 상태
-    val status: ApplicantStatus,
+    val status: ApplicantStatus
 )

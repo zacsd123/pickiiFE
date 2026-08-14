@@ -4,6 +4,5 @@ package com.example.pickii.domain.model
 data class CurrentUser(
     val id: String,
     val nickname: String,
-    val experience: Int,
     val hasProfile: Boolean
 )

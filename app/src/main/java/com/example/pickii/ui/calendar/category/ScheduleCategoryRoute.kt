@@ -15,7 +15,7 @@ fun ScheduleCategoryRoute(
     onCloseClick: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ScheduleCategoryViewModel = hiltViewModel(),
+    viewModel: ScheduleCategoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -35,6 +35,6 @@ fun ScheduleCategoryRoute(
         onColorSelect = viewModel::selectColor,
         onAddCategoryClick = viewModel::addOrUpdateCategory,
         onSaveClick = viewModel::saveCategories,
-        modifier = modifier,
+        modifier = modifier
     )
 }

@@ -16,6 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +29,10 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthGrid
 import com.example.pickii.ui.calendar.monthly.component.CalendarMonthHeader
 import com.example.pickii.ui.calendar.monthly.component.ScheduleSummaryCard
+import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
+import com.example.pickii.ui.common.PickiiTopBar
+import com.example.pickii.ui.theme.PickiiInk
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -32,15 +40,16 @@ import java.util.Locale
 private val MonthlyCalendarBackgroundColor = Color(0xFFF9FCA8)
 private val CalendarContainerColor = Color(0xFFFFFFFF)
 
-private val SelectedDateTitleColor = Color(0xFF1B1B1B)
+private val SelectedDateTitleColor = PickiiInk
 
-private val ActionButtonColor = Color(0xFF1B1B1B)
+private val ActionButtonColor = PickiiInk
 private val ActionButtonTextColor = Color(0xFFFFFFFF)
 
-private val SelectedDateFormatter = DateTimeFormatter.ofPattern(
-    "M월 d일",
-    Locale.KOREAN,
-)
+private val SelectedDateFormatter =
+    DateTimeFormatter.ofPattern(
+        "M월 d일",
+        Locale.KOREAN
+    )
 
 /**
  * 월간 캘린더 화면을 표시한다.
@@ -52,41 +61,55 @@ fun MonthlyCalendarScreen(
     onNextMonthClick: () -> Unit,
     onDateClick: (LocalDate) -> Unit,
     onScheduleClick: (Long) -> Unit,
+    onEditScheduleClick: (Long) -> Unit,
+    onDeleteScheduleClick: (Long) -> Unit,
     onAddScheduleClick: () -> Unit,
     onDailyCalendarClick: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier,
+    onNotificationClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val selectedDateSchedules = uiState.schedules
-        .filter { schedule ->
-            schedule.includesDate(uiState.selectedDate)
-        }
+    val selectedDateSchedules =
+        uiState.schedules
+            .filter { schedule ->
+                schedule.includesDate(uiState.selectedDate)
+            }
+    var pendingDeleteScheduleId by remember { mutableStateOf<Long?>(null) }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MonthlyCalendarBackgroundColor),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MonthlyCalendarBackgroundColor)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = 24.dp,
-                bottom = 120.dp,
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding =
+                PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp,
+                    bottom = PickiiBottomNavOverlaySpacing
+                ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item {
+                PickiiTopBar(
+                    notificationCount = uiState.notificationCount,
+                    onNotificationClick = onNotificationClick
+                )
+            }
+
             item {
                 CalendarMonthHeader(
                     displayedYearMonth = uiState.displayedYearMonth,
                     onPreviousMonthClick = onPreviousMonthClick,
-                    onNextMonthClick = onNextMonthClick,
+                    onNextMonthClick = onNextMonthClick
                 )
             }
 
             item {
                 Spacer(
-                    modifier = Modifier.height(4.dp),
+                    modifier = Modifier.height(4.dp)
                 )
             }
 
@@ -97,9 +120,9 @@ fun MonthlyCalendarScreen(
                             displayedYearMonth = uiState.displayedYearMonth,
                             selectedDate = uiState.selectedDate,
                             schedules = uiState.schedules,
-                            onDateClick = onDateClick,
+                            onDateClick = onDateClick
                         )
-                    },
+                    }
                 )
             }
 
@@ -109,7 +132,7 @@ fun MonthlyCalendarScreen(
                     onDetailClick = {
                         onDailyCalendarClick(uiState.selectedDate)
                     },
-                    onAddScheduleClick = onAddScheduleClick,
+                    onAddScheduleClick = onAddScheduleClick
                 )
             }
 
@@ -122,7 +145,7 @@ fun MonthlyCalendarScreen(
                     items = selectedDateSchedules,
                     key = { schedule ->
                         schedule.id
-                    },
+                    }
                 ) { schedule ->
                     ScheduleSummaryCard(
                         schedule = schedule,
@@ -130,9 +153,30 @@ fun MonthlyCalendarScreen(
                         onClick = {
                             onScheduleClick(schedule.id)
                         },
+                        onEditClick = {
+                            onEditScheduleClick(schedule.id)
+                        },
+                        onDeleteClick = {
+                            pendingDeleteScheduleId = schedule.id
+                        }
                     )
                 }
             }
+        }
+
+        val deleteTargetId = pendingDeleteScheduleId
+        if (deleteTargetId != null) {
+            ConfirmDialog(
+                title = "일정을 삭제할까요?",
+                body = "삭제하면 되돌릴 수 없습니다.",
+                confirmLabel = "삭제",
+                dismissLabel = "취소",
+                onConfirm = {
+                    onDeleteScheduleClick(deleteTargetId)
+                    pendingDeleteScheduleId = null
+                },
+                onDismiss = { pendingDeleteScheduleId = null }
+            )
         }
     }
 }
@@ -143,19 +187,19 @@ fun MonthlyCalendarScreen(
 @Composable
 private fun CalendarContainer(
     content: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = CalendarContainerColor,
-                shape = RoundedCornerShape(30.dp),
-            )
-            .padding(
-                horizontal = 18.dp,
-                vertical = 22.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = CalendarContainerColor,
+                    shape = RoundedCornerShape(30.dp)
+                ).padding(
+                    horizontal = 18.dp,
+                    vertical = 22.dp
+                )
     ) {
         content()
     }
@@ -169,35 +213,36 @@ private fun SelectedDateActionRow(
     selectedDate: LocalDate,
     onDetailClick: () -> Unit,
     onAddScheduleClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = selectedDate.format(
-                    SelectedDateFormatter,
-                ),
+                text =
+                    selectedDate.format(
+                        SelectedDateFormatter
+                    ),
                 color = SelectedDateTitleColor,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             CalendarActionButton(
                 text = "자세히",
-                onClick = onDetailClick,
+                onClick = onDetailClick
             )
         }
 
         CalendarActionButton(
             text = "+ 추가",
-            onClick = onAddScheduleClick,
+            onClick = onAddScheduleClick
         )
     }
 }
@@ -209,28 +254,27 @@ private fun SelectedDateActionRow(
 private fun CalendarActionButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .background(
-                color = ActionButtonColor,
-                shape = RoundedCornerShape(50),
-            )
-            .clickable(
-                onClick = onClick,
-            )
-            .padding(
-                horizontal = 16.dp,
-                vertical = 10.dp,
-            ),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .background(
+                    color = ActionButtonColor,
+                    shape = RoundedCornerShape(50)
+                ).clickable(
+                    onClick = onClick
+                ).padding(
+                    horizontal = 16.dp,
+                    vertical = 10.dp
+                ),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = ActionButtonTextColor,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -239,20 +283,19 @@ private fun CalendarActionButton(
  * 선택한 날짜에 일정이 없을 때 안내 문구를 표시한다.
  */
 @Composable
-private fun EmptyScheduleContent(
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyScheduleContent(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 28.dp),
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 28.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "등록된 일정이 없어요.",
             color = Color(0xFF77776E),
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }

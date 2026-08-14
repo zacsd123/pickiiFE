@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
-import com.example.pickii.ui.calendar.monthly.ScheduleColorType
+import com.example.pickii.domain.model.ScheduleColorType
+import com.example.pickii.ui.common.toComposeColor
 import java.time.LocalDate
 
 /**
@@ -24,19 +25,21 @@ import java.time.LocalDate
 fun CalendarScheduleBar(
     weekDates: List<LocalDate?>,
     schedules: List<MonthlyScheduleUiModel>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    val multiDaySchedules = schedules.filter { schedule ->
-        schedule.isMultiDay &&
+    val multiDaySchedules =
+        schedules.filter { schedule ->
+            schedule.isMultiDay &&
                 weekDates.any { date ->
                     date != null && schedule.includesDate(date)
                 }
-    }
+        }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(SCHEDULE_BAR_AREA_HEIGHT),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(SCHEDULE_BAR_AREA_HEIGHT)
     ) {
         multiDaySchedules
             .take(MAX_VISIBLE_SCHEDULE_BAR_COUNT)
@@ -44,7 +47,7 @@ fun CalendarScheduleBar(
                 ScheduleBarRow(
                     weekDates = weekDates,
                     schedule = schedule,
-                    verticalIndex = index,
+                    verticalIndex = index
                 )
             }
     }
@@ -58,12 +61,13 @@ private fun ScheduleBarRow(
     weekDates: List<LocalDate?>,
     schedule: MonthlyScheduleUiModel,
     verticalIndex: Int,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(SCHEDULE_BAR_HEIGHT),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(SCHEDULE_BAR_HEIGHT)
     ) {
         weekDates.forEachIndexed { index, date ->
             val isIncluded =
@@ -74,47 +78,54 @@ private fun ScheduleBarRow(
 
             val isPreviousIncluded =
                 previousDate != null &&
-                        schedule.includesDate(previousDate)
+                    schedule.includesDate(previousDate)
 
             val isNextIncluded =
                 nextDate != null &&
-                        schedule.includesDate(nextDate)
+                    schedule.includesDate(nextDate)
 
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(SCHEDULE_BAR_HEIGHT),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(SCHEDULE_BAR_HEIGHT)
             ) {
                 if (isIncluded) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(SCHEDULE_BAR_HEIGHT)
-                            .background(
-                                color = schedule.categoryColor.toComposeColor(),
-                                shape = RoundedCornerShape(
-                                    topStart = if (isPreviousIncluded) {
-                                        0.dp
-                                    } else {
-                                        SCHEDULE_BAR_CORNER_RADIUS
-                                    },
-                                    bottomStart = if (isPreviousIncluded) {
-                                        0.dp
-                                    } else {
-                                        SCHEDULE_BAR_CORNER_RADIUS
-                                    },
-                                    topEnd = if (isNextIncluded) {
-                                        0.dp
-                                    } else {
-                                        SCHEDULE_BAR_CORNER_RADIUS
-                                    },
-                                    bottomEnd = if (isNextIncluded) {
-                                        0.dp
-                                    } else {
-                                        SCHEDULE_BAR_CORNER_RADIUS
-                                    },
-                                ),
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(SCHEDULE_BAR_HEIGHT)
+                                .background(
+                                    color = schedule.categoryColor.toComposeColor(),
+                                    shape =
+                                        RoundedCornerShape(
+                                            topStart =
+                                                if (isPreviousIncluded) {
+                                                    0.dp
+                                                } else {
+                                                    SCHEDULE_BAR_CORNER_RADIUS
+                                                },
+                                            bottomStart =
+                                                if (isPreviousIncluded) {
+                                                    0.dp
+                                                } else {
+                                                    SCHEDULE_BAR_CORNER_RADIUS
+                                                },
+                                            topEnd =
+                                                if (isNextIncluded) {
+                                                    0.dp
+                                                } else {
+                                                    SCHEDULE_BAR_CORNER_RADIUS
+                                                },
+                                            bottomEnd =
+                                                if (isNextIncluded) {
+                                                    0.dp
+                                                } else {
+                                                    SCHEDULE_BAR_CORNER_RADIUS
+                                                }
+                                        )
+                                )
                     )
                 }
             }
@@ -125,19 +136,6 @@ private fun ScheduleBarRow(
 /**
  * 일정 색상 종류를 Compose 색상으로 변환한다.
  */
-private fun ScheduleColorType.toComposeColor(): Color {
-    return when (this) {
-        ScheduleColorType.RED -> Color(0xFFE86F73)
-        ScheduleColorType.ORANGE -> Color(0xFFED9A53)
-        ScheduleColorType.YELLOW -> Color(0xFFF1D354)
-        ScheduleColorType.GREEN -> Color(0xFF84C976)
-        ScheduleColorType.BLUE -> Color(0xFF6D9EEB)
-        ScheduleColorType.PURPLE -> Color(0xFFAC8AFA)
-        ScheduleColorType.PINK -> Color(0xFFE38AB0)
-        ScheduleColorType.GRAY -> Color(0xFFBDBDBD)
-        ScheduleColorType.BLACK -> Color(0xFF1C1C1C)
-    }
-}
 
 private val SCHEDULE_BAR_AREA_HEIGHT = 14.dp
 private val SCHEDULE_BAR_HEIGHT = 5.dp

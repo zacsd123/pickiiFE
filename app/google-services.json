@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "751279583758",
+    "project_id": "pikii-a9782",
+    "storage_bucket": "pikii-a9782.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751279583758:android:589696fd8e96cbdba5425f",
+        "android_client_info": {
+          "package_name": "com.example.pickii"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApL_cgezJ3Zuv31K4ejRoOcINXz5Fq1mw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

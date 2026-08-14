@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +24,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,13 +44,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
+import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.RecruitPost
+import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.AiGenerationDialog
 import com.example.pickii.ui.common.CharacterCounterText
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
+import com.example.pickii.ui.common.StatusBadge
+import com.example.pickii.ui.common.recruitStatusColor
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
@@ -103,6 +105,7 @@ fun RecruitApplyScreen(
     RecruitApplyScreenContent(
         uiState = uiState,
         onMessageChange = viewModel::onMessageChange,
+        onKeywordToggle = viewModel::onKeywordToggle,
         onAiHelpClick = viewModel::onAiHelpClick,
         onAiRetryClick = viewModel::onAiRetryClick,
         onAiDialogDismiss = viewModel::onAiDialogDismiss,
@@ -123,6 +126,7 @@ fun RecruitApplyScreen(
 private fun RecruitApplyScreenContent(
     uiState: RecruitApplyUiState,
     onMessageChange: (String) -> Unit,
+    onKeywordToggle: (Long) -> Unit,
     onAiHelpClick: () -> Unit,
     onAiRetryClick: () -> Unit,
     onAiDialogDismiss: () -> Unit,
@@ -183,6 +187,15 @@ private fun RecruitApplyScreenContent(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                if (uiState.availableKeywordCategories.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ApplyKeywordSection(
+                        categories = uiState.availableKeywordCategories,
+                        selectedKeywordIds = uiState.selectedKeywordIds,
+                        onKeywordToggle = onKeywordToggle
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 AiHelpBanner(onAiHelpClick = onAiHelpClick)
@@ -240,9 +253,12 @@ private fun RecruitApplyTopBar(onBackClick: () -> Unit) {
                 .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.Black)
-        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = Color.Black,
+            modifier = Modifier.clickable(onClick = onBackClick)
+        )
 
         Box(
             modifier =
@@ -281,13 +297,26 @@ private fun PostSummaryCard(
                 .background(PickiiFieldBackground)
                 .padding(16.dp)
     ) {
-        Text(text = post.title, color = Color.Black, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = post.title,
+                color = Color.Black,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            StatusBadge(
+                label = post.status.label,
+                containerColor = recruitStatusColor(post.status),
+                contentColor = if (post.status == RecruitStatus.CLOSED) Color.Black else Color.White
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            InfoChip(label = post.category.label)
-            InfoChip(label = post.topic.label)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            post.categories.forEach { InfoChip(label = it.label) }
+            post.topics.forEach { InfoChip(label = it.label) }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -437,6 +466,81 @@ private fun MessageField(
     )
 }
 
+/**
+ * 지원 키워드를 카테고리별로 보여주고 선택/해제할 수 있는 영역. 전체 카테고리를 통틀어
+ * 최대 [MAX_KEYWORD_SELECTION]개까지 선택 가능하다(5-7 정책).
+ */
+@Composable
+private fun ApplyKeywordSection(
+    categories: List<ApplyKeywordCategory>,
+    selectedKeywordIds: Set<Long>,
+    onKeywordToggle: (Long) -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.recruit_apply_label_keywords),
+                color = Color.Black,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "${selectedKeywordIds.size}/$MAX_KEYWORD_SELECTION",
+                color = PickiiTextGray,
+                fontSize = 12.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            categories.forEach { category ->
+                Column {
+                    Text(text = category.category, color = PickiiTextGray, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        category.keywords.forEach { keyword ->
+                            KeywordChip(
+                                label = keyword.content,
+                                selected = keyword.keywordId in selectedKeywordIds,
+                                onClick = { onKeywordToggle(keyword.keywordId) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 선택 시 검은 배경, 미선택 시 흰 배경으로 바뀌는 지원 키워드 칩. */
+@Composable
+private fun KeywordChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .background(if (selected) Color.Black else PickiiFieldBackground)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = if (selected) Color.White else Color.Black,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
 /** "AI로부터 도움받기"를 안내하는 배너. */
 @Composable
 private fun AiHelpBanner(onAiHelpClick: () -> Unit) {
@@ -513,20 +617,12 @@ private fun ApplyCompletionDialog(
     onGoHomeClick: () -> Unit,
     onViewApplicationStatusClick: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onGoHomeClick,
-        title = { Text(text = stringResource(R.string.recruit_apply_dialog_complete_title)) },
-        text = {},
-        confirmButton = {
-            TextButton(onClick = onViewApplicationStatusClick) {
-                Text(text = stringResource(R.string.recruit_apply_button_view_application_status))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onGoHomeClick) {
-                Text(text = stringResource(R.string.recruit_apply_button_go_home))
-            }
-        }
+    ConfirmDialog(
+        title = stringResource(R.string.recruit_apply_dialog_complete_title),
+        confirmLabel = stringResource(R.string.recruit_apply_button_view_application_status),
+        onConfirm = onViewApplicationStatusClick,
+        dismissLabel = stringResource(R.string.recruit_apply_button_go_home),
+        onDismiss = onGoHomeClick
     )
 }
 
@@ -538,6 +634,7 @@ private fun RecruitApplyScreenPreview() {
         RecruitApplyScreenContent(
             uiState = RecruitApplyUiState(),
             onMessageChange = {},
+            onKeywordToggle = {},
             onAiHelpClick = {},
             onAiRetryClick = {},
             onAiDialogDismiss = {},

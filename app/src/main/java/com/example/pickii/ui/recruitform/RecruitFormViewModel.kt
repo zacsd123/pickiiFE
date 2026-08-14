@@ -7,8 +7,8 @@ import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPost
-import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.model.RecruitTopic
+import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.AiDialogState
@@ -24,8 +24,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import javax.inject.Inject
 
 /** 공고 등록/수정 폼이 어느 모드로 동작 중인지. */
@@ -57,11 +55,13 @@ data class RecruitFormUiState(
     val mode: RecruitFormMode = RecruitFormMode.CREATE,
     val isLoginRequired: Boolean = false,
     val isAuthorized: Boolean = true,
+    val availableCategories: List<RecruitCategory> = emptyList(),
+    val availableTopics: List<RecruitTopic> = emptyList(),
     val title: String = "",
     val maxParticipants: Int? = null,
     val onCampus: CampusScope? = CampusScope.INTERNAL,
-    val category: RecruitCategory? = null,
-    val topic: RecruitTopic? = null,
+    val categories: Set<RecruitCategory> = emptySet(),
+    val topics: Set<RecruitTopic> = emptySet(),
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val shortIntro: String = "",
@@ -80,8 +80,8 @@ data class RecruitFormUiState(
             isTitleValid &&
                 maxParticipants != null &&
                 onCampus != null &&
-                category != null &&
-                topic != null &&
+                categories.isNotEmpty() &&
+                topics.isNotEmpty() &&
                 startDate != null &&
                 endDate != null &&
                 shortIntro.isNotBlank() &&
@@ -99,12 +99,10 @@ class RecruitFormViewModel
     constructor(
         savedStateHandle: SavedStateHandle,
         private val recruitRepository: RecruitRepository,
+        private val masterDataRepository: MasterDataRepository,
         private val sessionRepository: SessionRepository
     ) : ViewModel() {
         private val postId: String? = savedStateHandle[ARG_POST_ID]
-
-        /** 수정 중인 기존 모집 글. 등록 모드거나 아직 불러오지 못했으면 null이다. */
-        private var existingPost: RecruitPost? = null
 
         private val _uiState =
             MutableStateFlow(
@@ -116,11 +114,26 @@ class RecruitFormViewModel
         val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
 
         init {
+            loadFilterOptions()
             val editTargetPostId = postId
             if (editTargetPostId == null) {
                 checkLoginForCreate()
             } else {
                 loadExistingPost(editTargetPostId)
+            }
+        }
+
+        /** 카테고리/주제 선택지를 마스터 데이터에서 불러온다. */
+        private fun loadFilterOptions() {
+            viewModelScope.launch {
+                masterDataRepository.getCategories().onSuccess { categories ->
+                    _uiState.update { it.copy(availableCategories = categories) }
+                }
+            }
+            viewModelScope.launch {
+                masterDataRepository.getTopics().onSuccess { topics ->
+                    _uiState.update { it.copy(availableTopics = topics) }
+                }
             }
         }
 
@@ -131,22 +144,27 @@ class RecruitFormViewModel
 
         /** 수정 대상 글을 불러와 폼에 채우고, 현재 사용자가 작성자인지 확인한다. 작성자가 아니면 폼 대신 권한 없음 상태로 전환한다. */
         private fun loadExistingPost(postId: String) {
-            val post = recruitRepository.getPostById(postId)
-            val currentUserId = sessionRepository.currentUser.value?.id
-            if (post == null || currentUserId == null || post.authorId != currentUserId) {
-                _uiState.update { it.copy(isAuthorized = false) }
-                return
-            }
+            viewModelScope.launch {
+                val post = recruitRepository.getPostById(postId).getOrNull()
+                val currentUserId = sessionRepository.currentUser.value?.id
+                if (post == null || currentUserId == null || post.authorId != currentUserId) {
+                    _uiState.update { it.copy(isAuthorized = false) }
+                    return@launch
+                }
 
-            existingPost = post
+                applyExistingPost(post)
+            }
+        }
+
+        private fun applyExistingPost(post: RecruitPost) {
             _uiState.update {
                 it.copy(
                     isAuthorized = true,
                     title = post.title,
                     maxParticipants = post.maxParticipants,
                     onCampus = post.onCampus,
-                    category = post.category,
-                    topic = post.topic,
+                    categories = post.categories.toSet(),
+                    topics = post.topics.toSet(),
                     startDate = post.startDate,
                     endDate = post.endDate,
                     shortIntro = post.shortIntro,
@@ -172,15 +190,20 @@ class RecruitFormViewModel
             _uiState.update { it.copy(onCampus = scope) }
         }
 
-        /** 카테고리를 단일 선택한다. */
+        /** 카테고리 선택을 토글한다(복수 선택 가능). */
         fun onCategorySelect(category: RecruitCategory) {
-            _uiState.update { it.copy(category = category) }
+            _uiState.update {
+                val selected = it.categories
+                it.copy(categories = if (category in selected) selected - category else selected + category)
+            }
         }
 
-        /** 비활성화된 주제는 무시하고, 활성화된 주제만 단일 선택한다. */
+        /** 주제 선택을 토글한다(복수 선택 가능). */
         fun onTopicSelect(topic: RecruitTopic) {
-            if (!topic.isEnabled) return
-            _uiState.update { it.copy(topic = topic) }
+            _uiState.update {
+                val selected = it.topics
+                it.copy(topics = if (topic in selected) selected - topic else selected + topic)
+            }
         }
 
         /** 진행 기간의 시작일을 바꾼다. */
@@ -207,31 +230,33 @@ class RecruitFormViewModel
             }
         }
 
-        /** "AI 초안 생성" 버튼 클릭 시, 지금까지 입력한 내용을 바탕으로 간단 소개와 상세 사항 초안을 각각 생성해 채운다. */
+        /**
+         * "AI 초안 생성" 버튼 클릭 시, 입력해 둔 간단 소개/상세 사항을 AI가 다듬어 채운다.
+         *
+         * 상세 사항은 서버에서 필수 입력이라, 비어 있으면 API를 호출하지 않고 안내 토스트만 띄운다.
+         */
         fun onGenerateAiDraftClick() {
             val state = _uiState.value
-            val basePrompt =
-                listOfNotNull(state.title.ifBlank { null }, state.category?.label, state.topic?.label)
-                    .joinToString(separator = " ")
+            if (state.detailContent.isBlank()) {
+                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_form_toast_ai_draft_content_required))
+                return
+            }
 
             _uiState.update { it.copy(aiDialogState = AiDialogState.Loading) }
             viewModelScope.launch {
-                val shortIntroResult = recruitRepository.generateAiDraft("$basePrompt 간단 소개")
-                val detailContentResult = recruitRepository.generateAiDraft("$basePrompt 상세 사항")
-
-                val shortIntroDraft = shortIntroResult.getOrNull()
-                val detailContentDraft = detailContentResult.getOrNull()
-                if (shortIntroDraft != null && detailContentDraft != null) {
-                    _uiState.update {
-                        it.copy(
-                            shortIntro = shortIntroDraft.take(MAX_SHORT_INTRO_LENGTH),
-                            detailContent = detailContentDraft.take(MAX_DETAIL_LENGTH),
-                            aiDialogState = AiDialogState.Hidden
-                        )
+                recruitRepository
+                    .generateAiDraft(simpleDesc = state.shortIntro.ifBlank { null }, content = state.detailContent)
+                    .onSuccess { (simpleDesc, content) ->
+                        _uiState.update {
+                            it.copy(
+                                shortIntro = simpleDesc.take(MAX_SHORT_INTRO_LENGTH),
+                                detailContent = content.take(MAX_DETAIL_LENGTH),
+                                aiDialogState = AiDialogState.Hidden
+                            )
+                        }
+                    }.onFailure {
+                        _uiState.update { it.copy(aiDialogState = AiDialogState.Failed) }
                     }
-                } else {
-                    _uiState.update { it.copy(aiDialogState = AiDialogState.Failed) }
-                }
             }
         }
 
@@ -270,74 +295,65 @@ class RecruitFormViewModel
             onComplete()
         }
 
-        /** 새 모집 글을 OPEN 상태로 등록한다. */
+        /** 새 모집 글을 등록한다. */
         private fun createPost() {
             val state = _uiState.value
-            val currentUser = sessionRepository.currentUser.value ?: return
             val maxParticipants = state.maxParticipants ?: return
             val onCampus = state.onCampus ?: return
-            val category = state.category ?: return
-            val topic = state.topic ?: return
+            if (state.categories.isEmpty() || state.topics.isEmpty()) return
             val startDate = state.startDate ?: return
             val endDate = state.endDate ?: return
 
-            val post =
-                RecruitPost(
-                    id = UUID.randomUUID().toString(),
-                    title = state.title,
-                    authorId = currentUser.id,
-                    authorNickname = currentUser.nickname,
-                    authorExperience = currentUser.experience,
-                    onCampus = onCampus,
-                    category = category,
-                    topic = topic,
-                    startDate = startDate,
-                    endDate = endDate,
-                    maxParticipants = maxParticipants,
-                    currentParticipants = 0,
-                    shortIntro = state.shortIntro,
-                    detailContent = state.detailContent,
-                    status = RecruitStatus.OPEN,
-                    createdAt = LocalDateTime.now()
-                )
-
             viewModelScope.launch {
-                recruitRepository.createPost(post).onSuccess {
-                    _uiState.update { it.copy(isCompleteDialogVisible = true) }
-                }
+                recruitRepository
+                    .createPost(
+                        title = state.title,
+                        maxParticipants = maxParticipants,
+                        onCampus = onCampus,
+                        categoryIds = state.categories.map { it.id },
+                        topicIds = state.topics.map { it.id },
+                        startDate = startDate,
+                        endDate = endDate,
+                        shortIntro = state.shortIntro,
+                        detailContent = state.detailContent
+                    ).onSuccess {
+                        _uiState.update { it.copy(isCompleteDialogVisible = true) }
+                    }
             }
         }
 
         /** 기존 모집 글의 사용자 입력 항목만 바꿔서 저장한다. */
         private fun updatePost(onComplete: () -> Unit) {
             val state = _uiState.value
-            val original = existingPost ?: return
+            val targetPostId = postId ?: return
             val maxParticipants = state.maxParticipants ?: return
             val onCampus = state.onCampus ?: return
-            val category = state.category ?: return
-            val topic = state.topic ?: return
+            if (state.categories.isEmpty() || state.topics.isEmpty()) return
             val startDate = state.startDate ?: return
             val endDate = state.endDate ?: return
 
-            val updated =
-                original.copy(
-                    title = state.title,
-                    onCampus = onCampus,
-                    category = category,
-                    topic = topic,
-                    startDate = startDate,
-                    endDate = endDate,
-                    maxParticipants = maxParticipants,
-                    shortIntro = state.shortIntro,
-                    detailContent = state.detailContent
-                )
-
             viewModelScope.launch {
-                recruitRepository.updatePost(updated).onSuccess {
-                    existingPost = updated
-                    _events.send(RecruitUiEvent.ShowToast(R.string.recruit_form_toast_edit_complete))
-                    onComplete()
-                }
+                recruitRepository
+                    .updatePost(
+                        postId = targetPostId,
+                        title = state.title,
+                        maxParticipants = maxParticipants,
+                        onCampus = onCampus,
+                        categoryIds = state.categories.map { it.id },
+                        topicIds = state.topics.map { it.id },
+                        startDate = startDate,
+                        endDate = endDate,
+                        shortIntro = state.shortIntro,
+                        detailContent = state.detailContent
+                    ).onSuccess {
+                        _events.send(RecruitUiEvent.ShowToast(R.string.recruit_form_toast_edit_complete))
+                        onComplete()
+                    }
             }
+        }
+
+        /** 1회성 이벤트를 발행한다. */
+        private fun emitEvent(event: RecruitUiEvent) {
+            viewModelScope.launch { _events.send(event) }
         }
     }

@@ -8,5 +8,5 @@ enum class ScheduleRepeatType {
     DAILY,
     WEEKLY,
     MONTHLY,
-    YEARLY,
+    YEARLY
 }

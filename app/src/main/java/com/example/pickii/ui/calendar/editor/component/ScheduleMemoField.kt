@@ -20,12 +20,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.ui.theme.PickiiGray600
+import com.example.pickii.ui.theme.PickiiGrayMedium
+import com.example.pickii.ui.theme.PickiiInk
 
 private val MemoFieldBackgroundColor = Color(0xFFFFFFFF)
-private val MemoLabelColor = Color(0xFF777777)
-private val MemoTextColor = Color(0xFF1B1B1B)
-private val MemoPlaceholderColor = Color(0xFFAAAAAA)
-private val MemoCursorColor = Color(0xFF1B1B1B)
+private val MemoLabelColor = PickiiGray600
+private val MemoTextColor = PickiiInk
+private val MemoPlaceholderColor = PickiiGrayMedium
+private val MemoCursorColor = PickiiInk
 
 /**
  * 일정 메모 입력 영역이다.
@@ -34,55 +37,57 @@ private val MemoCursorColor = Color(0xFF1B1B1B)
 fun ScheduleMemoField(
     memo: String,
     onMemoChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MemoFieldBackgroundColor,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    color = MemoFieldBackgroundColor,
+                    shape = RoundedCornerShape(18.dp)
+                ).padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp
+                )
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "▤",
                 color = MemoLabelColor,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(
-                modifier = Modifier.width(8.dp),
+                modifier = Modifier.width(8.dp)
             )
 
             Text(
                 text = "메모",
                 color = MemoLabelColor,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
 
         BasicTextField(
             value = memo,
             onValueChange = onMemoChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 110.dp)
-                .padding(top = 14.dp),
-            textStyle = TextStyle(
-                color = MemoTextColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 23.sp,
-            ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 110.dp)
+                    .padding(top = 14.dp),
+            textStyle =
+                TextStyle(
+                    color = MemoTextColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 23.sp
+                ),
             cursorBrush = SolidColor(MemoCursorColor),
             singleLine = false,
             decorationBox = { innerTextField ->
@@ -91,12 +96,12 @@ fun ScheduleMemoField(
                         text = "메모를 입력해주세요.",
                         color = MemoPlaceholderColor,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Medium
                     )
                 }
 
                 innerTextField()
-            },
+            }
         )
     }
 }
