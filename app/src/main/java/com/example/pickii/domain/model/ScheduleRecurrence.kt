@@ -1,8 +1,10 @@
 package com.example.pickii.domain.model
 
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.minus
 
 /**
  * 반복 설정을 고려해 [date]가 [startDate]~[endDate] 원본 일정의 반복 발생 범위에 포함되는지 확인한다.
@@ -18,16 +20,16 @@ fun scheduleRecurrenceIncludesDate(
     repeatWeekdays: Set<DayOfWeek>
 ): Boolean {
     if (repeatType == ScheduleRepeatType.NONE) {
-        return !date.isBefore(startDate) && !date.isAfter(endDate)
+        return date >= startDate && date <= endDate
     }
 
-    val durationDays = ChronoUnit.DAYS.between(startDate, endDate)
+    val durationDays = startDate.daysUntil(endDate)
     val effectiveWeekdays = repeatWeekdays.ifEmpty { setOf(startDate.dayOfWeek) }
 
     for (offset in 0..durationDays) {
-        val occurrenceStart = date.minusDays(offset)
+        val occurrenceStart = date.minus(offset, DateTimeUnit.DAY)
 
-        if (occurrenceStart.isBefore(startDate)) {
+        if (occurrenceStart < startDate) {
             continue
         }
 
@@ -39,10 +41,10 @@ fun scheduleRecurrenceIncludesDate(
 
                 ScheduleRepeatType.WEEKLY -> occurrenceStart.dayOfWeek in effectiveWeekdays
 
-                ScheduleRepeatType.MONTHLY -> occurrenceStart.dayOfMonth == startDate.dayOfMonth
+                ScheduleRepeatType.MONTHLY -> occurrenceStart.day == startDate.day
 
                 ScheduleRepeatType.YEARLY ->
-                    occurrenceStart.dayOfMonth == startDate.dayOfMonth &&
+                    occurrenceStart.day == startDate.day &&
                         occurrenceStart.month == startDate.month
             }
 

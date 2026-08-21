@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /** 홈 화면 목록 카드에 표시되는 모집 글 요약(`GET /recruits` 목록 항목과 1:1 대응). */
 data class RecruitPostSummary(

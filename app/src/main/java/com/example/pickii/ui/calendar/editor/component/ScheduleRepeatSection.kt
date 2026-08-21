@@ -26,7 +26,7 @@ import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.ui.theme.PickiiGray600
 import com.example.pickii.ui.theme.PickiiGrayMedium
 import com.example.pickii.ui.theme.PickiiInk
-import java.time.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 
 private val RepeatBackgroundColor = Color(0xFFFFFFFF)
 private val RepeatLabelColor = PickiiGray600

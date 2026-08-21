@@ -5,7 +5,7 @@ import com.example.pickii.domain.model.ProjectCreationResult
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPage
 import com.example.pickii.domain.model.RecruitPost
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 /** 모집 글, 댓글, 스크랩, 지원, AI 초안 생성을 담당한다. */
 interface RecruitRepository {

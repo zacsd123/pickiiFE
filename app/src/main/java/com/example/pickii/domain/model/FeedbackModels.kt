@@ -1,7 +1,7 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 /** 내가 참여한 종료 프로젝트 하나의 상호평가 진행 현황(4-11). */
 data class FeedbackProject(

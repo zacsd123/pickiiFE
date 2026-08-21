@@ -777,7 +777,7 @@ private fun CommentRow(
                     modifier = Modifier.clickable { onAuthorClick(comment) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = comment.createdAt.toLocalDate().toDisplayString(), color = PickiiTextGray, fontSize = 11.sp)
+                Text(text = comment.createdAt.date.toDisplayString(), color = PickiiTextGray, fontSize = 11.sp)
             }
 
             Spacer(modifier = Modifier.height(6.dp))

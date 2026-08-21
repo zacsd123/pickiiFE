@@ -1,7 +1,7 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 /**
  * 모집 글 상세 하나를 표현하는 모델(`GET /recruits/{id}` 1:1 대응).

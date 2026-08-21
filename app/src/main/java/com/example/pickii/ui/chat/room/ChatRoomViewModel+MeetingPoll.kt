@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.example.pickii.ui.chat
 
 import androidx.lifecycle.viewModelScope
@@ -8,27 +10,42 @@ import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.toDisplayString
+import com.example.pickii.util.today
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.YearMonth
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.UtcOffset
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.atTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 private const val ERROR_CODE_UNANSWERED_EXISTS = "UNANSWERED_EXISTS"
 
-private val MeetingTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val MeetingTimeFormatter =
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
+
+private fun currentYearMonth(): YearMonth = today().let { YearMonth(it.year, it.month) }
 
 /** 확정된 팀 일정(회의) 목록을 이번 달 기준으로 불러온다(7-15). 개인 채팅방(projectId 없음)은 건너뛴다. */
 internal fun ChatRoomViewModel.loadMeetings() {
     val projectId = _uiState.value.projectId ?: return
     viewModelScope.launch {
         meetingPollRepository
-            .getTeamSchedules(projectId, YearMonth.now())
+            .getTeamSchedules(projectId, currentYearMonth())
             .onSuccess { schedules ->
                 _uiState.update { it.copy(meetings = schedules.map { schedule -> schedule.toUiModel() }) }
             }
@@ -128,8 +145,8 @@ internal fun ChatRoomViewModel.onAcknowledgeMeetingNotice(pollId: Long) {
  */
 internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
     viewModelScope.launch {
-        val now = YearMonth.now()
-        (0..2).forEach { offset -> calendarRepository.loadSchedules(now.plusMonths(offset.toLong())) }
+        val now = currentYearMonth()
+        (0..2).forEach { offset -> calendarRepository.loadSchedules(now.plus(offset, DateTimeUnit.MONTH)) }
         _uiState.update { it.copy(myCalendarSchedules = calendarRepository.schedules.value) }
     }
 }
@@ -140,8 +157,8 @@ internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
  */
 internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfirmedUiModel) {
     if (confirmed.scheduleId in _uiState.value.savedMeetingScheduleIds) return
-    val start = Instant.ofEpochMilli(confirmed.slotStartMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
-    val end = Instant.ofEpochMilli(confirmed.slotEndMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val start = Instant.fromEpochMilliseconds(confirmed.slotStartMillis).toLocalDateTime(TimeZone.currentSystemDefault())
+    val end = Instant.fromEpochMilliseconds(confirmed.slotEndMillis).toLocalDateTime(TimeZone.currentSystemDefault())
 
     viewModelScope.launch {
         calendarRepository
@@ -150,10 +167,10 @@ internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfi
                     id = 0L,
                     title = confirmed.meetingTitle,
                     categoryId = _uiState.value.selectedProjectCategoryId,
-                    startDate = start.toLocalDate(),
-                    endDate = end.toLocalDate(),
-                    startTime = start.toLocalTime(),
-                    endTime = end.toLocalTime()
+                    startDate = start.date,
+                    endDate = end.date,
+                    startTime = start.time,
+                    endTime = end.time
                 )
             ).onSuccess {
                 _uiState.update {
@@ -397,8 +414,8 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
                 val directMeetingContent =
                     encodeDirectMeetingMessage(
                         title = title,
-                        slotStartMillis = LocalDateTime.of(date, startTime).toEpochMillis(),
-                        slotEndMillis = LocalDateTime.of(date, endTime).toEpochMillis(),
+                        slotStartMillis = date.atTime(startTime).toEpochMillis(),
+                        slotEndMillis = date.atTime(endTime).toEpochMillis(),
                         scheduleId = scheduleId
                     )
                 chatStompClient.sendMessage(roomId, PublishChatMessage(type = "TEXT", message = directMeetingContent))
@@ -420,10 +437,11 @@ private fun TeamSchedule.toUiModel(): ManagedMeetingUiModel =
     )
 
 /** 밀리초(날짜 선택기 결과)를 기기 시간대 기준 [LocalDate]로 바꾼다. */
-private fun Long.toLocalDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+private fun Long.toLocalDate(): LocalDate =
+    Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault()).date
 
 /** 서버가 내려준 [LocalDateTime](KST)을 카운트다운 계산용 epoch millis로 바꾼다. */
-private fun LocalDateTime.toEpochMillis(): Long = atOffset(ZoneOffset.ofHours(9)).toInstant().toEpochMilli()
+private fun LocalDateTime.toEpochMillis(): Long = toInstant(UtcOffset(hours = 9)).toEpochMilliseconds()
 
 /** 자정 기준 분(0~1439)을 [LocalTime]으로 바꾼다(회의 조율 탐색 시간대 입력값). */
-private fun Int.toLocalTimeOfDay(): LocalTime = LocalTime.of(this / 60, this % 60)
+private fun Int.toLocalTimeOfDay(): LocalTime = LocalTime(this / 60, this % 60)

@@ -9,8 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.time.LocalDateTime
+import com.example.pickii.util.nowDateTime
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toInstant
 import javax.inject.Inject
 
 /**
@@ -104,13 +107,14 @@ class NotificationViewModel
             )
     }
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 private fun LocalDateTime.toRelativeTimeText(): String {
-    val minutes = Duration.between(this, LocalDateTime.now()).toMinutes()
+    val minutes = (nowDateTime().toInstant(TimeZone.UTC) - this.toInstant(TimeZone.UTC)).inWholeMinutes
     return when {
         minutes < 1 -> "방금 전"
         minutes < 60 -> "${minutes}분 전"
         minutes < 60 * 24 -> "${minutes / 60}시간 전"
         minutes < 60 * 24 * 7 -> "${minutes / (60 * 24)}일 전"
-        else -> "%04d.%02d.%02d".format(year, monthValue, dayOfMonth)
+        else -> "%04d.%02d.%02d".format(year, month.number, day)
     }
 }

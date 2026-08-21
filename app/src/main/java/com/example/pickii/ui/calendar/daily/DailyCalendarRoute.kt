@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 /**
  * 일일 캘린더 화면과 ViewModel을 연결한다.

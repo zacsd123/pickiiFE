@@ -59,7 +59,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 
 /** 필드/카드 공통 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp

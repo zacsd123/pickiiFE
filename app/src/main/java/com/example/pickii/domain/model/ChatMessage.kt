@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /** 채팅 메시지 한 건(히스토리 조회 + WebSocket 실시간 수신 공용). */
 data class ChatMessage(

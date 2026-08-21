@@ -47,8 +47,10 @@ import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGray
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.ZoneOffset
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.util.Date
 import java.util.Locale
 
@@ -365,8 +367,9 @@ internal fun MeetingDateRangePickerDialog(
     val selectableDates =
         remember {
             object : SelectableDates {
+                @OptIn(ExperimentalTime::class)
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    val candidate = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate()
+                    val candidate = Instant.fromEpochMilliseconds(utcTimeMillis).toLocalDateTime(TimeZone.UTC).date
                     return latestRegisteredSchedules.none { it.includesDate(candidate) }
                 }
             }

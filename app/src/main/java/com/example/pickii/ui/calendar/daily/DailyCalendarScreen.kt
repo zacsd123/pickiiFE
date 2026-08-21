@@ -26,8 +26,8 @@ import com.example.pickii.ui.calendar.daily.component.DailyCalendarHeader
 import com.example.pickii.ui.calendar.daily.component.DailyScheduleBlock
 import com.example.pickii.ui.calendar.daily.component.DailyTimeLabel
 import com.example.pickii.ui.calendar.daily.component.DailyTimeLine
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 private val ScreenBackgroundColor = Color(0xFFFFFFFF)
 
@@ -278,31 +278,31 @@ private fun DailyCalendarScreenPreview() {
     DailyCalendarScreen(
         uiState =
             DailyCalendarUiState(
-                selectedDate = LocalDate.of(2026, 7, 4),
+                selectedDate = LocalDate(2026, 7, 4),
                 schedules =
                     listOf(
                         DailyScheduleUiModel(
                             id = 1L,
                             title = "일정1",
-                            date = LocalDate.of(2026, 7, 4),
-                            startTime = LocalTime.of(1, 0),
-                            endTime = LocalTime.of(2, 0),
+                            date = LocalDate(2026, 7, 4),
+                            startTime = LocalTime(1, 0),
+                            endTime = LocalTime(2, 0),
                             colorType = ScheduleColorType.RED
                         ),
                         DailyScheduleUiModel(
                             id = 2L,
                             title = "일정2",
-                            date = LocalDate.of(2026, 7, 4),
-                            startTime = LocalTime.of(6, 0),
-                            endTime = LocalTime.of(8, 0),
+                            date = LocalDate(2026, 7, 4),
+                            startTime = LocalTime(6, 0),
+                            endTime = LocalTime(8, 0),
                             colorType = ScheduleColorType.GREEN
                         ),
                         DailyScheduleUiModel(
                             id = 3L,
                             title = "팀 회의",
-                            date = LocalDate.of(2026, 7, 4),
-                            startTime = LocalTime.of(13, 30),
-                            endTime = LocalTime.of(15, 0),
+                            date = LocalDate(2026, 7, 4),
+                            startTime = LocalTime(13, 30),
+                            endTime = LocalTime(15, 0),
                             colorType = ScheduleColorType.BLUE
                         )
                     )

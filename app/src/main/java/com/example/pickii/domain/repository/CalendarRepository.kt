@@ -4,7 +4,7 @@ import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.domain.model.ScheduleColorType
 import kotlinx.coroutines.flow.StateFlow
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 
 /**
  * 캘린더 일정 카테고리(7-1~7-4)와 개인 일정(7-5~7-9)을 관리하는 저장소 인터페이스다.

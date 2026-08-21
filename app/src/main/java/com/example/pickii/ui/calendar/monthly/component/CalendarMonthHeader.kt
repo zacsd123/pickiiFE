@@ -21,12 +21,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.theme.PickiiBlackSoft
-import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.Locale
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.format
+import kotlinx.datetime.format.MonthNames
 
 private val CalendarTextColor = PickiiBlackSoft
 private val CalendarYearColor = Color(0xFF7D7D70)
+
+private val MonthNameFormat = LocalDate.Format { monthName(MonthNames.ENGLISH_FULL) }
 
 /**
  * 월간 캘린더 상단의 연도, 월 이름,
@@ -41,11 +44,7 @@ fun CalendarMonthHeader(
     onNextMonthClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val monthName =
-        displayedYearMonth.month.getDisplayName(
-            TextStyle.FULL,
-            Locale.ENGLISH
-        )
+    val monthName = displayedYearMonth.firstDay.format(MonthNameFormat)
 
     Column(
         modifier = modifier.fillMaxWidth()
@@ -150,7 +149,7 @@ private fun CalendarMonthSelector(
 @Composable
 private fun CalendarMonthHeaderPreview() {
     CalendarMonthHeader(
-        displayedYearMonth = YearMonth.of(2026, 12),
+        displayedYearMonth = YearMonth(2026, 12),
         onPreviousMonthClick = {},
         onNextMonthClick = {},
         modifier =

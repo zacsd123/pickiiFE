@@ -33,9 +33,10 @@ import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.theme.PickiiInk
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
 
 private val MonthlyCalendarBackgroundColor = Color(0xFFF9FCA8)
 private val CalendarContainerColor = Color(0xFFFFFFFF)
@@ -46,10 +47,13 @@ private val ActionButtonColor = PickiiInk
 private val ActionButtonTextColor = Color(0xFFFFFFFF)
 
 private val SelectedDateFormatter =
-    DateTimeFormatter.ofPattern(
-        "M월 d일",
-        Locale.KOREAN
-    )
+    LocalDate.Format {
+        monthNumber(padding = Padding.NONE)
+        char('월')
+        char(' ')
+        day(padding = Padding.NONE)
+        char('일')
+    }
 
 /**
  * 월간 캘린더 화면을 표시한다.

@@ -1,6 +1,6 @@
 package com.example.pickii.ui.common.entrydraft
 
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 import java.util.UUID
 
 /** "사용 가능 Skill & Tool" 항목 하나의 입력 중 상태. [level]은 1(하)~3(상). */

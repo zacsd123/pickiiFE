@@ -1,6 +1,6 @@
 package com.example.pickii.ui.chat
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /**
  * 채팅 메시지 화면 표시 모델이다.

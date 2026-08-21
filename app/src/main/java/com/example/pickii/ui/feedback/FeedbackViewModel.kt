@@ -18,12 +18,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
 import javax.inject.Inject
 
 private const val ERROR_CODE_ALREADY_EVALUATED = "ALREADY_EVALUATED"
-private val FeedbackDateFormatter = DateTimeFormatter.ofPattern("M월 d일", Locale.KOREAN)
+private val FeedbackDateFormatter =
+    LocalDate.Format {
+        monthNumber(padding = Padding.NONE)
+        char('월')
+        char(' ')
+        day(padding = Padding.NONE)
+        char('일')
+    }
 
 @HiltViewModel
 class FeedbackViewModel

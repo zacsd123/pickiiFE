@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.common.toComposeColor
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 /**
  * 한 주에 포함된 여러 날짜 일정 막대를 표시한다.

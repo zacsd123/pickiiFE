@@ -1,9 +1,9 @@
 package com.example.pickii.ui.calendar.editor
 
 import com.example.pickii.domain.model.ScheduleRepeatType
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 /**
  * 일정 등록 화면에서 발생하는 사용자 동작이다.

@@ -1,8 +1,8 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 
 /** 회의 일정 조율(Meeting Poll)의 진행 상태(7-C). */
 enum class MeetingPollStatus {

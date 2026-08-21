@@ -14,16 +14,24 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import javax.inject.Inject
 
 private val ScheduleTimeFormatter =
-    DateTimeFormatter.ofPattern(
-        "HH:mm"
-    )
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /**
  * 월간 캘린더 화면의 상태와 사용자 동작을 관리한다.
@@ -118,11 +126,11 @@ class MonthlyCalendarViewModel
          * 이전 달로 이동한다.
          */
         fun moveToPreviousMonth() {
-            val previousMonth = _uiState.value.displayedYearMonth.minusMonths(1)
+            val previousMonth = _uiState.value.displayedYearMonth.minus(1, DateTimeUnit.MONTH)
             _uiState.update { currentState ->
                 currentState.copy(
                     displayedYearMonth = previousMonth,
-                    selectedDate = previousMonth.atDay(1),
+                    selectedDate = previousMonth.firstDay,
                     expandedScheduleId = null
                 )
             }
@@ -133,11 +141,11 @@ class MonthlyCalendarViewModel
          * 다음 달로 이동한다.
          */
         fun moveToNextMonth() {
-            val nextMonth = _uiState.value.displayedYearMonth.plusMonths(1)
+            val nextMonth = _uiState.value.displayedYearMonth.plus(1, DateTimeUnit.MONTH)
             _uiState.update { currentState ->
                 currentState.copy(
                     displayedYearMonth = nextMonth,
-                    selectedDate = nextMonth.atDay(1),
+                    selectedDate = nextMonth.firstDay,
                     expandedScheduleId = null
                 )
             }
@@ -225,7 +233,7 @@ private fun createRepeatText(
                 val weekdayText =
                     repeatWeekdays
                         .sortedBy { dayOfWeek ->
-                            dayOfWeek.value
+                            dayOfWeek.isoDayNumber
                         }.joinToString(", ") { dayOfWeek ->
                             dayOfWeek.toKoreanShortName()
                         }

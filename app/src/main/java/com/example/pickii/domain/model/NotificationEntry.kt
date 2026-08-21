@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /** 알림 한 건(9-1). */
 data class NotificationEntry(

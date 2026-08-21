@@ -21,7 +21,7 @@ import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.serialization.json.Json
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
 

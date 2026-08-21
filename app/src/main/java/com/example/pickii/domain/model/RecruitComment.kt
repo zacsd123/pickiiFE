@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /**
  * 공고 상세의 댓글 또는 답글 하나.
