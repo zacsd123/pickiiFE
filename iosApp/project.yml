@@ -1,6 +1,10 @@
 name: iosApp
 options:
   bundleIdPrefix: com.example.pickii
+packages:
+  KakaoOpenSDK:
+    url: https://github.com/kakao/kakao-ios-sdk
+    from: 2.28.0
 targets:
   iosApp:
     type: application
@@ -8,6 +12,16 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - iosApp
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
+    dependencies:
+      - package: KakaoOpenSDK
+        product: KakaoSDKCommon
+      - package: KakaoOpenSDK
+        product: KakaoSDKAuth
+      - package: KakaoOpenSDK
+        product: KakaoSDKUser
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.pickii.spike
@@ -21,6 +35,14 @@ targets:
       properties:
         UILaunchScreen: {}
         CADisableMinimumFrameDurationOnPhone: true
+        KakaoNativeAppKey: $(KAKAO_NATIVE_APP_KEY)
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - kakao$(KAKAO_NATIVE_APP_KEY)
+        LSApplicationQueriesSchemes:
+          - kakaokompassauth
+          - kakaolink
+          - kakaoplus
     preBuildScripts:
       - name: Compile Kotlin Framework
         script: |

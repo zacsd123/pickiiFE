@@ -51,7 +51,7 @@ Pickii/
 | Navigation Compose `2.9.8` | 화면 내비게이션 | 그대로 유지 (버전 확인) | androidx Navigation이 최근 멀티플랫폼 아티팩트를 지원 시작. Compose Multiplatform 1.10(2026-01)부터 Navigation 3 공식 지원도 추가됨 — 지금 버전이 멀티플랫폼 타깃을 인식 못 하면 Navigation 3로 갈아타는 것도 검토 |
 | `androidx.compose.material.icons.extended` | 아이콘 | **`compose.materialIconsExtended`** (JetBrains CMP 아티팩트) | 그룹이 다름, import 경로만 바뀜 |
 | Firebase Messaging (`firebase-bom`, `firebase-messaging`) + `google-services.json` | 푸시 알림 | **GitLive `firebase-kotlin-sdk`** (`dev.gitlive:firebase-messaging`) 또는 **KMPNotifier** | Firebase 공식 Android SDK는 iOS 미지원. iOS는 APNs 인증서 발급까지 별도로 필요 (Apple Developer 계정 필수) |
-| Kakao SDK (`v2-user`) | 카카오 로그인 | 공식 KMP 아티팩트 없음 → **직접 `expect/actual`** | androidMain은 기존 Kakao Android SDK 그대로, iosMain은 Kakao iOS SDK(CocoaPods 배포)를 Kotlin/Native cinterop으로 연결. **이 프로젝트에서 가장 불확실성이 큰 항목** — 별도 스파이크 필요 |
+| Kakao SDK (`v2-user`) | 카카오 로그인 | 공식 KMP 아티팩트 없음 → **인터페이스(commonMain) + Swift 구현체 주입(iosApp)** | ✅ **스파이크 완료(2026-08-22), 실제 로그인 통과.** 카카오 iOS SDK(2.28.0)가 SPM 전용 배포되는 순수 Swift 패키지라 Kotlin/Native cinterop(당초 검토한 방식)은 사실상 불가능함을 확인 — 대신 `KakaoAuthBridge` Kotlin 인터페이스를 정의하고 `iosApp`의 Swift(`KakaoAuthBridgeImpl.swift`)가 실제 SDK를 호출해 구현체를 주입하는 방식으로 연동, 시뮬레이터에서 실제 액세스 토큰 획득까지 확인함. androidMain은 기존 Kakao Android SDK 그대로 같은 인터페이스로 구현하면 됨. 상세 내용은 `PROGRESS_kmp-migration.md` 참고 |
 | `coreLibraryDesugaring` (java.time) | 날짜/시간 | **kotlinx-datetime** | desugaring은 Android 전용 트릭이라 iOS에서 안 통함. `LocalDate`/`LocalDateTime` 쓰는 `DateFormatter`, `DateTimeExt`, `ScheduleRecurrence` 등 전부 교체 |
 | `CameraCaptureUtil`, `GalleryPickerBottomSheet`, `PhotoSourceBottomSheet` | 카메라/갤러리 | KMP 미디어 피커 라이브러리(예: Peekaboo) 또는 자체 `expect/actual` | `ActivityResultContracts`·`ContentResolver` 등 Android 전용 API 사용 중 |
 | `res/values/strings.xml`, `res/drawable/*.xml`, `res/drawable/*.png` | 문자열·아이콘·이미지 리소스 | Compose Multiplatform 리소스 시스템 (`commonMain/composeResources/`) | 벡터 XML·PNG는 대체로 그대로 옮겨지고, `stringResource(R.string.x)` → `stringResource(Res.string.x)`로 호출부만 수정 |
@@ -79,7 +79,7 @@ Pickii/
 - [ ] `PickiiBottomNav`, `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 (Compose 테마는 대부분 그대로 포팅됨)
 - [ ] Mac에서 `iosApp` Xcode 프로젝트 생성, `ComposeUIViewController`로 진입점 연결
 - [ ] iOS 시뮬레이터에서 로그인 → 홈 화면까지 실제로 뜨는지 확인
-- [ ] 카카오 로그인 iOS 연동 스파이크 (여기서 막히면 이후 일정에 큰 영향 — 가장 먼저 검증)
+- [x] 카카오 로그인 iOS 연동 스파이크 — **통과(2026-08-22)**. 인터페이스+Swift 구현체 주입 방식으로 실제 로그인·토큰 획득까지 확인. 백엔드 연동/세션/토큰 갱신은 범위 밖, Phase 5에서 정식 연동 시 처리. 상세는 `PROGRESS_kmp-migration.md` 참고
 
 **이 단계가 끝나야 나머지 17개 화면 영역을 이식하는 데 드는 시간을 현실적으로 추정할 수 있습니다.**
 

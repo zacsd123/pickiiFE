@@ -1,5 +1,6 @@
-import SwiftUI
+import KakaoSDKAuth
 import Shared
+import SwiftUI
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
@@ -13,5 +14,10 @@ struct ContentView: View {
     var body: some View {
         ComposeView()
             .ignoresSafeArea(.all)
+            .onOpenURL { url in
+                if AuthApi.isKakaoTalkLoginUrl(url) {
+                    _ = AuthController.handleOpenUrl(url: url)
+                }
+            }
     }
 }
