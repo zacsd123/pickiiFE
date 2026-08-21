@@ -3,9 +3,9 @@ package com.example.pickii.domain.repository
 import com.example.pickii.domain.model.MeetingPollCreated
 import com.example.pickii.domain.model.MeetingPollDetail
 import com.example.pickii.domain.model.TeamSchedule
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.YearMonth
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.YearMonth
 
 /** `7-C 팀 일정(회의 일정 조율)` API(7-10~7-20)를 다룬다. */
 interface MeetingPollRepository {

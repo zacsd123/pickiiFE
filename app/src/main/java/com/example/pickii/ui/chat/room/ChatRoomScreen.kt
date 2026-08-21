@@ -70,8 +70,8 @@ import com.example.pickii.ui.theme.PickiiGray700
 import com.example.pickii.ui.theme.PickiiNavyTextDark
 import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.delay
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import androidx.compose.material3.Icon
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.size
@@ -389,7 +389,7 @@ private fun ChatRoomScreen(
                     val previousMessage = uiState.messages.getOrNull(index - 1)
 
                     if (previousMessage == null ||
-                        previousMessage.createdAt.toLocalDate() != message.createdAt.toLocalDate()
+                        previousMessage.createdAt.date != message.createdAt.date
                     ) {
                         ChatDateDivider(dateText = message.createdAt.toChatDateDividerText())
                     }

@@ -1,8 +1,8 @@
 package com.example.pickii.domain.model
 
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 /**
  * 캘린더에서 공통으로 사용하는 일정 모델이다.

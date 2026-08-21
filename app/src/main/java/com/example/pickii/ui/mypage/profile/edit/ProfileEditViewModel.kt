@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 import javax.inject.Inject
 
 /** 학교 검색 디바운스 간격(ms). */

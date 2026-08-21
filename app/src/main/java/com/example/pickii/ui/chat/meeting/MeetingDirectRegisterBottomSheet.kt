@@ -46,14 +46,33 @@ import com.example.pickii.ui.theme.PickiiGray500
 import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGray
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.example.pickii.util.today
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.DayOfWeekNames
+import kotlinx.datetime.format.char
+import kotlinx.datetime.number
 
 private const val DIRECT_REGISTER_TITLE_MAX_LENGTH = 20
-private val DirectRegisterDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd (E)", Locale.KOREAN)
-private val DirectRegisterTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val DirectRegisterDateFormatter =
+    LocalDate.Format {
+        year()
+        char('.')
+        monthNumber()
+        char('.')
+        day()
+        char(' ')
+        char('(')
+        dayOfWeek(DayOfWeekNames("월", "화", "수", "목", "금", "토", "일"))
+        char(')')
+    }
+private val DirectRegisterTimeFormatter =
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /**
  * 조율 없이 회의를 직접 등록하는 화면이다(7-16, 프로젝트장 전용).
@@ -68,11 +87,11 @@ fun MeetingDirectRegisterBottomSheet(
 ) {
     var title by remember { mutableStateOf("") }
     var date by remember { mutableStateOf<LocalDate?>(null) }
-    var startTime by remember { mutableStateOf(LocalTime.of(14, 0)) }
-    var endTime by remember { mutableStateOf(LocalTime.of(15, 0)) }
+    var startTime by remember { mutableStateOf(LocalTime(14, 0)) }
+    var endTime by remember { mutableStateOf(LocalTime(15, 0)) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val isFormValid = title.isNotBlank() && date != null && startTime.isBefore(endTime)
+    val isFormValid = title.isNotBlank() && date != null && startTime < endTime
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -175,7 +194,7 @@ private fun DirectRegisterDateBox(
     onDateChange: (LocalDate) -> Unit
 ) {
     val context = LocalContext.current
-    val base = date ?: LocalDate.now()
+    val base = date ?: today()
 
     Box(
         modifier =
@@ -187,10 +206,10 @@ private fun DirectRegisterDateBox(
                 .clickable {
                     DatePickerDialog(
                         context,
-                        { _, year, month, dayOfMonth -> onDateChange(LocalDate.of(year, month + 1, dayOfMonth)) },
+                        { _, year, month, dayOfMonth -> onDateChange(LocalDate(year, month + 1, dayOfMonth)) },
                         base.year,
-                        base.monthValue - 1,
-                        base.dayOfMonth
+                        base.month.number - 1,
+                        base.day
                     ).show()
                 }.padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
@@ -221,7 +240,7 @@ private fun DirectRegisterTimeBox(
                 .clickable {
                     TimePickerDialog(
                         context,
-                        { _, hourOfDay, minute -> onTimeChange(LocalTime.of(hourOfDay, minute)) },
+                        { _, hourOfDay, minute -> onTimeChange(LocalTime(hourOfDay, minute)) },
                         time.hour,
                         time.minute,
                         true

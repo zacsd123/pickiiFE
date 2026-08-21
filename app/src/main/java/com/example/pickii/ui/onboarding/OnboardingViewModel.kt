@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 import javax.inject.Inject
 
 /** 온보딩 전체 단계 수. */

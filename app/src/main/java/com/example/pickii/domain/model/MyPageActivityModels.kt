@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /** 지원 상태(4-4 지원 현황 조회, 4-8 지원자 수락/거절 기준). */
 enum class ApplyStatus {

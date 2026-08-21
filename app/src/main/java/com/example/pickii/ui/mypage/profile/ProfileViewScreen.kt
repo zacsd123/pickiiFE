@@ -69,7 +69,7 @@ import com.example.pickii.ui.theme.PickiiProfileCardGoldBright
 import com.example.pickii.ui.theme.PickiiProfileCardGoldMid
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
 
 private const val PROFILE_CARD_COUNT = 6
 

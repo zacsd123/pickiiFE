@@ -13,13 +13,17 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.YearMonth
+import com.example.pickii.util.today
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import javax.inject.Inject
 
-private val ALL_DAY_START = LocalTime.of(0, 0)
-private val ALL_DAY_END = LocalTime.of(23, 59)
+private val ALL_DAY_START = LocalTime(0, 0)
+private val ALL_DAY_END = LocalTime(23, 59)
 
 /**
  * 일일 캘린더 화면의 상태를 관리한다. [CalendarRepository]의 일정 캐시에서 선택한 날짜에 해당하는 것만 걸러 보여준다.
@@ -33,7 +37,7 @@ class DailyCalendarViewModel
         private val _uiState =
             MutableStateFlow(
                 DailyCalendarUiState(
-                    selectedDate = LocalDate.now()
+                    selectedDate = today()
                 )
             )
 
@@ -69,30 +73,30 @@ class DailyCalendarViewModel
         }
 
         private fun loadMonth(date: LocalDate) {
-            viewModelScope.launch { calendarRepository.loadSchedules(YearMonth.from(date)) }
+            viewModelScope.launch { calendarRepository.loadSchedules(YearMonth(date.year, date.month)) }
         }
 
         /**
          * 이전 날짜로 이동한다.
          */
         fun moveToPreviousDate() {
-            selectDate(_uiState.value.selectedDate.minusDays(1))
+            selectDate(_uiState.value.selectedDate.minus(1, DateTimeUnit.DAY))
         }
 
         /**
          * 다음 날짜로 이동한다.
          */
         fun moveToNextDate() {
-            selectDate(_uiState.value.selectedDate.plusDays(1))
+            selectDate(_uiState.value.selectedDate.plus(1, DateTimeUnit.DAY))
         }
 
         /**
          * 특정 날짜를 선택한다.
          */
         fun selectDate(date: LocalDate) {
-            val previousMonth = YearMonth.from(_uiState.value.selectedDate)
+            val previousMonth = YearMonth(_uiState.value.selectedDate.year, _uiState.value.selectedDate.month)
             _uiState.update { it.copy(selectedDate = date) }
-            if (YearMonth.from(date) != previousMonth) {
+            if (YearMonth(date.year, date.month) != previousMonth) {
                 loadMonth(date)
             }
         }

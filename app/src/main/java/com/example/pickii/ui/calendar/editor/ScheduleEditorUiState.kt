@@ -2,9 +2,9 @@ package com.example.pickii.ui.calendar.editor
 
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.domain.model.ScheduleRepeatType
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 /**
  * 일정 등록 화면의 상태다.
@@ -13,10 +13,10 @@ data class ScheduleEditorUiState(
     val title: String = "",
     val categories: List<ScheduleCategory> = emptyList(),
     val selectedCategoryId: Long? = null,
-    val startDate: LocalDate = LocalDate.of(2026, 7, 4),
-    val endDate: LocalDate = LocalDate.of(2026, 7, 4),
-    val startTime: LocalTime = LocalTime.of(9, 0),
-    val endTime: LocalTime = LocalTime.of(10, 0),
+    val startDate: LocalDate = LocalDate(2026, 7, 4),
+    val endDate: LocalDate = LocalDate(2026, 7, 4),
+    val startTime: LocalTime = LocalTime(9, 0),
+    val endTime: LocalTime = LocalTime(10, 0),
     val isAllDay: Boolean = false,
     val location: String = "",
     val repeatType: ScheduleRepeatType = ScheduleRepeatType.NONE,
@@ -36,14 +36,14 @@ data class ScheduleEditorUiState(
                 return false
             }
 
-            if (endDate.isBefore(startDate)) {
+            if (endDate < startDate) {
                 return false
             }
 
             if (
                 !isAllDay &&
                 startDate == endDate &&
-                !endTime.isAfter(startTime)
+                endTime <= startTime
             ) {
                 return false
             }

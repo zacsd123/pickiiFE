@@ -1,6 +1,6 @@
 package com.example.pickii.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 /** 공고 지원자 한 명(4-7). */
 data class ApplicantEntry(

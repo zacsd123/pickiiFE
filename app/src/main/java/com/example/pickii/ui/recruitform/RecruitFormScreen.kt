@@ -66,9 +66,13 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import com.example.pickii.util.toDisplayString
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atTime
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 /** 입력 필드/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
@@ -585,10 +589,12 @@ private fun DateBox(
 }
 
 /** 이 날짜의 UTC 자정 시각을 epoch millisecond로 변환한다([DatePicker] 초기값 용도). */
-private fun LocalDate.toEpochMillisUtc(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+@OptIn(ExperimentalTime::class)
+private fun LocalDate.toEpochMillisUtc(): Long = atTime(0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
 
 /** [DatePicker]가 반환한 epoch millisecond를 UTC 기준 날짜로 변환한다. */
-private fun Long.toLocalDateUtc(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
+@OptIn(ExperimentalTime::class)
+private fun Long.toLocalDateUtc(): LocalDate = Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.UTC).date
 
 /** AI 초안 생성을 안내하고 실행하는 배너. */
 @Composable

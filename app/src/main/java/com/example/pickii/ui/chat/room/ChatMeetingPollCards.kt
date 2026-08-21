@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.example.pickii.ui.chat
 
 import androidx.compose.animation.AnimatedVisibility
@@ -47,10 +49,16 @@ import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiGray650
 import com.example.pickii.ui.theme.PickiiInk
 import kotlinx.coroutines.delay
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.DayOfWeekNames
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * 회의 조율 하나(pollId 기준)의 진행 상황을 카드 하나(노란 라운드 박스)로 보여준다. 예전엔 등록공지/응답폼/
@@ -263,8 +271,24 @@ private fun MeetingCardButton(
     }
 }
 
-private val SlotDateFormatter = DateTimeFormatter.ofPattern("M월 d일 (E)", java.util.Locale.KOREAN)
-private val SlotTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val SlotDateFormatter =
+    LocalDate.Format {
+        monthNumber(padding = Padding.NONE)
+        char('월')
+        char(' ')
+        day(padding = Padding.NONE)
+        char('일')
+        char(' ')
+        char('(')
+        dayOfWeek(DayOfWeekNames("월", "화", "수", "목", "금", "토", "일"))
+        char(')')
+    }
+private val SlotTimeFormatter =
+    LocalDateTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /** 응답/집계 단계가 공유하는 선택 가능한 옵션 행("회의 가능한 날짜 없음" 등). [selected]면 어두운 배경으로
  * 강조한다 — 개별 시간 슬롯의 "가능" 체크([MeetingPollTimeChip])와는 다른 의미라 색을 구분했다. */
@@ -359,7 +383,7 @@ private fun ResponseBody(
     val showForm = !poll.myResponded
     val allSlotIds = poll.slots.map { it.slotId }.toSet()
     val isNoneAvailableSelected = allSlotIds.isNotEmpty() && mySelection.isEmpty()
-    val slotsByDate = poll.slots.groupBy { it.startAt.toLocalDate() }.toSortedMap()
+    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toSortedMap()
     var expandedDates by remember { mutableStateOf(setOf<LocalDate>()) }
 
     Text(text = "[회의 일정 조율]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -480,7 +504,7 @@ private fun AggregationBody(
     isCurrentUserLeader: Boolean,
     onConfirmClick: (Long) -> Unit
 ) {
-    val slotsByDate = poll.slots.groupBy { it.startAt.toLocalDate() }.toSortedMap()
+    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toSortedMap()
     var expandedDates by remember { mutableStateOf(setOf<LocalDate>()) }
     val canConfirm = isCurrentUserLeader
 
@@ -628,9 +652,9 @@ private fun ConfirmedBody(
     onSaveClick: () -> Unit
 ) {
     val start =
-        Instant.ofEpochMilli(meetingConfirmed.slotStartMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+        Instant.fromEpochMilliseconds(meetingConfirmed.slotStartMillis).toLocalDateTime(TimeZone.currentSystemDefault())
     val end =
-        Instant.ofEpochMilli(meetingConfirmed.slotEndMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+        Instant.fromEpochMilliseconds(meetingConfirmed.slotEndMillis).toLocalDateTime(TimeZone.currentSystemDefault())
 
     Text(text = "[회의 일정 확정]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
     Spacer(modifier = Modifier.height(12.dp))
@@ -654,7 +678,7 @@ private fun ConfirmedBody(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text =
-                    "${start.toLocalDate().format(SlotDateFormatter)} " +
+                    "${start.date.format(SlotDateFormatter)} " +
                         "${start.format(SlotTimeFormatter)}~${end.format(SlotTimeFormatter)}",
                 color = Color.White,
                 fontSize = 14.sp,

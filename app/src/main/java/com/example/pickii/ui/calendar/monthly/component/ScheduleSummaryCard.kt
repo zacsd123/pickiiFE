@@ -35,7 +35,9 @@ import com.example.pickii.ui.common.toComposeColor
 import com.example.pickii.ui.theme.PickiiInk
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 import androidx.compose.material3.Icon
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.size
@@ -53,9 +55,13 @@ private val EditButtonBackgroundColor = PickiiSurfaceGrayMuted
 private val EditButtonTextColor = Color(0xFF202330)
 
 private val ScheduleDateFormatter =
-    DateTimeFormatter.ofPattern(
-        "yyyy.MM.dd"
-    )
+    LocalDate.Format {
+        year()
+        char('.')
+        monthNumber()
+        char('.')
+        day()
+    }
 
 /**
  * 선택한 날짜에 포함된 일정 카드를 표시한다.

@@ -20,6 +20,8 @@ import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.RecruitUiEvent
+import com.example.pickii.util.nowDateTime
+import com.example.pickii.util.parseIsoOffsetDateTime
 import com.example.pickii.util.toDisplayString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -31,8 +33,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
+import kotlinx.datetime.LocalDateTime
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
@@ -539,11 +540,8 @@ class ChatRoomViewModel
                 content = if (isEncoded) "" else rawContent,
                 createdAt =
                     runCatching {
-                        OffsetDateTime
-                            .parse(
-                                createdAt
-                            ).toLocalDateTime()
-                    }.getOrDefault(LocalDateTime.now()),
+                        parseIsoOffsetDateTime(createdAt)
+                    }.getOrDefault(nowDateTime()),
                 isMine = senderId == currentMemberId,
                 isReadByCounterpart = false,
                 type =

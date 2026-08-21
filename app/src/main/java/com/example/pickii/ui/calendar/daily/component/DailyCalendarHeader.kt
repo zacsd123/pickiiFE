@@ -20,9 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.theme.PickiiInk
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
 
 private val HeaderBackgroundColor = Color(0xFFF7F7F7)
 private val HeaderTextColor = PickiiInk
@@ -32,10 +33,16 @@ private val AddButtonBackgroundColor = Color(0xFF6D8DF5)
 private val AddButtonTextColor = Color(0xFFFFFFFF)
 
 private val HeaderDateFormatter =
-    DateTimeFormatter.ofPattern(
-        "yyyy년 M월 d일",
-        Locale.KOREAN
-    )
+    LocalDate.Format {
+        year()
+        char('년')
+        char(' ')
+        monthNumber(padding = Padding.NONE)
+        char('월')
+        char(' ')
+        day(padding = Padding.NONE)
+        char('일')
+    }
 
 /**
  * 일일 캘린더 상단 날짜 이동 영역을 표시한다.
@@ -153,7 +160,7 @@ private fun HeaderSquareButton(
 @Composable
 private fun DailyCalendarHeaderPreview() {
     DailyCalendarHeader(
-        selectedDate = LocalDate.of(2026, 7, 4),
+        selectedDate = LocalDate(2026, 7, 4),
         onMenuClick = {},
         onPreviousDateClick = {},
         onNextDateClick = {},

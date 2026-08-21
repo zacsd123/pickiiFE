@@ -2,8 +2,8 @@ package com.example.pickii.domain.model
 
 import com.example.pickii.ui.chat.ChatRoomType
 import com.example.pickii.ui.chat.ProjectStatus
-import java.time.LocalDate
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 /**
  * 채팅방 목록 카드 한 건(`GET /chatrooms`).

@@ -3,9 +3,12 @@ package com.example.pickii.ui.calendar.monthly
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.model.scheduleRecurrenceIncludesDate
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
+import com.example.pickii.util.today
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
+
+private fun currentYearMonth(): YearMonth = today().let { YearMonth(it.year, it.month) }
 
 /**
  * 월간 캘린더 화면에 표시할 전체 상태다.
@@ -17,8 +20,8 @@ import java.time.YearMonth
  * @property notificationCount 상단 헤더에 표시할 미읽음 알림 수
  */
 data class MonthlyCalendarUiState(
-    val displayedYearMonth: YearMonth = YearMonth.now(),
-    val selectedDate: LocalDate = LocalDate.now(),
+    val displayedYearMonth: YearMonth = currentYearMonth(),
+    val selectedDate: LocalDate = today(),
     val schedules: List<MonthlyScheduleUiModel> = emptyList(),
     val expandedScheduleId: Long? = null,
     val notificationCount: Int = 0

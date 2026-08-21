@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.R
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
-import java.time.YearMonth
+import com.example.pickii.util.today
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.number
 
 /** 필드/다이얼로그 안 요소의 모서리 둥글기. */
 private val YearMonthFieldCornerRadius = 14.dp
@@ -65,7 +67,7 @@ fun YearMonthField(
 
     if (isDialogVisible) {
         YearMonthPickerDialog(
-            initial = value ?: YearMonth.now(),
+            initial = value ?: currentYearMonth(),
             onConfirm = {
                 onValueChange(it)
                 isDialogVisible = false
@@ -76,7 +78,9 @@ fun YearMonthField(
 }
 
 /** [YearMonth]를 "YYYY.MM" 형식으로 표시한다. */
-private fun YearMonth.toDisplayString(): String = "$year.${monthValue.toString().padStart(2, '0')}"
+private fun YearMonth.toDisplayString(): String = "$year.${month.number.toString().padStart(2, '0')}"
+
+private fun currentYearMonth(): YearMonth = today().let { YearMonth(it.year, it.month) }
 
 @Composable
 private fun YearMonthPickerDialog(
@@ -85,13 +89,13 @@ private fun YearMonthPickerDialog(
     onDismiss: () -> Unit
 ) {
     var year by remember { mutableIntStateOf(initial.year) }
-    var month by remember { mutableIntStateOf(initial.monthValue) }
-    val currentYear = YearMonth.now().year
+    var month by remember { mutableIntStateOf(initial.month.number) }
+    val currentYear = currentYearMonth().year
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onConfirm(YearMonth.of(year, month)) }) {
+            TextButton(onClick = { onConfirm(YearMonth(year, month)) }) {
                 Text(text = stringResource(R.string.common_button_confirm))
             }
         },

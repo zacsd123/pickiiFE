@@ -11,7 +11,8 @@ import com.example.pickii.ui.calendar.category.ScheduleCategoryRoute
 import com.example.pickii.ui.calendar.daily.DailyCalendarRoute
 import com.example.pickii.ui.calendar.editor.ScheduleEditorRoute
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarRoute
-import java.time.LocalDate
+import com.example.pickii.util.today
+import kotlinx.datetime.LocalDate
 
 private enum class CalendarScreenType {
     MONTHLY,
@@ -47,7 +48,7 @@ fun CalendarRoute(
 
     var selectedDateText by rememberSaveable {
         mutableStateOf(
-            LocalDate.now().toString()
+            today().toString()
         )
     }
 

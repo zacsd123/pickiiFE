@@ -6,6 +6,7 @@ import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -229,11 +230,11 @@ class ScheduleEditorViewModel
             }
         }
 
-        private fun updateStartDate(date: java.time.LocalDate) {
+        private fun updateStartDate(date: LocalDate) {
             _uiState.update { currentState ->
                 val adjustedEndDate =
                     if (
-                        currentState.endDate.isBefore(date)
+                        currentState.endDate < date
                     ) {
                         date
                     } else {
@@ -248,7 +249,7 @@ class ScheduleEditorViewModel
             }
         }
 
-        private fun updateEndDate(date: java.time.LocalDate) {
+        private fun updateEndDate(date: LocalDate) {
             _uiState.update { currentState ->
                 currentState.copy(
                     endDate = date,

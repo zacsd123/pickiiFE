@@ -1,14 +1,14 @@
 package com.example.pickii.ui.calendar.daily
 
 import com.example.pickii.domain.model.ScheduleColorType
-import java.time.LocalDate
-import java.time.LocalTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 /**
  * 일일 캘린더 화면의 상태를 나타낸다.
  */
 data class DailyCalendarUiState(
-    val selectedDate: LocalDate = LocalDate.of(2026, 7, 4),
+    val selectedDate: LocalDate = LocalDate(2026, 7, 4),
     val schedules: List<DailyScheduleUiModel> = emptyList()
 )
 
