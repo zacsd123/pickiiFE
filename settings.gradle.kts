@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Pickii"
 include(":app")
+include(":shared")
