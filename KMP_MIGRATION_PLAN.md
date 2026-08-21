@@ -41,11 +41,11 @@ Pickii/
 
 | 현재 (`libs.versions.toml`) | 용도 | KMP 대안 | 비고 |
 |---|---|---|---|
-| Hilt `2.60.1` + KSP | DI | **Koin** | Hilt는 어노테이션 프로세서 기반이라 Kotlin/Native(iOS) 미지원. Koin은 런타임 DI라 멀티플랫폼 공식 지원. `@HiltViewModel` 쓰는 화면 전부(거의 모든 화면) 수정 필요 |
-| Retrofit `2.11.0` + OkHttp `4.12.0` | REST API 통신 | **Ktor Client** | 가장 큰 작업. `data/remote/api/*ApiService.kt` 13개 + `data/repository/*ApiRepository.kt` 15개가 전부 대상 |
+| Hilt `2.60.1` + KSP | DI | **Koin `4.1.1`** | Hilt는 어노테이션 프로세서 기반이라 Kotlin/Native(iOS) 미지원. Koin은 런타임 DI라 멀티플랫폼 공식 지원. `@HiltViewModel` 쓰는 화면 전부(거의 모든 화면) 수정 필요. ⚠️ **버전 고정 필요**: 프로젝트 Kotlin `2.2.10`이 소비 가능한 klib ABI는 `<=2.2.0`인데 Koin `4.2.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 있어 못 읽음(2026-08-22 확인, `PROGRESS_kmp-migration.md` 참고). `4.1.1`이 마지막 호환 버전 |
+| Retrofit `2.11.0` + OkHttp `4.12.0` | REST API 통신 | **Ktor Client `3.3.3`** | 가장 큰 작업. `data/remote/api/*ApiService.kt` 13개 + `data/repository/*ApiRepository.kt` 15개가 전부 대상. ⚠️ **버전 고정 필요**: Ktor `3.4.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 `2.2.10`과 ABI 불일치(2026-08-22 확인). `3.3.3`이 마지막 호환 버전 |
 | `AuthInterceptor`, `TokenAuthenticator` (OkHttp) | 토큰 첨부·갱신 | Ktor `Auth` 플러그인 (Bearer + refresh 콜백) | 로직은 거의 그대로 옮겨 쓸 수 있음, API만 다름 |
 | `kotlinx.serialization` | JSON | 그대로 유지 | 이미 멀티플랫폼 라이브러리 |
-| Krossbow (`stomp-kxserialization-json` + `websocket-okhttp`) | 채팅 WebSocket(STOMP) | STOMP 부분은 그대로, `websocket-okhttp` → **`krossbow-websocket-ktor`** | Krossbow 자체는 이미 KMP 라이브러리. WebSocket 엔진만 OkHttp 전용에서 Ktor 엔진(Android=OkHttp, iOS=Darwin)으로 교체 |
+| Krossbow (`stomp-kxserialization-json` + `websocket-okhttp`) | 채팅 WebSocket(STOMP) | STOMP 부분은 그대로, `websocket-okhttp` → **`krossbow-websocket-ktor`** | Krossbow 자체는 이미 KMP 라이브러리. WebSocket 엔진만 OkHttp 전용에서 Ktor 엔진(Android=OkHttp, iOS=Darwin)으로 교체. ⚠️ **ABI 경고**: 최신 `10.0.0`의 iOS klib는 Kotlin `2.4.10` 컴파일러로 빌드돼 있어 현재 프로젝트 Kotlin `2.2.10`과 확실히 불일치(2026-08-22 확인). Koin/Ktor보다도 격차가 큼 — 채팅 이식 착수 전에 호환되는 구버전이 있는지 조사 필요, 없으면 대안 STOMP 라이브러리 검토 |
 | Coil3 (`coil-compose`, `coil-network-okhttp`) | 이미지 로딩 | 그대로 + **`coil-network-ktor3`** | 이미 `io.coil-kt.coil3` 그룹이라 멀티플랫폼 버전을 쓰고 있음. 네트워크 엔진만 교체 |
 | `androidx.datastore.preferences` | 토큰·설정 저장 | 그대로 유지 | 1.1.0부터 공식 멀티플랫폼 지원. `TokenStore` 등은 파일 경로 생성 부분만 `expect/actual` 필요 |
 | Navigation Compose `2.9.8` | 화면 내비게이션 | 그대로 유지 (버전 확인) | androidx Navigation이 최근 멀티플랫폼 아티팩트를 지원 시작. Compose Multiplatform 1.10(2026-01)부터 Navigation 3 공식 지원도 추가됨 — 지금 버전이 멀티플랫폼 타깃을 인식 못 하면 Navigation 3로 갈아타는 것도 검토 |
