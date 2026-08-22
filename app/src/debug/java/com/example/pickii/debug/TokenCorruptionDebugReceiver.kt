@@ -25,10 +25,15 @@ private const val TAG = "TokenCorruptionDebug"
  *
  * 실행 후 앱에서 아무 화면이나 새로고침해서(예: 홈 pull-to-refresh) API 호출을 한 번 유도하면 된다.
  */
-class TokenCorruptionDebugReceiver : BroadcastReceiver(), KoinComponent {
+class TokenCorruptionDebugReceiver :
+    BroadcastReceiver(),
+    KoinComponent {
     private val tokenStore: TokenStore by inject()
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent
+    ) {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {

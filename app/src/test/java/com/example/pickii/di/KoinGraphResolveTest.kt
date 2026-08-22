@@ -90,7 +90,10 @@ class KoinGraphResolveTest : KoinTest {
                         // `preferencesDataStore` 델리게이트는 프로퍼티 초기화 시점(=생성자 실행 중)에
                         // `context.applicationContext.filesDir`로 파일 경로를 계산한다 — Mockito
                         // 기본 mock은 이 두 메서드가 null을 반환해서 그대로 두면 NPE가 난다.
-                        val tempDir = kotlin.io.path.createTempDirectory(prefix = "koin-graph-resolve-test").toFile()
+                        val tempDir =
+                            kotlin.io.path
+                                .createTempDirectory(prefix = "koin-graph-resolve-test")
+                                .toFile()
                         Mockito.mock(Context::class.java).also { context ->
                             Mockito.`when`(context.applicationContext).thenReturn(context)
                             Mockito.`when`(context.filesDir).thenReturn(tempDir)
@@ -161,7 +164,11 @@ class KoinGraphResolveTest : KoinTest {
     @Test
     fun `인프라 싱글턴 8개 전부 진짜 싱글턴이다`() {
         assertSame(get<TokenStore>(), get<TokenStore>(), "TokenStore가 매번 새 인스턴스면 DataStore 인스턴스 중복 생성 위험")
-        assertSame(get<DeviceIdProvider>(), get<DeviceIdProvider>(), "DeviceIdProvider가 매번 새 인스턴스면 DataStore 인스턴스 중복 생성 위험")
+        assertSame(
+            get<DeviceIdProvider>(),
+            get<DeviceIdProvider>(),
+            "DeviceIdProvider가 매번 새 인스턴스면 DataStore 인스턴스 중복 생성 위험"
+        )
         assertSame(
             get<SavedMeetingScheduleStore>(),
             get<SavedMeetingScheduleStore>(),
@@ -172,7 +179,11 @@ class KoinGraphResolveTest : KoinTest {
             get<ActiveChatRoomTracker>(),
             "싱글턴이 아니면 FCM 알림 억제와 채팅방 진입 추적이 서로 다른 인스턴스를 봐서 어긋남"
         )
-        assertSame(get<AuthInterceptor>(), get<AuthInterceptor>(), "싱글턴이 아니어야 할 이유가 없음 — OkHttpClient가 한 인스턴스만 물고 있어야 함")
+        assertSame(
+            get<AuthInterceptor>(),
+            get<AuthInterceptor>(),
+            "싱글턴이 아니어야 할 이유가 없음 — OkHttpClient가 한 인스턴스만 물고 있어야 함"
+        )
         assertSame(
             get<TokenAuthenticator>(),
             get<TokenAuthenticator>(),
