@@ -14,7 +14,12 @@ private const val UNKNOWN_ERROR_CODE = "UNKNOWN_ERROR"
  *
  * 성공(2xx)이면 응답 바디를 그대로 담아 반환하고, 실패면 에러 바디를 [ApiErrorBody]로 파싱해
  * [ApiException]으로 감싼다. 네트워크 예외(IOException)도 동일하게 [Result.failure]로 감싼다.
+ *
+ * Ktor로 전환된 서비스는 `shared`의 동명 함수(파라미터가 `HttpResponse`인 오버로드)를 쓴다 —
+ * 두 함수가 같은 패키지(`com.example.pickii.util.network`)에 공존하고, 호출부 람다가 반환하는
+ * 타입(`Response<T>` vs `HttpResponse`)으로 자동 구분된다. Retrofit이 남아있는 동안만 유지.
  */
+@Deprecated("Ktor 전환 완료 후 제거. 새 코드는 shared의 safeApiCall(HttpResponse 오버로드)을 쓸 것.")
 suspend fun <T> safeApiCall(
     json: Json,
     call: suspend () -> Response<T>
@@ -36,6 +41,7 @@ suspend fun <T> safeApiCall(
     }
 
 /** 응답 본문이 없는(204 No Content) 엔드포인트를 위한 변형. 성공이면 [Unit]을 반환한다. */
+@Deprecated("Ktor 전환 완료 후 제거. 새 코드는 shared의 safeApiCallUnit(HttpResponse 오버로드)을 쓸 것.")
 suspend fun safeApiCallUnit(
     json: Json,
     call: suspend () -> Response<Unit>
@@ -50,9 +56,6 @@ suspend fun safeApiCallUnit(
     } catch (e: IOException) {
         Result.failure(e)
     }
-
-/** 문자열 id를 [Long]으로 변환하지 못했을 때 던질 예외. */
-fun invalidIdException(id: String) = IllegalArgumentException("잘못된 id: $id")
 
 private fun <T> Response<T>.toApiException(json: Json): ApiException {
     val errorBodyString = errorBody()?.string()
