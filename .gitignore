@@ -36,3 +36,6 @@ iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/*
 iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
 !iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 iosApp/Config/Secrets.xcconfig
+
+# Claude Code 로컬 세션 상태 (scheduled_tasks.lock 등), 프로젝트 코드 아님
+.claude/
