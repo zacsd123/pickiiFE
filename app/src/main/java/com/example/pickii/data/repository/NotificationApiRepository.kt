@@ -11,16 +11,12 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val NOTIFICATIONS_PAGE_SIZE = 50
 private const val DEVICE_PLATFORM = "ANDROID"
 
 /** `9-1`~`9-4`, `9-7` API로 [NotificationRepository]를 구현한다. */
-@Singleton
 class NotificationApiRepository
-    @Inject
     constructor(
         private val apiService: NotificationApiService,
         private val json: Json

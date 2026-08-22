@@ -4,20 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.repository.CalendarRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * 태그 관리 화면의 상태와 동작을 관리한다.
  */
-@HiltViewModel
 class ScheduleCategoryViewModel
-    @Inject
     constructor(
         private val calendarRepository: CalendarRepository
     ) : ViewModel() {

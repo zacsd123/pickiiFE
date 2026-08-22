@@ -6,16 +6,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.mypage.profile.ProfileViewScreenContent
+import org.koin.androidx.compose.koinViewModel
 
 /** 다른 회원의 프로필 조회 화면(10-1). 공고 작성자 닉네임 등에서 진입한다. */
 @Composable
 fun MemberProfileScreen(
     onBackClick: () -> Unit,
-    viewModel: MemberProfileViewModel = hiltViewModel()
+    viewModel: MemberProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

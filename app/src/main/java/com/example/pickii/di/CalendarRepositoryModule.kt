@@ -2,19 +2,10 @@ package com.example.pickii.di
 
 import com.example.pickii.data.repository.CalendarApiRepository
 import com.example.pickii.domain.repository.CalendarRepository
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.dsl.module
 
-/**
- * 캘린더 저장소 구현체를 주입한다.
- */
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class CalendarRepositoryModule {
-    @Binds
-    @Singleton
-    abstract fun bindCalendarRepository(calendarApiRepository: CalendarApiRepository): CalendarRepository
-}
+/** 캘린더 저장소 구현체를 주입하는 Koin 모듈 (Hilt `CalendarRepositoryModule`을 대체). */
+val calendarRepositoryModule =
+    module {
+        single<CalendarRepository> { CalendarApiRepository(apiService = get(), json = get()) }
+    }

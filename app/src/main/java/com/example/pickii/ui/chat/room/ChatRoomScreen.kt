@@ -53,7 +53,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -72,10 +71,7 @@ import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import androidx.compose.material3.Icon
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.size
-
+import org.koin.androidx.compose.koinViewModel
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
 private val InputBackgroundColor = Color(0xFFF1F2F5)
@@ -126,7 +122,7 @@ fun ChatRoomRoute(
     onLeaveChatRoom: () -> Unit,
     onNavigateToMemberProfile: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChatRoomViewModel = hiltViewModel()
+    viewModel: ChatRoomViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -315,7 +311,10 @@ private fun ChatRoomScreen(
 
             isTailAppend -> {
                 val appendedMessage = messages.last()
-                val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val lastVisibleIndex =
+                    listState.layoutInfo.visibleItemsInfo
+                        .lastOrNull()
+                        ?.index ?: 0
                 val wasNearBottom = messages.lastIndex - lastVisibleIndex <= NEAR_BOTTOM_THRESHOLD
                 if (appendedMessage.isMine || wasNearBottom) {
                     listState.animateScrollToItem(messages.lastIndex)
@@ -685,11 +684,12 @@ private fun ChatRoomHeader(
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit
 ) {
-    val displayTitle = if (roomType == ChatRoomType.DIRECT && personalChatMemberName.isNotBlank()) {
-        personalChatMemberName
-    } else {
-        roomTitle
-    }
+    val displayTitle =
+        if (roomType == ChatRoomType.DIRECT && personalChatMemberName.isNotBlank()) {
+            personalChatMemberName
+        } else {
+            roomTitle
+        }
     Column(
         modifier =
             Modifier
@@ -869,13 +869,15 @@ private fun ChatNotice(
             )
 
             Icon(
-                painter = painterResource(
-                    id = if (isExpanded) {
-                        R.drawable.ic_chevron_up
-                    } else {
-                        R.drawable.ic_chevron_down
-                    }
-                ),
+                painter =
+                    painterResource(
+                        id =
+                            if (isExpanded) {
+                                R.drawable.ic_chevron_up
+                            } else {
+                                R.drawable.ic_chevron_down
+                            }
+                    ),
                 contentDescription = if (isExpanded) "접기" else "펼치기",
                 tint = PickiiGray400,
                 modifier = Modifier.size(20.dp)

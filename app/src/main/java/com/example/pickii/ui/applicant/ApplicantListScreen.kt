@@ -47,12 +47,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
+import org.koin.androidx.compose.koinViewModel
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantCardColor = Color(0xFFFEFFF2)
@@ -82,7 +82,7 @@ fun ApplicantListScreen(
     onApplicantDetailClick: (Long) -> Unit,
     onProfileClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ApplicantListViewModel = hiltViewModel()
+    viewModel: ApplicantListViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

@@ -9,16 +9,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ApplicantRoute(
     onBackClick: () -> Unit,
     onNavigateToChatRoom: (roomId: String) -> Unit,
     onNavigateToMemberProfile: (memberId: String) -> Unit,
-    viewModel: ApplicantListViewModel = hiltViewModel()
+    viewModel: ApplicantListViewModel = koinViewModel()
 ) {
     var currentScreen by remember {
         mutableStateOf<ApplicantScreen>(

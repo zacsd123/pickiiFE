@@ -11,13 +11,9 @@ import com.example.pickii.domain.repository.AccountRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** `1. Authentication` 문서의 계정관리 API로 [AccountRepository]를 구현한다. */
-@Singleton
 class AccountApiRepository
-    @Inject
     constructor(
         private val authApiService: AuthApiService,
         private val json: Json

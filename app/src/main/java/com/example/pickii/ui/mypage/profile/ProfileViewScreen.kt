@@ -1,15 +1,7 @@
 package com.example.pickii.ui.mypage.profile
 
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.size
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.Icon
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,20 +28,26 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
@@ -61,7 +60,6 @@ import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
-import com.example.pickii.ui.common.SelectableChip
 import com.example.pickii.ui.mypage.profile.component.ProfileCardEmptyState
 import com.example.pickii.ui.mypage.profile.component.ProfileCardFrame
 import com.example.pickii.ui.mypage.profile.component.ProfileCardStack
@@ -70,6 +68,7 @@ import com.example.pickii.ui.theme.PickiiProfileCardGoldMid
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.koin.androidx.compose.koinViewModel
 
 private const val PROFILE_CARD_COUNT = 6
 
@@ -83,7 +82,7 @@ private const val PROFILE_CARD_COUNT = 6
 fun ProfileViewScreen(
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -399,9 +398,10 @@ private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(
-                id = getLinkIcon(link.linkName)
-            ),
+            painter =
+                painterResource(
+                    id = getLinkIcon(link.linkName)
+                ),
             contentDescription = link.linkName,
             tint = Color.Unspecified,
             modifier = Modifier.size(22.dp)
@@ -510,9 +510,7 @@ fun ProfileViewScreenContentPre() {
 }
 
 @Composable
-private fun ProfileTopicChip(
-    label: String
-) {
+private fun ProfileTopicChip(label: String) {
     Box(
         modifier =
             Modifier

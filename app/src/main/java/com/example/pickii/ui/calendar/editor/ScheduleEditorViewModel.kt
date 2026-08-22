@@ -5,21 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import kotlinx.datetime.LocalDate
 
 /**
  * 일정 등록 화면의 상태를 관리한다.
  */
-@HiltViewModel
 class ScheduleEditorViewModel
-    @Inject
     constructor(
         private val calendarRepository: CalendarRepository
     ) : ViewModel() {

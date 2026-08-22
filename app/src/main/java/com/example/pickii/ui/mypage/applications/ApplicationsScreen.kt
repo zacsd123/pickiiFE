@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.ApplyStatus
@@ -43,6 +42,7 @@ import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * 지원 현황 화면(16번). 내가 지원한 공고 목록, WAITING 상태만 취소 가능, ACCEPTED+채팅방 있으면 바로가기.
@@ -54,7 +54,7 @@ fun ApplicationsScreen(
     onBackClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onNavigateToChatRoom: (roomId: String) -> Unit,
-    viewModel: ApplicationsViewModel = hiltViewModel()
+    viewModel: ApplicationsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

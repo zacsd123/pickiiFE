@@ -21,12 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * 앱 진입 시 표시되는 스플래시 화면.
@@ -38,7 +38,7 @@ import com.example.pickii.ui.theme.PickiiYellowLight
 @Composable
 fun SplashScreen(
     onTimeout: () -> Unit = {},
-    viewModel: SplashViewModel = hiltViewModel()
+    viewModel: SplashViewModel = koinViewModel()
 ) {
     val isReadyToProceed by viewModel.isReadyToProceed.collectAsStateWithLifecycle()
 

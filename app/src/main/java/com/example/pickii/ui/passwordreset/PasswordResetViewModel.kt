@@ -5,13 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.EmailPurpose
 import com.example.pickii.domain.repository.SignupRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 비밀번호 규칙: 8~20자, 영문 대/소문자·숫자 각 1자 이상 포함(0.7 공통 Validation 규칙). */
 private val PASSWORD_REGEX = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,20}$")
@@ -58,9 +56,7 @@ data class PasswordResetUiState(
  * 이메일 인증(`purpose = PW_RESET`) 후 `SignupRepository.resetPassword`로 제출한다. 이메일 인증
  * 인프라는 회원가입 화면과 동일한 [SignupRepository]를 재사용한다.
  */
-@HiltViewModel
 class PasswordResetViewModel
-    @Inject
     constructor(
         private val signupRepository: SignupRepository
     ) : ViewModel() {

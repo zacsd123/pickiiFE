@@ -21,13 +21,9 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** `3. Recruit`, `4. User & Feedback` 문서의 마이페이지 활동내역 API로 [MyPageActivityRepository]를 구현한다. */
-@Singleton
 class MyPageActivityApiRepository
-    @Inject
     constructor(
         private val apiService: MyPageActivityApiService,
         private val json: Json

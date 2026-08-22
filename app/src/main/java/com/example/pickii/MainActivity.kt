@@ -37,7 +37,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -72,12 +71,11 @@ import com.example.pickii.ui.signup.SignupScreen
 import com.example.pickii.ui.splash.SplashScreen
 import com.example.pickii.ui.theme.PickiiTheme
 import com.example.pickii.ui.theme.PickiiYellowLight
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.androidx.compose.koinViewModel
 
 /** 화면 전환 페이드 애니메이션 길이(ms). 기본 전환 애니메이션이 무거운 화면(홈 등)과 겹치면 끊겨 보여서 가벼운 페이드로 대체한다. */
 private const val NAV_TRANSITION_DURATION_MS = 200
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private var notificationChatRoomId by mutableStateOf<Long?>(null)
     private var pendingNotificationTap by mutableStateOf<PendingNotificationTap?>(null)
@@ -197,7 +195,7 @@ private fun PickiiNavHost(
     var isChatTopLevel by remember { mutableStateOf(true) }
     var isMyPageTopLevel by remember { mutableStateOf(true) }
 
-    val mainNavigationViewModel: MainNavigationViewModel = hiltViewModel()
+    val mainNavigationViewModel: MainNavigationViewModel = koinViewModel()
     val isLoggedIn by mainNavigationViewModel.isLoggedIn.collectAsStateWithLifecycle()
     var showMyPageLoginPrompt by remember { mutableStateOf(false) }
     var showChatLoginPrompt by remember { mutableStateOf(false) }
@@ -290,7 +288,11 @@ private fun PickiiNavHost(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(
+                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                        )
+                    ),
             enterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
             exitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
             popEnterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },

@@ -13,13 +13,9 @@ import com.example.pickii.domain.repository.SignupRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** `1. Authentication` 문서의 이메일 인증/닉네임 중복확인/회원가입/비밀번호 재설정으로 [SignupRepository]를 구현한다. */
-@Singleton
 class SignupApiRepository
-    @Inject
     constructor(
         private val authApiService: AuthApiService,
         private val json: Json

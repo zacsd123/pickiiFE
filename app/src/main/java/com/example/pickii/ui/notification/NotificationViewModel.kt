@@ -4,24 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.NotificationEntry
 import com.example.pickii.domain.repository.NotificationRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.pickii.util.nowDateTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.example.pickii.util.nowDateTime
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
-import javax.inject.Inject
 
 /**
  * 알림 목록 조회(9-1), 읽음 처리(9-2, 9-3), 삭제(9-4)를 담당한다.
  */
-@HiltViewModel
 class NotificationViewModel
-    @Inject
     constructor(
         private val repository: NotificationRepository
     ) : ViewModel() {

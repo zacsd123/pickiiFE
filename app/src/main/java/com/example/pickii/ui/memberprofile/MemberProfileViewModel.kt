@@ -9,20 +9,16 @@ import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.ui.mypage.profile.ProfileViewUiState
 import com.example.pickii.ui.navigation.ARG_MEMBER_ID
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val ERROR_CODE_RESUME_NOT_FOUND = "RESUME_NOT_FOUND"
 
 /** 다른 회원의 프로필(10-1)을 조회한다. 공고 작성자 닉네임 클릭 등 앱 여러 곳에서 재사용한다. */
-@HiltViewModel
 class MemberProfileViewModel
-    @Inject
     constructor(
         savedStateHandle: SavedStateHandle,
         private val profileRepository: ProfileRepository,

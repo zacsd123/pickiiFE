@@ -23,7 +23,6 @@ import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.nowDateTime
 import com.example.pickii.util.parseIsoOffsetDateTime
 import com.example.pickii.util.toDisplayString
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,10 +32,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import kotlinx.datetime.LocalDateTime
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
 import com.example.pickii.domain.model.ChatMessage as DomainChatMessage
 
 private const val MESSAGE_PAGE_SIZE = 20
@@ -48,9 +45,7 @@ private const val ERROR_CODE_LEADER_CANNOT_LEAVE = "LEADER_CANNOT_LEAVE"
 /**
  * 채팅방의 메시지 및 사용자 동작 상태를 관리한다.
  */
-@HiltViewModel
 class ChatRoomViewModel
-    @Inject
     constructor(
         private val chatRepository: ChatRepository,
         internal val chatStompClient: ChatStompClient,
@@ -213,7 +208,9 @@ class ChatRoomViewModel
                         if (newMessage.type == ChatMessageType.MEETING_CONFIRMED && confirmed != null) {
                             // 확정 브로드캐스트는 새 메시지로 쌓지 않고 원래 등록공지 카드가 쓸 상태로만 흡수한다.
                             _uiState.update { state ->
-                                state.copy(confirmedMeetings = state.confirmedMeetings + (confirmed.pollId to confirmed))
+                                state.copy(
+                                    confirmedMeetings = state.confirmedMeetings + (confirmed.pollId to confirmed)
+                                )
                             }
                         } else {
                             _uiState.update { state ->

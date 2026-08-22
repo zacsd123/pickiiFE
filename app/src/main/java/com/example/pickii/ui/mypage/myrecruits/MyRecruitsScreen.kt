@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.MyRecruitSummary
@@ -46,6 +45,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBlue
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * 작성 공고 화면(17번). 내가 등록한 공고 목록과 지원자조회/수정/마감/추가모집/삭제 액션.
@@ -59,7 +59,7 @@ fun MyRecruitsScreen(
     onNotificationClick: () -> Unit,
     onNavigateToApplicantList: (postId: String) -> Unit,
     onNavigateToRecruitEdit: (postId: String) -> Unit,
-    viewModel: MyRecruitsViewModel = hiltViewModel()
+    viewModel: MyRecruitsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

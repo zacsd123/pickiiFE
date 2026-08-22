@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,7 +53,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -75,6 +73,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.calculateLevel
 import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.toFullDisplayString
+import org.koin.androidx.compose.koinViewModel
 
 /** 카드/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val CardCornerRadius = 20.dp
@@ -112,7 +111,7 @@ fun RecruitDetailScreen(
     onDeletedNavigateHome: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onNavigateToChatRoom: (roomId: Long) -> Unit = {},
-    viewModel: RecruitDetailViewModel = hiltViewModel()
+    viewModel: RecruitDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -483,7 +482,6 @@ private fun PostInfoCard(
     onReopenRecruitingClick: () -> Unit,
     onDeletePostClick: () -> Unit
 ) {
-
     val isClosed = post.status == RecruitStatus.CLOSED
 
     Column(
@@ -602,8 +600,7 @@ private fun PostInfoCard(
                         .clip(RoundedCornerShape(CardCornerRadius))
                         .background(
                             if (isClosed) PickiiFieldBackground else PickiiBlue
-                        )
-                        .then(
+                        ).then(
                             if (!isClosed) {
                                 Modifier.clickable(onClick = onApplyClick)
                             } else {

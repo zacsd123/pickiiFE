@@ -26,8 +26,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * `POST /auth/login`으로 실제 로그인을 수행하는 Repository.
@@ -38,9 +36,7 @@ import javax.inject.Singleton
 private const val DEFAULT_HAS_PROFILE = true
 private const val SOCIAL_PROVIDER_KAKAO = "KAKAO"
 
-@Singleton
 class RecruitAuthSessionRepository
-    @Inject
     constructor(
         private val authApiService: AuthApiService,
         private val tokenStore: TokenStore,

@@ -15,7 +15,6 @@ import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** "전달 메시지"에 입력할 수 있는 최대 글자 수. */
 private const val MAX_MESSAGE_LENGTH = 300
@@ -60,9 +58,7 @@ data class RecruitApplyUiState(
  * 공고 지원 화면의 상태를 보관하고, [RecruitRepository]/[SessionRepository]를 통해
  * 지원 메시지 작성, AI 초안 생성, 지원 등록을 처리한다.
  */
-@HiltViewModel
 class RecruitApplyViewModel
-    @Inject
     constructor(
         savedStateHandle: SavedStateHandle,
         private val recruitRepository: RecruitRepository,
@@ -198,8 +194,7 @@ class RecruitApplyViewModel
                         postId = post.id,
                         message = _uiState.value.message,
                         keywordIds = _uiState.value.selectedKeywordIds.toList()
-                    )
-                    .onSuccess {
+                    ).onSuccess {
                         _uiState.update { it.copy(isCompletionDialogVisible = true) }
                     }.onFailure { error ->
                         if (error is ApiException && error.code == ERROR_CODE_ALREADY_APPLIED) {
