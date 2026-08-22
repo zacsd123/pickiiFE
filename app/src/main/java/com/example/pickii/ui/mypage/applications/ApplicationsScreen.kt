@@ -189,11 +189,13 @@ private fun ApplyCard(
                     label = stringResource(R.string.mypage_applications_button_cancel),
                     onClick = onCancelClick
                 )
-            } else if (apply.chatRoomId != null) {
-                CardActionButton(
-                    label = stringResource(R.string.mypage_applications_button_chat),
-                    onClick = { onChatClick(apply.chatRoomId) }
-                )
+            } else {
+                apply.chatRoomId?.let { chatRoomId ->
+                    CardActionButton(
+                        label = stringResource(R.string.mypage_applications_button_chat),
+                        onClick = { onChatClick(chatRoomId) }
+                    )
+                }
             }
         }
     }
