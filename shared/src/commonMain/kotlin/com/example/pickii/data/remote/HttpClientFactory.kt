@@ -48,6 +48,16 @@ private val printlnLogger =
  * [AUTH_PATH_PREFIX]로 시작하는 요청(로그인/회원가입/비밀번호/토큰갱신 등)은 바디를 절대 찍지
  * 않고, `Authorization` 헤더는 항상 마스킹한다 — 기존 OkHttp 로깅은 이 두 가지를 전혀 하지
  * 않아서 디버그 빌드 로그캣에 비밀번호와 Bearer 토큰이 그대로 남았다(별도 이슈로 기록).
+ *
+ * `defaultRequest { }`에 `contentType(ContentType.Application.Json)`을 기본값으로 깔아둔다 —
+ * 개별 `Ktor*ApiService` 메서드가 바디를 넣으면서 `contentType()`을 빠뜨려도(실제로 이 사고가
+ * 났었다 — `KtorAuthApiService`의 모든 바디 있는 메서드가 처음엔 이걸 빠뜨렸다) 여전히
+ * `ContentNegotiation`이 직렬화 컨버터를 찾을 수 있다. 앞으로 90개 엔드포인트를 옮기면서 매번
+ * 사람이 기억해야 하는 구조로 두면 반드시 또 빠뜨리기 때문에 구조적으로 막았다. 바디 없는
+ * GET에도 이 헤더가 실리지만 서버는 통상 무시하고([HttpClientFactoryConfigurationTest]로 실측),
+ * `MultiPartFormDataContent` 같은 멀티파트 바디는 자기 자신의 Content-Type(예:
+ * `multipart/form-data; boundary=...`)으로 이 기본값을 덮어써서 나중에 이미지 업로드를 옮길 때도
+ * 문제가 없다(마찬가지로 실측 확인됨).
  */
 class HttpClientFactory(
     private val engine: HttpClientEngine,
@@ -60,6 +70,7 @@ class HttpClientFactory(
         HttpClient(engine) {
             defaultRequest {
                 url(baseUrl)
+                contentType(ContentType.Application.Json)
             }
             install(ContentNegotiation) {
                 json(json)
@@ -97,7 +108,6 @@ class HttpClientFactory(
                                 // 테스트 참고. Hilt→Koin 전환 때 순환 의존성을 lazy{}로 끊었던 것과
                                 // 같은 종류의 "안 보이지만 지우면 조용히 죽는" 지점이다.
                                 markAsRefreshTokenRequest()
-                                contentType(ContentType.Application.Json)
                                 setBody(TokenRefreshRequest(authSession.deviceId(), refreshToken))
                             }
 
