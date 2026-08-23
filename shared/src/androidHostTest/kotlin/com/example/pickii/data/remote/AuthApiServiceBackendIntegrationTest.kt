@@ -5,6 +5,7 @@ import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.LoginRequest
 import com.example.pickii.data.remote.dto.LoginResponseDto
+import com.example.pickii.data.remote.dto.SocialAccountDto
 import com.example.pickii.util.network.safeApiCall
 import kotlinx.coroutines.test.runTest
 import org.junit.Assume.assumeTrue
@@ -82,5 +83,59 @@ class AuthApiServiceBackendIntegrationTest {
             val exception = result.exceptionOrNull()
             assertIs<ApiException>(exception, "틀린 비밀번호인데 ApiException이 아닌 결과가 나옴: $result")
             assertTrue(exception.code.isNotBlank(), "에러 code가 비어있음")
+        }
+
+    /**
+     * 위 두 테스트는 로그인 자체가 인증 전 요청이라 `Authorization` 헤더가 없다 — `filter`(auth/ 제외)만
+     * 검증되고 `sanitizeHeader("Authorization")`는 한 번도 안 탄다. 이 테스트는 실제로 로그인해서 받은
+     * 토큰으로 인증이 필요한 조회성 GET(`users/me/social-accounts`, 데이터 생성 없음)을 한 번 더 호출해서
+     * 로그에 `Authorization: Bearer ***`처럼 마스킹돼 찍히는지 사람이 콘솔에서 직접 확인하기 위한 것이다.
+     */
+    @Test
+    fun `로그인 후 인증이 필요한 GET에서 Authorization 헤더가 로그에 마스킹된다`() =
+        runTest {
+            val email = System.getenv(ENV_EMAIL)
+            val password = System.getenv(ENV_PASSWORD)
+            assumeTrue(
+                "$ENV_EMAIL/$ENV_PASSWORD 환경변수가 없어서 스킵",
+                email != null && password != null
+            )
+
+            val loginApiService = KtorAuthApiService(backendIntegrationTestHttpClient())
+            val loginResult =
+                safeApiCall<ApiEnvelope<LoginResponseDto>> {
+                    loginApiService.login(
+                        LoginRequest(
+                            email = email!!,
+                            password = password!!,
+                            autoLogin = false,
+                            deviceId = NoOpAuthSession().deviceId()
+                        )
+                    )
+                }
+            val tokens =
+                loginResult.getOrElse {
+                    throw AssertionError("사전 로그인 실패 — 이 테스트는 로그인이 성공해야 진행됨: $it", it)
+                }.data
+
+            println("[BackendIntegrationTest] ↓↓↓ 인증된 GET 요청 — 아래 로그의 Authorization 헤더가 마스킹됐는지 확인 ↓↓↓")
+            val authenticatedApiService =
+                KtorAuthApiService(
+                    backendIntegrationTestHttpClient(
+                        StaticAuthSession(tokens.accessToken, tokens.refreshToken)
+                    )
+                )
+            val result =
+                safeApiCall<ApiEnvelope<List<SocialAccountDto>>> {
+                    authenticatedApiService.getSocialAccounts()
+                }
+            println("[BackendIntegrationTest] ↑↑↑ 여기까지 — status는 result=$result 참고 ↑↑↑")
+
+            // 이 테스트의 핵심 목적은 위 println 사이 로그를 사람이 눈으로 확인하는 것 — 자동 검증은
+            // "요청이 응답까지 갔다"는 것만 확인한다(계정 상태에 따라 성공/실패는 갈릴 수 있어도 무방).
+            assertTrue(
+                result.isSuccess || result.exceptionOrNull() is ApiException,
+                "예상 밖의 실패(네트워크 예외 등) — 로그 확인: $result"
+            )
         }
 }

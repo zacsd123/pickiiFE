@@ -45,3 +45,26 @@ internal class NoOpAuthSession : AuthSession {
 
     override suspend fun onRefreshFailed() = Unit
 }
+
+/**
+ * 로그인으로 실제로 받은 토큰을 그대로 들고 있는 [AuthSession] — 인증이 필요한 엔드포인트를
+ * 찍어볼 때 쓴다. `currentAccessToken()`이 non-null을 반환하는 순간부터 `HttpClientFactory`의
+ * Bearer Auth가 `Authorization` 헤더를 자동으로 붙인다.
+ */
+internal class StaticAuthSession(
+    private val accessToken: String,
+    private val refreshToken: String
+) : AuthSession {
+    override suspend fun currentAccessToken(): String? = accessToken
+
+    override suspend fun currentRefreshToken(): String? = refreshToken
+
+    override suspend fun deviceId(): String = "backend-integration-test-device"
+
+    override suspend fun onTokensRefreshed(
+        accessToken: String,
+        refreshToken: String
+    ) = Unit
+
+    override suspend fun onRefreshFailed() = Unit
+}
