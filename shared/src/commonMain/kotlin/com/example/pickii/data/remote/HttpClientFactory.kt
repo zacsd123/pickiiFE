@@ -10,11 +10,13 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
@@ -56,6 +58,9 @@ class HttpClientFactory(
 ) {
     fun create(): HttpClient =
         HttpClient(engine) {
+            defaultRequest {
+                url(baseUrl)
+            }
             install(ContentNegotiation) {
                 json(json)
             }
@@ -81,7 +86,7 @@ class HttpClientFactory(
                         }
 
                         val response =
-                            client.post("$baseUrl/$REFRESH_ENDPOINT_PATH") {
+                            client.post(REFRESH_ENDPOINT_PATH) {
                                 // ⚠️ 순환/무한루프 주의 — 이 markAsRefreshTokenRequest() 호출을 절대
                                 // 빼지 말 것: 이 요청은 방금 위에서 쓴 `client`(=이 HttpClient 자기 자신)로
                                 // 나가는데, 마크가 없으면 이 refresh 요청 자체도 같은 Auth 파이프라인을
