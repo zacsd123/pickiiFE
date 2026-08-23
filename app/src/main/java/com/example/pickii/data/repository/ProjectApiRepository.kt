@@ -5,13 +5,9 @@ import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** `6. Project` API로 [ProjectRepository]를 구현한다. */
-@Singleton
 class ProjectApiRepository
-    @Inject
     constructor(
         private val apiService: ProjectApiService,
         private val json: Json

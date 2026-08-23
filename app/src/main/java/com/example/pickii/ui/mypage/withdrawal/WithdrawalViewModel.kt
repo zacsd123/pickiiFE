@@ -7,13 +7,11 @@ import com.example.pickii.domain.model.EmailPurpose
 import com.example.pickii.domain.repository.AccountRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.domain.repository.SignupRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
 
@@ -25,9 +23,7 @@ private const val ERROR_CODE_EMAIL_CODE_ALREADY_SENT = "TOO_MANY_REQUESTS"
  *
  * 이메일 인증 인프라는 회원가입/비밀번호 재설정과 동일한 [SignupRepository]를 재사용한다.
  */
-@HiltViewModel
 class WithdrawalViewModel
-    @Inject
     constructor(
         private val signupRepository: SignupRepository,
         private val accountRepository: AccountRepository,

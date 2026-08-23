@@ -179,3 +179,33 @@ fun isValidEmail(email: String): Boolean = ...
 - `TODO`, `FIXME` 태그 규칙:
     - `// TODO: 페이징 처리 추가 필요` — 나중에 할 작업
     - `// FIXME: 특정 기기에서 키보드가 안 닫히는 문제` — 알려진 버그
+
+---
+
+## 8. iOS 빌드 (KMP, Mac 전용)
+
+`iosApp/`은 [XcodeGen](https://github.com/yonaskolb/XcodeGen)으로 `project.yml`에서 생성한다.
+`.xcodeproj`는 산출물이라 커밋 대상이 아니고(`Package.resolved`만 예외), 클론한 사람이 직접 한 번 생성해야 한다.
+
+**순서가 중요하다** — `project.yml`이 `Secrets.xcconfig`를 참조하고 있어서, 그 파일이 없으면
+`xcodegen generate` 자체가 스펙 검증 단계에서 실패한다. 시크릿 파일을 먼저 만들 것:
+
+```bash
+brew install xcodegen   # 최초 1회
+
+# 1) 시크릿 먼저 (Android local.properties와 같은 목적, git 밖에 둠)
+cp iosApp/Config/Secrets.xcconfig.example iosApp/Config/Secrets.xcconfig
+# Secrets.xcconfig를 열어 KAKAO_NATIVE_APP_KEY 값 채우기
+# (Android local.properties의 KAKAO_NATIVE_APP_KEY와 동일한 값. 비워둬도 빌드는 되지만
+#  카카오 로그인 관련 화면은 SDK 미초기화로 동작 안 함)
+
+# 2) 그 다음 프로젝트 생성
+cd iosApp
+xcodegen generate
+```
+
+이후 `iosApp/iosApp.xcodeproj`를 Xcode로 열거나 `xcodebuild`로 빌드한다. `project.yml`을 수정했으면
+`xcodegen generate`를 다시 실행해야 반영된다.
+
+> 클론 직후 `./gradlew: Permission denied`가 나면 `chmod +x gradlew`. (2026-08-22 기준 git에는
+> 실행 비트가 정상 반영돼 있어야 하지만, 혹시 다시 깨지면 이 명령으로 우회 가능)

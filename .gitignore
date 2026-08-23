@@ -13,4 +13,29 @@
 .externalNativeBuild
 .cxx
 local.properties
-/PROGRESS.md
+/PROGRESS*.md
+
+# iOS (Xcode / xcodegen)
+# .xcodeproj와 Generated-Info.plist는 project.yml로부터 `xcodegen generate`가 매번
+# 새로 만드는 산출물이라 원칙적으로 커밋 대상이 아님. 클론 후 iosApp/ 안에서
+# `xcodegen generate` 한 번 실행하면 다시 생성됨 (ReadMe.md 참고).
+#
+# 단, project.xcworkspace/xcshareddata/swiftpm/Package.resolved는 예외로 커밋한다 —
+# SPM 의존성(Kakao SDK 등) 버전을 팀 전체가 동일하게 고정하기 위함. 아래 계단식
+# 패턴은 git이 부모 디렉터리가 무시된 상태에서는 하위 파일의 !예외를 못 읽기 때문에
+# 필요함 (XcodeGen + SPM 조합에서 표준적으로 쓰이는 해법).
+iosApp/build/
+iosApp/DerivedData/
+iosApp/Generated-Info.plist
+iosApp/iosApp.xcodeproj/*
+!iosApp/iosApp.xcodeproj/project.xcworkspace/
+iosApp/iosApp.xcodeproj/project.xcworkspace/*
+!iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/
+iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/*
+!iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!iosApp/iosApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+iosApp/Config/Secrets.xcconfig
+
+# Claude Code 로컬 세션 상태 (scheduled_tasks.lock 등), 프로젝트 코드 아님
+.claude/

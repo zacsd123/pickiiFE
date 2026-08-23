@@ -16,9 +16,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.isoDayNumber
 
 private val WeekdayTextColor = Color(0xFFA8A8A8)
 private val WeekendTextColor = Color(0xFFB99CFF)
@@ -131,8 +132,8 @@ private fun CalendarWeekdayHeader(modifier: Modifier = Modifier) {
  * 이번 달에 포함되지 않는 앞뒤 칸은 null로 채운다.
  */
 private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
-    val firstDate = yearMonth.atDay(1)
-    val lastDate = yearMonth.atEndOfMonth()
+    val firstDate = yearMonth.firstDay
+    val daysInMonth = yearMonth.numberOfDays
 
     val leadingEmptyCount =
         calculateSundayBasedIndex(firstDate.dayOfWeek)
@@ -143,8 +144,8 @@ private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
                 add(null)
             }
 
-            for (dayOfMonth in 1..lastDate.dayOfMonth) {
-                add(yearMonth.atDay(dayOfMonth))
+            for (dayOfMonth in 1..daysInMonth) {
+                add(LocalDate(yearMonth.year, yearMonth.month, dayOfMonth))
             }
         }
 
@@ -163,7 +164,7 @@ private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
 /**
  * DayOfWeek 값을 일요일 시작 기준 0부터 6까지로 변환한다.
  */
-private fun calculateSundayBasedIndex(dayOfWeek: DayOfWeek): Int = dayOfWeek.value % 7
+private fun calculateSundayBasedIndex(dayOfWeek: DayOfWeek): Int = dayOfWeek.isoDayNumber % 7
 
 private const val DAYS_PER_WEEK = 7
 private val WEEKEND_INDICES = setOf(0, 6)

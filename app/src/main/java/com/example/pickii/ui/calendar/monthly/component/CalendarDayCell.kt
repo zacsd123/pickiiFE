@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.common.toComposeColor
-import java.time.DayOfWeek
-import java.time.LocalDate
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 private val DefaultDateTextColor = Color(0xFF1C1C1C)
 private val WeekendDateTextColor = Color(0xFFB99CFF)
@@ -86,7 +86,7 @@ fun CalendarDayCell(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = date.dayOfMonth.toString(),
+                text = date.day.toString(),
                 color = dateTextColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium

@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.ApplyKeywordCategory
@@ -59,6 +58,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
+import org.koin.androidx.compose.koinViewModel
 
 /** "전달 메시지"에 입력할 수 있는 최대 글자 수(화면 표시용, [RecruitApplyViewModel]과 동일한 값). */
 private const val MAX_MESSAGE_LENGTH = 300
@@ -88,7 +88,7 @@ fun RecruitApplyScreen(
     onViewApplicationStatusClick: () -> Unit = {},
     onCreateProfileClick: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
-    viewModel: RecruitApplyViewModel = hiltViewModel()
+    viewModel: RecruitApplyViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

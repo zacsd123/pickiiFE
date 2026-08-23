@@ -1,6 +1,5 @@
 package com.example.pickii.ui.mypage.profile.edit
 
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
@@ -18,7 +17,6 @@ import com.example.pickii.ui.common.entrydraft.ExperienceDraft
 import com.example.pickii.ui.common.entrydraft.LicenseDraft
 import com.example.pickii.ui.common.entrydraft.LinkDraft
 import com.example.pickii.ui.common.entrydraft.SkillToolDraft
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.YearMonth
-import javax.inject.Inject
+import kotlinx.datetime.YearMonth
 
 /** 학교 검색 디바운스 간격(ms). */
 private const val UNIVERSITY_SEARCH_DEBOUNCE_MS = 300L
@@ -36,9 +33,7 @@ private const val UNIVERSITY_SEARCH_DEBOUNCE_MS = 300L
 internal const val MAX_TOPIC_SELECTION = 3
 
 /** 기존 이력서를 불러와 한 화면 스크롤 폼으로 수정하고, [ProfileRepository.updateProfile]로 저장한다(4-3). */
-@HiltViewModel
 class ProfileEditViewModel
-    @Inject
     constructor(
         private val profileRepository: ProfileRepository,
         private val masterDataRepository: MasterDataRepository

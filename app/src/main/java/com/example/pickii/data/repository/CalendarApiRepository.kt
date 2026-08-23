@@ -13,28 +13,33 @@ import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.today
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.number
 import kotlinx.serialization.json.Json
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** API가 요구하는 필수 시작/종료 시간이 없는 "하루 종일" 일정에 사용하는 시간 범위. */
-private val ALL_DAY_START = LocalTime.of(0, 0)
-private val ALL_DAY_END = LocalTime.of(23, 59)
-private val TimeFormat = DateTimeFormatter.ofPattern("HH:mm")
+private val ALL_DAY_START = LocalTime(0, 0)
+private val ALL_DAY_END = LocalTime(23, 59)
+private val TimeFormat =
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /** `7-1`~`7-9` API로 [CalendarRepository]를 구현한다. */
-@Singleton
 class CalendarApiRepository
-    @Inject
     constructor(
         private val apiService: CalendarApiService,
         private val json: Json
@@ -47,7 +52,7 @@ class CalendarApiRepository
 
         override suspend fun loadSchedules(yearMonth: YearMonth): Result<Unit> =
             safeApiCall(json) {
-                apiService.getSchedules(yearMonth.year, yearMonth.monthValue)
+                apiService.getSchedules(yearMonth.year, yearMonth.month.number)
             }.map { envelope ->
                 val fetched = envelope.data.map { it.toDomain() }
                 _schedules.update { current -> current.mergeById(fetched) { it.id } }
@@ -144,7 +149,7 @@ class CalendarApiRepository
 
         private fun ScheduleDto.toDomain(): CalendarSchedule {
             val (repeatType, repeatWeekdays) = parseRrule(rrule)
-            val start = (date ?: startDate)?.let(LocalDate::parse) ?: LocalDate.now()
+            val start = (date ?: startDate)?.let(LocalDate::parse) ?: today()
             val end = (date ?: endDate)?.let(LocalDate::parse) ?: start
             val parsedStartTime = startTime?.let { runCatching { LocalTime.parse(it, TimeFormat) }.getOrNull() }
             val parsedEndTime = endTime?.let { runCatching { LocalTime.parse(it, TimeFormat) }.getOrNull() }
@@ -169,7 +174,7 @@ class CalendarApiRepository
             ScheduleCategory(id = categoryId, name = title, color = color.toScheduleColorType())
     }
 
-private fun LocalDate.toIsoString(): String = format(DateTimeFormatter.ISO_LOCAL_DATE)
+private fun LocalDate.toIsoString(): String = toString()
 
 /** [id]가 같은 항목을 [updates]로 교체하고, 없던 항목은 새로 추가한다. */
 private fun <T> List<T>.mergeById(
@@ -201,7 +206,7 @@ private fun buildRrule(
         ScheduleRepeatType.DAILY -> "FREQ=DAILY"
         ScheduleRepeatType.WEEKLY -> {
             val days = repeatWeekdays.ifEmpty { setOf(fallbackDay) }
-            val byDay = days.sortedBy { it.value }.joinToString(",") { RRULE_DAY_CODES.getValue(it) }
+            val byDay = days.sortedBy { it.isoDayNumber }.joinToString(",") { RRULE_DAY_CODES.getValue(it) }
             "FREQ=WEEKLY;BYDAY=$byDay"
         }
         ScheduleRepeatType.MONTHLY -> "FREQ=MONTHLY"

@@ -33,10 +33,16 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.theme.PickiiGray600
 import com.example.pickii.ui.theme.PickiiGrayMedium
 import com.example.pickii.ui.theme.PickiiInk
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
+import com.example.pickii.util.today
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.format
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.minus
+import kotlinx.datetime.number
+import kotlinx.datetime.plus
 
 private val SheetLabelColor = PickiiGray600
 private val SheetValueColor = PickiiInk
@@ -54,7 +60,7 @@ private val FooterButtonDisabledColor = Color(0xFFEDEDE7)
 private val FooterButtonEnabledTextColor = Color(0xFFFFFFFF)
 private val FooterButtonDisabledTextColor = PickiiGrayMedium
 
-private val SheetDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+private val SheetDateFormatter = LocalDate.Formats.ISO
 
 private const val DAYS_PER_WEEK = 7
 
@@ -84,7 +90,7 @@ fun ScheduleDatePickerSheet(
     modifier: Modifier = Modifier
 ) {
     var displayedYearMonth by remember {
-        mutableStateOf(YearMonth.from(initialStartDate))
+        mutableStateOf(YearMonth(initialStartDate.year, initialStartDate.month))
     }
 
     var selectionStart by remember {
@@ -136,10 +142,10 @@ fun ScheduleDatePickerSheet(
             MonthNavigationHeader(
                 displayedYearMonth = displayedYearMonth,
                 onPreviousMonth = {
-                    displayedYearMonth = displayedYearMonth.minusMonths(1)
+                    displayedYearMonth = displayedYearMonth.minus(1, DateTimeUnit.MONTH)
                 },
                 onNextMonth = {
-                    displayedYearMonth = displayedYearMonth.plusMonths(1)
+                    displayedYearMonth = displayedYearMonth.plus(1, DateTimeUnit.MONTH)
                 }
             )
 
@@ -160,7 +166,7 @@ fun ScheduleDatePickerSheet(
                         }
 
                         end == null -> {
-                            if (date.isBefore(start)) {
+                            if (date < start) {
                                 selectionStart = date
                             } else {
                                 selectionEnd = date
@@ -269,7 +275,7 @@ private fun MonthNavigationHeader(
         )
 
         Text(
-            text = "${displayedYearMonth.year}년 ${displayedYearMonth.monthValue}월",
+            text = "${displayedYearMonth.year}년 ${displayedYearMonth.month.number}월",
             color = SheetValueColor,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
@@ -328,7 +334,7 @@ private fun CalendarDateGrid(
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val today = LocalDate.now()
+    val today = today()
     val calendarDates = createCalendarDates(displayedYearMonth)
 
     Column(
@@ -349,8 +355,8 @@ private fun CalendarDateGrid(
                             date != null &&
                                 selectionStart != null &&
                                 selectionEnd != null &&
-                                date.isAfter(selectionStart) &&
-                                date.isBefore(selectionEnd),
+                                date > selectionStart &&
+                                date < selectionEnd,
                         onDateClick = onDateClick
                     )
                 }
@@ -413,7 +419,7 @@ private fun CalendarDateCell(
     ) {
         if (date != null) {
             Text(
-                text = date.dayOfMonth.toString(),
+                text = date.day.toString(),
                 color = textColor,
                 fontSize = 14.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
@@ -528,10 +534,10 @@ private fun FooterTextButton(
  * 이번 달에 포함되지 않는 앞뒤 칸은 null로 채운다.
  */
 private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
-    val firstDate = yearMonth.atDay(1)
-    val lastDate = yearMonth.atEndOfMonth()
+    val firstDate = yearMonth.firstDay
+    val daysInMonth = yearMonth.numberOfDays
 
-    val leadingEmptyCount = firstDate.dayOfWeek.value - 1
+    val leadingEmptyCount = firstDate.dayOfWeek.isoDayNumber - 1
 
     val dates =
         buildList<LocalDate?> {
@@ -539,8 +545,8 @@ private fun createCalendarDates(yearMonth: YearMonth): List<LocalDate?> {
                 add(null)
             }
 
-            for (dayOfMonth in 1..lastDate.dayOfMonth) {
-                add(yearMonth.atDay(dayOfMonth))
+            for (dayOfMonth in 1..daysInMonth) {
+                add(LocalDate(yearMonth.year, yearMonth.month, dayOfMonth))
             }
         }
 

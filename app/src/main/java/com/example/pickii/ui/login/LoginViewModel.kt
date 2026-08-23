@@ -5,13 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val DEFAULT_ERROR_MESSAGE = "잠시 후 다시 시도해주세요."
 
@@ -25,9 +23,7 @@ data class LoginUiState(
 )
 
 /** 로그인 화면의 입력 상태를 보관하고, [SessionRepository]를 통해 실제 로그인/비회원 전환을 처리한다. */
-@HiltViewModel
 class LoginViewModel
-    @Inject
     constructor(
         private val sessionRepository: SessionRepository,
         private val profileRepository: ProfileRepository

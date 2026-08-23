@@ -29,9 +29,10 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.ui.theme.PickiiGray600
 import com.example.pickii.ui.theme.PickiiInk
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 
 private val DateTimeSectionBackgroundColor = Color(0xFFFFFFFF)
 private val DateTimeLabelColor = PickiiGray600
@@ -41,15 +42,14 @@ private val DateTimeDividerColor = Color(0xFFE7E7E1)
 private val SwitchCheckedColor = PickiiInk
 private val SwitchUncheckedColor = Color(0xFFD2D2CC)
 
-private val DateFormatter =
-    DateTimeFormatter.ofPattern(
-        "yyyy-MM-dd"
-    )
+private val DateFormatter = LocalDate.Formats.ISO
 
 private val TimeFormatter =
-    DateTimeFormatter.ofPattern(
-        "HH:mm"
-    )
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /**
  * 일정 날짜(범위), 시작/종료 시간, 하루 종일 설정 영역이다.
@@ -270,7 +270,7 @@ private fun TimePickerRow(
                                 context,
                                 { _, hourOfDay, minute ->
                                     onTimeChange(
-                                        LocalTime.of(
+                                        LocalTime(
                                             hourOfDay,
                                             minute
                                         )

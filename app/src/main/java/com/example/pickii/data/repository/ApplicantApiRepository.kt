@@ -11,15 +11,11 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val APPLICANTS_PAGE_SIZE = 100
 
 /** `4-7`, `4-8` API로 [ApplicantRepository]를 구현한다. */
-@Singleton
 class ApplicantApiRepository
-    @Inject
     constructor(
         private val apiService: ApplicantApiService,
         private val json: Json

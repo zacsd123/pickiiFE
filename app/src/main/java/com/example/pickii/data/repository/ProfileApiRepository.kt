@@ -20,17 +20,13 @@ import com.example.pickii.domain.model.UpdateProfileInput
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import kotlinx.datetime.YearMonth
 import kotlinx.serialization.json.Json
-import java.time.YearMonth
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val ERROR_CODE_RESUME_NOT_FOUND = "RESUME_NOT_FOUND"
 
 /** `4-1 내 프로필 조회`, `4-2 프로필 생성`으로 [ProfileRepository]를 구현한다. */
-@Singleton
 class ProfileApiRepository
-    @Inject
     constructor(
         private val profileApiService: ProfileApiService,
         private val json: Json

@@ -29,11 +29,8 @@ import com.example.pickii.ui.chat.validateChatImage
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
-import java.time.LocalDate
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val ERROR_CODE_INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
 private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
@@ -42,175 +39,172 @@ private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 private const val SYSTEM_SENDER_NICKNAME = "시스템"
 
 /** `8. Chat` REST API로 [ChatRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
-@Singleton
-class ChatApiRepository
-    @Inject
-    constructor(
-        @ApplicationContext private val context: Context,
-        private val chatApiService: ChatApiService,
-        private val sessionRepository: SessionRepository,
-        private val projectRepository: ProjectRepository,
-        private val json: Json
-    ) : ChatRepository {
-        override suspend fun getChatRooms(
-            type: ChatRoomType,
-            page: Int,
-            size: Int
-        ): Result<ChatRoomSummaryPage> =
-            safeApiCall(json) { chatApiService.getChatRooms(type.name, page, size) }
-                .map { envelope ->
-                    val pageEnvelope = envelope.data
-                    ChatRoomSummaryPage(
-                        rooms = pageEnvelope.content.map { it.toDomain() },
-                        currentPage = pageEnvelope.pageInfo.currentPage,
-                        totalPages = pageEnvelope.pageInfo.totalPages,
-                        hasNext = pageEnvelope.pageInfo.hasNext
-                    )
-                }
-
-        override suspend fun getChatRoomDetail(chatRoomId: Long): Result<ChatRoomDetail> {
-            val currentMemberId =
-                sessionRepository.currentUser.value
-                    ?.id
-                    ?.toLongOrNull()
-            return safeApiCall(json) { chatApiService.getChatRoomDetail(chatRoomId) }
-                .map { envelope ->
-                    val dto = envelope.data
-                    // GROUP 방이면 6-2로 진짜 leaderId를 받아와 팀원 전체의 팀장 여부를 정확히 계산한다.
-                    // 실패하면 본인만 신뢰 가능한 기존 규칙으로 내려간다(아래 toDomain 참고).
-                    val leaderId = dto.projectId?.let { projectRepository.getProjectLeaderId(it).getOrNull() }
-                    dto.toDomain(currentMemberId, leaderId)
-                }
-        }
-
-        override suspend fun getMessages(
-            chatRoomId: Long,
-            cursor: String?,
-            size: Int
-        ): Result<ChatMessagePage> =
-            safeApiCall(json) { chatApiService.getMessages(chatRoomId, cursor, size) }
-                .map { envelope ->
-                    val page = envelope.data
-                    ChatMessagePage(
-                        messages = page.content.map { it.toDomain() },
-                        nextCursor = page.nextCursor,
-                        hasNext = page.hasNext
-                    )
-                }
-
-        override suspend fun uploadImage(
-            chatRoomId: Long,
-            imageUri: Uri
-        ): Result<String> {
-            when (context.validateChatImage(imageUri)) {
-                ChatImageValidationError.InvalidFileType ->
-                    return Result.failure(chatValidationException(ERROR_CODE_INVALID_FILE_TYPE, "허용되지 않는 파일 형식입니다."))
-                ChatImageValidationError.FileTooLarge ->
-                    return Result.failure(chatValidationException(ERROR_CODE_FILE_TOO_LARGE, "파일 크기가 10MB를 초과했습니다."))
-                null -> Unit
+class ChatApiRepository(
+    private val context: Context,
+    private val chatApiService: ChatApiService,
+    private val sessionRepository: SessionRepository,
+    private val projectRepository: ProjectRepository,
+    private val json: Json
+) : ChatRepository {
+    override suspend fun getChatRooms(
+        type: ChatRoomType,
+        page: Int,
+        size: Int
+    ): Result<ChatRoomSummaryPage> =
+        safeApiCall(json) { chatApiService.getChatRooms(type.name, page, size) }
+            .map { envelope ->
+                val pageEnvelope = envelope.data
+                ChatRoomSummaryPage(
+                    rooms = pageEnvelope.content.map { it.toDomain() },
+                    currentPage = pageEnvelope.pageInfo.currentPage,
+                    totalPages = pageEnvelope.pageInfo.totalPages,
+                    hasNext = pageEnvelope.pageInfo.hasNext
+                )
             }
 
-            val part = context.toChatImagePart(imageUri)
-            return safeApiCall(json) { chatApiService.uploadImage(chatRoomId, part) }
-                .map { it.data.imageUrl }
-        }
-
-        override suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult> =
-            safeApiCall(json) {
-                chatApiService.createDirectChatRoom(CreateDirectChatRoomRequest(targetMemberId))
-            }.map { DirectChatRoomResult(chatRoomId = it.data.chatRoomId) }
-
-        override suspend fun markAsRead(
-            chatRoomId: Long,
-            lastReadMessageId: String
-        ): Result<Unit> =
-            safeApiCallUnit(json) {
-                chatApiService.markAsRead(chatRoomId, MarkChatRoomReadRequest(lastReadMessageId))
+    override suspend fun getChatRoomDetail(chatRoomId: Long): Result<ChatRoomDetail> {
+        val currentMemberId =
+            sessionRepository.currentUser.value
+                ?.id
+                ?.toLongOrNull()
+        return safeApiCall(json) { chatApiService.getChatRoomDetail(chatRoomId) }
+            .map { envelope ->
+                val dto = envelope.data
+                // GROUP 방이면 6-2로 진짜 leaderId를 받아와 팀원 전체의 팀장 여부를 정확히 계산한다.
+                // 실패하면 본인만 신뢰 가능한 기존 규칙으로 내려간다(아래 toDomain 참고).
+                val leaderId = dto.projectId?.let { projectRepository.getProjectLeaderId(it).getOrNull() }
+                dto.toDomain(currentMemberId, leaderId)
             }
-
-        override suspend fun leaveChatRoom(chatRoomId: Long): Result<Unit> =
-            safeApiCallUnit(json) { chatApiService.leaveChatRoom(chatRoomId) }
-
-        override suspend fun updateNotification(
-            chatRoomId: Long,
-            enabled: Boolean
-        ): Result<Unit> =
-            safeApiCallUnit(json) {
-                chatApiService.updateNotification(chatRoomId, UpdateChatRoomNotificationRequest(enabled))
-            }
-
-        override suspend fun delegateLeader(
-            projectId: Long,
-            newLeaderMemberId: Long
-        ): Result<Unit> =
-            safeApiCallUnit(json) {
-                chatApiService.delegateLeader(projectId, DelegateChatRoomLeaderRequest(newLeaderMemberId))
-            }
-
-        override suspend fun removeMember(
-            projectId: Long,
-            memberId: Long
-        ): Result<Unit> = safeApiCallUnit(json) { chatApiService.removeMember(projectId, memberId) }
-
-        private fun ChatRoomSummaryDto.toDomain(): ChatRoomSummary =
-            ChatRoomSummary(
-                chatRoomId = chatRoomId,
-                type = type.toChatRoomType(),
-                title = title,
-                lastMessage = lastMessage,
-                lastMessageAt = lastMessageAt?.let(::parseIsoOffsetDateTime),
-                unreadCount = unreadCount,
-                isNotificationEnabled = notiEnabled
-            )
-
-        /**
-         * 팀장 여부는 6-2(`GET /projects/{projectId}`)의 `leaderId`로 정확히 계산한다.
-         * 그 호출이 실패한 경우(네트워크 오류 등)에만 본인 여부만 신뢰 가능한 예전 규칙으로 내려간다
-         * (`GET /chatrooms/{chatRoomId}`의 `isLeader`는 본인 것만 알려준다 — 알려진 API 제약).
-         */
-        private fun ChatRoomDetailDto.toDomain(
-            currentMemberId: Long?,
-            leaderId: Long?
-        ): ChatRoomDetail {
-            val amLeader = isLeader == true
-            return ChatRoomDetail(
-                chatRoomId = chatRoomId,
-                type = if (projectId != null) ChatRoomType.GROUP else ChatRoomType.DIRECT,
-                title = title,
-                members =
-                    members.map { member ->
-                        ChatMember(
-                            memberId = member.memberId,
-                            nickname = member.nickname,
-                            exp = member.exp,
-                            isLeader =
-                                if (leaderId != null) {
-                                    member.memberId == leaderId
-                                } else {
-                                    amLeader && member.memberId == currentMemberId
-                                }
-                        )
-                    },
-                projectId = projectId,
-                startDate = startDate?.let(LocalDate::parse),
-                endDate = endDate?.let(LocalDate::parse),
-                projectStatus = status?.toProjectStatus(),
-                isCurrentUserLeader = amLeader
-            )
-        }
-
-        private fun ChatMessageDto.toDomain(): ChatMessage =
-            ChatMessage(
-                messageId = messageId,
-                senderId = senderId ?: 0L,
-                senderNickname = senderNickname ?: SYSTEM_SENDER_NICKNAME,
-                senderExp = senderExp ?: 0,
-                type = type.toChatMessageContentType(),
-                text = message,
-                imageUrl = imageUrl,
-                createdAt = parseIsoOffsetDateTime(createdAt)
-            )
     }
+
+    override suspend fun getMessages(
+        chatRoomId: Long,
+        cursor: String?,
+        size: Int
+    ): Result<ChatMessagePage> =
+        safeApiCall(json) { chatApiService.getMessages(chatRoomId, cursor, size) }
+            .map { envelope ->
+                val page = envelope.data
+                ChatMessagePage(
+                    messages = page.content.map { it.toDomain() },
+                    nextCursor = page.nextCursor,
+                    hasNext = page.hasNext
+                )
+            }
+
+    override suspend fun uploadImage(
+        chatRoomId: Long,
+        imageUri: Uri
+    ): Result<String> {
+        when (context.validateChatImage(imageUri)) {
+            ChatImageValidationError.InvalidFileType ->
+                return Result.failure(chatValidationException(ERROR_CODE_INVALID_FILE_TYPE, "허용되지 않는 파일 형식입니다."))
+            ChatImageValidationError.FileTooLarge ->
+                return Result.failure(chatValidationException(ERROR_CODE_FILE_TOO_LARGE, "파일 크기가 10MB를 초과했습니다."))
+            null -> Unit
+        }
+
+        val part = context.toChatImagePart(imageUri)
+        return safeApiCall(json) { chatApiService.uploadImage(chatRoomId, part) }
+            .map { it.data.imageUrl }
+    }
+
+    override suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult> =
+        safeApiCall(json) {
+            chatApiService.createDirectChatRoom(CreateDirectChatRoomRequest(targetMemberId))
+        }.map { DirectChatRoomResult(chatRoomId = it.data.chatRoomId) }
+
+    override suspend fun markAsRead(
+        chatRoomId: Long,
+        lastReadMessageId: String
+    ): Result<Unit> =
+        safeApiCallUnit(json) {
+            chatApiService.markAsRead(chatRoomId, MarkChatRoomReadRequest(lastReadMessageId))
+        }
+
+    override suspend fun leaveChatRoom(chatRoomId: Long): Result<Unit> =
+        safeApiCallUnit(json) { chatApiService.leaveChatRoom(chatRoomId) }
+
+    override suspend fun updateNotification(
+        chatRoomId: Long,
+        enabled: Boolean
+    ): Result<Unit> =
+        safeApiCallUnit(json) {
+            chatApiService.updateNotification(chatRoomId, UpdateChatRoomNotificationRequest(enabled))
+        }
+
+    override suspend fun delegateLeader(
+        projectId: Long,
+        newLeaderMemberId: Long
+    ): Result<Unit> =
+        safeApiCallUnit(json) {
+            chatApiService.delegateLeader(projectId, DelegateChatRoomLeaderRequest(newLeaderMemberId))
+        }
+
+    override suspend fun removeMember(
+        projectId: Long,
+        memberId: Long
+    ): Result<Unit> = safeApiCallUnit(json) { chatApiService.removeMember(projectId, memberId) }
+
+    private fun ChatRoomSummaryDto.toDomain(): ChatRoomSummary =
+        ChatRoomSummary(
+            chatRoomId = chatRoomId,
+            type = type.toChatRoomType(),
+            title = title,
+            lastMessage = lastMessage,
+            lastMessageAt = lastMessageAt?.let(::parseIsoOffsetDateTime),
+            unreadCount = unreadCount,
+            isNotificationEnabled = notiEnabled
+        )
+
+    /**
+     * 팀장 여부는 6-2(`GET /projects/{projectId}`)의 `leaderId`로 정확히 계산한다.
+     * 그 호출이 실패한 경우(네트워크 오류 등)에만 본인 여부만 신뢰 가능한 예전 규칙으로 내려간다
+     * (`GET /chatrooms/{chatRoomId}`의 `isLeader`는 본인 것만 알려준다 — 알려진 API 제약).
+     */
+    private fun ChatRoomDetailDto.toDomain(
+        currentMemberId: Long?,
+        leaderId: Long?
+    ): ChatRoomDetail {
+        val amLeader = isLeader == true
+        return ChatRoomDetail(
+            chatRoomId = chatRoomId,
+            type = if (projectId != null) ChatRoomType.GROUP else ChatRoomType.DIRECT,
+            title = title,
+            members =
+                members.map { member ->
+                    ChatMember(
+                        memberId = member.memberId,
+                        nickname = member.nickname,
+                        exp = member.exp,
+                        isLeader =
+                            if (leaderId != null) {
+                                member.memberId == leaderId
+                            } else {
+                                amLeader && member.memberId == currentMemberId
+                            }
+                    )
+                },
+            projectId = projectId,
+            startDate = startDate?.let(LocalDate::parse),
+            endDate = endDate?.let(LocalDate::parse),
+            projectStatus = status?.toProjectStatus(),
+            isCurrentUserLeader = amLeader
+        )
+    }
+
+    private fun ChatMessageDto.toDomain(): ChatMessage =
+        ChatMessage(
+            messageId = messageId,
+            senderId = senderId ?: 0L,
+            senderNickname = senderNickname ?: SYSTEM_SENDER_NICKNAME,
+            senderExp = senderExp ?: 0,
+            type = type.toChatMessageContentType(),
+            text = message,
+            imageUrl = imageUrl,
+            createdAt = parseIsoOffsetDateTime(createdAt)
+        )
+}
 
 private fun chatValidationException(
     code: String,

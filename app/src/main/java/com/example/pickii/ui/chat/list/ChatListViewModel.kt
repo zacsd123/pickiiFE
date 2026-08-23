@@ -7,7 +7,6 @@ import com.example.pickii.domain.model.ChatRoomSummary
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.ui.common.RecruitUiEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,16 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val CHAT_LIST_PAGE_SIZE = 10
 
 /**
  * 채팅 목록 화면의 상태와 사용자 동작을 관리한다.
  */
-@HiltViewModel
 class ChatListViewModel
-    @Inject
     constructor(
         private val chatRepository: ChatRepository,
         private val notificationRepository: NotificationRepository

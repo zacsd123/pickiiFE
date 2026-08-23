@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.sp
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.calendar.daily.DailyScheduleUiModel
 import com.example.pickii.ui.common.toComposeColor
-import java.time.LocalDate
-import java.time.LocalTime
+import com.example.pickii.util.today
+import kotlinx.datetime.LocalTime
 
 /**
  * 시간표 위에 표시되는 일정 블록이다.
@@ -67,9 +67,9 @@ private fun DailyScheduleBlockPreview() {
             DailyScheduleUiModel(
                 id = 1L,
                 title = "회의",
-                date = LocalDate.now(),
-                startTime = LocalTime.of(9, 0),
-                endTime = LocalTime.of(11, 0),
+                date = today(),
+                startTime = LocalTime(9, 0),
+                endTime = LocalTime(11, 0),
                 colorType = ScheduleColorType.BLUE
             ),
         onClick = {},

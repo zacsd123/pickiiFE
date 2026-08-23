@@ -33,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
@@ -42,7 +41,6 @@ import com.example.pickii.domain.model.University
 import com.example.pickii.ui.common.AddEntryButton
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.CharacterCounterText
-import com.example.pickii.ui.common.FieldLabel as CommonFieldLabel
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.RemovableEntryCard
 import com.example.pickii.ui.common.SearchDropdownField
@@ -57,7 +55,9 @@ import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
-import java.time.YearMonth
+import kotlinx.datetime.YearMonth
+import org.koin.androidx.compose.koinViewModel
+import com.example.pickii.ui.common.FieldLabel as CommonFieldLabel
 
 /** 모서리 둥글기(입력 필드 공통). */
 private val FieldCornerRadius = 14.dp
@@ -72,7 +72,7 @@ private val FieldCornerRadius = 14.dp
 fun ProfileEditScreen(
     onBackClick: () -> Unit,
     onSaved: () -> Unit,
-    viewModel: ProfileEditViewModel = hiltViewModel()
+    viewModel: ProfileEditViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -372,7 +372,6 @@ private fun ProfileEditScreenContent(
                 shape = RoundedCornerShape(FieldCornerRadius),
                 colors = fieldColors()
             )
-
 
             Spacer(modifier = Modifier.height(24.dp))
             Box(

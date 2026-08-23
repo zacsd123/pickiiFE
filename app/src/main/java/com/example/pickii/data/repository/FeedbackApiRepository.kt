@@ -16,15 +16,11 @@ import com.example.pickii.util.network.invalidIdException
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
-import java.time.LocalDate
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** `4-9`~`4-12` API로 [FeedbackRepository]를 구현한다. */
-@Singleton
 class FeedbackApiRepository
-    @Inject
     constructor(
         private val apiService: FeedbackApiService,
         private val json: Json

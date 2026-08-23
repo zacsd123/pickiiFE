@@ -7,13 +7,11 @@ import com.example.pickii.domain.model.SignupTerms
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.domain.repository.SignupRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 회원가입 화면이 어느 단계를 보여주는 중인지. */
 enum class SignupPhase {
@@ -82,9 +80,7 @@ data class SignupUiState(
  * 환영 화면의 "로그인하기" 버튼이 방금 입력한 비밀번호로 바로 로그인해야 해서, 비밀번호를 내비게이션
  * 인자로 넘기지 않고 두 화면을 한 ViewModel/한 화면으로 묶어 [phase]로 전환한다.
  */
-@HiltViewModel
 class SignupViewModel
-    @Inject
     constructor(
         private val signupRepository: SignupRepository,
         private val sessionRepository: SessionRepository,

@@ -9,8 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.ui.common.RecruitUiEvent
+import org.koin.androidx.compose.koinViewModel
 
 private enum class FeedbackScreenType {
     LIST,
@@ -22,7 +22,7 @@ private enum class FeedbackScreenType {
 fun FeedbackRoute(
     onExit: () -> Unit,
     onNotificationClick: () -> Unit = {},
-    viewModel: FeedbackViewModel = hiltViewModel()
+    viewModel: FeedbackViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current

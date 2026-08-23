@@ -18,22 +18,27 @@ import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.nowDateTime
 import com.example.pickii.util.parseIsoOffsetDateTime
+import com.example.pickii.util.today
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.number
 import kotlinx.serialization.json.Json
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
-import javax.inject.Singleton
 
-private val TimeFormat = DateTimeFormatter.ofPattern("HH:mm")
+private val TimeFormat =
+    LocalTime.Format {
+        hour()
+        char(':')
+        minute()
+    }
 
 /** `7-C 팀 일정(회의 일정 조율)` API로 [MeetingPollRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
-@Singleton
 class MeetingPollApiRepository
-    @Inject
     constructor(
         private val apiService: MeetingPollApiService,
         private val json: Json
@@ -99,7 +104,7 @@ class MeetingPollApiRepository
             yearMonth: YearMonth
         ): Result<List<TeamSchedule>> =
             safeApiCall(json) {
-                apiService.getTeamSchedules(projectId, yearMonth.year, yearMonth.monthValue)
+                apiService.getTeamSchedules(projectId, yearMonth.year, yearMonth.month.number)
             }.map { envelope -> envelope.data.map { it.toDomain() } }
 
         override suspend fun deleteTeamSchedule(scheduleId: Long): Result<Unit> =
@@ -167,8 +172,8 @@ class MeetingPollApiRepository
             TeamSchedule(
                 scheduleId = scheduleId,
                 title = title,
-                startDate = (date ?: startDate)?.let(::parseIsoDate) ?: LocalDate.now(),
-                endDate = (date ?: endDate)?.let(::parseIsoDate) ?: LocalDate.now(),
+                startDate = (date ?: startDate)?.let(::parseIsoDate) ?: today(),
+                endDate = (date ?: endDate)?.let(::parseIsoDate) ?: today(),
                 startTime = startTime?.let { parseTime(it) },
                 endTime = endTime?.let { parseTime(it) }
             )
@@ -178,11 +183,11 @@ private fun String.toMeetingPollStatus(): MeetingPollStatus =
     runCatching { MeetingPollStatus.valueOf(this) }.getOrDefault(MeetingPollStatus.COLLECTING)
 
 private fun parseIsoDateTime(value: String): LocalDateTime =
-    runCatching { parseIsoOffsetDateTime(value) }.getOrDefault(LocalDateTime.now())
+    runCatching { parseIsoOffsetDateTime(value) }.getOrDefault(nowDateTime())
 
 private fun parseIsoDate(value: String): LocalDate =
     runCatching {
         LocalDate.parse(value)
-    }.getOrDefault(LocalDate.now())
+    }.getOrDefault(today())
 
 private fun parseTime(value: String): LocalTime? = runCatching { LocalTime.parse(value, TimeFormat) }.getOrNull()

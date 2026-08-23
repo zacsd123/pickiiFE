@@ -1,6 +1,5 @@
 package com.example.pickii.ui.home
 
-import androidx.compose.ui.draw.alpha
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
@@ -68,6 +66,7 @@ import com.example.pickii.ui.theme.PickiiPostCardBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toCompactDisplayString
+import org.koin.androidx.compose.koinViewModel
 
 /** 필드/칩/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val ChipCornerRadius = 20.dp
@@ -91,7 +90,7 @@ fun HomeScreen(
     onPostDetailClick: (postId: String) -> Unit = {},
     onPostApplyClick: (postId: String) -> Unit = {},
     onNotificationClick: () -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -104,11 +103,12 @@ fun HomeScreen(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(
-                    context,
-                    event.messageRes,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        context,
+                        event.messageRes,
+                        Toast.LENGTH_SHORT
+                    ).show()
         }
     }
 
@@ -465,7 +465,6 @@ private fun PostCard(
     onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     val isClosed = post.status == RecruitStatus.CLOSED
 
     Column(
@@ -555,8 +554,7 @@ private fun PostCard(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isClosed) PickiiFieldBackground else PickiiBlue
-                            )
-                            .then(
+                            ).then(
                                 if (!isClosed) {
                                     Modifier.clickable(onClick = onApplyClick)
                                 } else {

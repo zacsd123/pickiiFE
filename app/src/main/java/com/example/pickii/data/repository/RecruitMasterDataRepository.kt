@@ -14,16 +14,12 @@ import com.example.pickii.util.network.safeApiCall
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * `5. Master Data` 문서로 마스터 데이터를 조회하고, 변경이 거의 없는 데이터 특성상
  * 최초 성공 응답을 메모리에 캐싱해 재요청을 피한다(검색어에 따라 결과가 달라지는 대학교 검색은 예외).
  */
-@Singleton
 class RecruitMasterDataRepository
-    @Inject
     constructor(
         private val masterDataApiService: MasterDataApiService,
         private val json: Json

@@ -12,7 +12,6 @@ import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.util.toDisplayString
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,15 +20,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 그룹 채팅 개설 시 기본 팀명으로 붙이는 접미사. */
 private const val DEFAULT_TEAM_NAME_SUFFIX = " 팀"
 
 /** 공고 지원자 목록(4-7) 조회, 수락/거절(4-8), 채팅방 개설(6-1, 8-3)을 담당한다. */
-@HiltViewModel
 class ApplicantListViewModel
-    @Inject
     constructor(
         private val repository: ApplicantRepository,
         private val recruitRepository: RecruitRepository,
@@ -129,7 +125,7 @@ class ApplicantListViewModel
                 memberId = memberId.toLong(),
                 nickname = nickname,
                 exp = exp,
-                appliedDate = appliedAt.toLocalDate().toDisplayString(),
+                appliedDate = appliedAt.date.toDisplayString(),
                 applicationMessage = message,
                 keywords = keywords,
                 status =

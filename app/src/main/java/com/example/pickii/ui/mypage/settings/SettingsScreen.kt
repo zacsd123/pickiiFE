@@ -42,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
@@ -54,6 +53,7 @@ import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * 설정 화면. 계정 설정(비밀번호 변경/카카오 연동·해제/로그아웃/회원탈퇴)과 알림 설정을 한 화면에서 보여준다(사진 목업 기준).
@@ -71,8 +71,8 @@ fun SettingsScreen(
     onNavigateToPasswordChange: () -> Unit,
     onNavigateToWithdrawal: () -> Unit,
     onNavigateToLogout: () -> Unit,
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    notificationViewModel: NotificationSettingsViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = koinViewModel(),
+    notificationViewModel: NotificationSettingsViewModel = koinViewModel()
 ) {
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()

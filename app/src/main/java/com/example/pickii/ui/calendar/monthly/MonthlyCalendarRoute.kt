@@ -3,8 +3,8 @@ package com.example.pickii.ui.calendar.monthly
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MonthlyCalendarRoute(
@@ -12,7 +12,7 @@ fun MonthlyCalendarRoute(
     onDailyCalendarClick: (LocalDate) -> Unit,
     onEditScheduleClick: (Long) -> Unit,
     onNotificationClick: () -> Unit,
-    viewModel: MonthlyCalendarViewModel = hiltViewModel()
+    viewModel: MonthlyCalendarViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

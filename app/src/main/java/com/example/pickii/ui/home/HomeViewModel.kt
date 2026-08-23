@@ -1,6 +1,5 @@
 package com.example.pickii.ui.home
 
-import com.example.pickii.domain.repository.SessionRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
@@ -12,9 +11,9 @@ import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.visiblePageNumbers
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 서버 목록 조회 한 페이지 크기. */
 private const val POSTS_PAGE_SIZE = 6
@@ -56,9 +54,7 @@ data class HomeUiState(
 }
 
 /** 홈 화면의 검색/필터 상태를 보관하고, [RecruitRepository]/[MasterDataRepository]로 서버에서 목록을 조회한다. */
-@HiltViewModel
 class HomeViewModel
-    @Inject
     constructor(
         private val recruitRepository: RecruitRepository,
         private val masterDataRepository: MasterDataRepository,

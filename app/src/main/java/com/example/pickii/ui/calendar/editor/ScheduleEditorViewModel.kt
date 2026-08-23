@@ -5,20 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import kotlinx.datetime.LocalDate
 
 /**
  * 일정 등록 화면의 상태를 관리한다.
  */
-@HiltViewModel
 class ScheduleEditorViewModel
-    @Inject
     constructor(
         private val calendarRepository: CalendarRepository
     ) : ViewModel() {
@@ -229,11 +226,11 @@ class ScheduleEditorViewModel
             }
         }
 
-        private fun updateStartDate(date: java.time.LocalDate) {
+        private fun updateStartDate(date: LocalDate) {
             _uiState.update { currentState ->
                 val adjustedEndDate =
                     if (
-                        currentState.endDate.isBefore(date)
+                        currentState.endDate < date
                     ) {
                         date
                     } else {
@@ -248,7 +245,7 @@ class ScheduleEditorViewModel
             }
         }
 
-        private fun updateEndDate(date: java.time.LocalDate) {
+        private fun updateEndDate(date: LocalDate) {
             _uiState.update { currentState ->
                 currentState.copy(
                     endDate = date,

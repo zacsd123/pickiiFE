@@ -14,7 +14,6 @@ import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import javax.inject.Inject
+import kotlinx.datetime.LocalDate
 
 /** 공고 등록/수정 폼이 어느 모드로 동작 중인지. */
 enum class RecruitFormMode {
@@ -93,9 +91,7 @@ data class RecruitFormUiState(
  *
  * 내비게이션 인자로 전달된 [ARG_POST_ID]가 없으면 등록([RecruitFormMode.CREATE]), 있으면 수정([RecruitFormMode.EDIT]) 모드로 동작한다.
  */
-@HiltViewModel
 class RecruitFormViewModel
-    @Inject
     constructor(
         savedStateHandle: SavedStateHandle,
         private val recruitRepository: RecruitRepository,

@@ -5,18 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickii.R
 import com.example.pickii.domain.model.NotificationSettings
 import com.example.pickii.domain.repository.NotificationSettingsRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 알림 설정 조회/수정을 담당한다(9-5, 9-6). 토글 하나를 바꿀 때마다 즉시 서버에 반영한다. */
-@HiltViewModel
 class NotificationSettingsViewModel
-    @Inject
     constructor(
         private val repository: NotificationSettingsRepository
     ) : ViewModel() {

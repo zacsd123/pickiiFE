@@ -40,7 +40,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.SignupTerms
@@ -49,6 +48,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.koin.androidx.compose.koinViewModel
 
 /** 입력 필드/버튼 공통 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
@@ -68,7 +68,7 @@ fun SignupScreen(
     onBackClick: () -> Unit = {},
     onNavigateHome: () -> Unit = {},
     onNavigateOnboarding: () -> Unit = {},
-    viewModel: SignupViewModel = hiltViewModel()
+    viewModel: SignupViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
