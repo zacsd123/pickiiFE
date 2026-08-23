@@ -3,6 +3,8 @@ package com.example.pickii.data.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.util.Properties
 
 /**
  * 실제 백엔드(Railway 프로덕션)에 붙는 수동 통합 테스트(`*BackendIntegrationTest`) 전용 공용 헬퍼.
@@ -15,6 +17,20 @@ import kotlinx.serialization.json.Json
  * 그대로 검증하기 위함이다.
  */
 internal const val BACKEND_INTEGRATION_TEST_BASE_URL = "https://pikiibackend-production.up.railway.app/api/v1/"
+
+/**
+ * 자격증명을 환경변수가 아니라 gitignore된 `local.properties`에서 읽는다 — 커맨드라인에 비밀번호가
+ * 남아 셸 히스토리에 노출되는 걸 피하기 위함. 경로는 `shared/build.gradle.kts`의
+ * `backendIntegrationTest` 태스크가 시스템 프로퍼티로 넘겨준다. 파일/키가 없으면 빈 문자열을
+ * 반환하고, 호출부(테스트)가 `assumeTrue`로 스킵 처리한다.
+ */
+internal fun readLocalTestCredential(key: String): String? {
+    val path = System.getProperty("pickii.localPropertiesPath") ?: return null
+    val file = File(path)
+    if (!file.exists()) return null
+    val properties = Properties().apply { file.inputStream().use { load(it) } }
+    return properties.getProperty(key)?.takeIf { it.isNotBlank() }
+}
 
 internal fun backendIntegrationTestHttpClient(authSession: AuthSession = NoOpAuthSession()): HttpClient =
     HttpClientFactory(

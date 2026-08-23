@@ -80,6 +80,9 @@ afterEvaluate {
         dependsOn("compileAndroidHostTest")
         testClassesDirs = hostTest.get().testClassesDirs
         classpath = hostTest.get().classpath
+        // 커맨드라인에 비밀번호를 안 남기려고 환경변수 대신 gitignore된 local.properties 파일에서
+        // 읽는다 — 경로를 시스템 프로퍼티로 전달(AuthApiServiceBackendIntegrationTest가 읽음).
+        systemProperty("pickii.localPropertiesPath", rootProject.file("local.properties").absolutePath)
         filter {
             includeTestsMatching("*BackendIntegrationTest*")
             isFailOnNoMatchingTests = false
