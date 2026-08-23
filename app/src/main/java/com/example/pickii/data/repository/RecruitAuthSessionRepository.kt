@@ -3,9 +3,12 @@ package com.example.pickii.data.repository
 import com.example.pickii.data.local.DeviceIdProvider
 import com.example.pickii.data.local.TokenStore
 import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.LoginRequest
+import com.example.pickii.data.remote.dto.LoginResponseDto
 import com.example.pickii.data.remote.dto.LogoutRequest
 import com.example.pickii.data.remote.dto.SocialLoginRequest
+import com.example.pickii.data.remote.dto.SocialLoginResponseDto
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.ProfileRepository
@@ -25,7 +28,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.Json
 
 /**
  * `POST /auth/login`으로 실제 로그인을 수행하는 Repository.
@@ -42,8 +44,7 @@ class RecruitAuthSessionRepository
         private val tokenStore: TokenStore,
         private val deviceIdProvider: DeviceIdProvider,
         private val profileRepository: ProfileRepository,
-        private val notificationRepository: NotificationRepository,
-        private val json: Json
+        private val notificationRepository: NotificationRepository
     ) : SessionRepository {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -77,7 +78,7 @@ class RecruitAuthSessionRepository
             password: String,
             autoLogin: Boolean
         ): Result<CurrentUser> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<LoginResponseDto>> {
                 val deviceId = deviceIdProvider.getDeviceId()
                 authApiService.login(LoginRequest(email, password, autoLogin, deviceId))
             }.map { envelope ->
@@ -97,7 +98,7 @@ class RecruitAuthSessionRepository
             kakaoAccessToken: String,
             autoLogin: Boolean
         ): Result<CurrentUser> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<SocialLoginResponseDto>> {
                 val deviceId = deviceIdProvider.getDeviceId()
                 authApiService.socialLogin(
                     SOCIAL_PROVIDER_KAKAO,
@@ -120,7 +121,7 @@ class RecruitAuthSessionRepository
         override suspend fun logout(): Result<Unit> {
             unregisterDeviceToken()
             val result =
-                safeApiCallUnit(json) { authApiService.logout(LogoutRequest(deviceIdProvider.getDeviceId())) }
+                safeApiCallUnit { authApiService.logout(LogoutRequest(deviceIdProvider.getDeviceId())) }
             clearSession()
             return result
         }

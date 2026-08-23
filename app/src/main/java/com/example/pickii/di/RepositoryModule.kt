@@ -40,18 +40,17 @@ val repositoryModule =
                 tokenStore = get(),
                 deviceIdProvider = get(),
                 profileRepository = get(),
-                notificationRepository = get(),
-                json = get()
+                notificationRepository = get()
             )
         }
         single<RecruitRepository> {
             RecruitApiRepository(recruitApiService = get(), masterDataRepository = get(), json = get())
         }
         single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get(), json = get()) }
-        single<SignupRepository> { SignupApiRepository(authApiService = get(), json = get()) }
+        single<SignupRepository> { SignupApiRepository(authApiService = get()) }
         single<ProfileRepository> { ProfileApiRepository(profileApiService = get(), json = get()) }
         single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get(), json = get()) }
-        single<AccountRepository> { AccountApiRepository(authApiService = get(), json = get()) }
+        single<AccountRepository> { AccountApiRepository(authApiService = get()) }
         single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get(), json = get()) }
         single<FeedbackRepository> { FeedbackApiRepository(apiService = get(), json = get()) }
         single<ChatRepository> {

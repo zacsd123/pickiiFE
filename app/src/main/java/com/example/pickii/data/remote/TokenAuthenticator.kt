@@ -2,7 +2,7 @@ package com.example.pickii.data.remote
 
 import com.example.pickii.data.local.DeviceIdProvider
 import com.example.pickii.data.local.TokenStore
-import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.api.RetrofitAuthRefreshService
 import com.example.pickii.data.remote.dto.TokenRefreshRequest
 import com.example.pickii.util.network.safeApiCall
 import kotlinx.coroutines.runBlocking
@@ -22,11 +22,13 @@ private const val MAX_REFRESH_ATTEMPTS = 2
  *
  * Koin 싱글턴(`di/InfraModule.kt`).
  *
- * ⚠️ [authApiService] 순환 의존성 경고 — 절대 `Lazy` 벗기고 즉시 주입으로 바꾸지 말 것:
- * 이 클래스가 붙는 OkHttpClient로 Retrofit이 만들어지고, 그 Retrofit이 [AuthApiService]를 만든다.
- * 즉 `OkHttpClient → TokenAuthenticator → AuthApiService → Retrofit → OkHttpClient`로 순환한다.
- * `di/InfraModule.kt`에서 `lazy { get<AuthApiService>() }`로 감싸지 않고 그냥 `get()`으로 즉시
- * 해석하면, OkHttpClient를 만드는 도중에 같은 OkHttpClient를 다시 만들려고 해서
+ * ⚠️ [authRefreshService] 순환 의존성 경고 — 절대 `Lazy` 벗기고 즉시 주입으로 바꾸지 말 것:
+ * 이 클래스가 붙는 OkHttpClient로 Retrofit이 만들어지고, 그 Retrofit이 [RetrofitAuthRefreshService]를
+ * 만든다. 즉 `OkHttpClient → TokenAuthenticator → RetrofitAuthRefreshService → Retrofit →
+ * OkHttpClient`로 순환한다(원래는 `AuthApiService`가 이 역할이었는데, `AuthApiService`가 Ktor로
+ * 전환되면서 이 전용 인터페이스로 갈아탔다 — 순환 구조 자체는 그대로다).
+ * `di/InfraModule.kt`에서 `lazy { get<RetrofitAuthRefreshService>() }`로 감싸지 않고 그냥 `get()`으로
+ * 즉시 해석하면, OkHttpClient를 만드는 도중에 같은 OkHttpClient를 다시 만들려고 해서
  * **`StackOverflowError`가 첫 네트워크 호출(로그인) 시점에 터진다** — 빌드는 멀쩡히 통과하고
  * 런타임에만 죽어서 원인 찾기 아주 어렵다(`CircularDependencyKoinTest`에서 실측 재현해뒀다).
  * Hilt에서는 `Provider<AuthApiService>`가 하던 역할을 [Lazy]가 대신한다 — `.value`를 처음 건드리는
@@ -39,7 +41,7 @@ private const val MAX_REFRESH_ATTEMPTS = 2
 class TokenAuthenticator(
     private val tokenStore: TokenStore,
     private val deviceIdProvider: DeviceIdProvider,
-    private val authApiService: Lazy<AuthApiService>,
+    private val authRefreshService: Lazy<RetrofitAuthRefreshService>,
     private val json: Json
 ) : Authenticator {
     private val refreshLock = Any()
@@ -73,7 +75,7 @@ class TokenAuthenticator(
             val newAccessToken =
                 runBlocking {
                     safeApiCall(json) {
-                        authApiService.value
+                        authRefreshService.value
                             .refreshToken(TokenRefreshRequest(deviceIdProvider.getDeviceId(), refreshToken))
                     }.map { it.data }
                         .onSuccess { tokenStore.saveTokens(it.accessToken, it.refreshToken) }

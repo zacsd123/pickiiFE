@@ -7,7 +7,7 @@ import com.example.pickii.data.notification.ActiveChatRoomTracker
 import com.example.pickii.data.notification.FcmTokenRegistrar
 import com.example.pickii.data.remote.AuthInterceptor
 import com.example.pickii.data.remote.TokenAuthenticator
-import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.api.RetrofitAuthRefreshService
 import com.example.pickii.data.remote.socket.ChatStompClient
 import org.koin.dsl.module
 
@@ -32,7 +32,7 @@ val infraModule =
                 deviceIdProvider = get(),
                 // 순환 의존성 주의: 절대 lazy{}를 벗기지 말 것. TokenAuthenticator.kt의 클래스 주석에
                 // 이유(StackOverflowError 실측 재현 포함)를 자세히 적어뒀다.
-                authApiService = lazy { get<AuthApiService>() },
+                authRefreshService = lazy { get<RetrofitAuthRefreshService>() },
                 json = get()
             )
         }

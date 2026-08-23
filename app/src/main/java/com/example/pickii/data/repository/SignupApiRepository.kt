@@ -1,30 +1,32 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.AuthApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.EmailSendRequest
 import com.example.pickii.data.remote.dto.EmailVerifyRequest
+import com.example.pickii.data.remote.dto.EmailVerifyResponseDto
+import com.example.pickii.data.remote.dto.NicknameCheckResponseDto
 import com.example.pickii.data.remote.dto.PasswordResetRequest
 import com.example.pickii.data.remote.dto.SignupRequest
+import com.example.pickii.data.remote.dto.SignupResponseDto
 import com.example.pickii.data.remote.dto.SignupTermsDto
 import com.example.pickii.domain.model.EmailPurpose
 import com.example.pickii.domain.model.SignupTerms
 import com.example.pickii.domain.repository.SignupRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
-import kotlinx.serialization.json.Json
 
 /** `1. Authentication` 문서의 이메일 인증/닉네임 중복확인/회원가입/비밀번호 재설정으로 [SignupRepository]를 구현한다. */
 class SignupApiRepository
     constructor(
-        private val authApiService: AuthApiService,
-        private val json: Json
+        private val authApiService: AuthApiService
     ) : SignupRepository {
         override suspend fun sendEmailCode(
             email: String,
             purpose: EmailPurpose
         ): Result<Unit> =
-            safeApiCallUnit(json) {
+            safeApiCallUnit {
                 authApiService.sendEmailCode(EmailSendRequest(email = email, type = purpose.name))
             }
 
@@ -33,7 +35,7 @@ class SignupApiRepository
             code: String,
             purpose: EmailPurpose
         ): Result<String> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<EmailVerifyResponseDto>> {
                 authApiService.verifyEmailCode(EmailVerifyRequest(email = email, code = code, type = purpose.name))
             }.mapCatching { envelope ->
                 val body = envelope.data
@@ -42,7 +44,7 @@ class SignupApiRepository
             }
 
         override suspend fun checkNickname(nickname: String): Result<String> =
-            safeApiCall(json) { authApiService.checkNickname(nickname) }
+            safeApiCall<ApiEnvelope<NicknameCheckResponseDto>> { authApiService.checkNickname(nickname) }
                 .mapCatching { envelope ->
                     val body = envelope.data
                     if (!body.isAvailable) throw ApiException("NICKNAME_ALREADY_EXISTS", "이미 사용 중인 닉네임입니다.")
@@ -58,7 +60,7 @@ class SignupApiRepository
             nicknameVerificationToken: String,
             terms: SignupTerms
         ): Result<Unit> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<SignupResponseDto>> {
                 authApiService.signUp(
                     SignupRequest(
                         nickname = nickname,
@@ -86,7 +88,7 @@ class SignupApiRepository
             newPassword: String,
             newPasswordConfirm: String
         ): Result<Unit> =
-            safeApiCallUnit(json) {
+            safeApiCallUnit {
                 authApiService.resetPassword(
                     PasswordResetRequest(
                         email = email,

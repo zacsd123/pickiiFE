@@ -2,12 +2,16 @@ package com.example.pickii.di
 
 import com.example.pickii.BuildConfig
 import com.example.pickii.data.remote.AuthInterceptor
+import com.example.pickii.data.remote.AuthSession
+import com.example.pickii.data.remote.HttpClientFactory
 import com.example.pickii.data.remote.TokenAuthenticator
+import com.example.pickii.data.remote.TokenStoreAuthSession
 import com.example.pickii.data.remote.api.ApplicantApiService
 import com.example.pickii.data.remote.api.AuthApiService
 import com.example.pickii.data.remote.api.CalendarApiService
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.api.FeedbackApiService
+import com.example.pickii.data.remote.api.KtorAuthApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
 import com.example.pickii.data.remote.api.MeetingPollApiService
 import com.example.pickii.data.remote.api.MyPageActivityApiService
@@ -16,6 +20,9 @@ import com.example.pickii.data.remote.api.NotificationSettingsApiService
 import com.example.pickii.data.remote.api.ProfileApiService
 import com.example.pickii.data.remote.api.ProjectApiService
 import com.example.pickii.data.remote.api.RecruitApiService
+import com.example.pickii.data.remote.api.RetrofitAuthRefreshService
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -56,7 +63,23 @@ val networkModule =
                 .build()
         }
 
-        single<AuthApiService> { get<Retrofit>().create(AuthApiService::class.java) }
+        single<AuthSession> { TokenStoreAuthSession(get(), get()) }
+
+        // Retrofit→Ktor 전환 파일럿. 이 HttpClient는 AuthApiService만 쓴다 — 나머지 12개
+        // 서비스는 아직 Retrofit(위 OkHttpClient/Retrofit 싱글턴)을 그대로 쓴다.
+        single<HttpClient> {
+            HttpClientFactory(
+                engine = OkHttp.create(),
+                baseUrl = BuildConfig.API_BASE_URL,
+                json = get(),
+                authSession = get(),
+                // 기존 OkHttp HttpLoggingInterceptor(BODY, BuildConfig.DEBUG 가드)와 동일한 정책.
+                enableBodyLogging = BuildConfig.DEBUG
+            ).create()
+        }
+
+        single<AuthApiService> { KtorAuthApiService(get()) }
+        single<RetrofitAuthRefreshService> { get<Retrofit>().create(RetrofitAuthRefreshService::class.java) }
         single<MasterDataApiService> { get<Retrofit>().create(MasterDataApiService::class.java) }
         single<RecruitApiService> { get<Retrofit>().create(RecruitApiService::class.java) }
         single<ProfileApiService> { get<Retrofit>().create(ProfileApiService::class.java) }
