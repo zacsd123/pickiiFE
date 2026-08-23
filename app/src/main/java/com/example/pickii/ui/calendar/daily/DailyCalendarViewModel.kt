@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.repository.CalendarRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.pickii.util.today
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,14 +13,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.example.pickii.util.today
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.YearMonth
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import javax.inject.Inject
 
 private val ALL_DAY_START = LocalTime(0, 0)
 private val ALL_DAY_END = LocalTime(23, 59)
@@ -28,9 +26,7 @@ private val ALL_DAY_END = LocalTime(23, 59)
 /**
  * 일일 캘린더 화면의 상태를 관리한다. [CalendarRepository]의 일정 캐시에서 선택한 날짜에 해당하는 것만 걸러 보여준다.
  */
-@HiltViewModel
 class DailyCalendarViewModel
-    @Inject
     constructor(
         private val calendarRepository: CalendarRepository
     ) : ViewModel() {

@@ -13,8 +13,6 @@ import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.today
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -28,6 +26,8 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 private const val ERROR_CODE_UNANSWERED_EXISTS = "UNANSWERED_EXISTS"
 
@@ -157,7 +157,11 @@ internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
  */
 internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfirmedUiModel) {
     if (confirmed.scheduleId in _uiState.value.savedMeetingScheduleIds) return
-    val start = Instant.fromEpochMilliseconds(confirmed.slotStartMillis).toLocalDateTime(TimeZone.currentSystemDefault())
+    val start =
+        Instant
+            .fromEpochMilliseconds(
+                confirmed.slotStartMillis
+            ).toLocalDateTime(TimeZone.currentSystemDefault())
     val end = Instant.fromEpochMilliseconds(confirmed.slotEndMillis).toLocalDateTime(TimeZone.currentSystemDefault())
 
     viewModelScope.launch {

@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.AvatarPlaceholder
@@ -49,6 +48,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * 마이페이지 홈. 프로필 요약(닉네임/레벨/경험치), 활동내역 5종, 설정 진입점을 보여준다.
@@ -69,7 +69,7 @@ fun MyPageHomeScreen(
     onFeedbackClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    viewModel: MyPageHomeViewModel = hiltViewModel()
+    viewModel: MyPageHomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

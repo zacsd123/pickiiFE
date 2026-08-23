@@ -46,13 +46,13 @@ import com.example.pickii.ui.theme.PickiiGraySecondary
 import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGray
-import java.text.SimpleDateFormat
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * 회의 소요 시간을 선택한다. 30/60/90/120분만 유효하다(데모 시나리오 명시).

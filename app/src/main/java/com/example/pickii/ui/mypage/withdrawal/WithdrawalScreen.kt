@@ -37,7 +37,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
@@ -48,6 +47,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
+import org.koin.androidx.compose.koinViewModel
 
 private val FieldCornerRadius = 14.dp
 private val WithdrawWarningBackground = Color(0xFFFDECEA)
@@ -62,7 +62,7 @@ private val WithdrawWarningBackground = Color(0xFFFDECEA)
 fun WithdrawalScreen(
     onBackClick: () -> Unit,
     onComplete: () -> Unit,
-    viewModel: WithdrawalViewModel = hiltViewModel()
+    viewModel: WithdrawalViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

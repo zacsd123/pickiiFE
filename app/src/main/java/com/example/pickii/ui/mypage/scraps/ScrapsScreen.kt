@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.MyScrap
@@ -43,13 +42,14 @@ import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteBlue
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.koin.androidx.compose.koinViewModel
 
 /** 스크랩한 공고 화면(17번). 목록에서 바로 스크랩 해제할 수 있다. */
 @Composable
 fun ScrapsScreen(
     onBackClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    viewModel: ScrapsViewModel = hiltViewModel()
+    viewModel: ScrapsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

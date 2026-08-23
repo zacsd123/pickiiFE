@@ -20,7 +20,6 @@ import com.example.pickii.ui.common.entrydraft.ExperienceDraft
 import com.example.pickii.ui.common.entrydraft.LicenseDraft
 import com.example.pickii.ui.common.entrydraft.LinkDraft
 import com.example.pickii.ui.common.entrydraft.SkillToolDraft
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.YearMonth
-import javax.inject.Inject
 
 /** 온보딩 전체 단계 수. */
 internal const val ONBOARDING_TOTAL_STEPS = 8
@@ -93,9 +91,7 @@ data class OnboardingUiState(
  * 온보딩 8단계(학교/전공 → 관심분야 → 희망진로 → 장점 → 수상및경험 → Skill&Tool → 외부링크 → 자격증)의
  * 입력 상태를 누적하고, 마지막 단계에서 [ProfileRepository.createProfile]로 한 번에 제출한다.
  */
-@HiltViewModel
 class OnboardingViewModel
-    @Inject
     constructor(
         private val masterDataRepository: MasterDataRepository,
         private val profileRepository: ProfileRepository

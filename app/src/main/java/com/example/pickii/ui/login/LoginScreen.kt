@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.ui.common.ConfirmDialog
@@ -59,6 +58,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 /** 입력 필드와 버튼에 공통으로 사용하는 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
@@ -85,7 +85,7 @@ fun LoginScreen(
     onNavigateToPasswordReset: () -> Unit = {},
     onSignUpClick: () -> Unit = {},
     onGuestClick: () -> Unit = {},
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

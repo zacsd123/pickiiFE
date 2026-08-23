@@ -20,17 +20,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.R
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
-import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.common.toComposeColor
 import com.example.pickii.ui.theme.PickiiInk
 import com.example.pickii.ui.theme.PickiiPaletteRed
@@ -38,10 +40,6 @@ import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
-import androidx.compose.material3.Icon
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.size
-import com.example.pickii.R
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
 private val SummaryTitleColor = PickiiInk
@@ -168,13 +166,15 @@ private fun ScheduleSummaryHeader(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(
-                    id = if (isExpanded) {
-                        R.drawable.ic_chevron_up
-                    } else {
-                        R.drawable.ic_chevron_down
-                    }
-                ),
+                painter =
+                    painterResource(
+                        id =
+                            if (isExpanded) {
+                                R.drawable.ic_chevron_up
+                            } else {
+                                R.drawable.ic_chevron_down
+                            }
+                    ),
                 contentDescription = if (isExpanded) "접기" else "펼치기",
                 tint = Color.Black,
                 modifier = Modifier.size(20.dp)

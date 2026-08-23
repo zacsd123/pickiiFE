@@ -19,7 +19,6 @@ import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.ui.calendar.daily.DailyScheduleUiModel
 import com.example.pickii.ui.common.toComposeColor
 import com.example.pickii.util.today
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 /**

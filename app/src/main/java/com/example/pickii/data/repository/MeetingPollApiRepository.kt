@@ -18,10 +18,9 @@ import com.example.pickii.domain.model.TeamSchedule
 import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
-import com.example.pickii.util.parseIsoOffsetDateTime
 import com.example.pickii.util.nowDateTime
+import com.example.pickii.util.parseIsoOffsetDateTime
 import com.example.pickii.util.today
-import kotlinx.serialization.json.Json
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -29,8 +28,7 @@ import kotlinx.datetime.YearMonth
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.number
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.serialization.json.Json
 
 private val TimeFormat =
     LocalTime.Format {
@@ -40,9 +38,7 @@ private val TimeFormat =
     }
 
 /** `7-C 팀 일정(회의 일정 조율)` API로 [MeetingPollRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
-@Singleton
 class MeetingPollApiRepository
-    @Inject
     constructor(
         private val apiService: MeetingPollApiService,
         private val json: Json

@@ -26,20 +26,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pickii.R
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.koin.androidx.compose.koinViewModel
 
 /** 로그아웃 확인 화면(설정 화면에서 진입). */
 @Composable
 fun LogoutScreen(
     onBackClick: () -> Unit,
     onLoggedOut: () -> Unit,
-    viewModel: LogoutViewModel = hiltViewModel()
+    viewModel: LogoutViewModel = koinViewModel()
 ) {
     LogoutScreenContent(
         onBackClick = onBackClick,

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
@@ -66,13 +64,14 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import com.example.pickii.util.toDisplayString
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.koin.androidx.compose.koinViewModel
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /** 입력 필드/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
@@ -94,7 +93,7 @@ fun RecruitFormScreen(
     onBackClick: () -> Unit = {},
     onSubmitComplete: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
-    viewModel: RecruitFormViewModel = hiltViewModel()
+    viewModel: RecruitFormViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

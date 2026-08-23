@@ -9,7 +9,6 @@ import com.example.pickii.domain.model.FeedbackScores
 import com.example.pickii.domain.model.FeedbackTeamMember
 import com.example.pickii.domain.repository.FeedbackRepository
 import com.example.pickii.ui.common.RecruitUiEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +21,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
-import javax.inject.Inject
 
 private const val ERROR_CODE_ALREADY_EVALUATED = "ALREADY_EVALUATED"
 private val FeedbackDateFormatter =
@@ -34,9 +32,7 @@ private val FeedbackDateFormatter =
         char('일')
     }
 
-@HiltViewModel
 class FeedbackViewModel
-    @Inject
     constructor(
         private val feedbackRepository: FeedbackRepository
     ) : ViewModel() {

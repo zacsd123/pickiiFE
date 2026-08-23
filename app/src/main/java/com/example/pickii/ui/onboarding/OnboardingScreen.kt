@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
@@ -60,6 +59,7 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.koin.androidx.compose.koinViewModel
 
 /** 필드/카드 공통 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
@@ -75,7 +75,7 @@ private val NavButtonSize = 48.dp
 @Composable
 fun OnboardingScreen(
     onFinished: () -> Unit = {},
-    viewModel: OnboardingViewModel = hiltViewModel()
+    viewModel: OnboardingViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

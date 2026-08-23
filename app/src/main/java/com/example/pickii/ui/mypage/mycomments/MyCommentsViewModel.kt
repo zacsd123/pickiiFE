@@ -5,13 +5,9 @@ import com.example.pickii.domain.model.MyComment
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
 /** 작성한 댓글 목록(4-6)을 조회한다. */
-@HiltViewModel
 class MyCommentsViewModel
-    @Inject
     constructor(
         private val repository: MyPageActivityRepository
     ) : PagedListViewModel<MyComment, MyCommentsUiState>(
@@ -26,7 +22,11 @@ class MyCommentsViewModel
             page: Int,
             size: Int
         ): Result<PagedFetchResult<MyComment>> =
-            repository.getMyComments(page = page, size = size).map { PagedFetchResult(it.items, it.currentPage, it.totalPages) }
+            repository
+                .getMyComments(
+                    page = page,
+                    size = size
+                ).map { PagedFetchResult(it.items, it.currentPage, it.totalPages) }
 
         override fun MyCommentsUiState.withPagedState(
             isLoading: Boolean,

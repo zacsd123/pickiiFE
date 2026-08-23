@@ -13,11 +13,11 @@ import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
+import com.example.pickii.util.today
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.json.Json
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -26,9 +26,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.number
-import com.example.pickii.util.today
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.serialization.json.Json
 
 /** API가 요구하는 필수 시작/종료 시간이 없는 "하루 종일" 일정에 사용하는 시간 범위. */
 private val ALL_DAY_START = LocalTime(0, 0)
@@ -41,9 +39,7 @@ private val TimeFormat =
     }
 
 /** `7-1`~`7-9` API로 [CalendarRepository]를 구현한다. */
-@Singleton
 class CalendarApiRepository
-    @Inject
     constructor(
         private val apiService: CalendarApiService,
         private val json: Json

@@ -6,7 +6,6 @@ import com.example.pickii.domain.model.ScheduleColorType
 import com.example.pickii.domain.model.ScheduleRepeatType
 import com.example.pickii.domain.repository.CalendarRepository
 import com.example.pickii.domain.repository.NotificationRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,7 +23,6 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import javax.inject.Inject
 
 private val ScheduleTimeFormatter =
     LocalTime.Format {
@@ -36,9 +34,7 @@ private val ScheduleTimeFormatter =
 /**
  * 월간 캘린더 화면의 상태와 사용자 동작을 관리한다.
  */
-@HiltViewModel
 class MonthlyCalendarViewModel
-    @Inject
     constructor(
         private val calendarRepository: CalendarRepository,
         private val notificationRepository: NotificationRepository
@@ -260,4 +256,3 @@ private fun DayOfWeek.toKoreanShortName(): String =
         DayOfWeek.SATURDAY -> "토"
         DayOfWeek.SUNDAY -> "일"
     }
-

@@ -7,15 +7,11 @@ import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** 작성 공고 목록(4-5) 조회, 마감/추가모집/삭제(3-4, 3-5, 3-6)를 담당한다. */
-@HiltViewModel
 class MyRecruitsViewModel
-    @Inject
     constructor(
         private val myPageActivityRepository: MyPageActivityRepository,
         private val recruitRepository: RecruitRepository

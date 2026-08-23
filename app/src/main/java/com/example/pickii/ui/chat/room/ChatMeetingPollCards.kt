@@ -49,8 +49,6 @@ import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiGray650
 import com.example.pickii.ui.theme.PickiiInk
 import kotlinx.coroutines.delay
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -59,6 +57,8 @@ import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * 회의 조율 하나(pollId 기준)의 진행 상황을 카드 하나(노란 라운드 박스)로 보여준다. 예전엔 등록공지/응답폼/
@@ -347,7 +347,14 @@ private fun MeetingPollTimeChip(
     ) {
         Text(
             text = label,
-            color = if (selected) Color.White else if (enabled) Color.Black else PickiiGray400,
+            color =
+                if (selected) {
+                    Color.White
+                } else if (enabled) {
+                    Color.Black
+                } else {
+                    PickiiGray400
+                },
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
         )

@@ -6,20 +6,16 @@ import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val ERROR_CODE_RESUME_NOT_FOUND = "RESUME_NOT_FOUND"
 
 /** 이력서 형태의 내 프로필 조회 화면. [ProfileRepository]/[MasterDataRepository]를 조합해서 보여준다. */
-@HiltViewModel
 class ProfileViewModel
-    @Inject
     constructor(
         private val profileRepository: ProfileRepository,
         private val masterDataRepository: MasterDataRepository

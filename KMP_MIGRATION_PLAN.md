@@ -41,17 +41,17 @@ Pickii/
 
 | 현재 (`libs.versions.toml`) | 용도 | KMP 대안 | 비고 |
 |---|---|---|---|
-| Hilt `2.60.1` + KSP | DI | **Koin** | Hilt는 어노테이션 프로세서 기반이라 Kotlin/Native(iOS) 미지원. Koin은 런타임 DI라 멀티플랫폼 공식 지원. `@HiltViewModel` 쓰는 화면 전부(거의 모든 화면) 수정 필요 |
-| Retrofit `2.11.0` + OkHttp `4.12.0` | REST API 통신 | **Ktor Client** | 가장 큰 작업. `data/remote/api/*ApiService.kt` 13개 + `data/repository/*ApiRepository.kt` 15개가 전부 대상 |
+| Hilt `2.60.1` + KSP | DI | **Koin `4.1.1`** | Hilt는 어노테이션 프로세서 기반이라 Kotlin/Native(iOS) 미지원. Koin은 런타임 DI라 멀티플랫폼 공식 지원. `@HiltViewModel` 쓰는 화면 전부(거의 모든 화면) 수정 필요. ⚠️ **버전 고정 필요**: 프로젝트 Kotlin `2.2.10`이 소비 가능한 klib ABI는 `<=2.2.0`인데 Koin `4.2.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 있어 못 읽음(2026-08-22 확인, `PROGRESS_kmp-migration.md` 참고). `4.1.1`이 마지막 호환 버전 |
+| Retrofit `2.11.0` + OkHttp `4.12.0` | REST API 통신 | **Ktor Client `3.3.3`** | 가장 큰 작업. `data/remote/api/*ApiService.kt` 13개 + `data/repository/*ApiRepository.kt` 15개가 전부 대상. ⚠️ **버전 고정 필요**: Ktor `3.4.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 `2.2.10`과 ABI 불일치(2026-08-22 확인). `3.3.3`이 마지막 호환 버전 |
 | `AuthInterceptor`, `TokenAuthenticator` (OkHttp) | 토큰 첨부·갱신 | Ktor `Auth` 플러그인 (Bearer + refresh 콜백) | 로직은 거의 그대로 옮겨 쓸 수 있음, API만 다름 |
 | `kotlinx.serialization` | JSON | 그대로 유지 | 이미 멀티플랫폼 라이브러리 |
-| Krossbow (`stomp-kxserialization-json` + `websocket-okhttp`) | 채팅 WebSocket(STOMP) | STOMP 부분은 그대로, `websocket-okhttp` → **`krossbow-websocket-ktor`** | Krossbow 자체는 이미 KMP 라이브러리. WebSocket 엔진만 OkHttp 전용에서 Ktor 엔진(Android=OkHttp, iOS=Darwin)으로 교체 |
+| Krossbow `9.3.0` (`stomp-kxserialization-json` + `websocket-okhttp`) | 채팅 WebSocket(STOMP) | STOMP 부분은 그대로, `websocket-okhttp` → **`krossbow-websocket-ktor`** | Krossbow 자체는 이미 KMP 라이브러리. WebSocket 엔진만 OkHttp 전용에서 Ktor 엔진(Android=OkHttp, iOS=Darwin)으로 교체. ⚠️ **버전 고정 필요**: 최신 `10.0.0`의 iOS klib는 Kotlin `2.4.10` 컴파일러로 빌드돼 있어 프로젝트 Kotlin `2.2.10`과 불일치(2026-08-22 확인). `9.3.0`이 마지막 호환 버전(컴파일러 `2.1.20`) — `stomp-core`/`stomp-kxserialization-json`/`websocket-ktor` 3개 아티팩트 전부 확인함. 10.0.0은 Ktor 2 레거시 지원 제거가 주 변경점이라 어차피 Ktor 3만 쓰는 이 프로젝트엔 영향 없음, 대안 라이브러리 필요 없음 |
 | Coil3 (`coil-compose`, `coil-network-okhttp`) | 이미지 로딩 | 그대로 + **`coil-network-ktor3`** | 이미 `io.coil-kt.coil3` 그룹이라 멀티플랫폼 버전을 쓰고 있음. 네트워크 엔진만 교체 |
 | `androidx.datastore.preferences` | 토큰·설정 저장 | 그대로 유지 | 1.1.0부터 공식 멀티플랫폼 지원. `TokenStore` 등은 파일 경로 생성 부분만 `expect/actual` 필요 |
 | Navigation Compose `2.9.8` | 화면 내비게이션 | 그대로 유지 (버전 확인) | androidx Navigation이 최근 멀티플랫폼 아티팩트를 지원 시작. Compose Multiplatform 1.10(2026-01)부터 Navigation 3 공식 지원도 추가됨 — 지금 버전이 멀티플랫폼 타깃을 인식 못 하면 Navigation 3로 갈아타는 것도 검토 |
 | `androidx.compose.material.icons.extended` | 아이콘 | **`compose.materialIconsExtended`** (JetBrains CMP 아티팩트) | 그룹이 다름, import 경로만 바뀜 |
 | Firebase Messaging (`firebase-bom`, `firebase-messaging`) + `google-services.json` | 푸시 알림 | **GitLive `firebase-kotlin-sdk`** (`dev.gitlive:firebase-messaging`) 또는 **KMPNotifier** | Firebase 공식 Android SDK는 iOS 미지원. iOS는 APNs 인증서 발급까지 별도로 필요 (Apple Developer 계정 필수) |
-| Kakao SDK (`v2-user`) | 카카오 로그인 | 공식 KMP 아티팩트 없음 → **직접 `expect/actual`** | androidMain은 기존 Kakao Android SDK 그대로, iosMain은 Kakao iOS SDK(CocoaPods 배포)를 Kotlin/Native cinterop으로 연결. **이 프로젝트에서 가장 불확실성이 큰 항목** — 별도 스파이크 필요 |
+| Kakao SDK (`v2-user`) | 카카오 로그인 | 공식 KMP 아티팩트 없음 → **인터페이스(commonMain) + Swift 구현체 주입(iosApp)** | ✅ **스파이크 완료(2026-08-22), 실제 로그인 통과.** 카카오 iOS SDK(2.28.0)가 SPM 전용 배포되는 순수 Swift 패키지라 Kotlin/Native cinterop(당초 검토한 방식)은 사실상 불가능함을 확인 — 대신 `KakaoAuthBridge` Kotlin 인터페이스를 정의하고 `iosApp`의 Swift(`KakaoAuthBridgeImpl.swift`)가 실제 SDK를 호출해 구현체를 주입하는 방식으로 연동, 시뮬레이터에서 실제 액세스 토큰 획득까지 확인함. androidMain은 기존 Kakao Android SDK 그대로 같은 인터페이스로 구현하면 됨. 상세 내용은 `PROGRESS_kmp-migration.md` 참고 |
 | `coreLibraryDesugaring` (java.time) | 날짜/시간 | **kotlinx-datetime** | desugaring은 Android 전용 트릭이라 iOS에서 안 통함. `LocalDate`/`LocalDateTime` 쓰는 `DateFormatter`, `DateTimeExt`, `ScheduleRecurrence` 등 전부 교체 |
 | `CameraCaptureUtil`, `GalleryPickerBottomSheet`, `PhotoSourceBottomSheet` | 카메라/갤러리 | KMP 미디어 피커 라이브러리(예: Peekaboo) 또는 자체 `expect/actual` | `ActivityResultContracts`·`ContentResolver` 등 Android 전용 API 사용 중 |
 | `res/values/strings.xml`, `res/drawable/*.xml`, `res/drawable/*.png` | 문자열·아이콘·이미지 리소스 | Compose Multiplatform 리소스 시스템 (`commonMain/composeResources/`) | 벡터 XML·PNG는 대체로 그대로 옮겨지고, `stringResource(R.string.x)` → `stringResource(Res.string.x)`로 호출부만 수정 |
@@ -79,7 +79,7 @@ Pickii/
 - [ ] `PickiiBottomNav`, `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 (Compose 테마는 대부분 그대로 포팅됨)
 - [ ] Mac에서 `iosApp` Xcode 프로젝트 생성, `ComposeUIViewController`로 진입점 연결
 - [ ] iOS 시뮬레이터에서 로그인 → 홈 화면까지 실제로 뜨는지 확인
-- [ ] 카카오 로그인 iOS 연동 스파이크 (여기서 막히면 이후 일정에 큰 영향 — 가장 먼저 검증)
+- [x] 카카오 로그인 iOS 연동 스파이크 — **통과(2026-08-22)**. 인터페이스+Swift 구현체 주입 방식으로 실제 로그인·토큰 획득까지 확인. 백엔드 연동/세션/토큰 갱신은 범위 밖, Phase 5에서 정식 연동 시 처리. 상세는 `PROGRESS_kmp-migration.md` 참고
 
 **이 단계가 끝나야 나머지 17개 화면 영역을 이식하는 데 드는 시간을 현실적으로 추정할 수 있습니다.**
 
