@@ -1,7 +1,5 @@
 package com.example.pickii.ui.mypage.profile
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,6 +81,7 @@ import com.example.pickii.ui.theme.PickiiProfileCardGoldBright
 import com.example.pickii.ui.theme.PickiiProfileCardGoldMid
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import com.example.pickii.util.openUrl
 import kotlinx.datetime.YearMonth
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
@@ -389,8 +387,6 @@ private fun CardInfoRow(
 
 @Composable
 private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
-    val context = LocalContext.current
-
     Box(
         modifier =
             Modifier
@@ -408,13 +404,7 @@ private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
                             "https://${link.url}"
                         }
 
-                    val intent =
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(url)
-                        )
-
-                    context.startActivity(intent)
+                    openUrl(url)
                 },
         contentAlignment = Alignment.Center
     ) {
