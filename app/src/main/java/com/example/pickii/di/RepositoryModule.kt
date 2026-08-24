@@ -46,7 +46,7 @@ val repositoryModule =
         single<RecruitRepository> {
             RecruitApiRepository(recruitApiService = get(), masterDataRepository = get(), json = get())
         }
-        single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get(), json = get()) }
+        single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get()) }
         single<SignupRepository> { SignupApiRepository(authApiService = get()) }
         single<ProfileRepository> { ProfileApiRepository(profileApiService = get(), json = get()) }
         single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get(), json = get()) }
