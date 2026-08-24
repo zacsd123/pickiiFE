@@ -1,8 +1,12 @@
 package com.example.pickii.ui.common
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_login_required_body
+import com.example.pickii.shared.generated.resources.common_login_required_button_cancel
+import com.example.pickii.shared.generated.resources.common_login_required_button_login
+import com.example.pickii.shared.generated.resources.common_login_required_title
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 비로그인 상태에서 로그인이 필요한 동작을 시도했을 때 노출하는 로그인 유도 팝업.
@@ -16,10 +20,10 @@ fun LoginRequiredDialog(
     onDismiss: () -> Unit
 ) {
     ConfirmDialog(
-        title = stringResource(R.string.common_login_required_title),
-        body = stringResource(R.string.common_login_required_body),
-        confirmLabel = stringResource(R.string.common_login_required_button_login),
-        dismissLabel = stringResource(R.string.common_login_required_button_cancel),
+        title = stringResource(Res.string.common_login_required_title),
+        body = stringResource(Res.string.common_login_required_body),
+        confirmLabel = stringResource(Res.string.common_login_required_button_login),
+        dismissLabel = stringResource(Res.string.common_login_required_button_cancel),
         onConfirm = onLoginClick,
         onDismiss = onDismiss
     )

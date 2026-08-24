@@ -14,10 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_feedback_empty
+import com.example.pickii.shared.generated.resources.mypage_feedback_title
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
@@ -27,6 +28,7 @@ import com.example.pickii.ui.feedback.component.FeedbackTipCard
 import com.example.pickii.ui.feedback.component.ReceivedFeedbackCard
 import com.example.pickii.ui.feedback.component.WritableFeedbackCard
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FeedbackScreen(
@@ -63,7 +65,7 @@ fun FeedbackScreen(
 
             uiState.selectedTab == FeedbackTabType.RECEIVED && uiState.projects.isEmpty() -> {
                 EmptyStateMessage(
-                    message = stringResource(R.string.mypage_feedback_empty),
+                    message = stringResource(Res.string.mypage_feedback_empty),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -112,7 +114,7 @@ private fun FeedbackHeaderSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         BackHeader(
-            title = stringResource(R.string.mypage_feedback_title),
+            title = stringResource(Res.string.mypage_feedback_title),
             onBackClick = onBackClick
         )
 

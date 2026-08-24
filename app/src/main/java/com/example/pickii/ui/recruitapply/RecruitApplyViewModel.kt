@@ -3,7 +3,6 @@ package com.example.pickii.ui.recruitapply
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.CurrentUser
@@ -12,6 +11,10 @@ import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.recruit_apply_toast_ai_draft_message_required
+import com.example.pickii.shared.generated.resources.recruit_apply_toast_closed_recruiting
+import com.example.pickii.shared.generated.resources.recruit_detail_toast_already_applied
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
@@ -150,7 +153,7 @@ class RecruitApplyViewModel
         private fun generateAiDraft() {
             val message = _uiState.value.message
             if (message.isBlank()) {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_ai_draft_message_required))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.recruit_apply_toast_ai_draft_message_required))
                 return
             }
             _uiState.update { it.copy(aiDialogState = AiDialogState.Loading) }
@@ -173,12 +176,12 @@ class RecruitApplyViewModel
             val post = _uiState.value.post ?: return
             if (post.status == RecruitStatus.CLOSED) {
                 viewModelScope.launch {
-                    _events.send(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_closed_recruiting))
+                    _events.send(RecruitUiEvent.ShowToast(Res.string.recruit_apply_toast_closed_recruiting))
                 }
                 return
             }
             if (_uiState.value.message.isBlank()) {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_apply_toast_ai_draft_message_required))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.recruit_apply_toast_ai_draft_message_required))
                 return
             }
             _uiState.update { it.copy(isSubmitConfirmDialogVisible = true) }
@@ -198,7 +201,7 @@ class RecruitApplyViewModel
                         _uiState.update { it.copy(isCompletionDialogVisible = true) }
                     }.onFailure { error ->
                         if (error is ApiException && error.code == ERROR_CODE_ALREADY_APPLIED) {
-                            emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_detail_toast_already_applied))
+                            emitEvent(RecruitUiEvent.ShowToast(Res.string.recruit_detail_toast_already_applied))
                         }
                     }
             }

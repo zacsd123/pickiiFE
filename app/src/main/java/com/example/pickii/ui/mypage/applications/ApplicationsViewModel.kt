@@ -1,13 +1,17 @@
 package com.example.pickii.ui.mypage.applications
 
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyApply
 import com.example.pickii.domain.repository.MyPageActivityRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.applications_toast_cancel_failed
+import com.example.pickii.shared.generated.resources.applications_toast_load_failed
+import com.example.pickii.shared.generated.resources.mypage_applications_cancel_toast
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 
 /** 지원 현황 목록(4-4) 조회 및 지원 취소(3-13)를 담당한다. */
 class ApplicationsViewModel
@@ -15,7 +19,7 @@ class ApplicationsViewModel
         private val repository: MyPageActivityRepository
     ) : PagedListViewModel<MyApply, ApplicationsUiState>(
             initialState = ApplicationsUiState(),
-            loadFailureMessageRes = R.string.applications_toast_load_failed
+            loadFailureMessageRes = Res.string.applications_toast_load_failed
         ) {
         init {
             refresh()
@@ -36,7 +40,7 @@ class ApplicationsViewModel
             items: List<MyApply>,
             currentPage: Int,
             totalPages: Int,
-            toastMessageRes: Int?
+            toastMessageRes: StringResource?
         ): ApplicationsUiState =
             copy(
                 isLoading = isLoading,
@@ -63,7 +67,7 @@ class ApplicationsViewModel
                         _uiState.update {
                             it.copy(
                                 pendingCancelApplyId = null,
-                                toastMessageRes = R.string.mypage_applications_cancel_toast
+                                toastMessageRes = Res.string.mypage_applications_cancel_toast
                             )
                         }
                         refresh()
@@ -71,7 +75,7 @@ class ApplicationsViewModel
                         _uiState.update {
                             it.copy(
                                 pendingCancelApplyId = null,
-                                toastMessageRes = R.string.applications_toast_cancel_failed
+                                toastMessageRes = Res.string.applications_toast_cancel_failed
                             )
                         }
                     }

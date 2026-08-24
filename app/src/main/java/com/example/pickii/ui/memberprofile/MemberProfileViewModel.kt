@@ -3,10 +3,11 @@ package com.example.pickii.ui.memberprofile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.member_profile_toast_load_failed
 import com.example.pickii.ui.mypage.profile.ProfileViewUiState
 import com.example.pickii.ui.navigation.ARG_MEMBER_ID
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +49,7 @@ class MemberProfileViewModel
                             it.copy(
                                 isLoading = false,
                                 profile = null,
-                                toastMessageRes = if (isNoResume) null else R.string.member_profile_toast_load_failed
+                                toastMessageRes = if (isNoResume) null else Res.string.member_profile_toast_load_failed
                             )
                         }
                     }

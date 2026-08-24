@@ -2,7 +2,6 @@ package com.example.pickii.ui.mypage.profile.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.AdditionalLinkEntry
 import com.example.pickii.domain.model.ExperienceEntry
@@ -13,6 +12,8 @@ import com.example.pickii.domain.model.University
 import com.example.pickii.domain.model.UpdateProfileInput
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.profile_edit_toast_load_failed
 import com.example.pickii.ui.common.entrydraft.ExperienceDraft
 import com.example.pickii.ui.common.entrydraft.LicenseDraft
 import com.example.pickii.ui.common.entrydraft.LinkDraft
@@ -132,7 +133,7 @@ class ProfileEditViewModel
                         }
                     }.onFailure {
                         _uiState.update {
-                            it.copy(isLoading = false, toastMessageRes = R.string.profile_edit_toast_load_failed)
+                            it.copy(isLoading = false, toastMessageRes = Res.string.profile_edit_toast_load_failed)
                         }
                     }
             }

@@ -23,15 +23,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.today
 import kotlinx.datetime.YearMonth
 import kotlinx.datetime.number
+import org.jetbrains.compose.resources.stringResource
 
 /** 필드/다이얼로그 안 요소의 모서리 둥글기. */
 private val YearMonthFieldCornerRadius = 14.dp
@@ -96,11 +98,11 @@ private fun YearMonthPickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(YearMonth(year, month)) }) {
-                Text(text = stringResource(R.string.common_button_confirm))
+                Text(text = stringResource(Res.string.common_button_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.common_button_cancel)) }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.common_button_cancel)) }
         },
         text = {
             Row(modifier = Modifier.fillMaxWidth()) {

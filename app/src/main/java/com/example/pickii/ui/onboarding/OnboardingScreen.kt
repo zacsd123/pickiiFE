@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -42,10 +41,55 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.login_brand
+import com.example.pickii.shared.generated.resources.onboarding_button_add_experience
+import com.example.pickii.shared.generated.resources.onboarding_button_add_license
+import com.example.pickii.shared.generated.resources.onboarding_button_add_link
+import com.example.pickii.shared.generated.resources.onboarding_button_add_skill
+import com.example.pickii.shared.generated.resources.onboarding_button_skip
+import com.example.pickii.shared.generated.resources.onboarding_dialog_skip_body
+import com.example.pickii.shared.generated.resources.onboarding_dialog_skip_title
+import com.example.pickii.shared.generated.resources.onboarding_label_academic_status
+import com.example.pickii.shared.generated.resources.onboarding_label_major
+import com.example.pickii.shared.generated.resources.onboarding_label_university
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_acquired_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_end_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_desc
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_org
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_title
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_hope
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_license_name
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_link_url
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_major
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_skill_name
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_start_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_strength
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_university
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_high
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_low
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_mid
+import com.example.pickii.shared.generated.resources.onboarding_skill_not_selected_hint
+import com.example.pickii.shared.generated.resources.onboarding_step1_title
+import com.example.pickii.shared.generated.resources.onboarding_step2_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step2_title
+import com.example.pickii.shared.generated.resources.onboarding_step3_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step3_title
+import com.example.pickii.shared.generated.resources.onboarding_step4_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step4_title
+import com.example.pickii.shared.generated.resources.onboarding_step5_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step5_title
+import com.example.pickii.shared.generated.resources.onboarding_step6_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step6_title
+import com.example.pickii.shared.generated.resources.onboarding_step7_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step7_title
+import com.example.pickii.shared.generated.resources.onboarding_step8_subtitle
+import com.example.pickii.shared.generated.resources.onboarding_step8_title
 import com.example.pickii.ui.common.AddEntryButton
 import com.example.pickii.ui.common.AiGenerationDialog
 import com.example.pickii.ui.common.CharacterCounterText
@@ -59,6 +103,8 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 필드/카드 공통 모서리 둥글기. */
@@ -173,7 +219,7 @@ private fun OnboardingScreenContent(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = stringResource(R.string.login_brand),
+                text = stringResource(Res.string.login_brand),
                 color = Color.Black,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -278,7 +324,7 @@ private fun OnboardingScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.onboarding_button_skip),
+                text = stringResource(Res.string.onboarding_button_skip),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
                 modifier =
@@ -292,10 +338,10 @@ private fun OnboardingScreenContent(
 
         if (uiState.isSkipDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.onboarding_dialog_skip_title),
-                body = stringResource(R.string.onboarding_dialog_skip_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.onboarding_dialog_skip_title),
+                body = stringResource(Res.string.onboarding_dialog_skip_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onConfirmSkip,
                 onDismiss = onDismissSkipDialog
             )
@@ -309,14 +355,16 @@ private fun OnboardingScreenContent(
 @Composable
 private fun stepCopy(step: Int): Pair<String, String?> =
     when (step) {
-        1 -> stringResource(R.string.onboarding_step1_title) to null
-        2 -> stringResource(R.string.onboarding_step2_title) to stringResource(R.string.onboarding_step2_subtitle)
-        3 -> stringResource(R.string.onboarding_step3_title) to stringResource(R.string.onboarding_step3_subtitle)
-        4 -> stringResource(R.string.onboarding_step4_title) to stringResource(R.string.onboarding_step4_subtitle)
-        5 -> stringResource(R.string.onboarding_step5_title) to stringResource(R.string.onboarding_step5_subtitle)
-        6 -> stringResource(R.string.onboarding_step6_title) to stringResource(R.string.onboarding_step6_subtitle)
-        7 -> stringResource(R.string.onboarding_step7_title) to stringResource(R.string.onboarding_step7_subtitle)
-        else -> stringResource(R.string.onboarding_step8_title) to stringResource(R.string.onboarding_step8_subtitle)
+        1 -> stringResource(Res.string.onboarding_step1_title) to null
+        2 -> stringResource(Res.string.onboarding_step2_title) to stringResource(Res.string.onboarding_step2_subtitle)
+        3 -> stringResource(Res.string.onboarding_step3_title) to stringResource(Res.string.onboarding_step3_subtitle)
+        4 -> stringResource(Res.string.onboarding_step4_title) to stringResource(Res.string.onboarding_step4_subtitle)
+        5 -> stringResource(Res.string.onboarding_step5_title) to stringResource(Res.string.onboarding_step5_subtitle)
+        6 -> stringResource(Res.string.onboarding_step6_title) to stringResource(Res.string.onboarding_step6_subtitle)
+        7 -> stringResource(Res.string.onboarding_step7_title) to stringResource(Res.string.onboarding_step7_subtitle)
+        else ->
+            stringResource(Res.string.onboarding_step8_title) to
+                stringResource(Res.string.onboarding_step8_subtitle)
     }
 
 /** 1단계: 학적상태/학교/전공. */
@@ -328,7 +376,7 @@ private fun SchoolInfoStep(
     onUniversitySelect: (University) -> Unit,
     onMajorChange: (String) -> Unit
 ) {
-    StepFieldLabel(text = stringResource(R.string.onboarding_label_academic_status))
+    StepFieldLabel(text = stringResource(Res.string.onboarding_label_academic_status))
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -346,24 +394,24 @@ private fun SchoolInfoStep(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    StepFieldLabel(text = stringResource(R.string.onboarding_label_university))
+    StepFieldLabel(text = stringResource(Res.string.onboarding_label_university))
     SearchDropdownField(
         query = uiState.universityQuery,
         onQueryChange = onUniversityQueryChange,
         suggestions = uiState.universitySuggestions,
         onSelect = onUniversitySelect,
         itemLabel = { it.name },
-        placeholder = stringResource(R.string.onboarding_placeholder_university)
+        placeholder = stringResource(Res.string.onboarding_placeholder_university)
     )
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    StepFieldLabel(text = stringResource(R.string.onboarding_label_major))
+    StepFieldLabel(text = stringResource(Res.string.onboarding_label_major))
     OutlinedTextField(
         value = uiState.major,
         onValueChange = onMajorChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = stringResource(R.string.onboarding_placeholder_major), color = PickiiTextGray) },
+        placeholder = { Text(text = stringResource(Res.string.onboarding_placeholder_major), color = PickiiTextGray) },
         singleLine = true,
         shape = RoundedCornerShape(FieldCornerRadius),
         colors = pickiiFieldColors()
@@ -416,7 +464,7 @@ private fun HopeStep(
         value = uiState.hope,
         onValueChange = onHopeChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = stringResource(R.string.onboarding_placeholder_hope), color = PickiiTextGray) },
+        placeholder = { Text(text = stringResource(Res.string.onboarding_placeholder_hope), color = PickiiTextGray) },
         shape = RoundedCornerShape(FieldCornerRadius),
         colors = pickiiFieldColors()
     )
@@ -435,7 +483,12 @@ private fun StrengthStep(
         value = uiState.strength,
         onValueChange = onStrengthChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = stringResource(R.string.onboarding_placeholder_strength), color = PickiiTextGray) },
+        placeholder = {
+            Text(
+                text = stringResource(Res.string.onboarding_placeholder_strength),
+                color = PickiiTextGray
+            )
+        },
         shape = RoundedCornerShape(FieldCornerRadius),
         colors = pickiiFieldColors()
     )
@@ -467,7 +520,7 @@ private fun ExperienceStep(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.onboarding_placeholder_experience_title),
+                        text = stringResource(Res.string.onboarding_placeholder_experience_title),
                         color = PickiiTextGray
                     )
                 },
@@ -481,7 +534,10 @@ private fun ExperienceStep(
                 onValueChange = { onOrganizationChange(draft.id, it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = stringResource(R.string.onboarding_placeholder_experience_org), color = PickiiTextGray)
+                    Text(
+                        text = stringResource(Res.string.onboarding_placeholder_experience_org),
+                        color = PickiiTextGray
+                    )
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(FieldCornerRadius),
@@ -492,7 +548,7 @@ private fun ExperienceStep(
                 YearMonthField(
                     value = draft.startDate,
                     onValueChange = { onStartDateChange(draft.id, it) },
-                    placeholder = stringResource(R.string.onboarding_placeholder_start_date),
+                    placeholder = stringResource(Res.string.onboarding_placeholder_start_date),
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -501,7 +557,7 @@ private fun ExperienceStep(
                 YearMonthField(
                     value = draft.endDate,
                     onValueChange = { onEndDateChange(draft.id, it) },
-                    placeholder = stringResource(R.string.onboarding_placeholder_end_date),
+                    placeholder = stringResource(Res.string.onboarding_placeholder_end_date),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -511,14 +567,17 @@ private fun ExperienceStep(
                 onValueChange = { onDescriptionChange(draft.id, it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = stringResource(R.string.onboarding_placeholder_experience_desc), color = PickiiTextGray)
+                    Text(
+                        text = stringResource(Res.string.onboarding_placeholder_experience_desc),
+                        color = PickiiTextGray
+                    )
                 },
                 shape = RoundedCornerShape(FieldCornerRadius),
                 colors = pickiiFieldColors()
             )
         }
     }
-    AddEntryButton(label = stringResource(R.string.onboarding_button_add_experience), onClick = onAddExperience)
+    AddEntryButton(label = stringResource(Res.string.onboarding_button_add_experience), onClick = onAddExperience)
 }
 
 /** 6단계: 사용 가능 Skill & Tool(반복 입력, 숙련도 상/중/하). */
@@ -544,12 +603,12 @@ private fun SkillToolStep(
                 suggestions = if (draft.techStackName.isBlank()) emptyList() else suggestions,
                 onSelect = { onSelect(draft.id, it) },
                 itemLabel = { it.name },
-                placeholder = stringResource(R.string.onboarding_placeholder_skill_name)
+                placeholder = stringResource(Res.string.onboarding_placeholder_skill_name)
             )
             if (draft.techStackName.isNotBlank() && !draft.isSelected) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_skill_not_selected_hint),
+                    text = stringResource(Res.string.onboarding_skill_not_selected_hint),
                     color = PickiiTextGray,
                     fontSize = 12.sp
                 )
@@ -557,19 +616,19 @@ private fun SkillToolStep(
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SkillLevelChip(
-                    labelRes = R.string.onboarding_skill_level_high,
+                    labelRes = Res.string.onboarding_skill_level_high,
                     level = 3,
                     selected = draft.level,
                     onSelect = { onLevelChange(draft.id, it) }
                 )
                 SkillLevelChip(
-                    labelRes = R.string.onboarding_skill_level_mid,
+                    labelRes = Res.string.onboarding_skill_level_mid,
                     level = 2,
                     selected = draft.level,
                     onSelect = { onLevelChange(draft.id, it) }
                 )
                 SkillLevelChip(
-                    labelRes = R.string.onboarding_skill_level_low,
+                    labelRes = Res.string.onboarding_skill_level_low,
                     level = 1,
                     selected = draft.level,
                     onSelect = { onLevelChange(draft.id, it) }
@@ -577,12 +636,12 @@ private fun SkillToolStep(
             }
         }
     }
-    AddEntryButton(label = stringResource(R.string.onboarding_button_add_skill), onClick = onAddSkillTool)
+    AddEntryButton(label = stringResource(Res.string.onboarding_button_add_skill), onClick = onAddSkillTool)
 }
 
 @Composable
 private fun SkillLevelChip(
-    labelRes: Int,
+    labelRes: StringResource,
     level: Int,
     selected: Int,
     onSelect: (Int) -> Unit
@@ -629,7 +688,7 @@ private fun LinkStep(
                 onValueChange = { onUrlChange(draft.id, it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = stringResource(R.string.onboarding_placeholder_link_url), color = PickiiTextGray)
+                    Text(text = stringResource(Res.string.onboarding_placeholder_link_url), color = PickiiTextGray)
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(FieldCornerRadius),
@@ -637,7 +696,7 @@ private fun LinkStep(
             )
         }
     }
-    AddEntryButton(label = stringResource(R.string.onboarding_button_add_link), onClick = onAddLink)
+    AddEntryButton(label = stringResource(Res.string.onboarding_button_add_link), onClick = onAddLink)
 }
 
 /** 8단계: 자격증 및 취득일자(반복 입력). */
@@ -662,17 +721,17 @@ private fun LicenseStep(
                 suggestions = if (draft.licenseName.isBlank()) emptyList() else suggestions,
                 onSelect = { onNameChange(draft.id, it.name) },
                 itemLabel = { it.name },
-                placeholder = stringResource(R.string.onboarding_placeholder_license_name)
+                placeholder = stringResource(Res.string.onboarding_placeholder_license_name)
             )
             Spacer(modifier = Modifier.height(8.dp))
             YearMonthField(
                 value = draft.acquiredDate,
                 onValueChange = { onDateChange(draft.id, it) },
-                placeholder = stringResource(R.string.onboarding_placeholder_acquired_date)
+                placeholder = stringResource(Res.string.onboarding_placeholder_acquired_date)
             )
         }
     }
-    AddEntryButton(label = stringResource(R.string.onboarding_button_add_license), onClick = onAddLicense)
+    AddEntryButton(label = stringResource(Res.string.onboarding_button_add_license), onClick = onAddLicense)
 }
 
 /** 단계 입력 필드 위 라벨. */

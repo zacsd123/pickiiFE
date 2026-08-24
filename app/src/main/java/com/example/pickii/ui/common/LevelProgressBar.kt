@@ -13,15 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_level_label
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiDisabledGray
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.calculateLevel
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /** 레벨/경험치 바. 레벨 산출 공식은 기획/백엔드 확정 전까지 임시([com.example.pickii.util.calculateLevel] 참고). */
@@ -35,7 +36,7 @@ fun LevelProgressBar(
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = stringResource(R.string.mypage_level_label, levelInfo.level),
+            text = stringResource(Res.string.mypage_level_label, levelInfo.level),
             color = PickiiTextGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium

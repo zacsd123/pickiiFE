@@ -38,12 +38,34 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.mypage_menu_settings_title
+import com.example.pickii.shared.generated.resources.mypage_notification_all
+import com.example.pickii.shared.generated.resources.mypage_notification_announcement
+import com.example.pickii.shared.generated.resources.mypage_notification_announcement_desc
+import com.example.pickii.shared.generated.resources.mypage_notification_chat
+import com.example.pickii.shared.generated.resources.mypage_notification_chat_desc
+import com.example.pickii.shared.generated.resources.mypage_notification_marketing
+import com.example.pickii.shared.generated.resources.mypage_notification_marketing_desc
+import com.example.pickii.shared.generated.resources.mypage_profile_social_button_link
+import com.example.pickii.shared.generated.resources.mypage_profile_social_button_unlink
+import com.example.pickii.shared.generated.resources.mypage_profile_social_link_error
+import com.example.pickii.shared.generated.resources.mypage_profile_social_linked
+import com.example.pickii.shared.generated.resources.mypage_profile_social_not_linked
+import com.example.pickii.shared.generated.resources.mypage_profile_social_unlink_confirm_body
+import com.example.pickii.shared.generated.resources.mypage_profile_social_unlink_confirm_title
+import com.example.pickii.shared.generated.resources.mypage_settings_kakao_link
+import com.example.pickii.shared.generated.resources.mypage_settings_logout
+import com.example.pickii.shared.generated.resources.mypage_settings_password_change
+import com.example.pickii.shared.generated.resources.mypage_settings_section_account
+import com.example.pickii.shared.generated.resources.mypage_settings_section_notification
+import com.example.pickii.shared.generated.resources.mypage_settings_withdraw
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.theme.KakaoYellow
@@ -53,6 +75,8 @@ import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -78,12 +102,12 @@ fun SettingsScreen(
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val kakaoLinkErrorMessage = stringResource(R.string.mypage_profile_social_link_error)
+    val kakaoLinkErrorMessage = stringResource(Res.string.mypage_profile_social_link_error)
 
     if (notificationUiState.toastMessageRes != null) {
         val messageRes = notificationUiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             notificationViewModel.onToastShown()
         }
     }
@@ -168,16 +192,16 @@ private fun SettingsScreenContent(
                 .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_menu_settings_title), onBackClick = onBackClick)
+        BackHeader(title = stringResource(Res.string.mypage_menu_settings_title), onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(20.dp))
 
-        SectionTitle(stringResource(R.string.mypage_settings_section_account))
+        SectionTitle(stringResource(Res.string.mypage_settings_section_account))
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             SettingsRow(
                 icon = Icons.Filled.Lock,
                 iconBackground = PickiiFieldBackground,
                 iconTint = Color.Black,
-                title = stringResource(R.string.mypage_settings_password_change),
+                title = stringResource(Res.string.mypage_settings_password_change),
                 onClick = onPasswordChangeClick
             )
             KakaoLinkRow(
@@ -189,14 +213,14 @@ private fun SettingsScreenContent(
                 icon = Icons.AutoMirrored.Filled.Logout,
                 iconBackground = PickiiFieldBackground,
                 iconTint = Color.Black,
-                title = stringResource(R.string.mypage_settings_logout),
+                title = stringResource(Res.string.mypage_settings_logout),
                 onClick = onLogoutClick
             )
             SettingsRow(
                 icon = Icons.Filled.PersonOff,
                 iconBackground = PickiiPaletteRed.copy(alpha = 0.12f),
                 iconTint = PickiiPaletteRed,
-                title = stringResource(R.string.mypage_settings_withdraw),
+                title = stringResource(Res.string.mypage_settings_withdraw),
                 titleColor = PickiiPaletteRed,
                 onClick = onWithdrawClick,
                 showDivider = false
@@ -205,32 +229,32 @@ private fun SettingsScreenContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SectionTitle(stringResource(R.string.mypage_settings_section_notification))
+        SectionTitle(stringResource(Res.string.mypage_settings_section_notification))
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             ToggleRow(
                 icon = Icons.Filled.Settings,
-                title = stringResource(R.string.mypage_notification_all),
+                title = stringResource(Res.string.mypage_notification_all),
                 checked = settings.allEssentialEnabled,
                 onCheckedChange = onToggleAllEssential
             )
             ToggleRow(
                 icon = Icons.AutoMirrored.Filled.Chat,
-                title = stringResource(R.string.mypage_notification_chat),
-                subtitle = stringResource(R.string.mypage_notification_chat_desc),
+                title = stringResource(Res.string.mypage_notification_chat),
+                subtitle = stringResource(Res.string.mypage_notification_chat_desc),
                 checked = settings.chatNoti,
                 onCheckedChange = onToggleChat
             )
             ToggleRow(
                 icon = Icons.Filled.Campaign,
-                title = stringResource(R.string.mypage_notification_announcement),
-                subtitle = stringResource(R.string.mypage_notification_announcement_desc),
+                title = stringResource(Res.string.mypage_notification_announcement),
+                subtitle = stringResource(Res.string.mypage_notification_announcement_desc),
                 checked = isAnnouncementEnabled,
                 onCheckedChange = onToggleAnnouncement
             )
             ToggleRow(
                 icon = Icons.Filled.Campaign,
-                title = stringResource(R.string.mypage_notification_marketing),
-                subtitle = stringResource(R.string.mypage_notification_marketing_desc),
+                title = stringResource(Res.string.mypage_notification_marketing),
+                subtitle = stringResource(Res.string.mypage_notification_marketing_desc),
                 checked = settings.marketingNoti,
                 onCheckedChange = onToggleMarketing,
                 showDivider = false
@@ -242,10 +266,10 @@ private fun SettingsScreenContent(
 
     if (uiState.isUnlinkConfirmVisible) {
         ConfirmDialog(
-            title = stringResource(R.string.mypage_profile_social_unlink_confirm_title),
-            body = stringResource(R.string.mypage_profile_social_unlink_confirm_body),
-            confirmLabel = stringResource(R.string.common_button_confirm),
-            dismissLabel = stringResource(R.string.common_button_cancel),
+            title = stringResource(Res.string.mypage_profile_social_unlink_confirm_title),
+            body = stringResource(Res.string.mypage_profile_social_unlink_confirm_body),
+            confirmLabel = stringResource(Res.string.common_button_confirm),
+            dismissLabel = stringResource(Res.string.common_button_cancel),
             onConfirm = onConfirmUnlink,
             onDismiss = onDismissUnlinkDialog
         )
@@ -330,7 +354,7 @@ private fun KakaoLinkRow(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.mypage_settings_kakao_link),
+                    text = stringResource(Res.string.mypage_settings_kakao_link),
                     color = Color.Black,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
@@ -339,9 +363,9 @@ private fun KakaoLinkRow(
                     text =
                         stringResource(
                             if (isLinked) {
-                                R.string.mypage_profile_social_linked
+                                Res.string.mypage_profile_social_linked
                             } else {
-                                R.string.mypage_profile_social_not_linked
+                                Res.string.mypage_profile_social_not_linked
                             }
                         ),
                     color = PickiiTextGray,
@@ -361,9 +385,9 @@ private fun KakaoLinkRow(
                     text =
                         stringResource(
                             if (isLinked) {
-                                R.string.mypage_profile_social_button_unlink
+                                Res.string.mypage_profile_social_button_unlink
                             } else {
-                                R.string.mypage_profile_social_button_link
+                                Res.string.mypage_profile_social_button_link
                             }
                         ),
                     color = Color.Black,

@@ -37,19 +37,29 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.domain.model.RecruitTopic
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.home_button_apply
+import com.example.pickii.shared.generated.resources.home_button_detail
+import com.example.pickii.shared.generated.resources.home_button_filter
+import com.example.pickii.shared.generated.resources.home_button_register_post
+import com.example.pickii.shared.generated.resources.home_button_reset
+import com.example.pickii.shared.generated.resources.home_button_search
+import com.example.pickii.shared.generated.resources.home_filter_category_title
+import com.example.pickii.shared.generated.resources.home_filter_topic_title
+import com.example.pickii.shared.generated.resources.home_recruit_posts_title
+import com.example.pickii.shared.generated.resources.home_search_placeholder
+import com.example.pickii.shared.generated.resources.unknown_author_nickname
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.OneShotEventEffect
@@ -66,6 +76,8 @@ import com.example.pickii.ui.theme.PickiiPostCardBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toCompactDisplayString
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 필드/칩/버튼에 공통으로 사용하는 모서리 둥글기. */
@@ -106,7 +118,7 @@ fun HomeScreen(
                 Toast
                     .makeText(
                         context,
-                        event.messageRes,
+                        getString(event.messageRes),
                         Toast.LENGTH_SHORT
                     ).show()
         }
@@ -216,7 +228,7 @@ private fun HomeScreenContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.home_recruit_posts_title, uiState.totalElements),
+                text = stringResource(Res.string.home_recruit_posts_title, uiState.totalElements),
                 color = Color.Black,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -274,7 +286,7 @@ private fun SearchField(
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
-            Text(text = stringResource(R.string.home_search_placeholder), color = PickiiTextGray, fontSize = 14.sp)
+            Text(text = stringResource(Res.string.home_search_placeholder), color = PickiiTextGray, fontSize = 14.sp)
         },
         singleLine = true,
         shape = RoundedCornerShape(ChipCornerRadius),
@@ -318,7 +330,7 @@ private fun FilterToggleButton(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = stringResource(R.string.home_button_filter),
+            text = stringResource(Res.string.home_button_filter),
             color = Color.White,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
@@ -347,7 +359,7 @@ private fun FilterPanel(
                 .padding(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.home_filter_category_title),
+            text = stringResource(Res.string.home_filter_category_title),
             color = Color.Black,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
@@ -371,7 +383,7 @@ private fun FilterPanel(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = stringResource(R.string.home_filter_topic_title),
+            text = stringResource(Res.string.home_filter_topic_title),
             color = Color.Black,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
@@ -409,7 +421,7 @@ private fun FilterPanel(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.home_button_reset),
+                    text = stringResource(Res.string.home_button_reset),
                     color = Color.Black,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
@@ -426,7 +438,7 @@ private fun FilterPanel(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.home_button_search),
+                    text = stringResource(Res.string.home_button_search),
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
@@ -448,7 +460,7 @@ private fun RegisterPostButton(onClick: () -> Unit) {
                 .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
         Text(
-            text = stringResource(R.string.home_button_register_post),
+            text = stringResource(Res.string.home_button_register_post),
             color = Color.White,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
@@ -509,7 +521,13 @@ private fun PostCard(
         Text(
             text =
                 "${
-                    if (post.isAuthorUnknown) stringResource(R.string.unknown_author_nickname) else post.authorNickname
+                    if (post.isAuthorUnknown) {
+                        stringResource(
+                            Res.string.unknown_author_nickname
+                        )
+                    } else {
+                        post.authorNickname
+                    }
                 }, ${post.createdAt.toCompactDisplayString()}",
             color = PickiiTextGray,
             fontSize = 12.sp
@@ -538,7 +556,7 @@ private fun PostCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.home_button_detail),
+                    text = stringResource(Res.string.home_button_detail),
                     color = Color.Black,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -564,7 +582,7 @@ private fun PostCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.home_button_apply),
+                        text = stringResource(Res.string.home_button_apply),
                         color = if (isClosed) PickiiTextGray else Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium

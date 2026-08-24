@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.BuildConfig
-import com.example.pickii.R
 import com.example.pickii.data.local.SavedMeetingScheduleStore
 import com.example.pickii.data.notification.ActiveChatRoomTracker
 import com.example.pickii.data.remote.dto.ApiException
@@ -19,6 +18,13 @@ import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.MeetingPollRepository
 import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_room_toast_load_more_failed
+import com.example.pickii.shared.generated.resources.chat_toast_connection_failed
+import com.example.pickii.shared.generated.resources.chat_toast_generic_error
+import com.example.pickii.shared.generated.resources.chat_toast_leader_must_delegate
+import com.example.pickii.shared.generated.resources.chat_toast_project_closed
+import com.example.pickii.shared.generated.resources.chat_toast_send_invalid_file
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.nowDateTime
 import com.example.pickii.util.parseIsoOffsetDateTime
@@ -92,7 +98,7 @@ class ChatRoomViewModel
                     chatRepository.getChatRoomDetail(roomId).getOrNull()
                 if (detail == null) {
                     _uiState.update { it.copy(isLoading = false) }
-                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                    emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                     return@launch
                 }
 
@@ -175,7 +181,7 @@ class ChatRoomViewModel
                         ensurePollDetailsLoaded(newMessages)
                     }.onFailure {
                         _uiState.update { it.copy(isLoadingMoreMessages = false) }
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_room_toast_load_more_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_room_toast_load_more_failed))
                     }
             }
         }
@@ -190,7 +196,7 @@ class ChatRoomViewModel
             viewModelScope.launch {
                 chatStompClient.connectionState.collect { state ->
                     if (state == ChatConnectionState.FAILED) {
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_connection_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_connection_failed))
                     }
                 }
             }
@@ -232,7 +238,7 @@ class ChatRoomViewModel
 
             viewModelScope.launch {
                 chatStompClient.incomingErrors.collect {
-                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                    emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
             }
         }
@@ -299,7 +305,7 @@ class ChatRoomViewModel
                         .onSuccess { imageUrl ->
                             chatStompClient.sendMessage(roomId, PublishChatMessage(type = "IMAGE", imageUrl = imageUrl))
                         }.onFailure {
-                            emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_send_invalid_file))
+                            emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_send_invalid_file))
                         }
                 }
             }
@@ -334,7 +340,7 @@ class ChatRoomViewModel
                 chatRepository
                     .delegateLeader(projectId, memberId)
                     .onSuccess { refreshDetail(roomId) }
-                    .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+                    .onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
             }
         }
 
@@ -348,7 +354,7 @@ class ChatRoomViewModel
                 chatRepository
                     .removeMember(projectId, memberId)
                     .onSuccess { refreshDetail(roomId) }
-                    .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+                    .onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
             }
         }
 
@@ -361,8 +367,8 @@ class ChatRoomViewModel
                     .closeProject(projectId)
                     .onSuccess {
                         refreshDetail(roomId)
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_project_closed))
-                    }.onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_project_closed))
+                    }.onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
             }
         }
 
@@ -376,9 +382,9 @@ class ChatRoomViewModel
                     .onFailure { error ->
                         val messageRes =
                             if (error is ApiException && error.code == ERROR_CODE_LEADER_CANNOT_LEAVE) {
-                                R.string.chat_toast_leader_must_delegate
+                                Res.string.chat_toast_leader_must_delegate
                             } else {
-                                R.string.chat_toast_generic_error
+                                Res.string.chat_toast_generic_error
                             }
                         emitEvent(RecruitUiEvent.ShowToast(messageRes))
                     }
@@ -394,7 +400,7 @@ class ChatRoomViewModel
             viewModelScope.launch {
                 chatRepository.updateNotification(roomId, enabled).onFailure {
                     _uiState.update { it.copy(isNotificationEnabled = previous) }
-                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                    emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
             }
         }

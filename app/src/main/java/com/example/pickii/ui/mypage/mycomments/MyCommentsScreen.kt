@@ -21,14 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyComment
 import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_my_comments_button_go_to_post
+import com.example.pickii.shared.generated.resources.mypage_my_comments_empty
+import com.example.pickii.shared.generated.resources.mypage_my_comments_label_date
+import com.example.pickii.shared.generated.resources.mypage_my_comments_title
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.common.MyPageSectionHeader
@@ -39,6 +42,8 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -59,7 +64,7 @@ fun MyCommentsScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -91,7 +96,7 @@ private fun MyCommentsScreenContent(
     Column(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite).padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         MyPageSectionHeader(
-            title = stringResource(R.string.mypage_my_comments_title),
+            title = stringResource(Res.string.mypage_my_comments_title),
             onBackClick = onBackClick,
             onNotificationClick = onNotificationClick
         )
@@ -99,7 +104,7 @@ private fun MyCommentsScreenContent(
 
         when {
             uiState.isLoading -> LoadingIndicator()
-            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(R.string.mypage_my_comments_empty))
+            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(Res.string.mypage_my_comments_empty))
             else -> {
                 Column(modifier = Modifier.fillMaxSize()) {
                     uiState.items.forEach { comment ->
@@ -161,7 +166,7 @@ private fun MyCommentCard(
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = stringResource(R.string.mypage_my_comments_label_date, comment.createdAt.toFullDisplayString()),
+            text = stringResource(Res.string.mypage_my_comments_label_date, comment.createdAt.toFullDisplayString()),
             color = PickiiTextGray,
             fontSize = 12.sp
         )
@@ -175,7 +180,7 @@ private fun MyCommentCard(
                     .padding(horizontal = 12.dp, vertical = 7.dp)
         ) {
             Text(
-                text = stringResource(R.string.mypage_my_comments_button_go_to_post),
+                text = stringResource(Res.string.mypage_my_comments_button_go_to_post),
                 color = Color.White,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium

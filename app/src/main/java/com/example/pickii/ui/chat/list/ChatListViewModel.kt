@@ -2,10 +2,13 @@ package com.example.pickii.ui.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.ChatRoomSummary
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.NotificationRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_list_toast_load_failed
+import com.example.pickii.shared.generated.resources.chat_list_toast_load_more_failed
+import com.example.pickii.shared.generated.resources.chat_toast_generic_error
 import com.example.pickii.ui.common.RecruitUiEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -77,7 +80,7 @@ class ChatListViewModel
                         }
                     }.onFailure {
                         _uiState.update { state -> state.withLoading(tab, isLoading = false) }
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_list_toast_load_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_list_toast_load_failed))
                     }
             }
         }
@@ -107,7 +110,7 @@ class ChatListViewModel
                         }
                     }.onFailure {
                         _uiState.update { current -> current.withLoadingMore(tab, isLoadingMore = false) }
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_list_toast_load_more_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_list_toast_load_more_failed))
                     }
             }
         }
@@ -124,7 +127,7 @@ class ChatListViewModel
             viewModelScope.launch {
                 chatRepository.updateNotification(chatRoomId, enabled = !currentlyEnabled).onFailure {
                     applyNotificationState(chatRoomId, enabled = currentlyEnabled)
-                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                    emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
             }
         }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
+import org.jetbrains.compose.resources.getString
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -35,7 +36,7 @@ fun ApplicantRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
         }
     }
 

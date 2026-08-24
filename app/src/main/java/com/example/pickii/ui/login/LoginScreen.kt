@@ -38,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -48,7 +47,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.account_recovery_button_reset_password
+import com.example.pickii.shared.generated.resources.login_auto_login
+import com.example.pickii.shared.generated.resources.login_brand
+import com.example.pickii.shared.generated.resources.login_button_kakao
+import com.example.pickii.shared.generated.resources.login_button_signup
+import com.example.pickii.shared.generated.resources.login_button_submit
+import com.example.pickii.shared.generated.resources.login_divider_or
+import com.example.pickii.shared.generated.resources.login_error_confirm
+import com.example.pickii.shared.generated.resources.login_error_title
+import com.example.pickii.shared.generated.resources.login_guest_browse
+import com.example.pickii.shared.generated.resources.login_kakao_error
+import com.example.pickii.shared.generated.resources.login_kakao_not_linked
+import com.example.pickii.shared.generated.resources.login_label_email
+import com.example.pickii.shared.generated.resources.login_label_password
+import com.example.pickii.shared.generated.resources.login_placeholder_email
+import com.example.pickii.shared.generated.resources.login_placeholder_password
+import com.example.pickii.shared.generated.resources.login_title
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.KakaoLabel
@@ -58,6 +74,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 입력 필드와 버튼에 공통으로 사용하는 모서리 둥글기. */
@@ -90,8 +107,8 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val kakaoNotLinkedMessage = stringResource(R.string.login_kakao_not_linked)
-    val kakaoErrorMessage = stringResource(R.string.login_kakao_error)
+    val kakaoNotLinkedMessage = stringResource(Res.string.login_kakao_not_linked)
+    val kakaoErrorMessage = stringResource(Res.string.login_kakao_error)
 
     LoginScreenContent(
         uiState = uiState,
@@ -166,7 +183,7 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = stringResource(R.string.login_brand),
+                text = stringResource(Res.string.login_brand),
                 color = Color.Black,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -175,7 +192,7 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.login_title),
+                text = stringResource(Res.string.login_title),
                 color = Color.Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -183,21 +200,21 @@ private fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            FieldLabel(text = stringResource(R.string.login_label_email))
+            FieldLabel(text = stringResource(Res.string.login_label_email))
             PickiiTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                placeholder = stringResource(R.string.login_placeholder_email),
+                placeholder = stringResource(Res.string.login_placeholder_email),
                 keyboardType = KeyboardType.Email
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FieldLabel(text = stringResource(R.string.login_label_password))
+            FieldLabel(text = stringResource(Res.string.login_label_password))
             PickiiTextField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
-                placeholder = stringResource(R.string.login_placeholder_password),
+                placeholder = stringResource(Res.string.login_placeholder_password),
                 keyboardType = KeyboardType.Password,
                 visualTransformation =
                     if (uiState.isPasswordVisible) {
@@ -224,7 +241,7 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.account_recovery_button_reset_password),
+                text = stringResource(Res.string.account_recovery_button_reset_password),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
                 modifier =
@@ -247,7 +264,7 @@ private fun LoginScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.login_button_submit),
+                    text = stringResource(Res.string.login_button_submit),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -279,7 +296,7 @@ private fun LoginScreenContent(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.login_auto_login),
+                    text = stringResource(Res.string.login_auto_login),
                     color = PickiiTextGray,
                     fontSize = 13.sp
                 )
@@ -293,7 +310,7 @@ private fun LoginScreenContent(
             ) {
                 HorizontalDivider(modifier = Modifier.weight(1f))
                 Text(
-                    text = stringResource(R.string.login_divider_or),
+                    text = stringResource(Res.string.login_divider_or),
                     color = PickiiTextGray,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(horizontal = 12.dp)
@@ -303,7 +320,7 @@ private fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SecondaryButton(text = stringResource(R.string.login_button_signup), onClick = onSignUpClick)
+            SecondaryButton(text = stringResource(Res.string.login_button_signup), onClick = onSignUpClick)
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -312,7 +329,7 @@ private fun LoginScreenContent(
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                text = stringResource(R.string.login_guest_browse),
+                text = stringResource(Res.string.login_guest_browse),
                 color = PickiiTextGray,
                 fontSize = 13.sp,
                 modifier =
@@ -326,9 +343,9 @@ private fun LoginScreenContent(
 
         if (uiState.errorMessage != null) {
             ConfirmDialog(
-                title = stringResource(R.string.login_error_title),
+                title = stringResource(Res.string.login_error_title),
                 body = uiState.errorMessage,
-                confirmLabel = stringResource(R.string.login_error_confirm),
+                confirmLabel = stringResource(Res.string.login_error_confirm),
                 onConfirm = onErrorDialogDismiss
             )
         }
@@ -404,7 +421,7 @@ private fun KakaoLoginButton(onClick: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.login_button_kakao),
+            text = stringResource(Res.string.login_button_kakao),
             color = KakaoLabel,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium

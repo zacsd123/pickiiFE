@@ -36,16 +36,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.common_counter_format
+import com.example.pickii.shared.generated.resources.recruit_apply_banner_notice
+import com.example.pickii.shared.generated.resources.recruit_apply_banner_tip_subtitle
+import com.example.pickii.shared.generated.resources.recruit_apply_banner_tip_title
+import com.example.pickii.shared.generated.resources.recruit_apply_button_ai_help
+import com.example.pickii.shared.generated.resources.recruit_apply_button_create_profile
+import com.example.pickii.shared.generated.resources.recruit_apply_button_go_home
+import com.example.pickii.shared.generated.resources.recruit_apply_button_submit
+import com.example.pickii.shared.generated.resources.recruit_apply_button_view_application_status
+import com.example.pickii.shared.generated.resources.recruit_apply_dialog_back_warning_body
+import com.example.pickii.shared.generated.resources.recruit_apply_dialog_back_warning_title
+import com.example.pickii.shared.generated.resources.recruit_apply_dialog_complete_title
+import com.example.pickii.shared.generated.resources.recruit_apply_dialog_submit_body
+import com.example.pickii.shared.generated.resources.recruit_apply_dialog_submit_title
+import com.example.pickii.shared.generated.resources.recruit_apply_label_keywords
+import com.example.pickii.shared.generated.resources.recruit_apply_label_message
+import com.example.pickii.shared.generated.resources.recruit_apply_label_no_profile_guidance
+import com.example.pickii.shared.generated.resources.recruit_apply_placeholder_message
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.AiGenerationDialog
 import com.example.pickii.ui.common.CharacterCounterText
@@ -58,6 +77,8 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** "전달 메시지"에 입력할 수 있는 최대 글자 수(화면 표시용, [RecruitApplyViewModel]과 동일한 값). */
@@ -96,7 +117,7 @@ fun RecruitApplyScreen(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -164,12 +185,12 @@ private fun RecruitApplyScreenContent(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                NoticeBanner(text = stringResource(R.string.recruit_apply_banner_notice))
+                NoticeBanner(text = stringResource(Res.string.recruit_apply_banner_notice))
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = stringResource(R.string.recruit_apply_label_message),
+                    text = stringResource(Res.string.recruit_apply_label_message),
                     color = Color.Black,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -214,10 +235,10 @@ private fun RecruitApplyScreenContent(
 
         if (uiState.isSubmitConfirmDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_apply_dialog_submit_title),
-                body = stringResource(R.string.recruit_apply_dialog_submit_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_apply_dialog_submit_title),
+                body = stringResource(Res.string.recruit_apply_dialog_submit_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onSubmitConfirm,
                 onDismiss = onSubmitDialogDismiss
             )
@@ -232,10 +253,10 @@ private fun RecruitApplyScreenContent(
 
         if (uiState.isBackWarningDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_apply_dialog_back_warning_title),
-                body = stringResource(R.string.recruit_apply_dialog_back_warning_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_apply_dialog_back_warning_title),
+                body = stringResource(Res.string.recruit_apply_dialog_back_warning_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onBackWarningConfirm,
                 onDismiss = onBackWarningDismiss
             )
@@ -375,7 +396,7 @@ private fun AvailableSlotsIndicator(
         Spacer(modifier = Modifier.width(4.dp))
 
         Text(
-            text = stringResource(R.string.common_counter_format, current, max),
+            text = stringResource(Res.string.common_counter_format, current, max),
             color = Color.Black,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
@@ -397,7 +418,7 @@ private fun NoProfileGuidance(onCreateProfileClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(R.string.recruit_apply_label_no_profile_guidance),
+            text = stringResource(Res.string.recruit_apply_label_no_profile_guidance),
             color = Color.Black,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
@@ -415,7 +436,7 @@ private fun NoProfileGuidance(onCreateProfileClick: () -> Unit) {
                     .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.recruit_apply_button_create_profile),
+                text = stringResource(Res.string.recruit_apply_button_create_profile),
                 color = Color.White,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
@@ -453,7 +474,7 @@ private fun MessageField(
                 .fillMaxWidth()
                 .height(160.dp),
         placeholder = {
-            Text(text = stringResource(R.string.recruit_apply_placeholder_message), color = PickiiTextGray)
+            Text(text = stringResource(Res.string.recruit_apply_placeholder_message), color = PickiiTextGray)
         },
         shape = RoundedCornerShape(12.dp),
         colors =
@@ -479,7 +500,7 @@ private fun ApplyKeywordSection(
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(R.string.recruit_apply_label_keywords),
+                text = stringResource(Res.string.recruit_apply_label_keywords),
                 color = Color.Black,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
@@ -556,14 +577,14 @@ private fun AiHelpBanner(onAiHelpClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.recruit_apply_banner_tip_title),
+                text = stringResource(Res.string.recruit_apply_banner_tip_title),
                 color = Color.Black,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = stringResource(R.string.recruit_apply_banner_tip_subtitle),
+                text = stringResource(Res.string.recruit_apply_banner_tip_subtitle),
                 color = PickiiTextGray,
                 fontSize = 11.sp
             )
@@ -580,7 +601,7 @@ private fun AiHelpBanner(onAiHelpClick: () -> Unit) {
                     .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Text(
-                text = stringResource(R.string.recruit_apply_button_ai_help),
+                text = stringResource(Res.string.recruit_apply_button_ai_help),
                 color = Color.White,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
@@ -603,7 +624,7 @@ private fun SubmitButton(onClick: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.recruit_apply_button_submit),
+            text = stringResource(Res.string.recruit_apply_button_submit),
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
@@ -618,10 +639,10 @@ private fun ApplyCompletionDialog(
     onViewApplicationStatusClick: () -> Unit
 ) {
     ConfirmDialog(
-        title = stringResource(R.string.recruit_apply_dialog_complete_title),
-        confirmLabel = stringResource(R.string.recruit_apply_button_view_application_status),
+        title = stringResource(Res.string.recruit_apply_dialog_complete_title),
+        confirmLabel = stringResource(Res.string.recruit_apply_button_view_application_status),
         onConfirm = onViewApplicationStatusClick,
-        dismissLabel = stringResource(R.string.recruit_apply_button_go_home),
+        dismissLabel = stringResource(Res.string.recruit_apply_button_go_home),
         onDismiss = onGoHomeClick
     )
 }

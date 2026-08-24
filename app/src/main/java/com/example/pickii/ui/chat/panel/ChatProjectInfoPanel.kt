@@ -21,17 +21,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
 import com.example.pickii.domain.model.ScheduleCategory
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_project_close_button
+import com.example.pickii.shared.generated.resources.chat_project_close_dialog_body
+import com.example.pickii.shared.generated.resources.chat_project_close_dialog_title
+import com.example.pickii.shared.generated.resources.common_button_cancel
 import com.example.pickii.ui.calendar.editor.component.ScheduleCategorySection
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
 import com.example.pickii.ui.theme.PickiiNavyText
+import org.jetbrains.compose.resources.stringResource
 
 private val ProjectInfoPanelBackgroundColor = Color.White
 private val ProjectInfoPanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -130,10 +134,10 @@ fun ChatProjectInfoPanel(
 
     if (isCloseConfirmVisible) {
         ConfirmDialog(
-            title = stringResource(R.string.chat_project_close_dialog_title),
-            body = stringResource(R.string.chat_project_close_dialog_body),
-            confirmLabel = stringResource(R.string.chat_project_close_button),
-            dismissLabel = stringResource(R.string.common_button_cancel),
+            title = stringResource(Res.string.chat_project_close_dialog_title),
+            body = stringResource(Res.string.chat_project_close_dialog_body),
+            confirmLabel = stringResource(Res.string.chat_project_close_button),
+            dismissLabel = stringResource(Res.string.common_button_cancel),
             onConfirm = {
                 isCloseConfirmVisible = false
                 onCloseProjectClick()
@@ -159,7 +163,7 @@ private fun ProjectCloseButton(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.chat_project_close_button),
+            text = stringResource(Res.string.chat_project_close_button),
             color = Color.White,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold

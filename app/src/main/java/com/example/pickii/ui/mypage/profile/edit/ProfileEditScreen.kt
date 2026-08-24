@@ -28,16 +28,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.TechStack
 import com.example.pickii.domain.model.University
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_profile_edit_button_save
+import com.example.pickii.shared.generated.resources.mypage_profile_edit_label_about_me
+import com.example.pickii.shared.generated.resources.mypage_profile_edit_title
+import com.example.pickii.shared.generated.resources.onboarding_button_add_experience
+import com.example.pickii.shared.generated.resources.onboarding_button_add_license
+import com.example.pickii.shared.generated.resources.onboarding_button_add_link
+import com.example.pickii.shared.generated.resources.onboarding_button_add_skill
+import com.example.pickii.shared.generated.resources.onboarding_label_academic_status
+import com.example.pickii.shared.generated.resources.onboarding_label_major
+import com.example.pickii.shared.generated.resources.onboarding_label_university
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_acquired_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_end_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_desc
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_org
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_experience_title
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_hope
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_license_name
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_link_url
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_major
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_skill_name
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_start_date
+import com.example.pickii.shared.generated.resources.onboarding_placeholder_strength
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_high
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_low
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_mid
+import com.example.pickii.shared.generated.resources.onboarding_skill_not_selected_hint
+import com.example.pickii.shared.generated.resources.onboarding_step2_title
+import com.example.pickii.shared.generated.resources.onboarding_step3_title
+import com.example.pickii.shared.generated.resources.onboarding_step4_title
+import com.example.pickii.shared.generated.resources.onboarding_step5_title
+import com.example.pickii.shared.generated.resources.onboarding_step6_title
+import com.example.pickii.shared.generated.resources.onboarding_step7_title
+import com.example.pickii.shared.generated.resources.onboarding_step8_title
 import com.example.pickii.ui.common.AddEntryButton
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.CharacterCounterText
@@ -56,6 +88,8 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 import com.example.pickii.ui.common.FieldLabel as CommonFieldLabel
 
@@ -80,7 +114,7 @@ fun ProfileEditScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -167,13 +201,13 @@ private fun ProfileEditScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             BackHeader(
-                title = stringResource(R.string.mypage_profile_edit_title),
+                title = stringResource(Res.string.mypage_profile_edit_title),
                 onBackClick = onBackClick
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FieldLabel(stringResource(R.string.onboarding_label_academic_status))
+            FieldLabel(stringResource(Res.string.onboarding_label_academic_status))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -190,7 +224,7 @@ private fun ProfileEditScreenContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            FieldLabel(stringResource(R.string.onboarding_label_university))
+            FieldLabel(stringResource(Res.string.onboarding_label_university))
 
             OutlinedTextField(
                 value = uiState.universityQuery,
@@ -208,14 +242,14 @@ private fun ProfileEditScreenContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            FieldLabel(stringResource(R.string.onboarding_label_major))
+            FieldLabel(stringResource(Res.string.onboarding_label_major))
             OutlinedTextField(
                 value = uiState.major,
                 onValueChange = onMajorChange,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.onboarding_placeholder_major),
+                        text = stringResource(Res.string.onboarding_placeholder_major),
                         color = PickiiTextGray
                     )
                 },
@@ -225,7 +259,7 @@ private fun ProfileEditScreenContent(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.onboarding_step2_title))
+            FieldLabel(stringResource(Res.string.onboarding_step2_title))
             Text(
                 text = "${uiState.selectedTopicIds.size}/$MAX_TOPIC_SELECTION",
                 color = PickiiTextGray,
@@ -249,14 +283,14 @@ private fun ProfileEditScreenContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            FieldLabel(stringResource(R.string.onboarding_step3_title))
+            FieldLabel(stringResource(Res.string.onboarding_step3_title))
             OutlinedTextField(
                 value = uiState.hope,
                 onValueChange = onHopeChange,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.onboarding_placeholder_hope),
+                        text = stringResource(Res.string.onboarding_placeholder_hope),
                         color = PickiiTextGray
                     )
                 },
@@ -268,13 +302,13 @@ private fun ProfileEditScreenContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            FieldLabel(stringResource(R.string.onboarding_step4_title))
+            FieldLabel(stringResource(Res.string.onboarding_step4_title))
             OutlinedTextField(
                 value = uiState.strength,
                 onValueChange = onStrengthChange,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = stringResource(R.string.onboarding_placeholder_strength), color = PickiiTextGray)
+                    Text(text = stringResource(Res.string.onboarding_placeholder_strength), color = PickiiTextGray)
                 },
                 shape = RoundedCornerShape(FieldCornerRadius),
                 colors = fieldColors()
@@ -284,7 +318,7 @@ private fun ProfileEditScreenContent(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.onboarding_step5_title))
+            FieldLabel(stringResource(Res.string.onboarding_step5_title))
             uiState.experienceDrafts.forEach { draft ->
                 RemovableEntryCard(
                     onRemove = { onRemoveExperience(draft.id) },
@@ -300,10 +334,13 @@ private fun ProfileEditScreenContent(
                     )
                 }
             }
-            AddEntryButton(label = stringResource(R.string.onboarding_button_add_experience), onClick = onAddExperience)
+            AddEntryButton(
+                label = stringResource(Res.string.onboarding_button_add_experience),
+                onClick = onAddExperience
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.onboarding_step6_title))
+            FieldLabel(stringResource(Res.string.onboarding_step6_title))
             uiState.skillToolDrafts.forEach { draft ->
                 RemovableEntryCard(
                     onRemove = { onRemoveSkillTool(draft.id) },
@@ -324,10 +361,10 @@ private fun ProfileEditScreenContent(
                     )
                 }
             }
-            AddEntryButton(label = stringResource(R.string.onboarding_button_add_skill), onClick = onAddSkillTool)
+            AddEntryButton(label = stringResource(Res.string.onboarding_button_add_skill), onClick = onAddSkillTool)
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.onboarding_step7_title))
+            FieldLabel(stringResource(Res.string.onboarding_step7_title))
             uiState.linkDrafts.forEach { draft ->
                 RemovableEntryCard(onRemove = { onRemoveLink(draft.id) }, modifier = Modifier.padding(bottom = 12.dp)) {
                     LinkFields(
@@ -338,10 +375,10 @@ private fun ProfileEditScreenContent(
                     )
                 }
             }
-            AddEntryButton(label = stringResource(R.string.onboarding_button_add_link), onClick = onAddLink)
+            AddEntryButton(label = stringResource(Res.string.onboarding_button_add_link), onClick = onAddLink)
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.onboarding_step8_title))
+            FieldLabel(stringResource(Res.string.onboarding_step8_title))
             uiState.licenseDrafts.forEach { draft ->
                 RemovableEntryCard(
                     onRemove = { onRemoveLicense(draft.id) },
@@ -361,10 +398,10 @@ private fun ProfileEditScreenContent(
                     )
                 }
             }
-            AddEntryButton(label = stringResource(R.string.onboarding_button_add_license), onClick = onAddLicense)
+            AddEntryButton(label = stringResource(Res.string.onboarding_button_add_license), onClick = onAddLicense)
 
             Spacer(modifier = Modifier.height(24.dp))
-            FieldLabel(stringResource(R.string.mypage_profile_edit_label_about_me))
+            FieldLabel(stringResource(Res.string.mypage_profile_edit_label_about_me))
             OutlinedTextField(
                 value = uiState.aboutMe,
                 onValueChange = onAboutMeChange,
@@ -385,7 +422,7 @@ private fun ProfileEditScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.mypage_profile_edit_button_save),
+                    text = stringResource(Res.string.mypage_profile_edit_button_save),
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -428,7 +465,7 @@ private fun ExperienceFields(
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
             Text(
-                text = stringResource(R.string.onboarding_placeholder_experience_title),
+                text = stringResource(Res.string.onboarding_placeholder_experience_title),
                 color = PickiiTextGray
             )
         },
@@ -443,7 +480,7 @@ private fun ExperienceFields(
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
             Text(
-                text = stringResource(R.string.onboarding_placeholder_experience_org),
+                text = stringResource(Res.string.onboarding_placeholder_experience_org),
                 color = PickiiTextGray
             )
         },
@@ -456,7 +493,7 @@ private fun ExperienceFields(
         YearMonthField(
             value = draft.startDate,
             onValueChange = onStartDateChange,
-            placeholder = stringResource(R.string.onboarding_placeholder_start_date),
+            placeholder = stringResource(Res.string.onboarding_placeholder_start_date),
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -465,7 +502,7 @@ private fun ExperienceFields(
         YearMonthField(
             value = draft.endDate,
             onValueChange = onEndDateChange,
-            placeholder = stringResource(R.string.onboarding_placeholder_end_date),
+            placeholder = stringResource(Res.string.onboarding_placeholder_end_date),
             modifier = Modifier.weight(1f)
         )
     }
@@ -476,7 +513,7 @@ private fun ExperienceFields(
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
             Text(
-                text = stringResource(R.string.onboarding_placeholder_experience_desc),
+                text = stringResource(Res.string.onboarding_placeholder_experience_desc),
                 color = PickiiTextGray
             )
         },
@@ -499,12 +536,12 @@ private fun SkillToolFields(
         suggestions = if (draft.techStackName.isBlank()) emptyList() else suggestions,
         onSelect = onSelect,
         itemLabel = { it.name },
-        placeholder = stringResource(R.string.onboarding_placeholder_skill_name)
+        placeholder = stringResource(Res.string.onboarding_placeholder_skill_name)
     )
     if (draft.techStackName.isNotBlank() && !draft.isSelected) {
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(R.string.onboarding_skill_not_selected_hint),
+            text = stringResource(Res.string.onboarding_skill_not_selected_hint),
             color = PickiiTextGray,
             fontSize = 12.sp
         )
@@ -512,19 +549,19 @@ private fun SkillToolFields(
     Spacer(modifier = Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         SelectableChip(
-            label = stringResource(R.string.onboarding_skill_level_high),
+            label = stringResource(Res.string.onboarding_skill_level_high),
             selected = draft.level == 3,
             enabled = true,
             onClick = { onLevelChange(3) }
         )
         SelectableChip(
-            label = stringResource(R.string.onboarding_skill_level_mid),
+            label = stringResource(Res.string.onboarding_skill_level_mid),
             selected = draft.level == 2,
             enabled = true,
             onClick = { onLevelChange(2) }
         )
         SelectableChip(
-            label = stringResource(R.string.onboarding_skill_level_low),
+            label = stringResource(Res.string.onboarding_skill_level_low),
             selected = draft.level == 1,
             enabled = true,
             onClick = { onLevelChange(1) }
@@ -558,7 +595,12 @@ private fun LinkFields(
         value = draft.url,
         onValueChange = onUrlChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = stringResource(R.string.onboarding_placeholder_link_url), color = PickiiTextGray) },
+        placeholder = {
+            Text(
+                text = stringResource(Res.string.onboarding_placeholder_link_url),
+                color = PickiiTextGray
+            )
+        },
         singleLine = true,
         shape = RoundedCornerShape(FieldCornerRadius),
         colors = fieldColors()
@@ -578,13 +620,13 @@ private fun LicenseFields(
         suggestions = if (draft.licenseName.isBlank()) emptyList() else suggestions,
         onSelect = { onNameChange(it.name) },
         itemLabel = { it.name },
-        placeholder = stringResource(R.string.onboarding_placeholder_license_name)
+        placeholder = stringResource(Res.string.onboarding_placeholder_license_name)
     )
     Spacer(modifier = Modifier.height(8.dp))
     YearMonthField(
         value = draft.acquiredDate,
         onValueChange = onDateChange,
-        placeholder = stringResource(R.string.onboarding_placeholder_acquired_date)
+        placeholder = stringResource(Res.string.onboarding_placeholder_acquired_date)
     )
 }
 

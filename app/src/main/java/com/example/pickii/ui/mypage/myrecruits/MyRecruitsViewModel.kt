@@ -1,14 +1,17 @@
 package com.example.pickii.ui.mypage.myrecruits
 
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyRecruitSummary
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.myrecruits_toast_action_failed
+import com.example.pickii.shared.generated.resources.myrecruits_toast_load_failed
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 
 /** 작성 공고 목록(4-5) 조회, 마감/추가모집/삭제(3-4, 3-5, 3-6)를 담당한다. */
 class MyRecruitsViewModel
@@ -17,7 +20,7 @@ class MyRecruitsViewModel
         private val recruitRepository: RecruitRepository
     ) : PagedListViewModel<MyRecruitSummary, MyRecruitsUiState>(
             initialState = MyRecruitsUiState(),
-            loadFailureMessageRes = R.string.myrecruits_toast_load_failed
+            loadFailureMessageRes = Res.string.myrecruits_toast_load_failed
         ) {
         override suspend fun fetchPage(
             page: Int,
@@ -32,7 +35,7 @@ class MyRecruitsViewModel
             items: List<MyRecruitSummary>,
             currentPage: Int,
             totalPages: Int,
-            toastMessageRes: Int?
+            toastMessageRes: StringResource?
         ): MyRecruitsUiState =
             copy(
                 isLoading = isLoading,
@@ -68,7 +71,7 @@ class MyRecruitsViewModel
                     it.copy(
                         pendingRecruitId = null,
                         pendingAction = null,
-                        toastMessageRes = if (result.isFailure) R.string.myrecruits_toast_action_failed else null
+                        toastMessageRes = if (result.isFailure) Res.string.myrecruits_toast_action_failed else null
                     )
                 }
                 if (result.isSuccess) refresh()

@@ -38,16 +38,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitTopic
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.recruit_form_banner_ai_draft_subtitle
+import com.example.pickii.shared.generated.resources.recruit_form_banner_ai_draft_title
+import com.example.pickii.shared.generated.resources.recruit_form_button_ai_draft
+import com.example.pickii.shared.generated.resources.recruit_form_button_submit_create
+import com.example.pickii.shared.generated.resources.recruit_form_button_submit_edit
+import com.example.pickii.shared.generated.resources.recruit_form_dialog_create_complete_body
+import com.example.pickii.shared.generated.resources.recruit_form_dialog_create_complete_title
+import com.example.pickii.shared.generated.resources.recruit_form_dialog_submit_body
+import com.example.pickii.shared.generated.resources.recruit_form_dialog_submit_create_title
+import com.example.pickii.shared.generated.resources.recruit_form_dialog_submit_edit_title
+import com.example.pickii.shared.generated.resources.recruit_form_error_no_access
+import com.example.pickii.shared.generated.resources.recruit_form_helper_period
+import com.example.pickii.shared.generated.resources.recruit_form_helper_title_min_length
+import com.example.pickii.shared.generated.resources.recruit_form_label_campus_scope
+import com.example.pickii.shared.generated.resources.recruit_form_label_capacity
+import com.example.pickii.shared.generated.resources.recruit_form_label_category
+import com.example.pickii.shared.generated.resources.recruit_form_label_category_and_topic
+import com.example.pickii.shared.generated.resources.recruit_form_label_detail_content
+import com.example.pickii.shared.generated.resources.recruit_form_label_period
+import com.example.pickii.shared.generated.resources.recruit_form_label_short_intro
+import com.example.pickii.shared.generated.resources.recruit_form_label_title
+import com.example.pickii.shared.generated.resources.recruit_form_label_topic
+import com.example.pickii.shared.generated.resources.recruit_form_placeholder_capacity_unit
+import com.example.pickii.shared.generated.resources.recruit_form_placeholder_date
+import com.example.pickii.shared.generated.resources.recruit_form_placeholder_detail_content
+import com.example.pickii.shared.generated.resources.recruit_form_placeholder_short_intro
+import com.example.pickii.shared.generated.resources.recruit_form_placeholder_title
+import com.example.pickii.shared.generated.resources.recruit_form_title_create
+import com.example.pickii.shared.generated.resources.recruit_form_title_edit
 import com.example.pickii.ui.common.AiGenerationDialog
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.CampusScopeToggle
@@ -69,6 +99,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -104,7 +136,7 @@ fun RecruitFormScreen(
                 Toast
                     .makeText(
                         context,
-                        context.getString(event.messageRes),
+                        getString(event.messageRes),
                         Toast.LENGTH_SHORT
                     ).show()
         }
@@ -166,9 +198,9 @@ private fun RecruitFormScreenContent(
                     if (uiState.mode ==
                         RecruitFormMode.CREATE
                     ) {
-                        R.string.recruit_form_title_create
+                        Res.string.recruit_form_title_create
                     } else {
-                        R.string.recruit_form_title_edit
+                        Res.string.recruit_form_title_edit
                     }
                 ),
             onBackClick = onBackClick
@@ -219,7 +251,7 @@ private fun FormTopBar(
 private fun NoAccessMessage() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = stringResource(R.string.recruit_form_error_no_access),
+            text = stringResource(Res.string.recruit_form_error_no_access),
             color = PickiiTextGray,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
@@ -254,14 +286,14 @@ private fun FormBody(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
     ) {
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_title))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_title))
         OutlinedTextField(
             value = uiState.title,
             onValueChange = onTitleChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = stringResource(R.string.recruit_form_placeholder_title),
+                    text = stringResource(Res.string.recruit_form_placeholder_title),
                     color = PickiiTextGray
                 )
             },
@@ -272,7 +304,7 @@ private fun FormBody(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (!uiState.isTitleValid) {
                 Text(
-                    text = stringResource(R.string.recruit_form_helper_title_min_length),
+                    text = stringResource(Res.string.recruit_form_helper_title_min_length),
                     color = PickiiTextGray,
                     fontSize = 11.sp
                 )
@@ -284,20 +316,20 @@ private fun FormBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_capacity))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_capacity))
         ParticipantsDropdown(selected = uiState.maxParticipants, onSelect = onMaxParticipantsChange)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_campus_scope))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_campus_scope))
         CampusScopeToggle(selected = uiState.onCampus ?: CampusScope.INTERNAL, onSelect = onCampusScopeChange)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_category_and_topic))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_category_and_topic))
 
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.recruit_form_label_category), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = stringResource(Res.string.recruit_form_label_category), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
@@ -316,7 +348,7 @@ private fun FormBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = stringResource(R.string.recruit_form_label_topic), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = stringResource(Res.string.recruit_form_label_topic), color = PickiiTextGray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
@@ -335,18 +367,18 @@ private fun FormBody(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_period))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_period))
         DateRangeRow(
             startDate = uiState.startDate,
             endDate = uiState.endDate,
             onStartDateChange = onStartDateChange,
             onEndDateChange = onEndDateChange
         )
-        Text(text = stringResource(R.string.recruit_form_helper_period), color = PickiiTextGray, fontSize = 11.sp)
+        Text(text = stringResource(Res.string.recruit_form_helper_period), color = PickiiTextGray, fontSize = 11.sp)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_short_intro))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_short_intro))
         OutlinedTextField(
             value = uiState.shortIntro,
             onValueChange = onShortIntroChange,
@@ -356,9 +388,9 @@ private fun FormBody(
                     .height(90.dp),
             placeholder = {
                 val categoryLabel =
-                    uiState.categories.firstOrNull()?.label ?: stringResource(R.string.recruit_form_label_category)
+                    uiState.categories.firstOrNull()?.label ?: stringResource(Res.string.recruit_form_label_category)
                 Text(
-                    text = stringResource(R.string.recruit_form_placeholder_short_intro, categoryLabel),
+                    text = stringResource(Res.string.recruit_form_placeholder_short_intro, categoryLabel),
                     color = PickiiTextGray
                 )
             },
@@ -371,7 +403,7 @@ private fun FormBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        FieldSectionLabel(text = stringResource(R.string.recruit_form_label_detail_content))
+        FieldSectionLabel(text = stringResource(Res.string.recruit_form_label_detail_content))
         OutlinedTextField(
             value = uiState.detailContent,
             onValueChange = onDetailContentChange,
@@ -381,7 +413,7 @@ private fun FormBody(
                     .height(140.dp),
             placeholder = {
                 Text(
-                    text = stringResource(R.string.recruit_form_placeholder_detail_content),
+                    text = stringResource(Res.string.recruit_form_placeholder_detail_content),
                     color = PickiiTextGray
                 )
             },
@@ -404,9 +436,9 @@ private fun FormBody(
                     if (uiState.mode ==
                         RecruitFormMode.CREATE
                     ) {
-                        R.string.recruit_form_button_submit_create
+                        Res.string.recruit_form_button_submit_create
                     } else {
-                        R.string.recruit_form_button_submit_edit
+                        Res.string.recruit_form_button_submit_edit
                     }
                 ),
             enabled = uiState.isSubmitEnabled,
@@ -423,14 +455,14 @@ private fun FormBody(
             title =
                 stringResource(
                     if (uiState.mode == RecruitFormMode.CREATE) {
-                        R.string.recruit_form_dialog_submit_create_title
+                        Res.string.recruit_form_dialog_submit_create_title
                     } else {
-                        R.string.recruit_form_dialog_submit_edit_title
+                        Res.string.recruit_form_dialog_submit_edit_title
                     }
                 ),
-            body = stringResource(R.string.recruit_form_dialog_submit_body),
-            confirmLabel = stringResource(R.string.common_button_confirm),
-            dismissLabel = stringResource(R.string.common_button_cancel),
+            body = stringResource(Res.string.recruit_form_dialog_submit_body),
+            confirmLabel = stringResource(Res.string.common_button_confirm),
+            dismissLabel = stringResource(Res.string.common_button_cancel),
             onConfirm = onConfirmSubmit,
             onDismiss = onDismissSubmitConfirm
         )
@@ -445,9 +477,9 @@ private fun FormBody(
 @Composable
 private fun CreateCompleteDialog(onConfirm: () -> Unit) {
     ConfirmDialog(
-        title = stringResource(R.string.recruit_form_dialog_create_complete_title),
-        body = stringResource(R.string.recruit_form_dialog_create_complete_body),
-        confirmLabel = stringResource(R.string.common_button_confirm),
+        title = stringResource(Res.string.recruit_form_dialog_create_complete_title),
+        body = stringResource(Res.string.recruit_form_dialog_create_complete_body),
+        confirmLabel = stringResource(Res.string.common_button_confirm),
         onConfirm = onConfirm
     )
 }
@@ -475,7 +507,7 @@ private fun ParticipantsDropdown(
     onSelect: (Int) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val unit = stringResource(R.string.recruit_form_placeholder_capacity_unit)
+    val unit = stringResource(Res.string.recruit_form_placeholder_capacity_unit)
 
     Box {
         Row(
@@ -550,12 +582,12 @@ private fun DateRangeRow(
                         openDatePickerFor = null
                     }
                 ) {
-                    Text(text = stringResource(R.string.common_button_confirm))
+                    Text(text = stringResource(Res.string.common_button_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { openDatePickerFor = null }) {
-                    Text(text = stringResource(R.string.common_button_cancel))
+                    Text(text = stringResource(Res.string.common_button_cancel))
                 }
             }
         ) {
@@ -580,7 +612,7 @@ private fun DateBox(
                 .padding(horizontal = 12.dp, vertical = 14.dp)
     ) {
         Text(
-            text = date?.toDisplayString() ?: stringResource(R.string.recruit_form_placeholder_date),
+            text = date?.toDisplayString() ?: stringResource(Res.string.recruit_form_placeholder_date),
             color = if (date != null) Color.Black else PickiiTextGray,
             fontSize = 13.sp
         )
@@ -610,13 +642,13 @@ private fun AiDraftBanner(onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.recruit_form_banner_ai_draft_title),
+                text = stringResource(Res.string.recruit_form_banner_ai_draft_title),
                 color = Color.Black,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.recruit_form_banner_ai_draft_subtitle),
+                text = stringResource(Res.string.recruit_form_banner_ai_draft_subtitle),
                 color = PickiiTextGray,
                 fontSize = 11.sp
             )
@@ -631,7 +663,7 @@ private fun AiDraftBanner(onClick: () -> Unit) {
                     .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.recruit_form_button_ai_draft),
+                text = stringResource(Res.string.recruit_form_button_ai_draft),
                 color = Color.White,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium

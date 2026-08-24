@@ -2,12 +2,16 @@ package com.example.pickii.ui.feedback
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.FeedbackProject
 import com.example.pickii.domain.model.FeedbackScores
 import com.example.pickii.domain.model.FeedbackTeamMember
 import com.example.pickii.domain.repository.FeedbackRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.feedback_toast_ai_feedback_failed
+import com.example.pickii.shared.generated.resources.feedback_toast_already_evaluated
+import com.example.pickii.shared.generated.resources.feedback_toast_load_failed
+import com.example.pickii.shared.generated.resources.feedback_toast_submit_failed
 import com.example.pickii.ui.common.RecruitUiEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +61,7 @@ class FeedbackViewModel
                         loadWritableMembers(projects)
                     }.onFailure {
                         _uiState.update { it.copy(isLoading = false) }
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.feedback_toast_load_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.feedback_toast_load_failed))
                     }
             }
         }
@@ -139,9 +143,9 @@ class FeedbackViewModel
                     }.onFailure { error ->
                         val messageRes =
                             if (error is ApiException && error.code == ERROR_CODE_ALREADY_EVALUATED) {
-                                R.string.feedback_toast_already_evaluated
+                                Res.string.feedback_toast_already_evaluated
                             } else {
-                                R.string.feedback_toast_submit_failed
+                                Res.string.feedback_toast_submit_failed
                             }
                         emitEvent(RecruitUiEvent.ShowToast(messageRes))
                     }
@@ -168,7 +172,7 @@ class FeedbackViewModel
                         }
                     }.onFailure {
                         _uiState.update { it.copy(aiFeedback = FeedbackDetailUiState(isLoading = false)) }
-                        emitEvent(RecruitUiEvent.ShowToast(R.string.feedback_toast_ai_feedback_failed))
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.feedback_toast_ai_feedback_failed))
                     }
             }
         }

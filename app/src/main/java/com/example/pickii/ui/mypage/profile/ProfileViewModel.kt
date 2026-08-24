@@ -2,10 +2,11 @@ package com.example.pickii.ui.mypage.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.ProfileRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.profile_view_toast_load_failed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +42,7 @@ class ProfileViewModel
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                toastMessageRes = if (isNoResume) null else R.string.profile_view_toast_load_failed
+                                toastMessageRes = if (isNoResume) null else Res.string.profile_view_toast_load_failed
                             )
                         }
                     }

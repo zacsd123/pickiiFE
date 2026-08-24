@@ -31,14 +31,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.mypage_withdraw_agreement_all
+import com.example.pickii.shared.generated.resources.mypage_withdraw_button_cancel
+import com.example.pickii.shared.generated.resources.mypage_withdraw_button_submit
+import com.example.pickii.shared.generated.resources.mypage_withdraw_button_verify
+import com.example.pickii.shared.generated.resources.mypage_withdraw_complete
+import com.example.pickii.shared.generated.resources.mypage_withdraw_placeholder_code
+import com.example.pickii.shared.generated.resources.mypage_withdraw_placeholder_email
+import com.example.pickii.shared.generated.resources.mypage_withdraw_placeholder_password
+import com.example.pickii.shared.generated.resources.mypage_withdraw_title
+import com.example.pickii.shared.generated.resources.mypage_withdraw_warning_1
+import com.example.pickii.shared.generated.resources.mypage_withdraw_warning_2
+import com.example.pickii.shared.generated.resources.mypage_withdraw_warning_3
+import com.example.pickii.shared.generated.resources.mypage_withdraw_warning_title
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.theme.PickiiDisabledGray
@@ -47,6 +60,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 private val FieldCornerRadius = 14.dp
@@ -105,14 +119,14 @@ private fun WithdrawalScreenContent(
     Box(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite)) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Spacer(modifier = Modifier.height(16.dp))
-            BackHeader(title = stringResource(R.string.mypage_withdraw_title), onBackClick = onBackClick)
+            BackHeader(title = stringResource(Res.string.mypage_withdraw_title), onBackClick = onBackClick)
             Spacer(modifier = Modifier.height(24.dp))
 
             FieldWithButton(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                placeholder = stringResource(R.string.mypage_withdraw_placeholder_email),
-                buttonLabel = stringResource(R.string.mypage_withdraw_button_verify),
+                placeholder = stringResource(Res.string.mypage_withdraw_placeholder_email),
+                buttonLabel = stringResource(Res.string.mypage_withdraw_button_verify),
                 onButtonClick = onSendEmailCodeClick,
                 buttonEnabled = uiState.email.isNotBlank() && !uiState.isSendingEmailCode
             )
@@ -122,8 +136,8 @@ private fun WithdrawalScreenContent(
                 FieldWithButton(
                     value = uiState.emailCode,
                     onValueChange = onEmailCodeChange,
-                    placeholder = stringResource(R.string.mypage_withdraw_placeholder_code),
-                    buttonLabel = stringResource(R.string.mypage_withdraw_button_verify),
+                    placeholder = stringResource(Res.string.mypage_withdraw_placeholder_code),
+                    buttonLabel = stringResource(Res.string.mypage_withdraw_button_verify),
                     onButtonClick = onVerifyEmailCodeClick,
                     buttonEnabled = uiState.emailCode.isNotBlank() && !uiState.isVerifyingEmailCode
                 )
@@ -143,7 +157,7 @@ private fun WithdrawalScreenContent(
                 onValueChange = onPasswordChange,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = stringResource(R.string.mypage_withdraw_placeholder_password), color = PickiiTextGray)
+                    Text(text = stringResource(Res.string.mypage_withdraw_placeholder_password), color = PickiiTextGray)
                 },
                 singleLine = true,
                 visualTransformation =
@@ -162,16 +176,16 @@ private fun WithdrawalScreenContent(
                         .padding(16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.mypage_withdraw_warning_title),
+                    text = stringResource(Res.string.mypage_withdraw_warning_title),
                     color = PickiiPaletteRed,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 listOf(
-                    R.string.mypage_withdraw_warning_1,
-                    R.string.mypage_withdraw_warning_2,
-                    R.string.mypage_withdraw_warning_3
+                    Res.string.mypage_withdraw_warning_1,
+                    Res.string.mypage_withdraw_warning_2,
+                    Res.string.mypage_withdraw_warning_3
                 ).forEach { res ->
                     Text(text = "· " + stringResource(res), color = Color.Black, fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(4.dp))
@@ -205,7 +219,7 @@ private fun WithdrawalScreenContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.mypage_withdraw_button_cancel),
+                        text = stringResource(Res.string.mypage_withdraw_button_cancel),
                         color = Color.Black,
                         fontSize = 14.sp
                     )
@@ -221,7 +235,7 @@ private fun WithdrawalScreenContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.mypage_withdraw_button_submit),
+                        text = stringResource(Res.string.mypage_withdraw_button_submit),
                         color = if (uiState.isSubmitEnabled) Color.White else PickiiTextGray,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
@@ -240,8 +254,8 @@ private fun WithdrawalScreenContent(
 
     if (uiState.isComplete) {
         ConfirmDialog(
-            title = stringResource(R.string.mypage_withdraw_complete),
-            confirmLabel = stringResource(R.string.common_button_confirm),
+            title = stringResource(Res.string.mypage_withdraw_complete),
+            confirmLabel = stringResource(Res.string.common_button_confirm),
             onConfirm = onComplete,
             onDismiss = {}
         )
@@ -325,7 +339,7 @@ private fun SingleAgreementBox(
         }
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = stringResource(R.string.mypage_withdraw_agreement_all),
+            text = stringResource(Res.string.mypage_withdraw_agreement_all),
             color = if (checked) PickiiPaletteRed else PickiiTextGray,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium

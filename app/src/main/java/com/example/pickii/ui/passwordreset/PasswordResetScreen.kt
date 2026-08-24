@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -39,13 +38,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.login_brand
+import com.example.pickii.shared.generated.resources.password_reset_button_go_login
+import com.example.pickii.shared.generated.resources.password_reset_button_submit
+import com.example.pickii.shared.generated.resources.password_reset_dialog_complete_title
+import com.example.pickii.shared.generated.resources.password_reset_title
+import com.example.pickii.shared.generated.resources.signup_button_send_code
+import com.example.pickii.shared.generated.resources.signup_button_verify_code
+import com.example.pickii.shared.generated.resources.signup_helper_password_rule
+import com.example.pickii.shared.generated.resources.signup_label_email
+import com.example.pickii.shared.generated.resources.signup_label_password
+import com.example.pickii.shared.generated.resources.signup_message_password_match
+import com.example.pickii.shared.generated.resources.signup_message_password_mismatch
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 입력 필드/버튼 공통 모서리 둥글기. */
@@ -118,13 +131,13 @@ private fun PasswordResetScreenContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.login_brand),
+                    text = stringResource(Res.string.login_brand),
                     color = Color.Black,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.common_button_cancel),
+                    text = stringResource(Res.string.common_button_cancel),
                     color = PickiiTextGray,
                     fontSize = 13.sp,
                     modifier = Modifier.clickable(onClick = onBackClick)
@@ -134,7 +147,7 @@ private fun PasswordResetScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.password_reset_title),
+                text = stringResource(Res.string.password_reset_title),
                 color = Color.Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -143,11 +156,11 @@ private fun PasswordResetScreenContent(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            FieldLabel(text = stringResource(R.string.signup_label_email))
+            FieldLabel(text = stringResource(Res.string.signup_label_email))
             FieldWithButton(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                buttonLabel = stringResource(R.string.signup_button_send_code),
+                buttonLabel = stringResource(Res.string.signup_button_send_code),
                 onButtonClick = onSendEmailCodeClick,
                 buttonEnabled = uiState.email.isNotBlank() && !uiState.isSendingEmailCode
             )
@@ -157,7 +170,7 @@ private fun PasswordResetScreenContent(
                 FieldWithButton(
                     value = uiState.emailCode,
                     onValueChange = onEmailCodeChange,
-                    buttonLabel = stringResource(R.string.signup_button_verify_code),
+                    buttonLabel = stringResource(Res.string.signup_button_verify_code),
                     onButtonClick = onVerifyEmailCodeClick,
                     buttonEnabled = uiState.emailCode.isNotBlank() && !uiState.isVerifyingEmailCode
                 )
@@ -166,7 +179,7 @@ private fun PasswordResetScreenContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FieldLabel(text = stringResource(R.string.signup_label_password))
+            FieldLabel(text = stringResource(Res.string.signup_label_password))
             PasswordField(
                 value = uiState.newPassword,
                 onValueChange = onNewPasswordChange,
@@ -174,7 +187,7 @@ private fun PasswordResetScreenContent(
                 onToggleVisibility = onTogglePasswordVisibility
             )
             Text(
-                text = stringResource(R.string.signup_helper_password_rule),
+                text = stringResource(Res.string.signup_helper_password_rule),
                 color = if (uiState.newPassword.isEmpty() || uiState.isPasswordValid) PickiiTextGray else Color.Red,
                 fontSize = 11.sp
             )
@@ -192,9 +205,9 @@ private fun PasswordResetScreenContent(
                     message =
                         stringResource(
                             if (uiState.isPasswordMatching) {
-                                R.string.signup_message_password_match
+                                Res.string.signup_message_password_match
                             } else {
-                                R.string.signup_message_password_mismatch
+                                Res.string.signup_message_password_mismatch
                             }
                         ),
                     isError = !uiState.isPasswordMatching
@@ -204,7 +217,7 @@ private fun PasswordResetScreenContent(
             Spacer(modifier = Modifier.height(32.dp))
 
             PrimaryButton(
-                text = stringResource(R.string.password_reset_button_submit),
+                text = stringResource(Res.string.password_reset_button_submit),
                 onClick = onSubmitClick,
                 enabled = uiState.isSubmitEnabled
             )
@@ -219,8 +232,8 @@ private fun PasswordResetScreenContent(
 
         if (uiState.isComplete) {
             ConfirmDialog(
-                title = stringResource(R.string.password_reset_dialog_complete_title),
-                confirmLabel = stringResource(R.string.password_reset_button_go_login),
+                title = stringResource(Res.string.password_reset_dialog_complete_title),
+                confirmLabel = stringResource(Res.string.password_reset_button_go_login),
                 onConfirm = onCompleteConfirm,
                 onDismiss = {}
             )
