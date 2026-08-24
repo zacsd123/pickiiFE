@@ -14,6 +14,7 @@ import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.KtorApplicantApiService
 import com.example.pickii.data.remote.api.KtorAuthApiService
 import com.example.pickii.data.remote.api.KtorMasterDataApiService
+import com.example.pickii.data.remote.api.KtorMyPageActivityApiService
 import com.example.pickii.data.remote.api.KtorNotificationApiService
 import com.example.pickii.data.remote.api.KtorNotificationSettingsApiService
 import com.example.pickii.data.remote.api.KtorProfileApiService
@@ -89,7 +90,7 @@ val networkModule =
         single<MasterDataApiService> { KtorMasterDataApiService(get()) }
         single<RecruitApiService> { get<Retrofit>().create(RecruitApiService::class.java) }
         single<ProfileApiService> { KtorProfileApiService(get()) }
-        single<MyPageActivityApiService> { get<Retrofit>().create(MyPageActivityApiService::class.java) }
+        single<MyPageActivityApiService> { KtorMyPageActivityApiService(get()) }
         single<NotificationSettingsApiService> { KtorNotificationSettingsApiService(get()) }
         single<FeedbackApiService> { get<Retrofit>().create(FeedbackApiService::class.java) }
         single<ChatApiService> { get<Retrofit>().create(ChatApiService::class.java) }

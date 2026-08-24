@@ -1,9 +1,11 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.MyPageActivityApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.MyApplyDto
 import com.example.pickii.data.remote.dto.MyCommentDto
 import com.example.pickii.data.remote.dto.MyScrapDto
+import com.example.pickii.data.remote.dto.PageEnvelope
 import com.example.pickii.data.remote.dto.RecruitSummaryDto
 import com.example.pickii.domain.model.ApplyStatus
 import com.example.pickii.domain.model.MyApply
@@ -20,19 +22,17 @@ import com.example.pickii.util.network.invalidIdException
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
-import kotlinx.serialization.json.Json
 
 /** `3. Recruit`, `4. User & Feedback` 문서의 마이페이지 활동내역 API로 [MyPageActivityRepository]를 구현한다. */
 class MyPageActivityApiRepository
     constructor(
-        private val apiService: MyPageActivityApiService,
-        private val json: Json
+        private val apiService: MyPageActivityApiService
     ) : MyPageActivityRepository {
         override suspend fun getMyApplies(
             page: Int,
             size: Int
         ): Result<MyApplyPage> =
-            safeApiCall(json) { apiService.getMyApplies(page, size) }.map { envelope ->
+            safeApiCall<ApiEnvelope<PageEnvelope<MyApplyDto>>> { apiService.getMyApplies(page, size) }.map { envelope ->
                 val pageEnvelope = envelope.data
                 MyApplyPage(
                     items = pageEnvelope.content.map { it.toDomain() },
@@ -45,14 +45,16 @@ class MyPageActivityApiRepository
 
         override suspend fun cancelApply(applyId: String): Result<Unit> {
             val id = applyId.toLongOrNull() ?: return Result.failure(invalidIdException(applyId))
-            return safeApiCallUnit(json) { apiService.cancelApply(id) }
+            return safeApiCallUnit { apiService.cancelApply(id) }
         }
 
         override suspend fun getMyRecruits(
             page: Int,
             size: Int
         ): Result<MyRecruitPage> =
-            safeApiCall(json) { apiService.getMyRecruits(page, size) }.map { envelope ->
+            safeApiCall<ApiEnvelope<PageEnvelope<RecruitSummaryDto>>> {
+                apiService.getMyRecruits(page, size)
+            }.map { envelope ->
                 val pageEnvelope = envelope.data
                 MyRecruitPage(
                     items = pageEnvelope.content.map { it.toDomain() },
@@ -67,7 +69,9 @@ class MyPageActivityApiRepository
             page: Int,
             size: Int
         ): Result<MyCommentPage> =
-            safeApiCall(json) { apiService.getMyComments(page, size) }.map { envelope ->
+            safeApiCall<ApiEnvelope<PageEnvelope<MyCommentDto>>> {
+                apiService.getMyComments(page, size)
+            }.map { envelope ->
                 val pageEnvelope = envelope.data
                 MyCommentPage(
                     items = pageEnvelope.content.map { it.toDomain() },
@@ -82,7 +86,7 @@ class MyPageActivityApiRepository
             page: Int,
             size: Int
         ): Result<MyScrapPage> =
-            safeApiCall(json) { apiService.getMyScraps(page, size) }.map { envelope ->
+            safeApiCall<ApiEnvelope<PageEnvelope<MyScrapDto>>> { apiService.getMyScraps(page, size) }.map { envelope ->
                 val pageEnvelope = envelope.data
                 MyScrapPage(
                     items = pageEnvelope.content.map { it.toDomain() },
