@@ -58,8 +58,7 @@ val repositoryModule =
                 context = get<Context>(),
                 chatApiService = get(),
                 sessionRepository = get(),
-                projectRepository = get(),
-                json = get()
+                projectRepository = get()
             )
         }
         single<ApplicantRepository> { ApplicantApiRepository(apiService = get()) }

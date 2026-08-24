@@ -14,6 +14,7 @@ import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.KtorApplicantApiService
 import com.example.pickii.data.remote.api.KtorAuthApiService
 import com.example.pickii.data.remote.api.KtorCalendarApiService
+import com.example.pickii.data.remote.api.KtorChatApiService
 import com.example.pickii.data.remote.api.KtorFeedbackApiService
 import com.example.pickii.data.remote.api.KtorMasterDataApiService
 import com.example.pickii.data.remote.api.KtorMeetingPollApiService
@@ -97,7 +98,7 @@ val networkModule =
         single<MyPageActivityApiService> { KtorMyPageActivityApiService(get()) }
         single<NotificationSettingsApiService> { KtorNotificationSettingsApiService(get()) }
         single<FeedbackApiService> { KtorFeedbackApiService(get()) }
-        single<ChatApiService> { get<Retrofit>().create(ChatApiService::class.java) }
+        single<ChatApiService> { KtorChatApiService(get()) }
         single<ApplicantApiService> { KtorApplicantApiService(get()) }
         single<NotificationApiService> { KtorNotificationApiService(get()) }
         single<CalendarApiService> { KtorCalendarApiService(get()) }
