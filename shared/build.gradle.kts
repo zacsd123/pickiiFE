@@ -83,6 +83,15 @@ afterEvaluate {
         // 커맨드라인에 비밀번호를 안 남기려고 환경변수 대신 gitignore된 local.properties 파일에서
         // 읽는다 — 경로를 시스템 프로퍼티로 전달(AuthApiServiceBackendIntegrationTest가 읽음).
         systemProperty("pickii.localPropertiesPath", rootProject.file("local.properties").absolutePath)
+        // 이 태스크는 항상 새로 실행돼야 한다 — local.properties 내용 변경이나 백엔드 상태 변화를
+        // Gradle의 UP-TO-DATE 체크가 감지할 방법이 없다. 실제로 systemProperty에 넘긴 건 "경로"
+        // 문자열(항상 동일)뿐이라, 파일 내용만 바뀌면 Gradle이 "입력 변경 없음"으로 보고 이전
+        // 실행 결과(전부 스킵)를 그대로 재사용해버리는 걸 실측으로 확인했다.
+        outputs.upToDateWhen { false }
+        testLogging {
+            events("skipped", "passed", "failed")
+            showStandardStreams = true
+        }
         filter {
             includeTestsMatching("*BackendIntegrationTest*")
             isFailOnNoMatchingTests = false
