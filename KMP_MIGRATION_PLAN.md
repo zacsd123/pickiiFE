@@ -139,9 +139,19 @@ Pickii/
 > 이후 다른 영역)에서도 비슷한 마찰이 또 나올 가능성을 염두에 둘 것 — 뭔가 "빌드는 되는데 런타임에만
 > 이상하게 죽는다" 싶으면 이 플러그인 조합부터 의심.
 
-- [ ] `res/values/strings.xml`(32KB, 문자열 규모 큼) → `commonMain/composeResources/values/strings.xml`
-- [ ] `res/drawable/*.xml`(아이콘 26개), `res/drawable/*.png`(레벨 고양이 이미지 등) → `commonMain/composeResources/drawable/`
-- [ ] 코드 전체에서 `stringResource(R.string.x)` → `stringResource(Res.string.x)` 치환 (화면 수가 많아 기계적 치환 스크립트 권장)
+- [x] `res/values/strings.xml`(32KB, 문자열 규모 큼) → `commonMain/composeResources/values/strings.xml` — 완료(2026-08-24).
+  374개 이동, `app_name`(AndroidManifest 참조)과 `general_notification_channel_name`(FcmService의
+  동기 `Service#getString` 필요)은 CMP 리소스로 해석 불가해 `app/res/values/strings.xml`에 남김
+- [x] `res/drawable/*.xml`(벡터 아이콘 31개), `res/drawable/*.png`(레벨 고양이 4종 + 준비중 마스코트) →
+  `commonMain/composeResources/drawable/` — 완료(2026-08-24). `ic_launcher_background.xml`(adaptive
+  icon 레이어)과 `ic_notification.xml`(`NotificationCompat.setSmallIcon()`이 진짜 Android 리소스 ID를
+  요구 — CMP 쪽에도 사본을 남겨 Compose 아이콘으로는 계속 씀)은 `app/res`에 그대로 둠
+- [x] 코드 전체에서 `stringResource(R.string.x)`/`painterResource(R.drawable.x)` →
+  `Res.string.x`/`Res.drawable.x` 치환 — 완료(2026-08-24). Python 스크립트로 58개 파일 기계적 치환 +
+  ViewModel/UiState가 들고 있던 Int 타입 리소스 ID(`toastMessageRes`, `loadFailureMessageRes`,
+  `getLinkIcon` 반환 타입 등)를 `StringResource`/`DrawableResource`로 재설계. 커밋은 문자열/드로어블
+  두 개로 분리했지만 둘 다 완전히 적용된 상태에서만 전체 모듈이 컴파일됨(Kotlin 전체 모듈 컴파일
+  특성상 진짜 독립적으로 빌드되는 분할은 불가능했음)
 - [ ] `material-icons-extended` import 경로 전환
 
 ### Phase 4 — 화면 이식 (권장 순서)
