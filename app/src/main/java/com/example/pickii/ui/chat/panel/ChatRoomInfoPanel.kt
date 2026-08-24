@@ -1,7 +1,6 @@
 package com.example.pickii.ui.chat
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -21,17 +20,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chevron_right
+import com.example.pickii.shared.generated.resources.ic_close
+import com.example.pickii.shared.generated.resources.ic_leader_delegation
+import com.example.pickii.shared.generated.resources.ic_leave_chat_room
+import com.example.pickii.shared.generated.resources.ic_member_list
+import com.example.pickii.shared.generated.resources.ic_member_removal
+import com.example.pickii.shared.generated.resources.ic_notification
+import com.example.pickii.shared.generated.resources.ic_project_info
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
 import com.example.pickii.ui.theme.PickiiDivider
 import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiNavyTextDark
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 private val PanelBackgroundColor = Color.White
 private val PanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -83,7 +91,7 @@ fun ChatRoomInfoPanel(
         )
 
         ChatRoomInfoMenuItem(
-            iconRes = R.drawable.ic_notification,
+            iconRes = Res.drawable.ic_notification,
             title = "알람 설정",
             status =
                 if (uiState.isNotificationEnabled) {
@@ -95,14 +103,14 @@ fun ChatRoomInfoPanel(
         )
 
         ChatRoomInfoMenuItem(
-            iconRes = R.drawable.ic_member_list,
+            iconRes = Res.drawable.ic_member_list,
             title = "팀원 목록",
             status = "${uiState.memberCount}명",
             onClick = onMemberListClick
         )
 
         ChatRoomInfoMenuItem(
-            iconRes = R.drawable.ic_project_info,
+            iconRes = Res.drawable.ic_project_info,
             title = "프로젝트 정보",
             status = uiState.projectStatus.toDisplayText(),
             onClick = onProjectInfoClick
@@ -126,14 +134,14 @@ fun ChatRoomInfoPanel(
             )
 
             ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_leader_delegation,
+                iconRes = Res.drawable.ic_leader_delegation,
                 title = "팀장 위임",
                 status = null,
                 onClick = onLeaderDelegationClick
             )
 
             ChatRoomInfoMenuItem(
-                iconRes = R.drawable.ic_member_removal,
+                iconRes = Res.drawable.ic_member_removal,
                 title = "팀원 내보내기",
                 status = null,
                 onClick = onMemberRemovalClick
@@ -145,7 +153,7 @@ fun ChatRoomInfoPanel(
         )
 
         ChatRoomInfoMenuItem(
-            iconRes = R.drawable.ic_leave_chat_room,
+            iconRes = Res.drawable.ic_leave_chat_room,
             title = "채팅방 나가기",
             status = null,
             onClick = onLeaveChatRoomClick,
@@ -182,7 +190,7 @@ private fun ChatRoomInfoHeader(
             Image(
                 painter =
                     painterResource(
-                        id = R.drawable.ic_close
+                        resource = Res.drawable.ic_close
                     ),
                 contentDescription = "채팅방 정보 닫기",
                 modifier = Modifier.size(24.dp)
@@ -295,7 +303,7 @@ private fun ChatRoomMemberProfile(member: ChatRoomMemberUiModel) {
  */
 @Composable
 private fun ChatRoomInfoMenuItem(
-    @DrawableRes iconRes: Int,
+    iconRes: DrawableResource,
     title: String,
     status: String?,
     onClick: () -> Unit,
@@ -320,7 +328,7 @@ private fun ChatRoomInfoMenuItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(id = iconRes),
+            painter = painterResource(resource = iconRes),
             contentDescription = title,
             modifier = Modifier.size(48.dp)
         )
@@ -348,7 +356,7 @@ private fun ChatRoomInfoMenuItem(
         Image(
             painter =
                 painterResource(
-                    id = R.drawable.ic_chevron_right
+                    resource = Res.drawable.ic_chevron_right
                 ),
             contentDescription = null,
             modifier = Modifier.size(18.dp)

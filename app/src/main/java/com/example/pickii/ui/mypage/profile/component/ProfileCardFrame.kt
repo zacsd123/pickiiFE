@@ -27,16 +27,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.img_mascot_preparing
+import com.example.pickii.shared.generated.resources.mypage_profile_card_empty_message
 import com.example.pickii.ui.theme.PickiiProfileCardBlack
 import com.example.pickii.ui.theme.PickiiProfileCardGoldBright
 import com.example.pickii.ui.theme.PickiiProfileCardGoldDim
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 프로필 확인 화면 카드 6장이 공통으로 쓰는 검정+골드 카드 껍데기.
@@ -90,12 +92,12 @@ fun ProfileCardFrame(
 @Composable
 fun ProfileCardEmptyState(
     modifier: Modifier = Modifier,
-    message: String = stringResource(R.string.mypage_profile_card_empty_message)
+    message: String = stringResource(Res.string.mypage_profile_card_empty_message)
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(R.drawable.img_mascot_preparing),
+                painter = painterResource(Res.drawable.img_mascot_preparing),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.size(160.dp)

@@ -4,7 +4,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,8 +55,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.MeetingPollDetail
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chat_room_menu
+import com.example.pickii.shared.generated.resources.ic_chevron_down
+import com.example.pickii.shared.generated.resources.ic_chevron_up
+import com.example.pickii.shared.generated.resources.ic_file
+import com.example.pickii.shared.generated.resources.ic_meeting_manage
+import com.example.pickii.shared.generated.resources.ic_meeting_schedule
+import com.example.pickii.shared.generated.resources.ic_notice
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
@@ -71,6 +76,9 @@ import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.koin.androidx.compose.koinViewModel
 
 private val ChatBackgroundColor = Color(0xFFF8F9FB)
@@ -146,7 +154,7 @@ fun ChatRoomRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -764,7 +772,7 @@ private fun ChatRoomHeader(
                 Image(
                     painter =
                         painterResource(
-                            id = R.drawable.ic_chat_room_menu
+                            resource = Res.drawable.ic_chat_room_menu
                         ),
                     contentDescription = "채팅방 정보 열기",
                     modifier = Modifier.size(24.dp)
@@ -838,7 +846,7 @@ private fun ChatNotice(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_notice),
+                painter = painterResource(Res.drawable.ic_notice),
                 contentDescription = "공지",
                 modifier = Modifier.size(24.dp)
             )
@@ -871,11 +879,11 @@ private fun ChatNotice(
             Icon(
                 painter =
                     painterResource(
-                        id =
+                        resource =
                             if (isExpanded) {
-                                R.drawable.ic_chevron_up
+                                Res.drawable.ic_chevron_up
                             } else {
-                                R.drawable.ic_chevron_down
+                                Res.drawable.ic_chevron_down
                             }
                     ),
                 contentDescription = if (isExpanded) "접기" else "펼치기",
@@ -1027,7 +1035,7 @@ private fun ChatMessageItem(
  * 파일 및 회의 관련 추가 기능을 표시한다.
  */
 private data class ChatActionItem(
-    @DrawableRes val iconRes: Int,
+    val iconRes: DrawableResource,
     val label: String,
     val onClick: () -> Unit
 )
@@ -1043,11 +1051,11 @@ private fun ChatActionMenu(
 ) {
     val actionItems =
         buildList {
-            add(ChatActionItem(iconRes = R.drawable.ic_file, label = "사진/카메라", onClick = onPhotoClick))
-            add(ChatActionItem(iconRes = R.drawable.ic_notice, label = "공지 등록", onClick = onNoticeRegisterClick))
+            add(ChatActionItem(iconRes = Res.drawable.ic_file, label = "사진/카메라", onClick = onPhotoClick))
+            add(ChatActionItem(iconRes = Res.drawable.ic_notice, label = "공지 등록", onClick = onNoticeRegisterClick))
             add(
                 ChatActionItem(
-                    iconRes = R.drawable.ic_meeting_manage,
+                    iconRes = Res.drawable.ic_meeting_manage,
                     label = "회의 관리",
                     onClick = onMeetingManagementClick
                 )
@@ -1057,14 +1065,14 @@ private fun ChatActionMenu(
             if (isCurrentUserLeader) {
                 add(
                     ChatActionItem(
-                        iconRes = R.drawable.ic_meeting_schedule,
+                        iconRes = Res.drawable.ic_meeting_schedule,
                         label = "회의 일정 잡기",
                         onClick = onQuickMeetingClick
                     )
                 )
                 add(
                     ChatActionItem(
-                        iconRes = R.drawable.ic_meeting_schedule,
+                        iconRes = Res.drawable.ic_meeting_schedule,
                         label = "회의 직접 등록",
                         onClick = onDirectRegisterClick
                     )
@@ -1100,7 +1108,7 @@ private fun ChatActionMenu(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = item.iconRes),
+                        painter = painterResource(resource = item.iconRes),
                         contentDescription = item.label,
                         modifier = Modifier.size(26.dp)
                     )

@@ -26,12 +26,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chevron_down
+import com.example.pickii.shared.generated.resources.ic_chevron_up
 import com.example.pickii.ui.calendar.monthly.MonthlyScheduleUiModel
 import com.example.pickii.ui.common.toComposeColor
 import com.example.pickii.ui.theme.PickiiInk
@@ -40,6 +41,7 @@ import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.painterResource
 
 private val SummaryCardBackgroundColor = Color(0xFFFAFAF3)
 private val SummaryTitleColor = PickiiInk
@@ -168,11 +170,11 @@ private fun ScheduleSummaryHeader(
             Icon(
                 painter =
                     painterResource(
-                        id =
+                        resource =
                             if (isExpanded) {
-                                R.drawable.ic_chevron_up
+                                Res.drawable.ic_chevron_up
                             } else {
-                                R.drawable.ic_chevron_down
+                                Res.drawable.ic_chevron_down
                             }
                     ),
                 contentDescription = if (isExpanded) "접기" else "펼치기",
