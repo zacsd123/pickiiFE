@@ -62,7 +62,7 @@ val repositoryModule =
                 json = get()
             )
         }
-        single<ApplicantRepository> { ApplicantApiRepository(apiService = get(), json = get()) }
+        single<ApplicantRepository> { ApplicantApiRepository(apiService = get()) }
         single<NotificationRepository> { NotificationApiRepository(apiService = get(), json = get()) }
         single<MeetingPollRepository> { MeetingPollApiRepository(apiService = get(), json = get()) }
         single<ProjectRepository> { ProjectApiRepository(apiService = get()) }
