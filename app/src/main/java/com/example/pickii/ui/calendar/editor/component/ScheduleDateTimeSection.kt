@@ -1,6 +1,5 @@
 package com.example.pickii.ui.calendar.editor.component
 
-import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,9 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -238,7 +241,7 @@ private fun TimePickerRow(
     onTimeChange: (LocalTime) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -265,30 +268,65 @@ private fun TimePickerRow(
                 text = time.format(TimeFormatter),
                 modifier =
                     Modifier
-                        .clickable {
-                            TimePickerDialog(
-                                context,
-                                { _, hourOfDay, minute ->
-                                    onTimeChange(
-                                        LocalTime(
-                                            hourOfDay,
-                                            minute
-                                        )
-                                    )
-                                },
-                                time.hour,
-                                time.minute,
-                                true
-                            ).show()
-                        }.padding(
-                            vertical = 8.dp
-                        ),
+                        .clickable { showTimePicker = true }
+                        .padding(vertical = 8.dp),
                 color = DateTimeValueColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
     }
+
+    if (showTimePicker) {
+        ScheduleTimePickerDialog(
+            initialTime = time,
+            onDismiss = { showTimePicker = false },
+            onConfirm = { newTime ->
+                onTimeChange(newTime)
+                showTimePicker = false
+            }
+        )
+    }
+}
+
+/**
+ * Material3 [TimePicker]를 감싼 시간 선택 다이얼로그다. 예전 android.app.TimePickerDialog(OS 기본
+ * 스피너)와 생김새는 다르지만 동작(시:분 선택 후 확인)은 동일하다.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScheduleTimePickerDialog(
+    initialTime: LocalTime,
+    onDismiss: () -> Unit,
+    onConfirm: (LocalTime) -> Unit
+) {
+    val timePickerState =
+        rememberTimePickerState(
+            initialHour = initialTime.hour,
+            initialMinute = initialTime.minute,
+            is24Hour = true
+        )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(LocalTime(timePickerState.hour, timePickerState.minute))
+                }
+            ) {
+                Text("확인")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("취소")
+            }
+        },
+        text = {
+            TimePicker(state = timePickerState)
+        }
+    )
 }
 
 /**
