@@ -15,7 +15,7 @@ private const val TAG = "TokenCorruptionDebug"
 
 /**
  * TODO(디버그 검증용 임시 코드, 확인 끝나면 삭제): 저장된 Access Token만 깨뜨려서 다음 API 호출이
- * 401을 받게 만들고, `TokenAuthenticator`의 갱신 경로(Provider→Lazy 전환분)를 실기기에서 토큰의
+ * 401을 받게 만들고, `HttpClientFactory`의 Ktor `Auth` 플러그인 갱신 경로를 실기기에서 토큰의
  * 실제 만료를 기다리지 않고 바로 확인하기 위한 트리거. `app/src/debug` 전용 소스셋이라 release
  * 빌드에는 이 파일 자체가 포함되지 않는다.
  *

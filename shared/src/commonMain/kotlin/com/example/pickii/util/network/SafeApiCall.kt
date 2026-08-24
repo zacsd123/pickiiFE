@@ -15,9 +15,6 @@ private const val UNKNOWN_ERROR_CODE = "UNKNOWN_ERROR"
  * 성공(2xx)이면 응답 바디를 [T]로 역직렬화해서 반환하고(`ContentNegotiation` 플러그인이 처리),
  * 실패면 에러 바디를 [ApiErrorBody]로 파싱해 [ApiException]으로 감싼다. 네트워크 예외(IOException)도
  * 동일하게 [Result.failure]로 감싼다.
- *
- * Retrofit이 남아있는 서비스는 `app`의 동명 함수(파라미터가 `retrofit2.Response`인 오버로드)를
- * 계속 쓴다 — 같은 패키지에 공존하고 호출부 람다의 반환 타입으로 자동 구분된다.
  */
 suspend inline fun <reified T> safeApiCall(call: suspend () -> HttpResponse): Result<T> =
     try {

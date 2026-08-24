@@ -9,9 +9,10 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 /**
- * 플랫폼별 Ktor 엔진(Android=OkHttp, iOS=Darwin)을 고르는 진입점. Phase 2에서
- * [com.example.pickii.data.remote.AuthInterceptor]/`TokenAuthenticator` 로직을 Ktor `Auth` 플러그인으로
- * 옮길 때 이 팩토리 위에 인증/토큰 갱신을 얹는다. 아직 어떤 API 서비스도 이 클라이언트를 쓰지 않는다.
+ * Phase 1 스켈레톤 단계에서 만든 플랫폼별 Ktor 엔진(Android=OkHttp, iOS=Darwin) 선택 진입점.
+ * 실제 Phase 2 데이터 레이어 전환은 이 파일이 아니라 `data.remote.HttpClientFactory`
+ * (인증/토큰 갱신을 포함한 Auth 플러그인 설정까지 갖춘 버전)로 진행됐다 — 이 파일은 어떤
+ * API 서비스도 쓰지 않는 미사용 스캐폴딩으로 남아 있다.
  */
 internal expect fun httpClientEngine(): HttpClientEngineFactory<*>
 

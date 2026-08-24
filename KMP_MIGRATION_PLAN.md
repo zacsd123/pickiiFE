@@ -42,8 +42,8 @@ Pickii/
 | 현재 (`libs.versions.toml`) | 용도 | KMP 대안 | 비고 |
 |---|---|---|---|
 | Hilt `2.60.1` + KSP | DI | **Koin `4.1.1`** | Hilt는 어노테이션 프로세서 기반이라 Kotlin/Native(iOS) 미지원. Koin은 런타임 DI라 멀티플랫폼 공식 지원. `@HiltViewModel` 쓰는 화면 전부(거의 모든 화면) 수정 필요. ⚠️ **버전 고정 필요**: 프로젝트 Kotlin `2.2.10`이 소비 가능한 klib ABI는 `<=2.2.0`인데 Koin `4.2.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 있어 못 읽음(2026-08-22 확인, `PROGRESS_kmp-migration.md` 참고). `4.1.1`이 마지막 호환 버전 |
-| Retrofit `2.11.0` + OkHttp `4.12.0` | REST API 통신 | **Ktor Client `3.3.3`** | 가장 큰 작업. `data/remote/api/*ApiService.kt` 13개 + `data/repository/*ApiRepository.kt` 15개가 전부 대상. ⚠️ **버전 고정 필요**: Ktor `3.4.0`부터 iOS klib가 Kotlin `2.3.x` 컴파일러로 빌드돼 `2.2.10`과 ABI 불일치(2026-08-22 확인). `3.3.3`이 마지막 호환 버전 |
-| `AuthInterceptor`, `TokenAuthenticator` (OkHttp) | 토큰 첨부·갱신 | Ktor `Auth` 플러그인 (Bearer + refresh 콜백) | 로직은 거의 그대로 옮겨 쓸 수 있음, API만 다름 |
+| ~~Retrofit `2.11.0`~~ | REST API 통신 | **Ktor Client `3.3.3`** | ✅ **완료(2026-08-24)**. `data/remote/api/*ApiService.kt` 13개 전부 Ktor로 재작성, `data/repository/*ApiRepository.kt` 13개 전부 새 서비스로 교체. Retrofit 의존성 자체를 프로젝트에서 완전히 제거함(`retrofit-core`, `retrofit-kotlinx-serialization-converter`). OkHttp는 아직 남아있음(아래 참고) |
+| ~~`AuthInterceptor`, `TokenAuthenticator`~~ (OkHttp) | 토큰 첨부·갱신 | Ktor `Auth` 플러그인 (Bearer + refresh 콜백) | ✅ **완료(2026-08-24)**. 두 클래스 전부 삭제, `HttpClientFactory`의 Ktor `Auth` 플러그인이 전담. `okhttp-logging-interceptor`도 같이 제거(GitHub 이슈 #47 해소). OkHttpClient 싱글턴 자체는 `ChatStompClient`(Krossbow websocket-okhttp)가 아직 써서 남아있음 — 아래 Krossbow 행 참고 |
 | `kotlinx.serialization` | JSON | 그대로 유지 | 이미 멀티플랫폼 라이브러리 |
 | Krossbow `9.3.0` (`stomp-kxserialization-json` + `websocket-okhttp`) | 채팅 WebSocket(STOMP) | STOMP 부분은 그대로, `websocket-okhttp` → **`krossbow-websocket-ktor`** | Krossbow 자체는 이미 KMP 라이브러리. WebSocket 엔진만 OkHttp 전용에서 Ktor 엔진(Android=OkHttp, iOS=Darwin)으로 교체. ⚠️ **버전 고정 필요**: 최신 `10.0.0`의 iOS klib는 Kotlin `2.4.10` 컴파일러로 빌드돼 있어 프로젝트 Kotlin `2.2.10`과 불일치(2026-08-22 확인). `9.3.0`이 마지막 호환 버전(컴파일러 `2.1.20`) — `stomp-core`/`stomp-kxserialization-json`/`websocket-ktor` 3개 아티팩트 전부 확인함. 10.0.0은 Ktor 2 레거시 지원 제거가 주 변경점이라 어차피 Ktor 3만 쓰는 이 프로젝트엔 영향 없음, 대안 라이브러리 필요 없음 |
 | Coil3 (`coil-compose`, `coil-network-okhttp`) | 이미지 로딩 | 그대로 + **`coil-network-ktor3`** | 이미 `io.coil-kt.coil3` 그룹이라 멀티플랫폼 버전을 쓰고 있음. 네트워크 엔진만 교체 |
@@ -74,7 +74,9 @@ Pickii/
   - 이동 완료: `SessionRepository`, `MasterDataRepository` (인터페이스) + `CurrentUser`, `CampusScope`, `RecruitCategory`, `RecruitTopic`, `RecruitStatus`, `ProjectCreationResult`, `ApplyKeywordCategory`, `LicenseOption`, `LinkCategory`, `TechStack`, `University` (모델)
   - 미이동(java.time 걸림): `ProfileRepository`(→`MemberProfile`), `RecruitRepository`, `NotificationRepository` 등 — Login/Home 화면이 실제로 필요로 하는 나머지 리포지토리. kotlinx-datetime(버전 0.8.0, `YearMonth` 포함해서 새로 추가됨)으로 프로젝트 전역 날짜 타입을 바꾸는 작업(Phase 2 항목)을 먼저 하거나, 최소한 이 리포지토리들이 의존하는 범위만 먼저 손대는 결정이 필요함
 - [ ] Hilt → Koin 전환 (우선 로그인/홈 관련 모듈만) — 위 블로커 때문에 보류. `SharedModule.kt`에 빈 Koin 모듈만 만들어둠(앱에는 미연결, Hilt가 계속 전체 DI 담당 중)
-- [ ] `AuthApiService`, `RecruitAuthSessionRepository`(로그인) — Retrofit → Ktor로 재작성
+- [x] `AuthApiService`, `RecruitAuthSessionRepository`(로그인) — Retrofit → Ktor로 재작성. Phase 1이
+  의도했던 "로그인/홈만 좁게" 범위가 아니라 Phase 2의 13개 서비스 전체 스윕(2026-08-24)으로 같이
+  완료됨
 - [ ] `HomeScreen`, `HomeViewModel`, `LoginScreen`, `LoginViewModel` → `commonMain`으로 이동
 - [ ] `PickiiBottomNav`, `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 (Compose 테마는 대부분 그대로 포팅됨)
 - [ ] Mac에서 `iosApp` Xcode 프로젝트 생성, `ComposeUIViewController`로 진입점 연결
@@ -84,15 +86,24 @@ Pickii/
 **이 단계가 끝나야 나머지 17개 화면 영역을 이식하는 데 드는 시간을 현실적으로 추정할 수 있습니다.**
 
 ### Phase 2 — 데이터 레이어 전면 교체
-- [ ] Ktor Client 공통 설정 (`commonMain`): base URL, 직렬화, 로깅
-- [ ] Ktor `Auth` 플러그인으로 `AuthInterceptor`/`TokenAuthenticator` 로직 이식 (토큰 자동 첨부 + 401 시 refresh)
-- [ ] `data/remote/api/*ApiService.kt` 13개 전부 Ktor 기반으로 재작성
-- [ ] `data/remote/dto/*.kt`는 그대로 유지 (kotlinx.serialization 기반이라 손댈 것 거의 없음)
-- [ ] `data/repository/*ApiRepository.kt` 15개 전부 새 API 서비스 연결로 교체
+- [x] Ktor Client 공통 설정 (`commonMain`): base URL, 직렬화, 로깅 — `data/remote/HttpClientFactory.kt`
+  (2026-08-23~24, `enableBodyLogging` + auth/ 경로 제외 + Authorization 마스킹까지 포함)
+- [x] Ktor `Auth` 플러그인으로 `AuthInterceptor`/`TokenAuthenticator` 로직 이식 (토큰 자동 첨부 + 401 시 refresh) —
+  완료(2026-08-24). 두 클래스는 완전히 삭제됨. `BearerAuthRefreshSpikeTest`/`HttpClientFactoryAuthTest`로
+  갱신·순환 방지(`markAsRefreshTokenRequest()`) 실측 검증 완료. 다만 실기기/에뮬레이터에서 실제 401→갱신
+  흐름 관찰은 아직 못 함(`PROGRESS_kmp-migration.md`의 미검증 항목 참고)
+- [x] `data/remote/api/*ApiService.kt` 13개 전부 Ktor 기반으로 재작성 — 완료(2026-08-24). Auth,
+  Project, NotificationSettings, Applicant, MasterData, Notification, Profile, MyPageActivity,
+  Feedback, Calendar, MeetingPoll, Recruit, Chat(멀티파트 이미지 업로드 포함) 전부
+- [x] `data/remote/dto/*.kt`는 그대로 유지 (kotlinx.serialization 기반이라 손댈 것 거의 없음)
+- [x] `data/repository/*ApiRepository.kt` 13개 전부 새 API 서비스 연결로 교체 — 완료(2026-08-24)
 - [ ] `TokenStore`, `DeviceIdProvider`, `SavedMeetingScheduleStore` — DataStore는 유지, 파일 경로 생성부만 `expect/actual`
 - [ ] `data/remote/socket/ChatStompClient.kt` — `krossbow-websocket-okhttp` → `krossbow-websocket-ktor`
+  (Retrofit 제거 시점(2026-08-24)에는 손대지 않음 — OkHttpClient 싱글턴이 아직 이걸 위해 남아있음)
 - [x] `java.time` 사용처(`DateFormatter`, `DateTimeExt`, `ScheduleRecurrence` 등) → `kotlinx-datetime`으로 교체 — Phase 1 마무리하면서 앞당겨 완료(2026-08-22). 66개 파일 전환, 특성화 테스트 2개로 동작 동일함 검증. 발견한 이상한 점/개선 메모는 `PROGRESS_kmp-migration.md` 3번 참고
-- [ ] Koin 모듈로 DI 전면 전환 완료 (`di/NetworkModule.kt`, `di/RepositoryModule.kt`, `di/CalendarRepositoryModule.kt`)
+- [x] Koin 모듈로 DI 전면 전환 완료 (`di/NetworkModule.kt`, `di/RepositoryModule.kt`, `di/CalendarRepositoryModule.kt`) —
+  Hilt·KSP 완전 제거 및 Retrofit 계열(Retrofit/AuthInterceptor/TokenAuthenticator/okhttp-logging-interceptor)
+  전부 걷어낸 상태로 확인됨(2026-08-24)
 
 ### Phase 3 — 리소스 시스템 이식
 - [ ] `res/values/strings.xml`(32KB, 문자열 규모 큼) → `commonMain/composeResources/values/strings.xml`

@@ -7,8 +7,6 @@ import com.example.pickii.data.local.SavedMeetingScheduleStore
 import com.example.pickii.data.local.TokenStore
 import com.example.pickii.data.notification.ActiveChatRoomTracker
 import com.example.pickii.data.notification.FcmTokenRegistrar
-import com.example.pickii.data.remote.AuthInterceptor
-import com.example.pickii.data.remote.TokenAuthenticator
 import com.example.pickii.data.remote.socket.ChatStompClient
 import com.example.pickii.ui.applicant.ApplicantListViewModel
 import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
@@ -157,12 +155,15 @@ class KoinGraphResolveTest : KoinTest {
     }
 
     /**
-     * `di/InfraModule.kt`의 8개 싱글턴 전부 확인한다. 특히 [ChatStompClient]가 실수로 `factory`로
+     * `di/InfraModule.kt`의 6개 싱글턴 전부 확인한다. 특히 [ChatStompClient]가 실수로 `factory`로
      * 바뀌면(또는 `single` 선언을 지우면) 채팅방 진입마다 웹소켓 연결이 새로 생겨서 메시지 중복 수신·
      * 한쪽 연결만 끊김 같은, 재현하기도 진단하기도 어려운 버그가 된다 — 이 테스트가 그걸 막는다.
+     *
+     * `AuthInterceptor`/`TokenAuthenticator`는 Retrofit 제거와 함께 삭제됐다 — 토큰 첨부/갱신은
+     * 이제 `HttpClientFactory`의 Ktor `Auth` 플러그인이 전담한다.
      */
     @Test
-    fun `인프라 싱글턴 8개 전부 진짜 싱글턴이다`() {
+    fun `인프라 싱글턴 6개 전부 진짜 싱글턴이다`() {
         assertSame(get<TokenStore>(), get<TokenStore>(), "TokenStore가 매번 새 인스턴스면 DataStore 인스턴스 중복 생성 위험")
         assertSame(
             get<DeviceIdProvider>(),
@@ -178,16 +179,6 @@ class KoinGraphResolveTest : KoinTest {
             get<ActiveChatRoomTracker>(),
             get<ActiveChatRoomTracker>(),
             "싱글턴이 아니면 FCM 알림 억제와 채팅방 진입 추적이 서로 다른 인스턴스를 봐서 어긋남"
-        )
-        assertSame(
-            get<AuthInterceptor>(),
-            get<AuthInterceptor>(),
-            "싱글턴이 아니어야 할 이유가 없음 — OkHttpClient가 한 인스턴스만 물고 있어야 함"
-        )
-        assertSame(
-            get<TokenAuthenticator>(),
-            get<TokenAuthenticator>(),
-            "싱글턴이 아니면 refreshLock에 의한 갱신 동시성 제어가 인스턴스마다 따로 놀아 의미 없어짐"
         )
         assertSame(
             get<FcmTokenRegistrar>(),

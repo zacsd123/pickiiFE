@@ -6,9 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.pickii.BuildConfig
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 private val Context.tokenDataStore by preferencesDataStore(name = "pickii_token_store")
 
@@ -39,16 +37,10 @@ class TokenStore(
         context.tokenDataStore.edit { it.clear() }
     }
 
-    /** [AuthInterceptor]처럼 코루틴 밖(OkHttp 백그라운드 스레드)에서 동기적으로 토큰을 읽을 때 사용한다. */
-    fun currentAccessTokenBlocking(): String? = runBlocking { accessTokenFlow.first() }
-
-    /** [com.example.pickii.data.remote.TokenAuthenticator]가 코루틴 밖에서 동기적으로 Refresh Token을 읽을 때 사용한다. */
-    fun currentRefreshTokenBlocking(): String? = runBlocking { refreshTokenFlow.first() }
-
     /**
      * TODO(디버그 검증용 임시 코드, 확인 끝나면 삭제): 저장된 Access Token만 의도적으로 깨뜨리고
-     * Refresh Token은 그대로 둔다. 다음 API 호출이 401을 받아 [com.example.pickii.data.remote.TokenAuthenticator]의
-     * 갱신 경로(Provider→Lazy로 바꾼 부분)를 실기기에서 토큰 실제 만료를 기다리지 않고 바로 태울 때 쓴다.
+     * Refresh Token은 그대로 둔다. 다음 API 호출이 401을 받아 `HttpClientFactory`의 Ktor `Auth`
+     * 플러그인 갱신 경로를 실기기에서 토큰 실제 만료를 기다리지 않고 바로 태울 때 쓴다.
      */
     suspend fun debugCorruptAccessToken() {
         if (!BuildConfig.DEBUG) return
