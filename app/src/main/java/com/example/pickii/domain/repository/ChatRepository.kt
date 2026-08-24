@@ -4,8 +4,8 @@ import android.net.Uri
 import com.example.pickii.domain.model.ChatMessagePage
 import com.example.pickii.domain.model.ChatRoomDetail
 import com.example.pickii.domain.model.ChatRoomSummaryPage
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.model.DirectChatRoomResult
-import com.example.pickii.ui.chat.ChatRoomType
 
 /**
  * `8. Chat` 문서의 REST 엔드포인트를 담당한다(실시간 송수신은 `ChatStompClient`가 별도로 담당한다).

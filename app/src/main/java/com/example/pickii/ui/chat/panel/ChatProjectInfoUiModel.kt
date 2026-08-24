@@ -1,5 +1,7 @@
 package com.example.pickii.ui.chat
 
+import com.example.pickii.domain.model.ProjectStatus
+
 data class ChatProjectInfoUiModel(
     val projectTitle: String,
     val startDate: String,

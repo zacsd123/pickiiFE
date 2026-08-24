@@ -13,6 +13,8 @@ import com.example.pickii.data.remote.socket.ChatConnectionState
 import com.example.pickii.data.remote.socket.ChatStompClient
 import com.example.pickii.domain.model.ChatMessageContentType
 import com.example.pickii.domain.model.ChatRoomDetail
+import com.example.pickii.domain.model.ChatRoomType
+import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.domain.repository.CalendarRepository
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.MeetingPollRepository

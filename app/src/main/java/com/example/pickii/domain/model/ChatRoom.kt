@@ -1,9 +1,23 @@
 package com.example.pickii.domain.model
 
-import com.example.pickii.ui.chat.ChatRoomType
-import com.example.pickii.ui.chat.ProjectStatus
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+
+/**
+ * 채팅방 종류를 나타낸다.
+ */
+enum class ChatRoomType {
+    GROUP,
+    DIRECT
+}
+
+/**
+ * 프로젝트 진행 상태를 나타낸다. 서버는 IN_PROGRESS/END 두 가지만 쓴다(API 6-4).
+ */
+enum class ProjectStatus {
+    IN_PROGRESS,
+    END
+}
 
 /**
  * 채팅방 목록 카드 한 건(`GET /chatrooms`).

@@ -53,7 +53,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.model.MeetingPollDetail
+import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.ic_arrow_back
 import com.example.pickii.shared.generated.resources.ic_chat_room_menu

@@ -3,6 +3,7 @@ package com.example.pickii.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.ChatRoomSummary
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.shared.generated.resources.Res

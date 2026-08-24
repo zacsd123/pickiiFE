@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.domain.model.ScheduleCategory
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.chat_project_close_button

@@ -1,5 +1,7 @@
 package com.example.pickii.ui.chat
 
+import com.example.pickii.domain.model.ChatRoomType
+
 /**
  * 채팅 목록에 표시되는 채팅방 미리보기 정보다.
  *
