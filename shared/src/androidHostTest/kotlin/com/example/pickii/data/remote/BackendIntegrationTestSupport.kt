@@ -3,6 +3,8 @@ package com.example.pickii.data.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.util.Properties
 
 /**
  * 실제 백엔드(Railway 프로덕션)에 붙는 수동 통합 테스트(`*BackendIntegrationTest`) 전용 공용 헬퍼.
@@ -15,6 +17,45 @@ import kotlinx.serialization.json.Json
  * 그대로 검증하기 위함이다.
  */
 internal const val BACKEND_INTEGRATION_TEST_BASE_URL = "https://pikiibackend-production.up.railway.app/api/v1/"
+
+private const val SKIP_TAG = "[BackendIntegrationTest]"
+
+/**
+ * 자격증명을 환경변수가 아니라 gitignore된 `local.properties`에서 읽는다 — 커맨드라인에 비밀번호가
+ * 남아 셸 히스토리에 노출되는 걸 피하기 위함. 경로는 `shared/build.gradle.kts`의
+ * `backendIntegrationTest` 태스크가 시스템 프로퍼티로 넘겨준다. 파일/키가 없거나 값이 비어 있으면
+ * null을 반환하고, 호출부(테스트)가 `assumeTrue`로 스킵 처리한다.
+ *
+ * 스킵될 상황마다 **구체적인 이유를 콘솔에 직접 출력한다** — 스킵과 통과가 리포트를 열어보기
+ * 전까진 구분이 안 되는 게 실제 문제였다("키가 아예 없음" vs "키는 있는데 값이 빔"도 구분).
+ * `backendIntegrationTest` 태스크에 `testLogging { showStandardStreams = true }`를 걸어둬서
+ * 이 println이 `--info` 없이도 콘솔에 바로 뜬다.
+ */
+internal fun readLocalTestCredential(key: String): String? {
+    val path = System.getProperty("pickii.localPropertiesPath")
+    if (path == null) {
+        println("$SKIP_TAG 스킵 사유: 시스템 프로퍼티 'pickii.localPropertiesPath'가 없음 — backendIntegrationTest 태스크로 실행했는지 확인")
+        return null
+    }
+    val file = File(path)
+    if (!file.exists()) {
+        println("$SKIP_TAG 스킵 사유: local.properties 파일이 없음 (경로: $path)")
+        return null
+    }
+    val properties = Properties().apply { file.inputStream().use { load(it) } }
+    val rawValue = properties.getProperty(key)
+    return when {
+        rawValue == null -> {
+            println("$SKIP_TAG 스킵 사유: local.properties에 '$key' 키 자체가 없음")
+            null
+        }
+        rawValue.isBlank() -> {
+            println("$SKIP_TAG 스킵 사유: local.properties에 '$key' 키는 있지만 값이 비어 있음")
+            null
+        }
+        else -> rawValue
+    }
+}
 
 internal fun backendIntegrationTestHttpClient(authSession: AuthSession = NoOpAuthSession()): HttpClient =
     HttpClientFactory(

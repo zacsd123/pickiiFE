@@ -13,16 +13,18 @@ import kotlin.test.Test
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-private const val ENV_EMAIL = "PICKII_TEST_EMAIL"
-private const val ENV_PASSWORD = "PICKII_TEST_PASSWORD"
+private const val KEY_EMAIL = "PICKII_TEST_EMAIL"
+private const val KEY_PASSWORD = "PICKII_TEST_PASSWORD"
 
 /**
  * 실제 백엔드(Railway 프로덕션)에 붙는 수동 통합 테스트.
  *
  * **일반 테스트 실행에 안 낀다.** `:shared:testAndroidHostTest`/`:app:testDebugUnitTest`에서
  * 명시적으로 제외되고(`shared/build.gradle.kts` 참고), `./gradlew :shared:backendIntegrationTest`로만
- * 실행된다. 자격증명(`PICKII_TEST_EMAIL`/`PICKII_TEST_PASSWORD` 환경변수)이 없으면 실패가 아니라
- * **스킵**된다 — 다른 사람이 클론했을 때 이 자격증명 없이도 빌드/일반 테스트가 깨지면 안 되기 때문.
+ * 실행된다. 자격증명(`local.properties`의 `PICKII_TEST_EMAIL`/`PICKII_TEST_PASSWORD`, gitignore
+ * 대상)이 없으면 실패가 아니라 **스킵**된다 — 다른 사람이 클론했을 때 이 자격증명 없이도
+ * 빌드/일반 테스트가 깨지면 안 되기 때문. 환경변수가 아니라 파일로 받는 이유는 커맨드라인에
+ * 비밀번호가 남아 셸 히스토리에 노출되는 걸 피하기 위함([readLocalTestCredential] 참고).
  *
  * 확인하는 것은 딱 하나: Ktor로 전환한 [KtorAuthApiService] + [safeApiCall] + [ApiEnvelope] 조합이
  * 실제 응답과 맞물려서, Retrofit 때와 동일한 반환 계약(`Result<T>` + `ApiException(code, message)`)을
@@ -33,10 +35,10 @@ class AuthApiServiceBackendIntegrationTest {
     @Test
     fun `실제 이메일 로그인이 성공하면 토큰이 파싱된다`() =
         runTest {
-            val email = System.getenv(ENV_EMAIL)
-            val password = System.getenv(ENV_PASSWORD)
+            val email = readLocalTestCredential(KEY_EMAIL)
+            val password = readLocalTestCredential(KEY_PASSWORD)
             assumeTrue(
-                "$ENV_EMAIL/$ENV_PASSWORD 환경변수가 없어서 스킵 — 실제 계정 자격증명을 넣어야 실행됨",
+                "local.properties에 $KEY_EMAIL/$KEY_PASSWORD 가 없어서 스킵 — 실제 계정 자격증명을 넣어야 실행됨",
                 email != null && password != null
             )
 
@@ -64,8 +66,8 @@ class AuthApiServiceBackendIntegrationTest {
     @Test
     fun `틀린 비밀번호면 Retrofit 때와 같은 모양의 ApiException으로 실패한다`() =
         runTest {
-            val email = System.getenv(ENV_EMAIL)
-            assumeTrue("$ENV_EMAIL 환경변수가 없어서 스킵", email != null)
+            val email = readLocalTestCredential(KEY_EMAIL)
+            assumeTrue("local.properties에 $KEY_EMAIL 이 없어서 스킵", email != null)
 
             val authApiService = KtorAuthApiService(backendIntegrationTestHttpClient())
             val result =
@@ -94,10 +96,10 @@ class AuthApiServiceBackendIntegrationTest {
     @Test
     fun `로그인 후 인증이 필요한 GET에서 Authorization 헤더가 로그에 마스킹된다`() =
         runTest {
-            val email = System.getenv(ENV_EMAIL)
-            val password = System.getenv(ENV_PASSWORD)
+            val email = readLocalTestCredential(KEY_EMAIL)
+            val password = readLocalTestCredential(KEY_PASSWORD)
             assumeTrue(
-                "$ENV_EMAIL/$ENV_PASSWORD 환경변수가 없어서 스킵",
+                "local.properties에 $KEY_EMAIL/$KEY_PASSWORD 가 없어서 스킵",
                 email != null && password != null
             )
 

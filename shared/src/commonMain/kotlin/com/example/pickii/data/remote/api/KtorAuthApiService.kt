@@ -20,7 +20,16 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 
-/** [AuthApiService]를 Ktor [HttpClient]로 구현한다. Retrofit→Ktor 전환 파일럿. */
+/**
+ * [AuthApiService]를 Ktor [HttpClient]로 구현한다. Retrofit→Ktor 전환 파일럿.
+ *
+ * 바디가 있는 요청도 개별적으로 `contentType()`을 부르지 않는다 —
+ * [com.example.pickii.data.remote.HttpClientFactory]의 `defaultRequest { }`가
+ * `application/json`을 기본값으로 깔아둔다. 원래는 메서드마다 직접 불렀었는데,
+ * 사람이 매번 기억해야 하는 구조라 실제로 전부 빠뜨린 적이 있다("Content-Type: null"
+ * 예외, `AuthApiServiceBackendIntegrationTest`가 실제 백엔드로 잡아냄) — 그래서
+ * `HttpClientFactory` 쪽에 구조적으로 옮겼다.
+ */
 class KtorAuthApiService(
     private val client: HttpClient
 ) : AuthApiService {
