@@ -2,14 +2,23 @@ package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.RecruitApiService
 import com.example.pickii.data.remote.dto.AiDraftRequest
+import com.example.pickii.data.remote.dto.AiDraftResponseDto
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ApplyAiDraftRequest
+import com.example.pickii.data.remote.dto.ApplyAiDraftResponseDto
 import com.example.pickii.data.remote.dto.ApplyRequest
 import com.example.pickii.data.remote.dto.CommentCreateRequest
+import com.example.pickii.data.remote.dto.CommentCreateResponseDto
 import com.example.pickii.data.remote.dto.CommentDto
+import com.example.pickii.data.remote.dto.CommentsResponseDto
+import com.example.pickii.data.remote.dto.PageEnvelope
 import com.example.pickii.data.remote.dto.ProjectCreateRequest
+import com.example.pickii.data.remote.dto.ProjectCreateResponseDto
+import com.example.pickii.data.remote.dto.RecruitCreateResponseDto
 import com.example.pickii.data.remote.dto.RecruitDetailDto
 import com.example.pickii.data.remote.dto.RecruitSummaryDto
 import com.example.pickii.data.remote.dto.RecruitWriteRequest
+import com.example.pickii.data.remote.dto.ScrapResponseDto
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.ProjectCreationResult
 import com.example.pickii.domain.model.RecruitCategory
@@ -25,7 +34,6 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.json.Json
 
 /** 검색 키워드로 인정하는 최소 글자 수(0.7 공통 Validation 규칙). 더 짧으면 필터 없이 조회한다. */
 private const val MIN_KEYWORD_LENGTH = 2
@@ -34,8 +42,7 @@ private const val MIN_KEYWORD_LENGTH = 2
 class RecruitApiRepository
     constructor(
         private val recruitApiService: RecruitApiService,
-        private val masterDataRepository: MasterDataRepository,
-        private val json: Json
+        private val masterDataRepository: MasterDataRepository
     ) : RecruitRepository {
         override suspend fun getPosts(
             keyword: String?,
@@ -45,7 +52,7 @@ class RecruitApiRepository
             page: Int,
             size: Int
         ): Result<RecruitPage> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<PageEnvelope<RecruitSummaryDto>>> {
                 recruitApiService.getRecruits(
                     keyword = keyword?.takeIf { it.length >= MIN_KEYWORD_LENGTH },
                     onCampus = onCampus,
@@ -69,7 +76,7 @@ class RecruitApiRepository
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
             val categories = masterDataRepository.getCategories().getOrDefault(emptyList())
             val topics = masterDataRepository.getTopics().getOrDefault(emptyList())
-            return safeApiCall(json) { recruitApiService.getRecruit(id) }
+            return safeApiCall<ApiEnvelope<RecruitDetailDto>> { recruitApiService.getRecruit(id) }
                 .map { it.data.toDomain(categories, topics) }
         }
 
@@ -84,7 +91,7 @@ class RecruitApiRepository
             shortIntro: String,
             detailContent: String
         ): Result<String> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<RecruitCreateResponseDto>> {
                 recruitApiService.createRecruit(
                     buildWriteRequest(
                         title = title,
@@ -113,7 +120,7 @@ class RecruitApiRepository
             detailContent: String
         ): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) {
+            return safeApiCallUnit {
                 recruitApiService.updateRecruit(
                     id,
                     buildWriteRequest(
@@ -133,22 +140,22 @@ class RecruitApiRepository
 
         override suspend fun closePost(postId: String): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) { recruitApiService.closeRecruit(id) }
+            return safeApiCallUnit { recruitApiService.closeRecruit(id) }
         }
 
         override suspend fun reopenAdditionalRecruiting(postId: String): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) { recruitApiService.reopenAdditionalRecruit(id) }
+            return safeApiCallUnit { recruitApiService.reopenAdditionalRecruit(id) }
         }
 
         override suspend fun deletePost(postId: String): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) { recruitApiService.deleteRecruit(id) }
+            return safeApiCallUnit { recruitApiService.deleteRecruit(id) }
         }
 
         override suspend fun getComments(postId: String): Result<List<RecruitComment>> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCall(json) { recruitApiService.getComments(id) }
+            return safeApiCall<ApiEnvelope<CommentsResponseDto>> { recruitApiService.getComments(id) }
                 .map { envelope -> envelope.data.comments.flatMap { it.flatten(postId) } }
         }
 
@@ -159,23 +166,25 @@ class RecruitApiRepository
         ): Result<String> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
             val request = CommentCreateRequest(content = content, parentCommentId = parentCommentId?.toLongOrNull())
-            return safeApiCall(json) { recruitApiService.createComment(id, request) }
+            return safeApiCall<ApiEnvelope<CommentCreateResponseDto>> { recruitApiService.createComment(id, request) }
                 .map { it.data.commentId.toString() }
         }
 
         override suspend fun deleteComment(commentId: String): Result<Unit> {
             val id = commentId.toLongOrNull() ?: return Result.failure(invalidPostIdException(commentId))
-            return safeApiCallUnit(json) { recruitApiService.deleteComment(id) }
+            return safeApiCallUnit { recruitApiService.deleteComment(id) }
         }
 
         override suspend fun scrapPost(postId: String): Result<Boolean> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCall(json) { recruitApiService.scrapRecruit(id) }.map { it.data.isScrapped }
+            return safeApiCall<ApiEnvelope<ScrapResponseDto>> {
+                recruitApiService.scrapRecruit(id)
+            }.map { it.data.isScrapped }
         }
 
         override suspend fun unscrapPost(postId: String): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) { recruitApiService.unscrapRecruit(id) }
+            return safeApiCallUnit { recruitApiService.unscrapRecruit(id) }
         }
 
         override suspend fun submitApplication(
@@ -184,7 +193,7 @@ class RecruitApiRepository
             keywordIds: List<Long>
         ): Result<Unit> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCallUnit(json) {
+            return safeApiCallUnit {
                 recruitApiService.submitApplication(
                     id,
                     ApplyRequest(message = message, keywordIds = keywordIds.ifEmpty { null })
@@ -196,7 +205,7 @@ class RecruitApiRepository
             simpleDesc: String?,
             content: String
         ): Result<Pair<String, String>> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<AiDraftResponseDto>> {
                 recruitApiService.generateRecruitAiDraft(AiDraftRequest(simpleDesc = simpleDesc, content = content))
             }.map { it.data.simpleDesc to it.data.content }
 
@@ -205,7 +214,7 @@ class RecruitApiRepository
             message: String
         ): Result<String> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCall(json) {
+            return safeApiCall<ApiEnvelope<ApplyAiDraftResponseDto>> {
                 recruitApiService.generateApplyAiDraft(id, ApplyAiDraftRequest(message = message))
             }.map { it.data.convertedText }
         }
@@ -215,7 +224,7 @@ class RecruitApiRepository
             name: String
         ): Result<ProjectCreationResult> {
             val id = postId.toValidRecruitId() ?: return Result.failure(invalidPostIdException(postId))
-            return safeApiCall(json) {
+            return safeApiCall<ApiEnvelope<ProjectCreateResponseDto>> {
                 recruitApiService.createProject(id, ProjectCreateRequest(name = name))
             }.map { envelope ->
                 ProjectCreationResult(
