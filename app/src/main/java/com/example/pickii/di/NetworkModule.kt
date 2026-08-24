@@ -12,6 +12,7 @@ import com.example.pickii.data.remote.api.CalendarApiService
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.api.FeedbackApiService
 import com.example.pickii.data.remote.api.KtorAuthApiService
+import com.example.pickii.data.remote.api.KtorProjectApiService
 import com.example.pickii.data.remote.api.MasterDataApiService
 import com.example.pickii.data.remote.api.MeetingPollApiService
 import com.example.pickii.data.remote.api.MyPageActivityApiService
@@ -65,8 +66,8 @@ val networkModule =
 
         single<AuthSession> { TokenStoreAuthSession(get(), get()) }
 
-        // Retrofit→Ktor 전환 파일럿. 이 HttpClient는 AuthApiService만 쓴다 — 나머지 12개
-        // 서비스는 아직 Retrofit(위 OkHttpClient/Retrofit 싱글턴)을 그대로 쓴다.
+        // Retrofit→Ktor 전환 중. 전환된 서비스는 이 HttpClient를 같이 쓰고, 아직 안 옮긴 서비스는
+        // 위 OkHttpClient/Retrofit 싱글턴을 그대로 쓴다.
         single<HttpClient> {
             HttpClientFactory(
                 engine = OkHttp.create(),
@@ -91,5 +92,5 @@ val networkModule =
         single<NotificationApiService> { get<Retrofit>().create(NotificationApiService::class.java) }
         single<CalendarApiService> { get<Retrofit>().create(CalendarApiService::class.java) }
         single<MeetingPollApiService> { get<Retrofit>().create(MeetingPollApiService::class.java) }
-        single<ProjectApiService> { get<Retrofit>().create(ProjectApiService::class.java) }
+        single<ProjectApiService> { KtorProjectApiService(get()) }
     }
