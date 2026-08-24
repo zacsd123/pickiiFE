@@ -1,6 +1,5 @@
 package com.example.pickii.ui.mypage.mycomments
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +32,7 @@ import com.example.pickii.shared.generated.resources.mypage_my_comments_label_da
 import com.example.pickii.shared.generated.resources.mypage_my_comments_title
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.MyPageSectionHeader
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.StatusBadge
@@ -59,12 +58,12 @@ fun MyCommentsScreen(
     viewModel: MyCommentsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
+            if (messageRes != null) snackbarHostState.showSnackbar(getString(messageRes))
             viewModel.onToastShown()
         }
     }

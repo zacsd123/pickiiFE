@@ -1,7 +1,6 @@
 package com.example.pickii.ui.chat
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -66,6 +65,7 @@ import com.example.pickii.shared.generated.resources.ic_meeting_manage
 import com.example.pickii.shared.generated.resources.ic_meeting_schedule
 import com.example.pickii.shared.generated.resources.ic_notice
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.theme.PickiiDivider
@@ -134,7 +134,7 @@ fun ChatRoomRoute(
     viewModel: ChatRoomViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(roomId) {
@@ -155,7 +155,7 @@ fun ChatRoomRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                snackbarHostState.showSnackbar(getString(event.messageRes))
         }
     }
 

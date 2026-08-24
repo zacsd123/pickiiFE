@@ -1,6 +1,5 @@
 package com.example.pickii.ui.home
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,6 +59,7 @@ import com.example.pickii.shared.generated.resources.ic_search
 import com.example.pickii.shared.generated.resources.unknown_author_nickname
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.LevelAvatar
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PaginationRow
 import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
@@ -105,7 +104,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -115,12 +114,7 @@ fun HomeScreen(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast
-                    .makeText(
-                        context,
-                        getString(event.messageRes),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                snackbarHostState.showSnackbar(getString(event.messageRes))
         }
     }
 

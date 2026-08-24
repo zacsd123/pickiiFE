@@ -1,6 +1,5 @@
 package com.example.pickii.ui.applicant
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
 import org.jetbrains.compose.resources.getString
@@ -27,7 +26,7 @@ fun ApplicantRoute(
         )
     }
 
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.navigateToChatRoom.collect { roomId -> onNavigateToChatRoom(roomId) }
@@ -36,7 +35,7 @@ fun ApplicantRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                snackbarHostState.showSnackbar(getString(event.messageRes))
         }
     }
 

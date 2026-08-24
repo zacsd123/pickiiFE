@@ -1,6 +1,5 @@
 package com.example.pickii.ui.mypage.settings
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -66,6 +65,7 @@ import com.example.pickii.shared.generated.resources.mypage_settings_section_not
 import com.example.pickii.shared.generated.resources.mypage_settings_withdraw
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.theme.KakaoYellow
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
@@ -101,13 +101,14 @@ fun SettingsScreen(
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
     val kakaoLinkErrorMessage = stringResource(Res.string.mypage_profile_social_link_error)
 
     if (notificationUiState.toastMessageRes != null) {
         val messageRes = notificationUiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
+            if (messageRes != null) snackbarHostState.showSnackbar(getString(messageRes))
             notificationViewModel.onToastShown()
         }
     }
@@ -128,14 +129,14 @@ fun SettingsScreen(
                                 settingsViewModel.onKakaoLinkConfirmed(
                                     providerId = providerId.toString(),
                                     onError = {
-                                        Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                                        scope.launch { snackbarHostState.showSnackbar(kakaoLinkErrorMessage) }
                                     }
                                 )
                             }.onFailure {
-                                Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                                scope.launch { snackbarHostState.showSnackbar(kakaoLinkErrorMessage) }
                             }
                     }.onFailure {
-                        Toast.makeText(context, kakaoLinkErrorMessage, Toast.LENGTH_SHORT).show()
+                        scope.launch { snackbarHostState.showSnackbar(kakaoLinkErrorMessage) }
                     }
             }
         },

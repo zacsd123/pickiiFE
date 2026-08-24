@@ -2,7 +2,6 @@ package com.example.pickii.ui.mypage.profile
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,6 +76,7 @@ import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
 import com.example.pickii.ui.common.LoadingIndicator
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.mypage.profile.component.ProfileCardEmptyState
 import com.example.pickii.ui.mypage.profile.component.ProfileCardFrame
 import com.example.pickii.ui.mypage.profile.component.ProfileCardStack
@@ -106,7 +106,7 @@ fun ProfileViewScreen(
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -128,7 +128,7 @@ fun ProfileViewScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
+            if (messageRes != null) snackbarHostState.showSnackbar(getString(messageRes))
             viewModel.onToastShown()
         }
     }

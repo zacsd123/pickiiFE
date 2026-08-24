@@ -1,13 +1,12 @@
 package com.example.pickii.ui.memberprofile
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.member_profile_title
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.mypage.profile.ProfileViewScreenContent
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -20,12 +19,12 @@ fun MemberProfileScreen(
     viewModel: MemberProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
+            if (messageRes != null) snackbarHostState.showSnackbar(getString(messageRes))
             viewModel.onToastShown()
         }
     }

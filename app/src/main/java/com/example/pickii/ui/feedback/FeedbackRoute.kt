@@ -1,6 +1,5 @@
 package com.example.pickii.ui.feedback
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -8,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.RecruitUiEvent
 import org.jetbrains.compose.resources.getString
 import org.koin.androidx.compose.koinViewModel
@@ -26,7 +25,7 @@ fun FeedbackRoute(
     viewModel: FeedbackViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     var currentScreen by remember {
         mutableStateOf(FeedbackScreenType.LIST)
@@ -44,7 +43,7 @@ fun FeedbackRoute(
         viewModel.events.collect { event ->
             when (event) {
                 is RecruitUiEvent.ShowToast ->
-                    Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                    snackbarHostState.showSnackbar(getString(event.messageRes))
             }
         }
     }
