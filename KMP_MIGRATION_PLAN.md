@@ -106,6 +106,39 @@ Pickii/
   전부 걷어낸 상태로 확인됨(2026-08-24)
 
 ### Phase 3 — 리소스 시스템 이식
+
+> [!IMPORTANT]
+> **`com.android.kotlin.multiplatform.library` + Compose Multiplatform 리소스 조합은 기본 설정으론
+> Android에서 아예 안 뜬다.** Phase 3 착수 전 실측(2026-08-24)으로 발견: `compose.resources {}`를
+> 설정하고 `composeResources/drawable`에 아이콘을 넣은 뒤 `painterResource()`로 불러오면 빌드는
+> 통과하지만 런타임에 `org.jetbrains.compose.resources.MissingResourceException`으로 죽는다.
+> 원인: `shared/build.gradle.kts`의 `android {}` 블록(= `com.android.kotlin.multiplatform.library`
+> 플러그인이 제공하는 것 — AGP 9가 전통적인 `com.android.library`+`androidTarget()` 조합을 막아서
+> 어쩔 수 없이 쓰고 있는 그 플러그인, 위 라이브러리 교체표 참고)이 기본적으로 Android 리소스 처리를
+> 꺼둔 상태라, Compose Multiplatform의 리소스 복사 태스크(`copyAndroidMainComposeResourcesToAndroidAssets`)가
+> `outputDirectory` 설정을 못 받아 조용히 실패한다.
+>
+> **알려진 이슈**: [CMP-9547](https://youtrack.jetbrains.com/issue/CMP-9547) (JetBrains YouTrack).
+> "Answered" 상태로 종료 — 코드 수정이 아니라 워크어라운드 안내로 닫힘. JetBrains 담당자 코멘트:
+> *"That's not our plugin, it's from Google."* — `com.android.kotlin.multiplatform.library`는
+> AGP(Google) 소유라 CMP 쪽에서 고칠 수 있는 범위가 아니고, 2026-06-20 코멘트로도 AGP 9.1.0에서
+> 여전히 재현된다고 확인됨 — **버전을 올려도 없어지는 문제가 아니라 opt-in 설정이 원래 필요한 것.**
+>
+> **해결(적용 완료, 2026-08-24)**: `shared/build.gradle.kts`의 `kotlin { android { ... } }` 블록
+> 안에 `androidResources.enable = true` 한 줄 추가. 이 블록 이름이 문서상 `androidLibrary`로
+> 나오지만 실제로는 `android`라는 이름으로도 동일하게 동작함을 실측 확인(별칭). 추가 후
+> `ic_instagram.xml`/`ic_linkedin.xml`(gradient가 `<aapt:attr>`로 인라인된 벡터, 이번 조사에서
+> 가장 위험하다고 판단했던 두 파일)을 에뮬레이터에서 실제로 렌더링해서 그라디언트까지 정상 출력됨을
+> 확인 — **아이콘 자체는 문제 없었고, 문제는 전적으로 이 인프라 설정 하나였다.** `androidResources.enable`을
+> 지우면 리소스 시스템 전체가 다시 조용히 죽으니, 나중에 "이거 왜 있지" 하고 지우지 말 것 — Ktor
+> `TokenAuthenticator`의 `lazy {}` 순환 의존성 가드와 같은 성격의 "지우면 안 되는 한 줄"이다
+> (`shared/build.gradle.kts`에 이유 주석 있음).
+>
+> **더 넓은 시사점**: `com.android.kotlin.multiplatform.library`는 AGP 9가 강제한 선택지이지 우리가
+> 고른 게 아니다. 상대적으로 덜 다져진 조합이라, Compose Multiplatform 쪽 다른 기능(리소스뿐 아니라
+> 이후 다른 영역)에서도 비슷한 마찰이 또 나올 가능성을 염두에 둘 것 — 뭔가 "빌드는 되는데 런타임에만
+> 이상하게 죽는다" 싶으면 이 플러그인 조합부터 의심.
+
 - [ ] `res/values/strings.xml`(32KB, 문자열 규모 큼) → `commonMain/composeResources/values/strings.xml`
 - [ ] `res/drawable/*.xml`(아이콘 26개), `res/drawable/*.png`(레벨 고양이 이미지 등) → `commonMain/composeResources/drawable/`
 - [ ] 코드 전체에서 `stringResource(R.string.x)` → `stringResource(Res.string.x)` 치환 (화면 수가 많아 기계적 치환 스크립트 권장)

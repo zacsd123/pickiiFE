@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.compose.multiplatform)
 }
 
+compose.resources {
+    packageOfResClass = "com.example.pickii.shared.generated.resources"
+    publicResClass = true
+}
+
 kotlin {
     android {
         namespace = "com.example.pickii.shared"
@@ -17,6 +22,19 @@ kotlin {
         }
 
         withHostTestBuilder {}
+
+        // ⚠️ 지우지 말 것 — 없으면 CMP composeResources(drawable/string 전부)가 Android APK에서
+        // 통째로 안 뜬다. com.android.kotlin.multiplatform.library(AGP 9가 강제한 플러그인,
+        // 위 android {} 블록의 정체)는 Android 리소스 처리가 기본 꺼져 있는데, Compose
+        // Multiplatform의 리소스 복사 태스크(copyAndroidMainComposeResourcesToAndroidAssets)가
+        // 이걸 켜야만 동작한다. 안 켜면 빌드는 통과하고 런타임에 painterResource/stringResource
+        // 호출부에서만 MissingResourceException으로 죽는다 — 원인 찾기 아주 어렵다(실측 재현:
+        // CMP-9547, https://youtrack.jetbrains.com/issue/CMP-9547). JetBrains 쪽 설명(같은
+        // 이슈 코멘트): "That's not our plugin, it's from Google" — CMP 버전을 올려도 안 고쳐진다,
+        // AGP 플러그인이 요구하는 opt-in이다. 2026-08-24 시점 최신 확인(같은 이슈, 2026-06-20
+        // 코멘트)으로도 AGP 9.1.0에서 여전히 필요함 — 미래에 CMP/AGP를 올려도 이 줄을 먼저
+        // 지워보지 말 것.
+        androidResources.enable = true
     }
     listOf(
         iosX64(),
@@ -44,6 +62,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
         }
         androidMain.dependencies {
             implementation(libs.koin.android)
