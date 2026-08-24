@@ -1,24 +1,23 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.NotificationSettingsApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.NotificationSettingsDto
 import com.example.pickii.domain.model.NotificationSettings
 import com.example.pickii.domain.repository.NotificationSettingsRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
-import kotlinx.serialization.json.Json
 
 /** `9-5`, `9-6` API로 [NotificationSettingsRepository]를 구현한다. */
 class NotificationSettingsApiRepository
     constructor(
-        private val apiService: NotificationSettingsApiService,
-        private val json: Json
+        private val apiService: NotificationSettingsApiService
     ) : NotificationSettingsRepository {
         override suspend fun getSettings(): Result<NotificationSettings> =
-            safeApiCall(json) { apiService.getSettings() }.map { it.data.toDomain() }
+            safeApiCall<ApiEnvelope<NotificationSettingsDto>> { apiService.getSettings() }.map { it.data.toDomain() }
 
         override suspend fun updateSettings(settings: NotificationSettings): Result<Unit> =
-            safeApiCallUnit(json) { apiService.updateSettings(settings.toRequest()) }
+            safeApiCallUnit { apiService.updateSettings(settings.toRequest()) }
 
         private fun NotificationSettingsDto.toDomain() =
             NotificationSettings(

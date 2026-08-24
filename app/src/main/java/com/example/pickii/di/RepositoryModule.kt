@@ -51,7 +51,7 @@ val repositoryModule =
         single<ProfileRepository> { ProfileApiRepository(profileApiService = get(), json = get()) }
         single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get(), json = get()) }
         single<AccountRepository> { AccountApiRepository(authApiService = get()) }
-        single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get(), json = get()) }
+        single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get()) }
         single<FeedbackRepository> { FeedbackApiRepository(apiService = get(), json = get()) }
         single<ChatRepository> {
             ChatApiRepository(
