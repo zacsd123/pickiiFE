@@ -2,8 +2,10 @@ package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.ProfileApiService
 import com.example.pickii.data.remote.dto.AdditionalLinkDto
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.CreateResumeRequest
+import com.example.pickii.data.remote.dto.CreateResumeResponseDto
 import com.example.pickii.data.remote.dto.ExperienceDto
 import com.example.pickii.data.remote.dto.LicenseDto
 import com.example.pickii.data.remote.dto.MemberProfileDto
@@ -21,18 +23,16 @@ import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import kotlinx.datetime.YearMonth
-import kotlinx.serialization.json.Json
 
 private const val ERROR_CODE_RESUME_NOT_FOUND = "RESUME_NOT_FOUND"
 
 /** `4-1 내 프로필 조회`, `4-2 프로필 생성`으로 [ProfileRepository]를 구현한다. */
 class ProfileApiRepository
     constructor(
-        private val profileApiService: ProfileApiService,
-        private val json: Json
+        private val profileApiService: ProfileApiService
     ) : ProfileRepository {
         override suspend fun getMyProfile(): Result<MemberProfile> =
-            safeApiCall(json) { profileApiService.getMyProfile() }.map { it.data.toDomain() }
+            safeApiCall<ApiEnvelope<MemberProfileDto>> { profileApiService.getMyProfile() }.map { it.data.toDomain() }
 
         override suspend fun hasResume(): Boolean =
             getMyProfile().fold(
@@ -41,14 +41,18 @@ class ProfileApiRepository
             )
 
         override suspend fun createProfile(input: CreateProfileInput): Result<Unit> =
-            safeApiCall(json) { profileApiService.createResume(input.toRequest()) }.map { }
+            safeApiCall<ApiEnvelope<CreateResumeResponseDto>> {
+                profileApiService.createResume(input.toRequest())
+            }.map { }
 
         override suspend fun updateProfile(input: UpdateProfileInput): Result<Unit> =
-            safeApiCallUnit(json) { profileApiService.updateResume(input.toRequest()) }
+            safeApiCallUnit { profileApiService.updateResume(input.toRequest()) }
 
         override suspend fun getMemberProfile(memberId: String): Result<MemberProfile> {
             val id = memberId.toLongOrNull() ?: return Result.failure(IllegalArgumentException("잘못된 id: $memberId"))
-            return safeApiCall(json) { profileApiService.getMemberProfile(id) }.map { it.data.toDomain() }
+            return safeApiCall<ApiEnvelope<MemberProfileDto>> {
+                profileApiService.getMemberProfile(id)
+            }.map { it.data.toDomain() }
         }
 
         private fun UpdateProfileInput.toRequest() =
