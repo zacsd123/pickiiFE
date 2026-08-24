@@ -22,12 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Interests
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,10 +48,15 @@ import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_build
+import com.example.pickii.shared.generated.resources.ic_description
+import com.example.pickii.shared.generated.resources.ic_emoji_events
 import com.example.pickii.shared.generated.resources.ic_github
+import com.example.pickii.shared.generated.resources.ic_interests
 import com.example.pickii.shared.generated.resources.ic_link
 import com.example.pickii.shared.generated.resources.ic_linkedin
 import com.example.pickii.shared.generated.resources.ic_notion
+import com.example.pickii.shared.generated.resources.ic_workspace_premium
 import com.example.pickii.shared.generated.resources.mypage_create_profile_prompt
 import com.example.pickii.shared.generated.resources.mypage_profile_button_edit
 import com.example.pickii.shared.generated.resources.mypage_profile_card_topic_title
@@ -257,7 +256,7 @@ private fun TopicSchoolLinksCard(
 ) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
-        headerIcon = Icons.Filled.Interests,
+        headerIcon = Res.drawable.ic_interests,
         title = stringResource(Res.string.mypage_profile_card_topic_title)
     ) {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -304,7 +303,7 @@ private fun TopicSchoolLinksCard(
 private fun AboutMeCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
-        headerIcon = Icons.Filled.Description,
+        headerIcon = Res.drawable.ic_description,
         title = stringResource(Res.string.mypage_profile_label_about_me)
     ) {
         Text(
@@ -321,7 +320,7 @@ private fun AboutMeCard(profile: MemberProfile) {
 private fun SkillsCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
-        headerIcon = Icons.Filled.Build,
+        headerIcon = Res.drawable.ic_build,
         title = stringResource(Res.string.mypage_profile_label_skills)
     ) {
         if (profile.skillTools.isEmpty()) {
@@ -339,7 +338,7 @@ private fun SkillsCard(profile: MemberProfile) {
 private fun LicenseCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
-        headerIcon = Icons.Filled.WorkspacePremium,
+        headerIcon = Res.drawable.ic_workspace_premium,
         title = stringResource(Res.string.mypage_profile_label_licenses)
     ) {
         if (profile.licenses.isEmpty()) {
@@ -357,7 +356,7 @@ private fun LicenseCard(profile: MemberProfile) {
 private fun ExperienceCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
-        headerIcon = Icons.Filled.EmojiEvents,
+        headerIcon = Res.drawable.ic_emoji_events,
         title = stringResource(Res.string.mypage_profile_label_experience)
     ) {
         if (profile.experiences.isEmpty()) {

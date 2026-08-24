@@ -20,9 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -59,6 +56,8 @@ import com.example.pickii.shared.generated.resources.home_filter_category_title
 import com.example.pickii.shared.generated.resources.home_filter_topic_title
 import com.example.pickii.shared.generated.resources.home_recruit_posts_title
 import com.example.pickii.shared.generated.resources.home_search_placeholder
+import com.example.pickii.shared.generated.resources.ic_menu
+import com.example.pickii.shared.generated.resources.ic_search
 import com.example.pickii.shared.generated.resources.unknown_author_nickname
 import com.example.pickii.ui.common.CampusScopeToggle
 import com.example.pickii.ui.common.LevelAvatar
@@ -77,6 +76,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.toCompactDisplayString
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -292,7 +292,7 @@ private fun SearchField(
         shape = RoundedCornerShape(ChipCornerRadius),
         trailingIcon = {
             Icon(
-                imageVector = Icons.Filled.Search,
+                painter = painterResource(Res.drawable.ic_search),
                 contentDescription = null,
                 tint = PickiiTextGray,
                 modifier = Modifier.clickable(onClick = onSubmit)
@@ -323,7 +323,7 @@ private fun FilterToggleButton(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = Icons.Filled.Menu,
+            painter = painterResource(Res.drawable.ic_menu),
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier.size(16.dp)

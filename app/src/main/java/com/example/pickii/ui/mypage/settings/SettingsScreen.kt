@@ -17,13 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PersonOff
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -36,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +37,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.common_button_cancel
 import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.ic_campaign
+import com.example.pickii.shared.generated.resources.ic_chat
+import com.example.pickii.shared.generated.resources.ic_lock
+import com.example.pickii.shared.generated.resources.ic_logout
+import com.example.pickii.shared.generated.resources.ic_person_off_filled
+import com.example.pickii.shared.generated.resources.ic_settings
 import com.example.pickii.shared.generated.resources.mypage_menu_settings_title
 import com.example.pickii.shared.generated.resources.mypage_notification_all
 import com.example.pickii.shared.generated.resources.mypage_notification_announcement
@@ -75,7 +73,9 @@ import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -198,7 +198,7 @@ private fun SettingsScreenContent(
         SectionTitle(stringResource(Res.string.mypage_settings_section_account))
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             SettingsRow(
-                icon = Icons.Filled.Lock,
+                icon = Res.drawable.ic_lock,
                 iconBackground = PickiiFieldBackground,
                 iconTint = Color.Black,
                 title = stringResource(Res.string.mypage_settings_password_change),
@@ -210,14 +210,14 @@ private fun SettingsScreenContent(
                 onUnlinkClick = { onUnlinkRequest("KAKAO") }
             )
             SettingsRow(
-                icon = Icons.AutoMirrored.Filled.Logout,
+                icon = Res.drawable.ic_logout,
                 iconBackground = PickiiFieldBackground,
                 iconTint = Color.Black,
                 title = stringResource(Res.string.mypage_settings_logout),
                 onClick = onLogoutClick
             )
             SettingsRow(
-                icon = Icons.Filled.PersonOff,
+                icon = Res.drawable.ic_person_off_filled,
                 iconBackground = PickiiPaletteRed.copy(alpha = 0.12f),
                 iconTint = PickiiPaletteRed,
                 title = stringResource(Res.string.mypage_settings_withdraw),
@@ -232,27 +232,27 @@ private fun SettingsScreenContent(
         SectionTitle(stringResource(Res.string.mypage_settings_section_notification))
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             ToggleRow(
-                icon = Icons.Filled.Settings,
+                icon = Res.drawable.ic_settings,
                 title = stringResource(Res.string.mypage_notification_all),
                 checked = settings.allEssentialEnabled,
                 onCheckedChange = onToggleAllEssential
             )
             ToggleRow(
-                icon = Icons.AutoMirrored.Filled.Chat,
+                icon = Res.drawable.ic_chat,
                 title = stringResource(Res.string.mypage_notification_chat),
                 subtitle = stringResource(Res.string.mypage_notification_chat_desc),
                 checked = settings.chatNoti,
                 onCheckedChange = onToggleChat
             )
             ToggleRow(
-                icon = Icons.Filled.Campaign,
+                icon = Res.drawable.ic_campaign,
                 title = stringResource(Res.string.mypage_notification_announcement),
                 subtitle = stringResource(Res.string.mypage_notification_announcement_desc),
                 checked = isAnnouncementEnabled,
                 onCheckedChange = onToggleAnnouncement
             )
             ToggleRow(
-                icon = Icons.Filled.Campaign,
+                icon = Res.drawable.ic_campaign,
                 title = stringResource(Res.string.mypage_notification_marketing),
                 subtitle = stringResource(Res.string.mypage_notification_marketing_desc),
                 checked = settings.marketingNoti,
@@ -284,7 +284,7 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun SettingsRow(
-    icon: ImageVector,
+    icon: DrawableResource,
     iconBackground: Color,
     iconTint: Color,
     title: String,
@@ -326,7 +326,7 @@ private fun SettingsRow(
 
 @Composable
 private fun RowIcon(
-    icon: ImageVector,
+    icon: DrawableResource,
     background: Color,
     tint: Color
 ) {
@@ -334,7 +334,7 @@ private fun RowIcon(
         modifier = Modifier.size(32.dp).clip(CircleShape).background(background),
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+        Icon(painter = painterResource(icon), contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
     }
 }
 
@@ -350,7 +350,7 @@ private fun KakaoLinkRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RowIcon(icon = Icons.Filled.Campaign, background = KakaoYellow, tint = Color.Black)
+            RowIcon(icon = Res.drawable.ic_campaign, background = KakaoYellow, tint = Color.Black)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -403,7 +403,7 @@ private fun KakaoLinkRow(
 
 @Composable
 private fun ToggleRow(
-    icon: ImageVector,
+    icon: DrawableResource,
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,

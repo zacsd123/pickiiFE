@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.account_recovery_button_reset_password
+import com.example.pickii.shared.generated.resources.ic_visibility
+import com.example.pickii.shared.generated.resources.ic_visibility_off
 import com.example.pickii.shared.generated.resources.login_auto_login
 import com.example.pickii.shared.generated.resources.login_brand
 import com.example.pickii.shared.generated.resources.login_button_kakao
@@ -74,6 +73,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -225,12 +225,14 @@ private fun LoginScreenContent(
                 trailingIcon = {
                     IconButton(onClick = onTogglePasswordVisibility) {
                         Icon(
-                            imageVector =
-                                if (uiState.isPasswordVisible) {
-                                    Icons.Filled.Visibility
-                                } else {
-                                    Icons.Filled.VisibilityOff
-                                },
+                            painter =
+                                painterResource(
+                                    if (uiState.isPasswordVisible) {
+                                        Res.drawable.ic_visibility
+                                    } else {
+                                        Res.drawable.ic_visibility_off
+                                    }
+                                ),
                             contentDescription = null,
                             tint = PickiiTextGray
                         )

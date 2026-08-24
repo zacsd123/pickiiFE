@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_arrow_back
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 뒤로가기 아이콘 + 제목으로 구성된 화면 상단 헤더.
@@ -52,7 +53,7 @@ fun BackHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(Res.drawable.ic_arrow_back),
                     contentDescription = null,
                     tint = Color.Black,
                     modifier = Modifier.size(24.dp)
@@ -60,7 +61,7 @@ fun BackHeader(
             }
         } else {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                painter = painterResource(Res.drawable.ic_arrow_back),
                 contentDescription = null,
                 tint = Color.Black,
                 modifier = Modifier.clickable(onClick = onBackClick)

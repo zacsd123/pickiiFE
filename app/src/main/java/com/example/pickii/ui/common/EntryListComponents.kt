@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,8 +23,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_add
+import com.example.pickii.shared.generated.resources.ic_close_filled
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
+import org.jetbrains.compose.resources.painterResource
 
 /** 반복 입력 카드/버튼에 공통으로 쓰는 모서리 둥글기. */
 private val EntryCornerRadius = 14.dp
@@ -53,7 +54,7 @@ fun AddEntryButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = Icons.Filled.Add,
+            painter = painterResource(Res.drawable.ic_add),
             contentDescription = null,
             tint = PickiiTextGray,
             modifier = Modifier.size(16.dp)
@@ -83,7 +84,7 @@ fun RemovableEntryCard(
         }
         IconButton(onClick = onRemove, modifier = Modifier.align(Alignment.TopEnd).size(28.dp)) {
             Icon(
-                imageVector = Icons.Filled.Close,
+                painter = painterResource(Res.drawable.ic_close_filled),
                 contentDescription = null,
                 tint = PickiiTextGray,
                 modifier = Modifier.size(16.dp)

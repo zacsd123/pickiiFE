@@ -18,8 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -39,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.ic_check_filled
 import com.example.pickii.shared.generated.resources.mypage_withdraw_agreement_all
 import com.example.pickii.shared.generated.resources.mypage_withdraw_button_cancel
 import com.example.pickii.shared.generated.resources.mypage_withdraw_button_submit
@@ -60,6 +59,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -330,7 +330,7 @@ private fun SingleAgreementBox(
         ) {
             if (checked) {
                 Icon(
-                    imageVector = Icons.Filled.Check,
+                    painter = painterResource(Res.drawable.ic_check_filled),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(14.dp)

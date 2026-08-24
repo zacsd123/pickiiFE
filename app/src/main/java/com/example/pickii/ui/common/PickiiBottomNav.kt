@@ -15,11 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChatBubbleOutline
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,14 +24,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chat_bubble_outline
+import com.example.pickii.shared.generated.resources.ic_date_range
+import com.example.pickii.shared.generated.resources.ic_home
+import com.example.pickii.shared.generated.resources.ic_person
 import com.example.pickii.ui.theme.PickiiNavYellow
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 /** 캡슐 모양 배경/인디케이터의 모서리 둥글기. */
 private val NavCapsuleCornerRadius = 20.dp
@@ -76,12 +77,12 @@ private val NavIndicatorAnimationSpec =
     spring<Dp>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
 
 /** 탭과 아이콘 목록. */
-private val PickiiBottomNavItems: List<Pair<PickiiBottomNavTab, ImageVector>> =
+private val PickiiBottomNavItems: List<Pair<PickiiBottomNavTab, DrawableResource>> =
     listOf(
-        PickiiBottomNavTab.HOME to Icons.Filled.Home,
-        PickiiBottomNavTab.CALENDAR to Icons.Filled.DateRange,
-        PickiiBottomNavTab.CHAT to Icons.Filled.ChatBubbleOutline,
-        PickiiBottomNavTab.MY_PAGE to Icons.Filled.Person
+        PickiiBottomNavTab.HOME to Res.drawable.ic_home,
+        PickiiBottomNavTab.CALENDAR to Res.drawable.ic_date_range,
+        PickiiBottomNavTab.CHAT to Res.drawable.ic_chat_bubble_outline,
+        PickiiBottomNavTab.MY_PAGE to Res.drawable.ic_person
     )
 
 /**
@@ -171,7 +172,7 @@ fun PickiiBottomNav(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(icon),
                         contentDescription = null,
                         tint = contentColor,
                         modifier = Modifier.size(18.dp)

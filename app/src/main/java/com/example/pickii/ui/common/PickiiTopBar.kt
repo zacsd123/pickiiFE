@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_notifications
 import com.example.pickii.ui.theme.PickiiFieldBackground
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 화면 상단 공용 헤더: Pickii 로고 + 가운데 슬롯([centerContent]) + 오른쪽 슬롯([trailingContent]).
@@ -94,7 +95,7 @@ private fun NotificationBellButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.Notifications,
+                painter = painterResource(Res.drawable.ic_notifications),
                 contentDescription = null,
                 tint = Color.Black,
                 modifier = Modifier.size(18.dp)

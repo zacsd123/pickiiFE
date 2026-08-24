@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.ic_visibility
+import com.example.pickii.shared.generated.resources.ic_visibility_off
 import com.example.pickii.shared.generated.resources.login_brand
 import com.example.pickii.shared.generated.resources.password_reset_button_go_login
 import com.example.pickii.shared.generated.resources.password_reset_button_submit
@@ -58,6 +57,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -294,7 +294,10 @@ private fun PasswordField(
         trailingIcon = {
             IconButton(onClick = onToggleVisibility) {
                 Icon(
-                    imageVector = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                    painter =
+                        painterResource(
+                            if (isVisible) Res.drawable.ic_visibility else Res.drawable.ic_visibility_off
+                        ),
                     contentDescription = null,
                     tint = PickiiTextGray
                 )

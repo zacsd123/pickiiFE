@@ -18,9 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -47,6 +43,8 @@ import com.example.pickii.domain.model.University
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.common_button_cancel
 import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.ic_arrow_back
+import com.example.pickii.shared.generated.resources.ic_arrow_forward
 import com.example.pickii.shared.generated.resources.login_brand
 import com.example.pickii.shared.generated.resources.onboarding_button_add_experience
 import com.example.pickii.shared.generated.resources.onboarding_button_add_license
@@ -103,7 +101,9 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -762,7 +762,7 @@ private fun OnboardingNavRow(
         Box(modifier = Modifier.size(NavButtonSize)) {
             if (step > 1) {
                 NavCircleButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = Res.drawable.ic_arrow_back,
                     background = PickiiYellowLight,
                     onClick = onPreviousClick
                 )
@@ -788,7 +788,7 @@ private fun OnboardingNavRow(
         }
 
         NavCircleButton(
-            icon = Icons.AutoMirrored.Filled.ArrowForward,
+            icon = Res.drawable.ic_arrow_forward,
             background = if (canGoNext) PickiiBlue else PickiiFieldBackground,
             onClick = onNextClick,
             enabled = canGoNext
@@ -798,7 +798,7 @@ private fun OnboardingNavRow(
 
 @Composable
 private fun NavCircleButton(
-    icon: ImageVector,
+    icon: DrawableResource,
     background: Color,
     onClick: () -> Unit,
     enabled: Boolean = true
@@ -812,7 +812,7 @@ private fun NavCircleButton(
                 .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = Color.White)
+        Icon(painter = painterResource(icon), contentDescription = null, tint = Color.White)
     }
 }
 

@@ -152,7 +152,13 @@ Pickii/
   `getLinkIcon` 반환 타입 등)를 `StringResource`/`DrawableResource`로 재설계. 커밋은 문자열/드로어블
   두 개로 분리했지만 둘 다 완전히 적용된 상태에서만 전체 모듈이 컴파일됨(Kotlin 전체 모듈 컴파일
   특성상 진짜 독립적으로 빌드되는 분할은 불가능했음)
-- [ ] `material-icons-extended` import 경로 전환
+- [x] `material-icons-extended` 제거 — 완료(2026-08-25). 실사용 아이콘이 36개뿐인데 CMP 대응
+  아티팩트(`org.jetbrains.compose.material:material-icons-extended`)는 최신 버전이 1.7.3으로 CMP
+  버전(1.10.3)보다 3단계 뒤처져 있고, 이번 마이그레이션에서 klib ABI 불일치로 이미 세 번(Koin/Ktor/
+  Krossbow) 발목 잡혔던 전례가 있어 그 리스크를 다시 지지 않기로 하고 의존성 자체를 걷어냈다. Google
+  공식 material-design-icons(Apache 2.0) SVG를 소스로 36개를 Android 벡터 XML로 변환해
+  `composeResources/drawable`에 직접 추가하고, `Icons.Filled.X` 등 26개 파일의 64개 호출부를
+  `painterResource(Res.drawable.ic_x)`로 교체했다. 라이선스 출처는 저장소 루트 `NOTICE` 파일에 기록.
 
 ### Phase 4 — 화면 이식 (권장 순서)
 지금 구조가 이미 화면 단위(`ui/기능명/`)로 잘 나뉘어 있어서, 복잡도가 낮은 것부터 순서대로 옮기는 걸 권장합니다.
@@ -188,7 +194,7 @@ Pickii/
 - [ ] Phase 0 — Mac/Apple Developer 계정 확보
 - [ ] Phase 1 — 로그인+홈 워킹 스켈레톤으로 전체 툴체인 검증
 - [ ] Phase 2 — Retrofit/Hilt/OkHttp 계열 전면 교체
-- [ ] Phase 3 — 리소스 시스템 이식
+- [x] Phase 3 — 리소스 시스템 이식
 - [ ] Phase 4 — 화면 19개 영역 순차 이식 (채팅은 마지막)
 - [ ] Phase 5 — 카카오 로그인·푸시·카메라 등 플랫폼 전용 기능
 - [ ] Phase 6 — QA

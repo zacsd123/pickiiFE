@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,14 +31,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_arrow_back
+import com.example.pickii.shared.generated.resources.ic_arrow_forward
 import com.example.pickii.ui.theme.PickiiProfileCardBlack
 import com.example.pickii.ui.theme.PickiiProfileCardGoldDim
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 private const val TRANSITION_DURATION_MS = 360
 
@@ -112,12 +113,12 @@ fun ProfileCardStack(
 
         Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
             ArrowButton(
-                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                icon = Res.drawable.ic_arrow_back,
                 enabled = !isAnimating && currentIndex > 0,
                 onClick = { navigate(-1) }
             )
             ArrowButton(
-                icon = Icons.AutoMirrored.Filled.ArrowForward,
+                icon = Res.drawable.ic_arrow_forward,
                 enabled = !isAnimating && currentIndex < pageCount - 1,
                 onClick = { navigate(1) }
             )
@@ -187,7 +188,7 @@ private fun alphaForDepth(depth: Float): Float = (depth + 1f).coerceIn(0f, 1f)
 
 @Composable
 private fun ArrowButton(
-    icon: ImageVector,
+    icon: DrawableResource,
     enabled: Boolean,
     onClick: () -> Unit
 ) {
@@ -203,7 +204,7 @@ private fun ArrowButton(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = icon,
+            painter = painterResource(icon),
             contentDescription = null,
             tint = if (enabled) Color.White else Color.White.copy(alpha = 0.3f)
         )

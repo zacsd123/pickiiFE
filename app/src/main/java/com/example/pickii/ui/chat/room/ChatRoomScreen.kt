@@ -27,8 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -57,6 +55,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.domain.model.MeetingPollDetail
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_arrow_back
 import com.example.pickii.shared.generated.resources.ic_chat_room_menu
 import com.example.pickii.shared.generated.resources.ic_chevron_down
 import com.example.pickii.shared.generated.resources.ic_chevron_up
@@ -727,7 +726,7 @@ private fun ChatRoomHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(Res.drawable.ic_arrow_back),
                     contentDescription = null,
                     tint = Color.Black
                 )

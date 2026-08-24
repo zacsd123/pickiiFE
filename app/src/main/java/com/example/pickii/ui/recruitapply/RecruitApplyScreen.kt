@@ -21,9 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -48,6 +45,8 @@ import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.common_button_cancel
 import com.example.pickii.shared.generated.resources.common_button_confirm
 import com.example.pickii.shared.generated.resources.common_counter_format
+import com.example.pickii.shared.generated.resources.ic_arrow_back
+import com.example.pickii.shared.generated.resources.ic_notifications
 import com.example.pickii.shared.generated.resources.recruit_apply_banner_notice
 import com.example.pickii.shared.generated.resources.recruit_apply_banner_tip_subtitle
 import com.example.pickii.shared.generated.resources.recruit_apply_banner_tip_title
@@ -78,6 +77,7 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -275,7 +275,7 @@ private fun RecruitApplyTopBar(onBackClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            painter = painterResource(Res.drawable.ic_arrow_back),
             contentDescription = null,
             tint = Color.Black,
             modifier = Modifier.clickable(onClick = onBackClick)
@@ -298,7 +298,7 @@ private fun RecruitApplyTopBar(onBackClick: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Icon(imageVector = Icons.Filled.Notifications, contentDescription = null, tint = Color.Black)
+        Icon(painter = painterResource(Res.drawable.ic_notifications), contentDescription = null, tint = Color.Black)
 
         Spacer(modifier = Modifier.width(8.dp))
     }

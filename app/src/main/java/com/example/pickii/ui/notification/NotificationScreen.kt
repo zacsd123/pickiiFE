@@ -18,12 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,13 +25,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chat_bubble_outline_outlined
+import com.example.pickii.shared.generated.resources.ic_check_rounded
+import com.example.pickii.shared.generated.resources.ic_close_outlined
+import com.example.pickii.shared.generated.resources.ic_person_rounded
+import com.example.pickii.shared.generated.resources.ic_schedule_outlined
 import com.example.pickii.ui.common.PickiiTopBar
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 private val NotificationBackgroundColor = Color(0xFFF8F8F5)
 private val PrimaryTextColor = Color(0xFF20201F)
@@ -90,7 +91,7 @@ fun NotificationScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Close,
+                        painter = painterResource(Res.drawable.ic_close_outlined),
                         contentDescription = "알림 화면 닫기",
                         tint = PrimaryTextColor,
                         modifier = Modifier.size(29.dp)
@@ -253,35 +254,35 @@ private fun NotificationTypeIcon(type: NotificationType) {
         when (type) {
             NotificationType.CHAT ->
                 NotificationIconData(
-                    imageVector = Icons.Outlined.ChatBubbleOutline,
+                    icon = Res.drawable.ic_chat_bubble_outline_outlined,
                     backgroundColor = ChatIconBackgroundColor,
                     iconColor = ChatIconColor
                 )
 
             NotificationType.ACCEPT ->
                 NotificationIconData(
-                    imageVector = Icons.Rounded.Check,
+                    icon = Res.drawable.ic_check_rounded,
                     backgroundColor = AcceptIconBackgroundColor,
                     iconColor = AcceptIconColor
                 )
 
             NotificationType.APPLY ->
                 NotificationIconData(
-                    imageVector = Icons.Rounded.Person,
+                    icon = Res.drawable.ic_person_rounded,
                     backgroundColor = ApplyIconBackgroundColor,
                     iconColor = ApplyIconColor
                 )
 
             NotificationType.CLOSED ->
                 NotificationIconData(
-                    imageVector = Icons.Outlined.Schedule,
+                    icon = Res.drawable.ic_schedule_outlined,
                     backgroundColor = ClosedIconBackgroundColor,
                     iconColor = ClosedIconColor
                 )
 
             NotificationType.OTHER ->
                 NotificationIconData(
-                    imageVector = Icons.Outlined.Schedule,
+                    icon = Res.drawable.ic_schedule_outlined,
                     backgroundColor = ClosedIconBackgroundColor,
                     iconColor = ClosedIconColor
                 )
@@ -296,7 +297,7 @@ private fun NotificationTypeIcon(type: NotificationType) {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = iconData.imageVector,
+            painter = painterResource(iconData.icon),
             contentDescription = null,
             tint = iconData.iconColor,
             modifier = Modifier.size(25.dp)
@@ -320,7 +321,7 @@ private fun EmptyNotificationContent(modifier: Modifier = Modifier) {
 }
 
 private data class NotificationIconData(
-    val imageVector: ImageVector,
+    val icon: DrawableResource,
     val backgroundColor: Color,
     val iconColor: Color
 )

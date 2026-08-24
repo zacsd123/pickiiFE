@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_arrow_back
 import com.example.pickii.shared.generated.resources.ic_check
 import com.example.pickii.shared.generated.resources.ic_chevron_down
 import com.example.pickii.shared.generated.resources.ic_close
@@ -228,7 +227,7 @@ private fun ApplicantListHeader(onBackClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(Res.drawable.ic_arrow_back),
                     contentDescription = null,
                     tint = Color.Black,
                     modifier = Modifier.size(20.dp)

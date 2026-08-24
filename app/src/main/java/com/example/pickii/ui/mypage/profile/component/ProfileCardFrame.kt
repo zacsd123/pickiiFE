@@ -25,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +36,7 @@ import com.example.pickii.shared.generated.resources.mypage_profile_card_empty_m
 import com.example.pickii.ui.theme.PickiiProfileCardBlack
 import com.example.pickii.ui.theme.PickiiProfileCardGoldBright
 import com.example.pickii.ui.theme.PickiiProfileCardGoldDim
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -48,7 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ProfileCardFrame(
     modifier: Modifier = Modifier,
-    headerIcon: ImageVector? = null,
+    headerIcon: DrawableResource? = null,
     title: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -64,7 +64,7 @@ fun ProfileCardFrame(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (headerIcon != null) {
                     Icon(
-                        imageVector = headerIcon,
+                        painter = painterResource(headerIcon),
                         contentDescription = null,
                         tint = PickiiProfileCardGoldBright,
                         modifier = Modifier.size(20.dp)

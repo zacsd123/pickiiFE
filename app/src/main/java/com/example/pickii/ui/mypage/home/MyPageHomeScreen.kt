@@ -14,14 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,12 +23,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_bookmark_border
+import com.example.pickii.shared.generated.resources.ic_campaign
+import com.example.pickii.shared.generated.resources.ic_chat
+import com.example.pickii.shared.generated.resources.ic_chevron_right_filled
+import com.example.pickii.shared.generated.resources.ic_description
+import com.example.pickii.shared.generated.resources.ic_emoji_events
+import com.example.pickii.shared.generated.resources.ic_settings
 import com.example.pickii.shared.generated.resources.mypage_button_create_profile
 import com.example.pickii.shared.generated.resources.mypage_button_edit_profile
 import com.example.pickii.shared.generated.resources.mypage_contact_email
@@ -66,6 +64,8 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -168,31 +168,31 @@ private fun MyPageHomeScreenContent(
                     .background(Color.White)
         ) {
             ActivityMenuRow(
-                icon = Icons.Filled.Description,
+                icon = Res.drawable.ic_description,
                 title = stringResource(Res.string.mypage_menu_applications_title),
                 subtitle = stringResource(Res.string.mypage_menu_applications_subtitle),
                 onClick = onApplicationsClick
             )
             ActivityMenuRow(
-                icon = Icons.Filled.Campaign,
+                icon = Res.drawable.ic_campaign,
                 title = stringResource(Res.string.mypage_menu_my_recruits_title),
                 subtitle = stringResource(Res.string.mypage_menu_my_recruits_subtitle),
                 onClick = onMyRecruitsClick
             )
             ActivityMenuRow(
-                icon = Icons.Filled.BookmarkBorder,
+                icon = Res.drawable.ic_bookmark_border,
                 title = stringResource(Res.string.mypage_menu_scraps_title),
                 subtitle = stringResource(Res.string.mypage_menu_scraps_subtitle),
                 onClick = onScrapsClick
             )
             ActivityMenuRow(
-                icon = Icons.AutoMirrored.Filled.Chat,
+                icon = Res.drawable.ic_chat,
                 title = stringResource(Res.string.mypage_menu_my_comments_title),
                 subtitle = stringResource(Res.string.mypage_menu_my_comments_subtitle),
                 onClick = onMyCommentsClick
             )
             ActivityMenuRow(
-                icon = Icons.Filled.EmojiEvents,
+                icon = Res.drawable.ic_emoji_events,
                 title = stringResource(Res.string.mypage_menu_feedback_title),
                 subtitle = stringResource(Res.string.mypage_menu_feedback_subtitle),
                 onClick = onFeedbackClick,
@@ -213,7 +213,7 @@ private fun MyPageHomeScreenContent(
 
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             ActivityMenuRow(
-                icon = Icons.Filled.Settings,
+                icon = Res.drawable.ic_settings,
                 title = stringResource(Res.string.mypage_menu_settings_title),
                 subtitle = null,
                 onClick = onSettingsClick,
@@ -317,7 +317,7 @@ private fun ProfileSummaryCard(
 
 @Composable
 private fun ActivityMenuRow(
-    icon: ImageVector,
+    icon: DrawableResource,
     title: String,
     subtitle: String?,
     onClick: () -> Unit,
@@ -332,7 +332,12 @@ private fun ActivityMenuRow(
                     .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = Color.Black, modifier = Modifier.width(22.dp))
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.width(22.dp)
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Medium)
@@ -341,7 +346,11 @@ private fun ActivityMenuRow(
                     Text(text = subtitle, color = PickiiTextGray, fontSize = 12.sp)
                 }
             }
-            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = PickiiTextGray)
+            Icon(
+                painter = painterResource(Res.drawable.ic_chevron_right_filled),
+                contentDescription = null,
+                tint = PickiiTextGray
+            )
         }
         if (showDivider) {
             Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PickiiFieldBackground))

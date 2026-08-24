@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.domain.model.MyScrap
 import com.example.pickii.domain.model.RecruitStatus
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_bookmark
 import com.example.pickii.shared.generated.resources.mypage_scraps_empty
 import com.example.pickii.shared.generated.resources.mypage_scraps_label_date
 import com.example.pickii.shared.generated.resources.mypage_scraps_title
@@ -45,6 +44,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBlue
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -166,7 +166,7 @@ private fun ScrapCard(
         Spacer(modifier = Modifier.width(12.dp))
 
         Icon(
-            imageVector = Icons.Filled.Bookmark,
+            painter = painterResource(Res.drawable.ic_bookmark),
             contentDescription = null,
             tint = PickiiPaletteBlue,
             modifier = Modifier.clickable(onClick = onUnscrapClick)

@@ -14,9 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,14 +25,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_photo_camera
+import com.example.pickii.shared.generated.resources.ic_photo_library
 import com.example.pickii.ui.theme.PickiiBlackAlt
 import com.example.pickii.ui.theme.PickiiGray700
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * "사진/카메라" 항목을 눌렀을 때, 갤러리와 카메라 중 사진을 가져올 방법을 고르는 바텀시트다.
@@ -89,7 +90,7 @@ fun PhotoSourceBottomSheet(
             Spacer(modifier = Modifier.height(18.dp))
 
             PhotoSourceRow(
-                icon = Icons.Filled.PhotoLibrary,
+                icon = Res.drawable.ic_photo_library,
                 label = "갤러리",
                 onClick = onGalleryClick
             )
@@ -97,7 +98,7 @@ fun PhotoSourceBottomSheet(
             Spacer(modifier = Modifier.height(8.dp))
 
             PhotoSourceRow(
-                icon = Icons.Filled.PhotoCamera,
+                icon = Res.drawable.ic_photo_camera,
                 label = "카메라",
                 onClick = onCameraClick
             )
@@ -112,7 +113,7 @@ fun PhotoSourceBottomSheet(
  */
 @Composable
 private fun PhotoSourceRow(
-    icon: ImageVector,
+    icon: DrawableResource,
     label: String,
     onClick: () -> Unit
 ) {
@@ -134,7 +135,7 @@ private fun PhotoSourceRow(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(icon),
                 contentDescription = label,
                 tint = PickiiGray700,
                 modifier = Modifier.size(22.dp)
