@@ -3,12 +3,17 @@ package com.example.pickii.ui.applicant
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.ApplicantEntry
 import com.example.pickii.domain.model.ApplyStatus
 import com.example.pickii.domain.repository.ApplicantRepository
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.applicant_list_toast_accept_failed
+import com.example.pickii.shared.generated.resources.applicant_list_toast_direct_chat_failed
+import com.example.pickii.shared.generated.resources.applicant_list_toast_group_chat_failed
+import com.example.pickii.shared.generated.resources.applicant_list_toast_load_failed
+import com.example.pickii.shared.generated.resources.applicant_list_toast_reject_failed
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.util.toDisplayString
@@ -59,7 +64,7 @@ class ApplicantListViewModel
                         _uiState.update { it.copy(isLoading = false, applicants = uiApplicants) }
                     }.onFailure {
                         _uiState.update { it.copy(isLoading = false) }
-                        _events.send(RecruitUiEvent.ShowToast(R.string.applicant_list_toast_load_failed))
+                        _events.send(RecruitUiEvent.ShowToast(Res.string.applicant_list_toast_load_failed))
                     }
             }
         }
@@ -82,7 +87,7 @@ class ApplicantListViewModel
                     .createProject(recruitId, teamName)
                     .onSuccess { result -> _navigateToChatRoom.send(result.chatRoomId) }
                     .onFailure {
-                        _events.send(RecruitUiEvent.ShowToast(R.string.applicant_list_toast_group_chat_failed))
+                        _events.send(RecruitUiEvent.ShowToast(Res.string.applicant_list_toast_group_chat_failed))
                     }
             }
         }
@@ -94,7 +99,7 @@ class ApplicantListViewModel
                     .createDirectChatRoom(memberId)
                     .onSuccess { result -> _navigateToChatRoom.send(result.chatRoomId.toString()) }
                     .onFailure {
-                        _events.send(RecruitUiEvent.ShowToast(R.string.applicant_list_toast_direct_chat_failed))
+                        _events.send(RecruitUiEvent.ShowToast(Res.string.applicant_list_toast_direct_chat_failed))
                     }
             }
         }
@@ -110,9 +115,9 @@ class ApplicantListViewModel
                     .onFailure {
                         val messageRes =
                             if (accept) {
-                                R.string.applicant_list_toast_accept_failed
+                                Res.string.applicant_list_toast_accept_failed
                             } else {
-                                R.string.applicant_list_toast_reject_failed
+                                Res.string.applicant_list_toast_reject_failed
                             }
                         _events.send(RecruitUiEvent.ShowToast(messageRes))
                     }

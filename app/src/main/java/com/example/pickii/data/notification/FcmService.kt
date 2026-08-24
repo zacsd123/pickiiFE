@@ -26,6 +26,13 @@ private const val DATA_KEY_REFERENCE_ID = "referenceId"
  *
  * 서버는 알림 제목/본문을 [RemoteMessage.getNotification]에, 딥링크 정보(type/referenceType/referenceId,
  * 9-1 응답과 동일한 필드)를 [RemoteMessage.getData]에 실어 보낸다(PUSH_NOTIFICATION.md 4-4).
+ *
+ * 채널 이름/아이콘은 CMP `Res.string`/`Res.drawable`이 아니라 여전히 클래식 Android `R`을 쓴다 —
+ * `NotificationChannel`/`NotificationCompat.Builder.setSmallIcon()`은 시스템(알림 트레이)이 직접
+ * 그리는 진짜 Android 리소스 ID가 필요해서 CMP의 asset 기반 `StringResource`/`DrawableResource`를
+ * 받을 수 없다. `app_name`과 같은 이유로 `app/src/main/res/`에 이 둘만 남겨뒀다(`strings.xml`/
+ * `drawable/ic_notification.xml` 참고, `ic_notification`은 ChatRoomInfoPanel의 Compose 아이콘과
+ * 공유해서 shared 쪽에도 같은 파일이 있다).
  */
 class FcmService : FirebaseMessagingService() {
     private val fcmTokenRegistrar: FcmTokenRegistrar by inject()

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 
 private const val DEFAULT_PAGE_SIZE = 10
 
@@ -26,7 +27,7 @@ data class PagedFetchResult<T>(
  */
 abstract class PagedListViewModel<T, S : PagedListUiState<T>>(
     initialState: S,
-    private val loadFailureMessageRes: Int,
+    private val loadFailureMessageRes: StringResource,
     private val pageSize: Int = DEFAULT_PAGE_SIZE
 ) : ViewModel() {
     protected val _uiState = MutableStateFlow(initialState)
@@ -44,7 +45,7 @@ abstract class PagedListViewModel<T, S : PagedListUiState<T>>(
         items: List<T> = this.items,
         currentPage: Int = this.currentPage,
         totalPages: Int = this.totalPages,
-        toastMessageRes: Int? = this.toastMessageRes
+        toastMessageRes: StringResource? = this.toastMessageRes
     ): S
 
     fun refresh() = load(_uiState.value.currentPage)

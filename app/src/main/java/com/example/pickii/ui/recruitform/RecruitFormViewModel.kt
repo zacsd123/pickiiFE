@@ -3,7 +3,6 @@ package com.example.pickii.ui.recruitform
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPost
@@ -11,6 +10,9 @@ import com.example.pickii.domain.model.RecruitTopic
 import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.recruit_form_toast_ai_draft_content_required
+import com.example.pickii.shared.generated.resources.recruit_form_toast_edit_complete
 import com.example.pickii.ui.common.AiDialogState
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
@@ -234,7 +236,7 @@ class RecruitFormViewModel
         fun onGenerateAiDraftClick() {
             val state = _uiState.value
             if (state.detailContent.isBlank()) {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_form_toast_ai_draft_content_required))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.recruit_form_toast_ai_draft_content_required))
                 return
             }
 
@@ -342,7 +344,7 @@ class RecruitFormViewModel
                         shortIntro = state.shortIntro,
                         detailContent = state.detailContent
                     ).onSuccess {
-                        _events.send(RecruitUiEvent.ShowToast(R.string.recruit_form_toast_edit_complete))
+                        _events.send(RecruitUiEvent.ShowToast(Res.string.recruit_form_toast_edit_complete))
                         onComplete()
                     }
             }

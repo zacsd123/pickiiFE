@@ -2,7 +2,6 @@ package com.example.pickii.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.CampusScope
 import com.example.pickii.domain.model.RecruitCategory
 import com.example.pickii.domain.model.RecruitPostSummary
@@ -12,6 +11,8 @@ import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.domain.repository.ProfileRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.home_toast_load_failed
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.visiblePageNumbers
 import kotlinx.coroutines.channels.Channel
@@ -141,7 +142,7 @@ class HomeViewModel
                         }
                     }.onFailure {
                         _uiState.update { it.copy(isLoading = false) }
-                        _events.send(RecruitUiEvent.ShowToast(R.string.home_toast_load_failed))
+                        _events.send(RecruitUiEvent.ShowToast(Res.string.home_toast_load_failed))
                     }
             }
         }

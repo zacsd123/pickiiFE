@@ -34,16 +34,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
 import com.example.pickii.domain.model.MeetingPollDetail
 import com.example.pickii.domain.model.MeetingPollSlot
 import com.example.pickii.domain.model.MeetingPollStatus
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chevron_down
+import com.example.pickii.shared.generated.resources.ic_chevron_up
 import com.example.pickii.ui.theme.PickiiBorderGray
 import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiGray650
@@ -57,6 +58,7 @@ import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -464,7 +466,8 @@ private fun ResponseBody(
                     Icon(
                         painter =
                             painterResource(
-                                id = if (isDateExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
+                                resource =
+                                    if (isDateExpanded) Res.drawable.ic_chevron_up else Res.drawable.ic_chevron_down
                             ),
                         contentDescription = if (isDateExpanded) "접기" else "펼치기",
                         tint = PickiiGray400,
@@ -554,7 +557,8 @@ private fun AggregationBody(
                     Icon(
                         painter =
                             painterResource(
-                                id = if (isDateExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
+                                resource =
+                                    if (isDateExpanded) Res.drawable.ic_chevron_up else Res.drawable.ic_chevron_down
                             ),
                         contentDescription = if (isDateExpanded) "접기" else "펼치기",
                         tint = PickiiGray400,

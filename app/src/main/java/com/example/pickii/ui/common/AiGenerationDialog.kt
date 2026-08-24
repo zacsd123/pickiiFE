@@ -11,9 +11,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_ai_dialog_button_close
+import com.example.pickii.shared.generated.resources.common_ai_dialog_button_retry
+import com.example.pickii.shared.generated.resources.common_ai_dialog_failed_title
+import com.example.pickii.shared.generated.resources.common_ai_dialog_loading
+import org.jetbrains.compose.resources.stringResource
 
 /** AI 초안 생성 팝업의 표시 상태. */
 sealed interface AiDialogState {
@@ -51,7 +55,7 @@ fun AiGenerationDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = stringResource(R.string.common_ai_dialog_loading))
+                        Text(text = stringResource(Res.string.common_ai_dialog_loading))
                     }
                 }
             )
@@ -59,17 +63,17 @@ fun AiGenerationDialog(
         AiDialogState.Failed ->
             AlertDialog(
                 onDismissRequest = onDismiss,
-                title = { Text(text = stringResource(R.string.common_ai_dialog_failed_title)) },
+                title = { Text(text = stringResource(Res.string.common_ai_dialog_failed_title)) },
                 text = {},
                 confirmButton = {
                     TextButton(
                         onClick = onRetry
-                    ) { Text(text = stringResource(R.string.common_ai_dialog_button_retry)) }
+                    ) { Text(text = stringResource(Res.string.common_ai_dialog_button_retry)) }
                 },
                 dismissButton = {
                     TextButton(
                         onClick = onDismiss
-                    ) { Text(text = stringResource(R.string.common_ai_dialog_button_close)) }
+                    ) { Text(text = stringResource(Res.string.common_ai_dialog_button_close)) }
                 }
             )
     }

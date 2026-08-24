@@ -1,6 +1,14 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.MasterDataApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
+import com.example.pickii.data.remote.dto.ApplyKeywordCategoryDto
+import com.example.pickii.data.remote.dto.CategoryDto
+import com.example.pickii.data.remote.dto.LicenseOptionDto
+import com.example.pickii.data.remote.dto.LinkCategoryDto
+import com.example.pickii.data.remote.dto.TechStackDto
+import com.example.pickii.data.remote.dto.TopicDto
+import com.example.pickii.data.remote.dto.UniversityDto
 import com.example.pickii.domain.model.ApplyKeywordCategory
 import com.example.pickii.domain.model.ApplyKeywordItem
 import com.example.pickii.domain.model.LicenseOption
@@ -13,7 +21,6 @@ import com.example.pickii.domain.repository.MasterDataRepository
 import com.example.pickii.util.network.safeApiCall
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 
 /**
  * `5. Master Data` 문서로 마스터 데이터를 조회하고, 변경이 거의 없는 데이터 특성상
@@ -21,8 +28,7 @@ import kotlinx.serialization.json.Json
  */
 class RecruitMasterDataRepository
     constructor(
-        private val masterDataApiService: MasterDataApiService,
-        private val json: Json
+        private val masterDataApiService: MasterDataApiService
     ) : MasterDataRepository {
         private val categoriesMutex = Mutex()
         private var cachedCategories: List<RecruitCategory>? = null
@@ -45,7 +51,7 @@ class RecruitMasterDataRepository
         override suspend fun getCategories(): Result<List<RecruitCategory>> =
             categoriesMutex.withLock {
                 cachedCategories?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getCategories() }
+                safeApiCall<ApiEnvelope<List<CategoryDto>>> { masterDataApiService.getCategories() }
                     .map { envelope -> envelope.data.map { RecruitCategory(id = it.categoryId, label = it.name) } }
                     .onSuccess { cachedCategories = it }
             }
@@ -53,19 +59,19 @@ class RecruitMasterDataRepository
         override suspend fun getTopics(): Result<List<RecruitTopic>> =
             topicsMutex.withLock {
                 cachedTopics?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getTopics() }
+                safeApiCall<ApiEnvelope<List<TopicDto>>> { masterDataApiService.getTopics() }
                     .map { envelope -> envelope.data.map { RecruitTopic(id = it.topicId, label = it.name) } }
                     .onSuccess { cachedTopics = it }
             }
 
         override suspend fun getUniversities(keyword: String?): Result<List<University>> =
-            safeApiCall(json) { masterDataApiService.getUniversities(keyword) }
+            safeApiCall<ApiEnvelope<List<UniversityDto>>> { masterDataApiService.getUniversities(keyword) }
                 .map { envelope -> envelope.data.map { University(id = it.univId, name = it.name) } }
 
         override suspend fun getTechStacks(): Result<List<TechStack>> =
             techStacksMutex.withLock {
                 cachedTechStacks?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getTechStacks() }
+                safeApiCall<ApiEnvelope<List<TechStackDto>>> { masterDataApiService.getTechStacks() }
                     .map { envelope -> envelope.data.map { TechStack(name = it.name) } }
                     .onSuccess { cachedTechStacks = it }
             }
@@ -73,7 +79,7 @@ class RecruitMasterDataRepository
         override suspend fun getLicenseOptions(): Result<List<LicenseOption>> =
             licenseOptionsMutex.withLock {
                 cachedLicenseOptions?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getLicenses() }
+                safeApiCall<ApiEnvelope<List<LicenseOptionDto>>> { masterDataApiService.getLicenses() }
                     .map { envelope -> envelope.data.map { LicenseOption(name = it.name) } }
                     .onSuccess { cachedLicenseOptions = it }
             }
@@ -81,7 +87,7 @@ class RecruitMasterDataRepository
         override suspend fun getLinkCategories(): Result<List<LinkCategory>> =
             linkCategoriesMutex.withLock {
                 cachedLinkCategories?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getLinkCategories() }
+                safeApiCall<ApiEnvelope<List<LinkCategoryDto>>> { masterDataApiService.getLinkCategories() }
                     .map { envelope -> envelope.data.map { LinkCategory(name = it.name) } }
                     .onSuccess { cachedLinkCategories = it }
             }
@@ -89,7 +95,7 @@ class RecruitMasterDataRepository
         override suspend fun getApplyKeywords(): Result<List<ApplyKeywordCategory>> =
             applyKeywordsMutex.withLock {
                 cachedApplyKeywords?.let { return@withLock Result.success(it) }
-                safeApiCall(json) { masterDataApiService.getApplyKeywords() }
+                safeApiCall<ApiEnvelope<List<ApplyKeywordCategoryDto>>> { masterDataApiService.getApplyKeywords() }
                     .map { envelope ->
                         envelope.data.map { categoryDto ->
                             ApplyKeywordCategory(

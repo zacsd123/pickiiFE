@@ -1,14 +1,17 @@
 package com.example.pickii.ui.mypage.scraps
 
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyScrap
 import com.example.pickii.domain.repository.MyPageActivityRepository
 import com.example.pickii.domain.repository.RecruitRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.scraps_toast_load_failed
+import com.example.pickii.shared.generated.resources.scraps_toast_unscrap_failed
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 
 /** 스크랩한 공고 목록(3-16) 조회 및 스크랩 해제(3-15)를 담당한다. */
 class ScrapsViewModel
@@ -17,7 +20,7 @@ class ScrapsViewModel
         private val recruitRepository: RecruitRepository
     ) : PagedListViewModel<MyScrap, ScrapsUiState>(
             initialState = ScrapsUiState(),
-            loadFailureMessageRes = R.string.scraps_toast_load_failed
+            loadFailureMessageRes = Res.string.scraps_toast_load_failed
         ) {
         init {
             refresh()
@@ -36,7 +39,7 @@ class ScrapsViewModel
             items: List<MyScrap>,
             currentPage: Int,
             totalPages: Int,
-            toastMessageRes: Int?
+            toastMessageRes: StringResource?
         ): ScrapsUiState =
             copy(
                 isLoading = isLoading,
@@ -56,7 +59,7 @@ class ScrapsViewModel
                             state.copy(items = state.items.filterNot { it.recruitId == recruitId })
                         }
                     }.onFailure {
-                        _uiState.update { it.copy(toastMessageRes = R.string.scraps_toast_unscrap_failed) }
+                        _uiState.update { it.copy(toastMessageRes = Res.string.scraps_toast_unscrap_failed) }
                     }
             }
         }

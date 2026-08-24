@@ -40,8 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,13 +47,33 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.AcademicStatus
 import com.example.pickii.domain.model.AdditionalLinkEntry
 import com.example.pickii.domain.model.ExperienceEntry
 import com.example.pickii.domain.model.LicenseEntry
 import com.example.pickii.domain.model.MemberProfile
 import com.example.pickii.domain.model.SkillToolEntry
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_github
+import com.example.pickii.shared.generated.resources.ic_link
+import com.example.pickii.shared.generated.resources.ic_linkedin
+import com.example.pickii.shared.generated.resources.ic_notion
+import com.example.pickii.shared.generated.resources.mypage_create_profile_prompt
+import com.example.pickii.shared.generated.resources.mypage_profile_button_edit
+import com.example.pickii.shared.generated.resources.mypage_profile_card_topic_title
+import com.example.pickii.shared.generated.resources.mypage_profile_experience_ongoing
+import com.example.pickii.shared.generated.resources.mypage_profile_label_about_me
+import com.example.pickii.shared.generated.resources.mypage_profile_label_academic_status
+import com.example.pickii.shared.generated.resources.mypage_profile_label_experience
+import com.example.pickii.shared.generated.resources.mypage_profile_label_licenses
+import com.example.pickii.shared.generated.resources.mypage_profile_label_links
+import com.example.pickii.shared.generated.resources.mypage_profile_label_major
+import com.example.pickii.shared.generated.resources.mypage_profile_label_skills
+import com.example.pickii.shared.generated.resources.mypage_profile_label_university
+import com.example.pickii.shared.generated.resources.mypage_profile_title
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_high
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_low
+import com.example.pickii.shared.generated.resources.onboarding_skill_level_mid
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
@@ -68,6 +86,10 @@ import com.example.pickii.ui.theme.PickiiProfileCardGoldMid
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 private const val PROFILE_CARD_COUNT = 6
@@ -107,7 +129,7 @@ fun ProfileViewScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -124,7 +146,7 @@ internal fun ProfileViewScreenContent(
     uiState: ProfileViewUiState,
     onBackClick: () -> Unit,
     onEditClick: (() -> Unit)? = null,
-    title: String = stringResource(R.string.mypage_profile_title)
+    title: String = stringResource(Res.string.mypage_profile_title)
 ) {
     val profile = uiState.profile
 
@@ -138,7 +160,7 @@ internal fun ProfileViewScreenContent(
             LoadingIndicator()
         } else if (profile == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.mypage_create_profile_prompt), color = PickiiTextGray)
+                Text(text = stringResource(Res.string.mypage_create_profile_prompt), color = PickiiTextGray)
             }
         } else {
             Column(
@@ -193,7 +215,7 @@ private fun ProfileViewHeader(
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.mypage_profile_button_edit),
+                            text = stringResource(Res.string.mypage_profile_button_edit),
                             color = Color.White,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
@@ -236,7 +258,7 @@ private fun TopicSchoolLinksCard(
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
         headerIcon = Icons.Filled.Interests,
-        title = stringResource(R.string.mypage_profile_card_topic_title)
+        title = stringResource(Res.string.mypage_profile_card_topic_title)
     ) {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             if (topicLabels.isNotEmpty()) {
@@ -252,10 +274,10 @@ private fun TopicSchoolLinksCard(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            CardInfoRow(label = stringResource(R.string.mypage_profile_label_university), value = profile.univ)
-            CardInfoRow(label = stringResource(R.string.mypage_profile_label_major), value = profile.major)
+            CardInfoRow(label = stringResource(Res.string.mypage_profile_label_university), value = profile.univ)
+            CardInfoRow(label = stringResource(Res.string.mypage_profile_label_major), value = profile.major)
             CardInfoRow(
-                label = stringResource(R.string.mypage_profile_label_academic_status),
+                label = stringResource(Res.string.mypage_profile_label_academic_status),
                 value = profile.academicStatus.label,
                 showDivider = profile.additionalLinks.isNotEmpty()
             )
@@ -263,7 +285,7 @@ private fun TopicSchoolLinksCard(
             if (profile.additionalLinks.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = stringResource(R.string.mypage_profile_label_links),
+                    text = stringResource(Res.string.mypage_profile_label_links),
                     color = PickiiProfileCardGoldMid,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -283,7 +305,7 @@ private fun AboutMeCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
         headerIcon = Icons.Filled.Description,
-        title = stringResource(R.string.mypage_profile_label_about_me)
+        title = stringResource(Res.string.mypage_profile_label_about_me)
     ) {
         Text(
             text = profile.aboutMe.orEmpty(),
@@ -300,7 +322,7 @@ private fun SkillsCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
         headerIcon = Icons.Filled.Build,
-        title = stringResource(R.string.mypage_profile_label_skills)
+        title = stringResource(Res.string.mypage_profile_label_skills)
     ) {
         if (profile.skillTools.isEmpty()) {
             ProfileCardEmptyState()
@@ -318,7 +340,7 @@ private fun LicenseCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
         headerIcon = Icons.Filled.WorkspacePremium,
-        title = stringResource(R.string.mypage_profile_label_licenses)
+        title = stringResource(Res.string.mypage_profile_label_licenses)
     ) {
         if (profile.licenses.isEmpty()) {
             ProfileCardEmptyState()
@@ -336,7 +358,7 @@ private fun ExperienceCard(profile: MemberProfile) {
     ProfileCardFrame(
         modifier = Modifier.fillMaxSize(),
         headerIcon = Icons.Filled.EmojiEvents,
-        title = stringResource(R.string.mypage_profile_label_experience)
+        title = stringResource(Res.string.mypage_profile_label_experience)
     ) {
         if (profile.experiences.isEmpty()) {
             ProfileCardEmptyState()
@@ -400,7 +422,7 @@ private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
         Icon(
             painter =
                 painterResource(
-                    id = getLinkIcon(link.linkName)
+                    resource = getLinkIcon(link.linkName)
                 ),
             contentDescription = link.linkName,
             tint = Color.Unspecified,
@@ -409,22 +431,22 @@ private fun AdditionalLinkChip(link: AdditionalLinkEntry) {
     }
 }
 
-private fun getLinkIcon(linkName: String): Int =
+private fun getLinkIcon(linkName: String): DrawableResource =
     when (linkName.lowercase()) {
         "git" ->
-            R.drawable.ic_github
+            Res.drawable.ic_github
 
         "notion" ->
-            R.drawable.ic_notion
+            Res.drawable.ic_notion
 
         "linkedin" ->
-            R.drawable.ic_linkedin
+            Res.drawable.ic_linkedin
 
         "홈페이지" ->
-            R.drawable.ic_link
+            Res.drawable.ic_link
 
         else ->
-            R.drawable.ic_link
+            Res.drawable.ic_link
     }
 
 @Composable
@@ -438,9 +460,9 @@ private fun SkillToolRow(entry: SkillToolEntry) {
 @Composable
 private fun skillLevelLabel(level: Int): String =
     when (level) {
-        3 -> stringResource(R.string.onboarding_skill_level_high)
-        2 -> stringResource(R.string.onboarding_skill_level_mid)
-        else -> stringResource(R.string.onboarding_skill_level_low)
+        3 -> stringResource(Res.string.onboarding_skill_level_high)
+        2 -> stringResource(Res.string.onboarding_skill_level_mid)
+        else -> stringResource(Res.string.onboarding_skill_level_low)
     }
 
 @Composable
@@ -458,7 +480,7 @@ private fun ExperienceRow(entry: ExperienceEntry) {
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = entry.organization, color = PickiiProfileCardGoldMid, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(2.dp))
-        val ongoingLabel = stringResource(R.string.mypage_profile_experience_ongoing)
+        val ongoingLabel = stringResource(Res.string.mypage_profile_experience_ongoing)
         Text(
             text = experiencePeriod(entry.startDate, entry.endDate, ongoingLabel),
             color = PickiiProfileCardGoldMid,

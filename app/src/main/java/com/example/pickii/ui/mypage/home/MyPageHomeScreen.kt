@@ -32,12 +32,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_button_create_profile
+import com.example.pickii.shared.generated.resources.mypage_button_edit_profile
+import com.example.pickii.shared.generated.resources.mypage_contact_email
+import com.example.pickii.shared.generated.resources.mypage_contact_instagram
+import com.example.pickii.shared.generated.resources.mypage_contact_label
+import com.example.pickii.shared.generated.resources.mypage_create_profile_prompt
+import com.example.pickii.shared.generated.resources.mypage_menu_applications_subtitle
+import com.example.pickii.shared.generated.resources.mypage_menu_applications_title
+import com.example.pickii.shared.generated.resources.mypage_menu_feedback_subtitle
+import com.example.pickii.shared.generated.resources.mypage_menu_feedback_title
+import com.example.pickii.shared.generated.resources.mypage_menu_my_comments_subtitle
+import com.example.pickii.shared.generated.resources.mypage_menu_my_comments_title
+import com.example.pickii.shared.generated.resources.mypage_menu_my_recruits_subtitle
+import com.example.pickii.shared.generated.resources.mypage_menu_my_recruits_title
+import com.example.pickii.shared.generated.resources.mypage_menu_scraps_subtitle
+import com.example.pickii.shared.generated.resources.mypage_menu_scraps_title
+import com.example.pickii.shared.generated.resources.mypage_menu_settings_title
+import com.example.pickii.shared.generated.resources.mypage_section_activity
+import com.example.pickii.shared.generated.resources.mypage_section_settings
 import com.example.pickii.ui.common.AvatarPlaceholder
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LevelProgressBar
@@ -48,6 +66,7 @@ import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -133,7 +152,7 @@ private fun MyPageHomeScreenContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.mypage_section_activity),
+            text = stringResource(Res.string.mypage_section_activity),
             color = Color.Black,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
@@ -150,32 +169,32 @@ private fun MyPageHomeScreenContent(
         ) {
             ActivityMenuRow(
                 icon = Icons.Filled.Description,
-                title = stringResource(R.string.mypage_menu_applications_title),
-                subtitle = stringResource(R.string.mypage_menu_applications_subtitle),
+                title = stringResource(Res.string.mypage_menu_applications_title),
+                subtitle = stringResource(Res.string.mypage_menu_applications_subtitle),
                 onClick = onApplicationsClick
             )
             ActivityMenuRow(
                 icon = Icons.Filled.Campaign,
-                title = stringResource(R.string.mypage_menu_my_recruits_title),
-                subtitle = stringResource(R.string.mypage_menu_my_recruits_subtitle),
+                title = stringResource(Res.string.mypage_menu_my_recruits_title),
+                subtitle = stringResource(Res.string.mypage_menu_my_recruits_subtitle),
                 onClick = onMyRecruitsClick
             )
             ActivityMenuRow(
                 icon = Icons.Filled.BookmarkBorder,
-                title = stringResource(R.string.mypage_menu_scraps_title),
-                subtitle = stringResource(R.string.mypage_menu_scraps_subtitle),
+                title = stringResource(Res.string.mypage_menu_scraps_title),
+                subtitle = stringResource(Res.string.mypage_menu_scraps_subtitle),
                 onClick = onScrapsClick
             )
             ActivityMenuRow(
                 icon = Icons.AutoMirrored.Filled.Chat,
-                title = stringResource(R.string.mypage_menu_my_comments_title),
-                subtitle = stringResource(R.string.mypage_menu_my_comments_subtitle),
+                title = stringResource(Res.string.mypage_menu_my_comments_title),
+                subtitle = stringResource(Res.string.mypage_menu_my_comments_subtitle),
                 onClick = onMyCommentsClick
             )
             ActivityMenuRow(
                 icon = Icons.Filled.EmojiEvents,
-                title = stringResource(R.string.mypage_menu_feedback_title),
-                subtitle = stringResource(R.string.mypage_menu_feedback_subtitle),
+                title = stringResource(Res.string.mypage_menu_feedback_title),
+                subtitle = stringResource(Res.string.mypage_menu_feedback_subtitle),
                 onClick = onFeedbackClick,
                 showDivider = false
             )
@@ -184,7 +203,7 @@ private fun MyPageHomeScreenContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.mypage_section_settings),
+            text = stringResource(Res.string.mypage_section_settings),
             color = Color.Black,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
@@ -195,7 +214,7 @@ private fun MyPageHomeScreenContent(
         Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)) {
             ActivityMenuRow(
                 icon = Icons.Filled.Settings,
-                title = stringResource(R.string.mypage_menu_settings_title),
+                title = stringResource(Res.string.mypage_menu_settings_title),
                 subtitle = null,
                 onClick = onSettingsClick,
                 showDivider = false
@@ -204,9 +223,9 @@ private fun MyPageHomeScreenContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text(text = stringResource(R.string.mypage_contact_label), color = PickiiTextGray, fontSize = 12.sp)
-        Text(text = stringResource(R.string.mypage_contact_email), color = PickiiTextGray, fontSize = 12.sp)
-        Text(text = stringResource(R.string.mypage_contact_instagram), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = stringResource(Res.string.mypage_contact_label), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = stringResource(Res.string.mypage_contact_email), color = PickiiTextGray, fontSize = 12.sp)
+        Text(text = stringResource(Res.string.mypage_contact_instagram), color = PickiiTextGray, fontSize = 12.sp)
 
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -253,7 +272,7 @@ private fun ProfileSummaryCard(
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.mypage_button_edit_profile),
+                        text = stringResource(Res.string.mypage_button_edit_profile),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
@@ -265,7 +284,7 @@ private fun ProfileSummaryCard(
                 AvatarPlaceholder()
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.mypage_create_profile_prompt),
+                    text = stringResource(Res.string.mypage_create_profile_prompt),
                     color = Color.Black,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
@@ -286,7 +305,7 @@ private fun ProfileSummaryCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.mypage_button_create_profile),
+                    text = stringResource(Res.string.mypage_button_create_profile),
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold

@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,10 +55,43 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.RecruitComment
 import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.recruit_comment_author_menu_chat
+import com.example.pickii.shared.generated.resources.recruit_comment_author_menu_profile
+import com.example.pickii.shared.generated.resources.recruit_comment_button_cancel_reply
+import com.example.pickii.shared.generated.resources.recruit_comment_button_delete
+import com.example.pickii.shared.generated.resources.recruit_comment_button_reply
+import com.example.pickii.shared.generated.resources.recruit_comment_deleted_placeholder
+import com.example.pickii.shared.generated.resources.recruit_comment_dialog_delete_body
+import com.example.pickii.shared.generated.resources.recruit_comment_dialog_delete_title
+import com.example.pickii.shared.generated.resources.recruit_comment_empty_state
+import com.example.pickii.shared.generated.resources.recruit_comment_header_title
+import com.example.pickii.shared.generated.resources.recruit_comment_placeholder_input
+import com.example.pickii.shared.generated.resources.recruit_comment_reply_indent_prefix
+import com.example.pickii.shared.generated.resources.recruit_comment_reply_mode_prefix
+import com.example.pickii.shared.generated.resources.recruit_detail_button_apply
+import com.example.pickii.shared.generated.resources.recruit_detail_button_close_recruiting
+import com.example.pickii.shared.generated.resources.recruit_detail_button_delete_post
+import com.example.pickii.shared.generated.resources.recruit_detail_button_edit
+import com.example.pickii.shared.generated.resources.recruit_detail_button_reopen_recruiting
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_close_post_body
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_close_post_title
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_delete_post_body
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_delete_post_title
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_reopen_post_body
+import com.example.pickii.shared.generated.resources.recruit_detail_dialog_reopen_post_title
+import com.example.pickii.shared.generated.resources.recruit_detail_label_author
+import com.example.pickii.shared.generated.resources.recruit_detail_label_author_experience
+import com.example.pickii.shared.generated.resources.recruit_detail_label_detail_content
+import com.example.pickii.shared.generated.resources.recruit_detail_label_period_and_capacity
+import com.example.pickii.shared.generated.resources.recruit_detail_label_short_intro
+import com.example.pickii.shared.generated.resources.recruit_detail_label_written_at
+import com.example.pickii.shared.generated.resources.unknown_author_nickname
 import com.example.pickii.ui.common.CharacterCounterText
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.LevelAvatar
@@ -73,6 +105,8 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.calculateLevel
 import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.toFullDisplayString
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 카드/버튼에 공통으로 사용하는 모서리 둥글기. */
@@ -134,7 +168,7 @@ fun RecruitDetailScreen(
                 Toast
                     .makeText(
                         context,
-                        event.messageRes,
+                        getString(event.messageRes),
                         Toast.LENGTH_SHORT
                     ).show()
         }
@@ -279,10 +313,10 @@ private fun RecruitDetailScreenContent(
 
         if (uiState.isDeleteCommentDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_comment_dialog_delete_title),
-                body = stringResource(R.string.recruit_comment_dialog_delete_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_comment_dialog_delete_title),
+                body = stringResource(Res.string.recruit_comment_dialog_delete_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onConfirmDeleteComment,
                 onDismiss = onDismissDeleteCommentDialog
             )
@@ -290,10 +324,10 @@ private fun RecruitDetailScreenContent(
 
         if (uiState.isClosePostDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_detail_dialog_close_post_title),
-                body = stringResource(R.string.recruit_detail_dialog_close_post_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_detail_dialog_close_post_title),
+                body = stringResource(Res.string.recruit_detail_dialog_close_post_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onConfirmCloseRecruiting,
                 onDismiss = onDismissCloseRecruitingDialog
             )
@@ -301,10 +335,10 @@ private fun RecruitDetailScreenContent(
 
         if (uiState.isReopenPostDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_detail_dialog_reopen_post_title),
-                body = stringResource(R.string.recruit_detail_dialog_reopen_post_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_detail_dialog_reopen_post_title),
+                body = stringResource(Res.string.recruit_detail_dialog_reopen_post_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onConfirmReopenRecruiting,
                 onDismiss = onDismissReopenRecruitingDialog
             )
@@ -312,10 +346,10 @@ private fun RecruitDetailScreenContent(
 
         if (uiState.isDeletePostDialogVisible) {
             ConfirmDialog(
-                title = stringResource(R.string.recruit_detail_dialog_delete_post_title),
-                body = stringResource(R.string.recruit_detail_dialog_delete_post_body),
-                confirmLabel = stringResource(R.string.common_button_confirm),
-                dismissLabel = stringResource(R.string.common_button_cancel),
+                title = stringResource(Res.string.recruit_detail_dialog_delete_post_title),
+                body = stringResource(Res.string.recruit_detail_dialog_delete_post_body),
+                confirmLabel = stringResource(Res.string.common_button_confirm),
+                dismissLabel = stringResource(Res.string.common_button_cancel),
                 onConfirm = onConfirmDeletePost,
                 onDismiss = onDismissDeletePostDialog
             )
@@ -365,13 +399,13 @@ private fun CommentAuthorMenuBottomSheet(
 
             CommentAuthorMenuRow(
                 icon = Icons.Filled.Person,
-                label = stringResource(R.string.recruit_comment_author_menu_profile),
+                label = stringResource(Res.string.recruit_comment_author_menu_profile),
                 onClick = onProfileClick
             )
 
             CommentAuthorMenuRow(
                 icon = Icons.AutoMirrored.Filled.Chat,
-                label = stringResource(R.string.recruit_comment_author_menu_chat),
+                label = stringResource(Res.string.recruit_comment_author_menu_chat),
                 onClick = onChatClick
             )
 
@@ -500,16 +534,16 @@ private fun PostInfoCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.recruit_detail_label_author),
+                    text = stringResource(Res.string.recruit_detail_label_author),
                     color = PickiiTextGray,
                     fontSize = 12.sp
                 )
                 Text(
                     text =
                         stringResource(
-                            R.string.recruit_detail_label_author_experience,
+                            Res.string.recruit_detail_label_author_experience,
                             if (post.isAuthorUnknown) {
-                                stringResource(R.string.unknown_author_nickname)
+                                stringResource(Res.string.unknown_author_nickname)
                             } else {
                                 post.authorNickname
                             },
@@ -523,7 +557,7 @@ private fun PostInfoCard(
                 Text(
                     text =
                         stringResource(
-                            R.string.recruit_detail_label_written_at,
+                            Res.string.recruit_detail_label_written_at,
                             post.createdAt.toFullDisplayString()
                         ),
                     color = PickiiTextGray,
@@ -561,7 +595,7 @@ private fun PostInfoCard(
         Text(
             text =
                 stringResource(
-                    R.string.recruit_detail_label_period_and_capacity,
+                    Res.string.recruit_detail_label_period_and_capacity,
                     post.startDate.toDisplayString(),
                     post.endDate.toDisplayString(),
                     (post.maxParticipants - post.currentParticipants).coerceAtLeast(0)
@@ -573,11 +607,11 @@ private fun PostInfoCard(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        InfoSection(title = stringResource(R.string.recruit_detail_label_short_intro), body = post.shortIntro)
+        InfoSection(title = stringResource(Res.string.recruit_detail_label_short_intro), body = post.shortIntro)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        InfoSection(title = stringResource(R.string.recruit_detail_label_detail_content), body = post.detailContent)
+        InfoSection(title = stringResource(Res.string.recruit_detail_label_detail_content), body = post.detailContent)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -610,7 +644,7 @@ private fun PostInfoCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.recruit_detail_button_apply),
+                    text = stringResource(Res.string.recruit_detail_button_apply),
                     color = if (isClosed) PickiiTextGray else Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -655,26 +689,26 @@ private fun AuthorActionButtons(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             AuthorActionButton(
-                text = stringResource(R.string.recruit_detail_button_edit),
+                text = stringResource(Res.string.recruit_detail_button_edit),
                 onClick = onEditClick,
                 modifier = Modifier.weight(1f)
             )
             if (isClosed) {
                 AuthorActionButton(
-                    text = stringResource(R.string.recruit_detail_button_reopen_recruiting),
+                    text = stringResource(Res.string.recruit_detail_button_reopen_recruiting),
                     onClick = onReopenRecruitingClick,
                     modifier = Modifier.weight(1f)
                 )
             } else {
                 AuthorActionButton(
-                    text = stringResource(R.string.recruit_detail_button_close_recruiting),
+                    text = stringResource(Res.string.recruit_detail_button_close_recruiting),
                     onClick = onCloseRecruitingClick,
                     modifier = Modifier.weight(1f)
                 )
             }
         }
         AuthorActionButton(
-            text = stringResource(R.string.recruit_detail_button_delete_post),
+            text = stringResource(Res.string.recruit_detail_button_delete_post),
             onClick = onDeletePostClick,
             contentColor = PickiiPaletteRed,
             modifier = Modifier.fillMaxWidth()
@@ -707,7 +741,7 @@ private fun AuthorActionButton(
 @Composable
 private fun CommentsHeader() {
     Text(
-        text = stringResource(R.string.recruit_comment_header_title),
+        text = stringResource(Res.string.recruit_comment_header_title),
         color = Color.Black,
         fontSize = 16.sp,
         fontWeight = FontWeight.Bold,
@@ -719,7 +753,7 @@ private fun CommentsHeader() {
 @Composable
 private fun EmptyCommentsText() {
     Text(
-        text = stringResource(R.string.recruit_comment_empty_state),
+        text = stringResource(Res.string.recruit_comment_empty_state),
         color = PickiiTextGray,
         fontSize = 13.sp,
         modifier =
@@ -744,7 +778,7 @@ private fun CommentRow(
     val isOwnComment = !comment.isDeleted && currentUserId != null && comment.authorId == currentUserId
     val nicknameText =
         if (item.visualIndentLevel > 0) {
-            stringResource(R.string.recruit_comment_reply_indent_prefix, comment.authorNickname)
+            stringResource(Res.string.recruit_comment_reply_indent_prefix, comment.authorNickname)
         } else {
             comment.authorNickname
         }
@@ -760,7 +794,7 @@ private fun CommentRow(
     ) {
         if (comment.isDeleted) {
             Text(
-                text = stringResource(R.string.recruit_comment_deleted_placeholder),
+                text = stringResource(Res.string.recruit_comment_deleted_placeholder),
                 color = PickiiTextGray,
                 fontSize = 13.sp
             )
@@ -785,7 +819,7 @@ private fun CommentRow(
 
             Row {
                 Text(
-                    text = stringResource(R.string.recruit_comment_button_reply),
+                    text = stringResource(Res.string.recruit_comment_button_reply),
                     color = PickiiBlue,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
@@ -795,7 +829,7 @@ private fun CommentRow(
                 if (isOwnComment) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = stringResource(R.string.recruit_comment_button_delete),
+                        text = stringResource(Res.string.recruit_comment_button_delete),
                         color = Color.Red,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -831,7 +865,7 @@ private fun CommentInputBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.recruit_comment_reply_mode_prefix, replyTargetNickname),
+                    text = stringResource(Res.string.recruit_comment_reply_mode_prefix, replyTargetNickname),
                     color = PickiiBlue,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -839,7 +873,7 @@ private fun CommentInputBar(
                 IconButton(onClick = onCancelReply) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.recruit_comment_button_cancel_reply),
+                        contentDescription = stringResource(Res.string.recruit_comment_button_cancel_reply),
                         tint = PickiiTextGray,
                         modifier = Modifier.size(16.dp)
                     )
@@ -854,7 +888,7 @@ private fun CommentInputBar(
                 modifier = Modifier.weight(1f),
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.recruit_comment_placeholder_input),
+                        text = stringResource(Res.string.recruit_comment_placeholder_input),
                         color = PickiiTextGray,
                         fontSize = 13.sp
                     )

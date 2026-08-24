@@ -53,7 +53,7 @@ class RecruitAuthSessionRepository
 
         /**
          * 저장된 Access Token 유무로 로그인 상태를 판단한다. 별도 "세션 복원" 호출 없이 앱을 껐다 켜도
-         * (자동 로그인) 로그인 상태가 그대로 유지되고, [com.example.pickii.data.remote.TokenAuthenticator]가
+         * (자동 로그인) 로그인 상태가 그대로 유지되고, `HttpClientFactory`의 Ktor `Auth` 플러그인이
          * Refresh Token 만료로 토큰을 지우면 로그아웃 상태에도 자동으로 반영된다.
          */
         override val isLoggedIn: StateFlow<Boolean> =

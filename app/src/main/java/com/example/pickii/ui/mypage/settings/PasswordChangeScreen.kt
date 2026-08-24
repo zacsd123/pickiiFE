@@ -26,14 +26,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mypage_password_change_button_submit
+import com.example.pickii.shared.generated.resources.mypage_password_change_error_mismatch
+import com.example.pickii.shared.generated.resources.mypage_password_change_hint_new
+import com.example.pickii.shared.generated.resources.mypage_password_change_label_confirm
+import com.example.pickii.shared.generated.resources.mypage_password_change_label_current
+import com.example.pickii.shared.generated.resources.mypage_password_change_label_new
+import com.example.pickii.shared.generated.resources.mypage_password_change_title
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiDisabledGray
@@ -41,6 +47,7 @@ import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 private val FieldCornerRadius = 14.dp
@@ -92,10 +99,10 @@ private fun PasswordChangeScreenContent(
                 .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_password_change_title), onBackClick = onBackClick)
+        BackHeader(title = stringResource(Res.string.mypage_password_change_title), onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
 
-        FieldLabel(stringResource(R.string.mypage_password_change_label_current))
+        FieldLabel(stringResource(Res.string.mypage_password_change_label_current))
         PasswordField(
             value = uiState.currentPassword,
             onValueChange = onCurrentPasswordChange,
@@ -104,17 +111,21 @@ private fun PasswordChangeScreenContent(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        FieldLabel(stringResource(R.string.mypage_password_change_label_new))
+        FieldLabel(stringResource(Res.string.mypage_password_change_label_new))
         PasswordField(
             value = uiState.newPassword,
             onValueChange = onNewPasswordChange,
             isVisible = uiState.isNewPasswordVisible,
             onToggleVisibility = onToggleNewPasswordVisibility
         )
-        Text(text = stringResource(R.string.mypage_password_change_hint_new), color = PickiiTextGray, fontSize = 11.sp)
+        Text(
+            text = stringResource(Res.string.mypage_password_change_hint_new),
+            color = PickiiTextGray,
+            fontSize = 11.sp
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
-        FieldLabel(stringResource(R.string.mypage_password_change_label_confirm))
+        FieldLabel(stringResource(Res.string.mypage_password_change_label_confirm))
         PasswordField(
             value = uiState.newPasswordConfirm,
             onValueChange = onNewPasswordConfirmChange,
@@ -123,7 +134,7 @@ private fun PasswordChangeScreenContent(
         )
         if (uiState.isMismatch) {
             Text(
-                text = stringResource(R.string.mypage_password_change_error_mismatch),
+                text = stringResource(Res.string.mypage_password_change_error_mismatch),
                 color = PickiiPaletteRed,
                 fontSize = 12.sp
             )
@@ -141,7 +152,7 @@ private fun PasswordChangeScreenContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(R.string.mypage_password_change_button_submit),
+                text = stringResource(Res.string.mypage_password_change_button_submit),
                 color = if (uiState.isValid) PickiiYellowLight else PickiiTextGray,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold

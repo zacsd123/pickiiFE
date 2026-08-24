@@ -10,6 +10,7 @@ import com.example.pickii.ui.common.entrydraft.ExperienceDraft
 import com.example.pickii.ui.common.entrydraft.LicenseDraft
 import com.example.pickii.ui.common.entrydraft.LinkDraft
 import com.example.pickii.ui.common.entrydraft.SkillToolDraft
+import org.jetbrains.compose.resources.StringResource
 
 /** 전공 최대 글자 수(0.7 공통 Validation 규칙). */
 internal const val PROFILE_EDIT_MAX_MAJOR_LENGTH = 50
@@ -43,7 +44,7 @@ data class ProfileEditUiState(
     val contactEmail: String = "",
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
-    val toastMessageRes: Int? = null
+    val toastMessageRes: StringResource? = null
 ) {
     val isValid: Boolean
         get() =

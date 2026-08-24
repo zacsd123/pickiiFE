@@ -36,19 +36,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_direct_tab
+import com.example.pickii.shared.generated.resources.chat_empty_list
+import com.example.pickii.shared.generated.resources.chat_group_tab
+import com.example.pickii.shared.generated.resources.chat_room_no_message
+import com.example.pickii.shared.generated.resources.chat_title
+import com.example.pickii.shared.generated.resources.ic_notification_off
+import com.example.pickii.shared.generated.resources.ic_notification_on
+import com.example.pickii.shared.generated.resources.ic_profile
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 private val ChatBackgroundColor = Color(0xFFF9FCA8)
@@ -81,7 +90,7 @@ fun ChatListRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, context.getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -166,7 +175,7 @@ private fun ChatListScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = stringResource(R.string.chat_title),
+            text = stringResource(Res.string.chat_title),
             color = ChatPrimaryColor,
             fontSize = 52.sp,
             fontWeight = FontWeight.ExtraBold
@@ -235,7 +244,7 @@ private fun ChatTabSelector(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ChatTabButton(
-            text = stringResource(R.string.chat_group_tab),
+            text = stringResource(Res.string.chat_group_tab),
             isSelected = selectedTab == ChatListTab.GROUP,
             onClick = {
                 onTabSelected(ChatListTab.GROUP)
@@ -243,7 +252,7 @@ private fun ChatTabSelector(
         )
 
         ChatTabButton(
-            text = stringResource(R.string.chat_direct_tab),
+            text = stringResource(Res.string.chat_direct_tab),
             isSelected = selectedTab == ChatListTab.DIRECT,
             onClick = {
                 onTabSelected(ChatListTab.DIRECT)
@@ -378,7 +387,7 @@ private fun ChatRoomPreviewCard(
                 )
 
                 Text(
-                    text = chatRoom.lastMessage.ifBlank { stringResource(R.string.chat_room_no_message) },
+                    text = chatRoom.lastMessage.ifBlank { stringResource(Res.string.chat_room_no_message) },
                     color = ChatSecondaryTextColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
@@ -413,11 +422,11 @@ private fun ChatRoomPreviewCard(
                 Image(
                     painter =
                         painterResource(
-                            id =
+                            resource =
                                 if (chatRoom.isNotificationEnabled) {
-                                    R.drawable.ic_notification_on
+                                    Res.drawable.ic_notification_on
                                 } else {
-                                    R.drawable.ic_notification_off
+                                    Res.drawable.ic_notification_off
                                 }
                         ),
                     contentDescription = null,
@@ -469,7 +478,7 @@ private fun DirectChatProfileImage() {
         Image(
             painter =
                 painterResource(
-                    id = R.drawable.ic_profile
+                    resource = Res.drawable.ic_profile
                 ),
             contentDescription = null,
             modifier = Modifier.size(24.dp)
@@ -522,7 +531,7 @@ private fun ChatProfileCircle(modifier: Modifier = Modifier) {
         Image(
             painter =
                 painterResource(
-                    id = R.drawable.ic_profile
+                    resource = Res.drawable.ic_profile
                 ),
             contentDescription = null,
             modifier = Modifier.size(16.dp)
@@ -570,7 +579,7 @@ private fun EmptyChatContent() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.chat_empty_list),
+            text = stringResource(Res.string.chat_empty_list),
             color = ChatSecondaryTextColor,
             fontSize = 16.sp,
             style = MaterialTheme.typography.bodyLarge

@@ -5,10 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.member_profile_title
 import com.example.pickii.ui.mypage.profile.ProfileViewScreenContent
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 다른 회원의 프로필 조회 화면(10-1). 공고 작성자 닉네임 등에서 진입한다. */
@@ -23,7 +25,7 @@ fun MemberProfileScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -32,6 +34,6 @@ fun MemberProfileScreen(
         uiState = uiState,
         onBackClick = onBackClick,
         onEditClick = null,
-        title = stringResource(R.string.member_profile_title)
+        title = stringResource(Res.string.member_profile_title)
     )
 }

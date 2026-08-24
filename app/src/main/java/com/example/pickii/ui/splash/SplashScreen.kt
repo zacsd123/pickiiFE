@@ -16,16 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.splash_subtitle
+import com.example.pickii.shared.generated.resources.splash_title
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -73,7 +75,7 @@ private fun SplashScreenContent() {
             verticalArrangement = Arrangement.Center
         ) {
             androidx.compose.material3.Text(
-                text = stringResource(R.string.splash_title),
+                text = stringResource(Res.string.splash_title),
                 color = Color.Black,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -82,7 +84,7 @@ private fun SplashScreenContent() {
             Spacer(modifier = Modifier.height(6.dp))
 
             androidx.compose.material3.Text(
-                text = stringResource(R.string.splash_subtitle),
+                text = stringResource(Res.string.splash_subtitle),
                 color = PickiiTextGray,
                 fontSize = 14.sp
             )

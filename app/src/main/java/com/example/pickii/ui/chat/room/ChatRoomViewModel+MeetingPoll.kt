@@ -3,11 +3,15 @@
 package com.example.pickii.ui.chat
 
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.data.remote.dto.PublishChatMessage
 import com.example.pickii.domain.model.CalendarSchedule
 import com.example.pickii.domain.model.TeamSchedule
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_toast_generic_error
+import com.example.pickii.shared.generated.resources.chat_toast_meeting_saved_to_calendar
+import com.example.pickii.shared.generated.resources.meeting_poll_toast_confirmed
+import com.example.pickii.shared.generated.resources.meeting_poll_toast_response_submitted
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.toDisplayString
 import com.example.pickii.util.today
@@ -78,7 +82,7 @@ internal fun ChatRoomViewModel.onSelectProjectColor(categoryId: Long?) {
         meetingPollRepository
             .setProjectScheduleColor(projectId, categoryId)
             .onSuccess { _uiState.update { it.copy(selectedProjectCategoryId = categoryId) } }
-            .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+            .onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
     }
 }
 
@@ -94,7 +98,7 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
     val roomId = _uiState.value.roomId
     val projectId = _uiState.value.projectId
     if (projectId == null) {
-        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
     }
 
@@ -120,7 +124,7 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
                     )
                 chatStompClient.sendMessage(roomId, PublishChatMessage(type = "TEXT", message = noticeContent))
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }
@@ -181,9 +185,9 @@ internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfi
                     it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + confirmed.scheduleId)
                 }
                 savedMeetingScheduleStore.markSaved(confirmed.scheduleId)
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_meeting_saved_to_calendar))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_meeting_saved_to_calendar))
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }
@@ -270,10 +274,10 @@ internal fun ChatRoomViewModel.submitMeetingPollResponse(pollId: Long) {
         meetingPollRepository
             .submitResponse(pollId, unavailableSlotIds)
             .onSuccess {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.meeting_poll_toast_response_submitted))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.meeting_poll_toast_response_submitted))
                 loadPollDetail(pollId)
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }
@@ -308,7 +312,7 @@ internal fun ChatRoomViewModel.cancelMeetingPoll(pollId: Long) {
                 loadPollDetail(pollId)
                 loadMeetings()
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }
@@ -326,7 +330,7 @@ private fun ChatRoomViewModel.confirmMeetingPollSlot(
     val poll = _uiState.value.pollDetails[pollId]
     val slot = poll?.slots?.find { it.slotId == slotId }
     if (poll == null || slot == null) {
-        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
     }
     val roomId = _uiState.value.roomId
@@ -335,7 +339,7 @@ private fun ChatRoomViewModel.confirmMeetingPollSlot(
         meetingPollRepository
             .confirmPoll(pollId, slotId, force)
             .onSuccess { scheduleId ->
-                emitEvent(RecruitUiEvent.ShowToast(R.string.meeting_poll_toast_confirmed))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.meeting_poll_toast_confirmed))
                 val confirmedContent =
                     encodeMeetingConfirmedMessage(
                         pollId = pollId,
@@ -354,7 +358,7 @@ private fun ChatRoomViewModel.confirmMeetingPollSlot(
                 if (!force && error is ApiException && error.code == ERROR_CODE_UNANSWERED_EXISTS) {
                     _uiState.update { it.copy(pendingForceConfirm = pollId to slotId) }
                 } else {
-                    emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                    emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
             }
     }
@@ -374,7 +378,7 @@ internal fun ChatRoomViewModel.deleteMeeting(meetingId: Long) {
                     current.copy(meetings = current.meetings.filterNot { it.id == meetingId })
                 }
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }
@@ -387,7 +391,7 @@ internal fun ChatRoomViewModel.updateMeetingAttendance(
     viewModelScope.launch {
         meetingPollRepository
             .updateAttendance(meetingId, attending)
-            .onFailure { emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error)) }
+            .onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
     }
 }
 
@@ -403,7 +407,7 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
 ) {
     val projectId = _uiState.value.projectId
     if (projectId == null) {
-        emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
     }
     val roomId = _uiState.value.roomId
@@ -412,7 +416,7 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
         meetingPollRepository
             .registerScheduleDirectly(projectId, title, date, startTime, endTime)
             .onSuccess { scheduleId ->
-                emitEvent(RecruitUiEvent.ShowToast(R.string.meeting_poll_toast_confirmed))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.meeting_poll_toast_confirmed))
                 // 조율 흐름과 마찬가지로 구조화된 정보를 실제 채팅 메시지로 브로드캐스트해, 서버 echo로
                 // 돌아온 메시지가 팀원 전원 화면에 "내 캘린더에 저장" 카드로 뜨게 한다.
                 val directMeetingContent =
@@ -425,7 +429,7 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
                 chatStompClient.sendMessage(roomId, PublishChatMessage(type = "TEXT", message = directMeetingContent))
                 loadMeetings()
             }.onFailure {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.chat_toast_generic_error))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
             }
     }
 }

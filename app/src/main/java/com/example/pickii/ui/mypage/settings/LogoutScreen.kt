@@ -22,16 +22,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.mypage_logout_body
+import com.example.pickii.shared.generated.resources.mypage_logout_confirm
+import com.example.pickii.shared.generated.resources.mypage_logout_title
+import com.example.pickii.shared.generated.resources.mypage_settings_logout
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 로그아웃 확인 화면(설정 화면에서 진입). */
@@ -60,7 +65,7 @@ private fun LogoutScreenContent(
                 .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        BackHeader(title = stringResource(R.string.mypage_settings_logout), onBackClick = onBackClick)
+        BackHeader(title = stringResource(Res.string.mypage_settings_logout), onBackClick = onBackClick)
 
         Column(
             modifier = Modifier.fillMaxSize().weight(1f),
@@ -82,7 +87,7 @@ private fun LogoutScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = stringResource(R.string.mypage_logout_title),
+                text = stringResource(Res.string.mypage_logout_title),
                 color = Color.Black,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -91,7 +96,7 @@ private fun LogoutScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.mypage_logout_body),
+                text = stringResource(Res.string.mypage_logout_body),
                 color = PickiiTextGray,
                 fontSize = 13.sp
             )
@@ -107,7 +112,7 @@ private fun LogoutScreenContent(
                             .clickable(onClick = onBackClick)
                             .padding(horizontal = 32.dp, vertical = 14.dp)
                 ) {
-                    Text(text = stringResource(R.string.common_button_cancel), color = Color.Black, fontSize = 14.sp)
+                    Text(text = stringResource(Res.string.common_button_cancel), color = Color.Black, fontSize = 14.sp)
                 }
                 Box(
                     modifier =
@@ -118,7 +123,7 @@ private fun LogoutScreenContent(
                             .padding(horizontal = 32.dp, vertical = 14.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.mypage_logout_confirm),
+                        text = stringResource(Res.string.mypage_logout_confirm),
                         color = PickiiYellowLight,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold

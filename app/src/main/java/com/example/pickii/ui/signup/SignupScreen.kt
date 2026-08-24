@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -41,13 +40,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.SignupTerms
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.login_brand
+import com.example.pickii.shared.generated.resources.signup_button_check_nickname
+import com.example.pickii.shared.generated.resources.signup_button_send_code
+import com.example.pickii.shared.generated.resources.signup_button_submit
+import com.example.pickii.shared.generated.resources.signup_button_verify_code
+import com.example.pickii.shared.generated.resources.signup_helper_password_rule
+import com.example.pickii.shared.generated.resources.signup_label_email
+import com.example.pickii.shared.generated.resources.signup_label_nickname
+import com.example.pickii.shared.generated.resources.signup_label_password
+import com.example.pickii.shared.generated.resources.signup_message_password_match
+import com.example.pickii.shared.generated.resources.signup_message_password_mismatch
+import com.example.pickii.shared.generated.resources.signup_term_age
+import com.example.pickii.shared.generated.resources.signup_term_data_collection
+import com.example.pickii.shared.generated.resources.signup_term_privacy
+import com.example.pickii.shared.generated.resources.signup_term_profile_share
+import com.example.pickii.shared.generated.resources.signup_term_push_noti
+import com.example.pickii.shared.generated.resources.signup_term_service
+import com.example.pickii.shared.generated.resources.signup_terms_select_all
+import com.example.pickii.shared.generated.resources.signup_terms_title
+import com.example.pickii.shared.generated.resources.signup_title
+import com.example.pickii.shared.generated.resources.signup_welcome_button_login
+import com.example.pickii.shared.generated.resources.signup_welcome_title
 import com.example.pickii.ui.common.FieldLabel
 import com.example.pickii.ui.theme.PickiiBlue
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /** 입력 필드/버튼 공통 모서리 둥글기. */
@@ -150,13 +173,13 @@ private fun SignupFormContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.login_brand),
+                    text = stringResource(Res.string.login_brand),
                     color = Color.Black,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.common_button_cancel),
+                    text = stringResource(Res.string.common_button_cancel),
                     color = PickiiTextGray,
                     fontSize = 13.sp,
                     modifier = Modifier.clickable(onClick = onBackClick)
@@ -166,7 +189,7 @@ private fun SignupFormContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.signup_title),
+                text = stringResource(Res.string.signup_title),
                 color = Color.Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -174,11 +197,11 @@ private fun SignupFormContent(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            FieldLabel(text = stringResource(R.string.signup_label_nickname))
+            FieldLabel(text = stringResource(Res.string.signup_label_nickname))
             FieldWithButton(
                 value = uiState.nickname,
                 onValueChange = onNicknameChange,
-                buttonLabel = stringResource(R.string.signup_button_check_nickname),
+                buttonLabel = stringResource(Res.string.signup_button_check_nickname),
                 onButtonClick = onCheckNicknameClick,
                 buttonEnabled = uiState.nickname.isNotBlank() && !uiState.isCheckingNickname,
                 PlaceHolderText = "닉네임을 입력해주세요."
@@ -187,11 +210,11 @@ private fun SignupFormContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FieldLabel(text = stringResource(R.string.signup_label_email))
+            FieldLabel(text = stringResource(Res.string.signup_label_email))
             FieldWithButton(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                buttonLabel = stringResource(R.string.signup_button_send_code),
+                buttonLabel = stringResource(Res.string.signup_button_send_code),
                 onButtonClick = onSendEmailCodeClick,
                 buttonEnabled = uiState.email.isNotBlank() && !uiState.isSendingEmailCode,
                 PlaceHolderText = "example@google.com"
@@ -202,7 +225,7 @@ private fun SignupFormContent(
                 FieldWithButton(
                     value = uiState.emailCode,
                     onValueChange = onEmailCodeChange,
-                    buttonLabel = stringResource(R.string.signup_button_verify_code),
+                    buttonLabel = stringResource(Res.string.signup_button_verify_code),
                     onButtonClick = onVerifyEmailCodeClick,
                     buttonEnabled = uiState.emailCode.isNotBlank() && !uiState.isVerifyingEmailCode,
                     PlaceHolderText = "인증번호를 입력해주세요."
@@ -212,7 +235,7 @@ private fun SignupFormContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FieldLabel(text = stringResource(R.string.signup_label_password))
+            FieldLabel(text = stringResource(Res.string.signup_label_password))
             PasswordField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
@@ -221,7 +244,7 @@ private fun SignupFormContent(
                 PlaceHolderText = "비밀번호"
             )
             Text(
-                text = stringResource(R.string.signup_helper_password_rule),
+                text = stringResource(Res.string.signup_helper_password_rule),
                 color = if (uiState.password.isEmpty() || uiState.isPasswordValid) PickiiTextGray else Color.Red,
                 fontSize = 11.sp
             )
@@ -240,9 +263,9 @@ private fun SignupFormContent(
                     message =
                         stringResource(
                             if (uiState.isPasswordMatching) {
-                                R.string.signup_message_password_match
+                                Res.string.signup_message_password_match
                             } else {
-                                R.string.signup_message_password_mismatch
+                                Res.string.signup_message_password_mismatch
                             }
                         ),
                     isError = !uiState.isPasswordMatching
@@ -265,7 +288,7 @@ private fun SignupFormContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = stringResource(R.string.signup_button_submit),
+                text = stringResource(Res.string.signup_button_submit),
                 onClick = onSubmitClick,
                 enabled = uiState.isSubmitEnabled
             )
@@ -301,7 +324,7 @@ private fun SignupWelcomeContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = stringResource(R.string.login_brand),
+                text = stringResource(Res.string.login_brand),
                 color = Color.Black,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -310,7 +333,7 @@ private fun SignupWelcomeContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = stringResource(R.string.signup_welcome_title, uiState.nickname),
+                text = stringResource(Res.string.signup_welcome_title, uiState.nickname),
                 color = Color.Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -327,15 +350,15 @@ private fun SignupWelcomeContent(
                         .background(Color.White)
                         .padding(20.dp)
             ) {
-                RecapRow(label = stringResource(R.string.signup_label_email), value = uiState.email)
+                RecapRow(label = stringResource(Res.string.signup_label_email), value = uiState.email)
                 Spacer(modifier = Modifier.height(8.dp))
-                RecapRow(label = stringResource(R.string.signup_label_password), value = uiState.password)
+                RecapRow(label = stringResource(Res.string.signup_label_password), value = uiState.password)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             PrimaryButton(
-                text = stringResource(R.string.signup_welcome_button_login),
+                text = stringResource(Res.string.signup_welcome_button_login),
                 onClick = onLoginClick,
                 enabled = !uiState.isSubmitting
             )
@@ -468,13 +491,13 @@ private fun TermsSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.signup_terms_title),
+                text = stringResource(Res.string.signup_terms_title),
                 color = Color.Black,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             TermCheckboxRow(
-                label = stringResource(R.string.signup_terms_select_all),
+                label = stringResource(Res.string.signup_terms_select_all),
                 checked = terms.isAllAgreed,
                 onCheckedChange = { onToggleAllTerms() }
             )
@@ -483,32 +506,32 @@ private fun TermsSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_age),
+            label = stringResource(Res.string.signup_term_age),
             checked = terms.ageAgreed,
             onCheckedChange = onAgeAgreedChange
         )
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_service),
+            label = stringResource(Res.string.signup_term_service),
             checked = terms.termsAgreed,
             onCheckedChange = onTermsAgreedChange
         )
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_privacy),
+            label = stringResource(Res.string.signup_term_privacy),
             checked = terms.privacyAgreed,
             onCheckedChange = onPrivacyAgreedChange
         )
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_profile_share),
+            label = stringResource(Res.string.signup_term_profile_share),
             checked = terms.profileShareAgreed,
             onCheckedChange = onProfileShareAgreedChange
         )
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_data_collection),
+            label = stringResource(Res.string.signup_term_data_collection),
             checked = terms.dataCollectionAgreed,
             onCheckedChange = onDataCollectionAgreedChange
         )
         TermCheckboxRow(
-            label = stringResource(R.string.signup_term_push_noti),
+            label = stringResource(Res.string.signup_term_push_noti),
             checked = terms.pushNotiAgreed,
             onCheckedChange = onPushNotiAgreedChange
         )

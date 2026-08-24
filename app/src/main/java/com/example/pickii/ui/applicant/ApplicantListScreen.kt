@@ -42,16 +42,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_check
+import com.example.pickii.shared.generated.resources.ic_chevron_down
+import com.example.pickii.shared.generated.resources.ic_close
+import com.example.pickii.shared.generated.resources.ic_eye
+import com.example.pickii.shared.generated.resources.ic_group_chat
+import com.example.pickii.shared.generated.resources.ic_speech_bubble
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.common.LoadingIndicator
 import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.androidx.compose.koinViewModel
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
@@ -284,7 +291,7 @@ private fun ApplicantFilterSection(
                     )
 
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_chevron_down),
+                        painter = painterResource(resource = Res.drawable.ic_chevron_down),
                         contentDescription = "정렬 메뉴 열기",
                         tint = PickiiGrayDarkText,
                         modifier = Modifier.size(18.dp)
@@ -590,7 +597,7 @@ private fun ApplicantCardActions(
             ApplicantStatus.PENDING -> {
                 ApplicantSmallButton(
                     text = "수락하기",
-                    iconResId = R.drawable.ic_check,
+                    iconResId = Res.drawable.ic_check,
                     containerColor = AcceptButtonColor,
                     contentColor = Color.White,
                     onClick = onAcceptClick
@@ -598,7 +605,7 @@ private fun ApplicantCardActions(
 
                 ApplicantSmallButton(
                     text = "거절하기",
-                    iconResId = R.drawable.ic_close,
+                    iconResId = Res.drawable.ic_close,
                     containerColor = RejectButtonColor,
                     contentColor = Color.White,
                     onClick = onRejectClick
@@ -608,7 +615,7 @@ private fun ApplicantCardActions(
             ApplicantStatus.ACCEPTED -> {
                 ApplicantSmallButton(
                     text = "채팅방 개설",
-                    iconResId = R.drawable.ic_speech_bubble,
+                    iconResId = Res.drawable.ic_speech_bubble,
                     containerColor = AcceptButtonColor,
                     contentColor = Color.White,
                     onClick = onChatClick
@@ -620,7 +627,7 @@ private fun ApplicantCardActions(
 
         ApplicantSmallButton(
             text = "자세히 보기",
-            iconResId = R.drawable.ic_eye,
+            iconResId = Res.drawable.ic_eye,
             containerColor = DetailButtonColor,
             contentColor = Color(0xFF73764A),
             onClick = onDetailClick
@@ -631,7 +638,7 @@ private fun ApplicantCardActions(
 @Composable
 private fun ApplicantSmallButton(
     text: String,
-    iconResId: Int,
+    iconResId: DrawableResource,
     containerColor: Color,
     contentColor: Color,
     onClick: () -> Unit
@@ -659,7 +666,7 @@ private fun ApplicantSmallButton(
         Image(
             painter =
                 painterResource(
-                    id = iconResId
+                    resource = iconResId
                 ),
             contentDescription = null,
             modifier = Modifier.size(15.dp)
@@ -713,7 +720,7 @@ private fun GroupChatBottomBar(onClick: () -> Unit) {
                 Image(
                     painter =
                         painterResource(
-                            id = R.drawable.ic_group_chat
+                            resource = Res.drawable.ic_group_chat
                         ),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)

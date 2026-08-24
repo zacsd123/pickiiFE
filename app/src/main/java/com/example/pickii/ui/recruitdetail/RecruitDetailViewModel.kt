@@ -3,7 +3,6 @@ package com.example.pickii.ui.recruitdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.data.remote.dto.ApiException
 import com.example.pickii.domain.model.CurrentUser
 import com.example.pickii.domain.model.RecruitComment
@@ -11,6 +10,10 @@ import com.example.pickii.domain.model.RecruitPost
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.RecruitRepository
 import com.example.pickii.domain.repository.SessionRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.chat_toast_cannot_chat_self
+import com.example.pickii.shared.generated.resources.chat_toast_generic_error
+import com.example.pickii.shared.generated.resources.recruit_comment_toast_too_short
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import kotlinx.coroutines.channels.Channel
@@ -286,9 +289,9 @@ class RecruitDetailViewModel
                     .onFailure { error ->
                         val messageRes =
                             if (error is ApiException && error.code == ERROR_CODE_CANNOT_CHAT_SELF) {
-                                R.string.chat_toast_cannot_chat_self
+                                Res.string.chat_toast_cannot_chat_self
                             } else {
-                                R.string.chat_toast_generic_error
+                                Res.string.chat_toast_generic_error
                             }
                         emitEvent(RecruitUiEvent.ShowToast(messageRes))
                     }
@@ -307,7 +310,7 @@ class RecruitDetailViewModel
                 return
             }
             if (!state.isCommentDraftValid) {
-                emitEvent(RecruitUiEvent.ShowToast(R.string.recruit_comment_toast_too_short))
+                emitEvent(RecruitUiEvent.ShowToast(Res.string.recruit_comment_toast_too_short))
                 return
             }
             viewModelScope.launch {

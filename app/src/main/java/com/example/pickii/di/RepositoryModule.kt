@@ -44,26 +44,25 @@ val repositoryModule =
             )
         }
         single<RecruitRepository> {
-            RecruitApiRepository(recruitApiService = get(), masterDataRepository = get(), json = get())
+            RecruitApiRepository(recruitApiService = get(), masterDataRepository = get())
         }
-        single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get(), json = get()) }
+        single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get()) }
         single<SignupRepository> { SignupApiRepository(authApiService = get()) }
-        single<ProfileRepository> { ProfileApiRepository(profileApiService = get(), json = get()) }
-        single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get(), json = get()) }
+        single<ProfileRepository> { ProfileApiRepository(profileApiService = get()) }
+        single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get()) }
         single<AccountRepository> { AccountApiRepository(authApiService = get()) }
-        single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get(), json = get()) }
-        single<FeedbackRepository> { FeedbackApiRepository(apiService = get(), json = get()) }
+        single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get()) }
+        single<FeedbackRepository> { FeedbackApiRepository(apiService = get()) }
         single<ChatRepository> {
             ChatApiRepository(
                 context = get<Context>(),
                 chatApiService = get(),
                 sessionRepository = get(),
-                projectRepository = get(),
-                json = get()
+                projectRepository = get()
             )
         }
-        single<ApplicantRepository> { ApplicantApiRepository(apiService = get(), json = get()) }
-        single<NotificationRepository> { NotificationApiRepository(apiService = get(), json = get()) }
-        single<MeetingPollRepository> { MeetingPollApiRepository(apiService = get(), json = get()) }
-        single<ProjectRepository> { ProjectApiRepository(apiService = get(), json = get()) }
+        single<ApplicantRepository> { ApplicantApiRepository(apiService = get()) }
+        single<NotificationRepository> { NotificationApiRepository(apiService = get()) }
+        single<MeetingPollRepository> { MeetingPollApiRepository(apiService = get()) }
+        single<ProjectRepository> { ProjectApiRepository(apiService = get()) }
     }

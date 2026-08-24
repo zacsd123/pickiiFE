@@ -3,12 +3,17 @@ package com.example.pickii.data.repository
 import android.content.Context
 import android.net.Uri
 import com.example.pickii.data.remote.api.ChatApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
+import com.example.pickii.data.remote.dto.ChatImageUploadResponseDto
 import com.example.pickii.data.remote.dto.ChatMessageDto
 import com.example.pickii.data.remote.dto.ChatRoomDetailDto
 import com.example.pickii.data.remote.dto.ChatRoomSummaryDto
 import com.example.pickii.data.remote.dto.CreateDirectChatRoomRequest
+import com.example.pickii.data.remote.dto.CreateDirectChatRoomResponseDto
+import com.example.pickii.data.remote.dto.CursorPageDto
 import com.example.pickii.data.remote.dto.DelegateChatRoomLeaderRequest
 import com.example.pickii.data.remote.dto.MarkChatRoomReadRequest
+import com.example.pickii.data.remote.dto.PageEnvelope
 import com.example.pickii.data.remote.dto.UpdateChatRoomNotificationRequest
 import com.example.pickii.domain.model.ChatMember
 import com.example.pickii.domain.model.ChatMessage
@@ -30,7 +35,6 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.json.Json
 
 private const val ERROR_CODE_INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
 private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
@@ -43,31 +47,31 @@ class ChatApiRepository(
     private val context: Context,
     private val chatApiService: ChatApiService,
     private val sessionRepository: SessionRepository,
-    private val projectRepository: ProjectRepository,
-    private val json: Json
+    private val projectRepository: ProjectRepository
 ) : ChatRepository {
     override suspend fun getChatRooms(
         type: ChatRoomType,
         page: Int,
         size: Int
     ): Result<ChatRoomSummaryPage> =
-        safeApiCall(json) { chatApiService.getChatRooms(type.name, page, size) }
-            .map { envelope ->
-                val pageEnvelope = envelope.data
-                ChatRoomSummaryPage(
-                    rooms = pageEnvelope.content.map { it.toDomain() },
-                    currentPage = pageEnvelope.pageInfo.currentPage,
-                    totalPages = pageEnvelope.pageInfo.totalPages,
-                    hasNext = pageEnvelope.pageInfo.hasNext
-                )
-            }
+        safeApiCall<ApiEnvelope<PageEnvelope<ChatRoomSummaryDto>>> {
+            chatApiService.getChatRooms(type.name, page, size)
+        }.map { envelope ->
+            val pageEnvelope = envelope.data
+            ChatRoomSummaryPage(
+                rooms = pageEnvelope.content.map { it.toDomain() },
+                currentPage = pageEnvelope.pageInfo.currentPage,
+                totalPages = pageEnvelope.pageInfo.totalPages,
+                hasNext = pageEnvelope.pageInfo.hasNext
+            )
+        }
 
     override suspend fun getChatRoomDetail(chatRoomId: Long): Result<ChatRoomDetail> {
         val currentMemberId =
             sessionRepository.currentUser.value
                 ?.id
                 ?.toLongOrNull()
-        return safeApiCall(json) { chatApiService.getChatRoomDetail(chatRoomId) }
+        return safeApiCall<ApiEnvelope<ChatRoomDetailDto>> { chatApiService.getChatRoomDetail(chatRoomId) }
             .map { envelope ->
                 val dto = envelope.data
                 // GROUP 방이면 6-2로 진짜 leaderId를 받아와 팀원 전체의 팀장 여부를 정확히 계산한다.
@@ -82,7 +86,7 @@ class ChatApiRepository(
         cursor: String?,
         size: Int
     ): Result<ChatMessagePage> =
-        safeApiCall(json) { chatApiService.getMessages(chatRoomId, cursor, size) }
+        safeApiCall<ApiEnvelope<CursorPageDto<ChatMessageDto>>> { chatApiService.getMessages(chatRoomId, cursor, size) }
             .map { envelope ->
                 val page = envelope.data
                 ChatMessagePage(
@@ -105,12 +109,13 @@ class ChatApiRepository(
         }
 
         val part = context.toChatImagePart(imageUri)
-        return safeApiCall(json) { chatApiService.uploadImage(chatRoomId, part) }
-            .map { it.data.imageUrl }
+        return safeApiCall<ApiEnvelope<ChatImageUploadResponseDto>> {
+            chatApiService.uploadImage(chatRoomId, part.fileName, part.contentType, part.bytes)
+        }.map { it.data.imageUrl }
     }
 
     override suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult> =
-        safeApiCall(json) {
+        safeApiCall<ApiEnvelope<CreateDirectChatRoomResponseDto>> {
             chatApiService.createDirectChatRoom(CreateDirectChatRoomRequest(targetMemberId))
         }.map { DirectChatRoomResult(chatRoomId = it.data.chatRoomId) }
 
@@ -118,18 +123,18 @@ class ChatApiRepository(
         chatRoomId: Long,
         lastReadMessageId: String
     ): Result<Unit> =
-        safeApiCallUnit(json) {
+        safeApiCallUnit {
             chatApiService.markAsRead(chatRoomId, MarkChatRoomReadRequest(lastReadMessageId))
         }
 
     override suspend fun leaveChatRoom(chatRoomId: Long): Result<Unit> =
-        safeApiCallUnit(json) { chatApiService.leaveChatRoom(chatRoomId) }
+        safeApiCallUnit { chatApiService.leaveChatRoom(chatRoomId) }
 
     override suspend fun updateNotification(
         chatRoomId: Long,
         enabled: Boolean
     ): Result<Unit> =
-        safeApiCallUnit(json) {
+        safeApiCallUnit {
             chatApiService.updateNotification(chatRoomId, UpdateChatRoomNotificationRequest(enabled))
         }
 
@@ -137,14 +142,14 @@ class ChatApiRepository(
         projectId: Long,
         newLeaderMemberId: Long
     ): Result<Unit> =
-        safeApiCallUnit(json) {
+        safeApiCallUnit {
             chatApiService.delegateLeader(projectId, DelegateChatRoomLeaderRequest(newLeaderMemberId))
         }
 
     override suspend fun removeMember(
         projectId: Long,
         memberId: Long
-    ): Result<Unit> = safeApiCallUnit(json) { chatApiService.removeMember(projectId, memberId) }
+    ): Result<Unit> = safeApiCallUnit { chatApiService.removeMember(projectId, memberId) }
 
     private fun ChatRoomSummaryDto.toDomain(): ChatRoomSummary =
         ChatRoomSummary(

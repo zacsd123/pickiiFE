@@ -2,9 +2,11 @@ package com.example.pickii.ui.mypage.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pickii.R
 import com.example.pickii.domain.model.NotificationSettings
 import com.example.pickii.domain.repository.NotificationSettingsRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.notification_settings_toast_load_failed
+import com.example.pickii.shared.generated.resources.notification_settings_toast_update_failed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +30,7 @@ class NotificationSettingsViewModel
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                toastMessageRes = R.string.notification_settings_toast_load_failed
+                                toastMessageRes = Res.string.notification_settings_toast_load_failed
                             )
                         }
                     }
@@ -48,7 +50,7 @@ class NotificationSettingsViewModel
                     _uiState.update {
                         it.copy(
                             settings = previousSettings,
-                            toastMessageRes = R.string.notification_settings_toast_update_failed
+                            toastMessageRes = Res.string.notification_settings_toast_update_failed
                         )
                     }
                 }

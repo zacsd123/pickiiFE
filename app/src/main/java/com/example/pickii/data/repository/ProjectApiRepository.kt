@@ -1,20 +1,20 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.ProjectApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
+import com.example.pickii.data.remote.dto.ProjectDetailDto
 import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
-import kotlinx.serialization.json.Json
 
 /** `6. Project` API로 [ProjectRepository]를 구현한다. */
 class ProjectApiRepository
     constructor(
-        private val apiService: ProjectApiService,
-        private val json: Json
+        private val apiService: ProjectApiService
     ) : ProjectRepository {
         override suspend fun getProjectLeaderId(projectId: Long): Result<Long> =
-            safeApiCall(json) { apiService.getProject(projectId) }.map { it.data.leaderId }
+            safeApiCall<ApiEnvelope<ProjectDetailDto>> { apiService.getProject(projectId) }.map { it.data.leaderId }
 
         override suspend fun closeProject(projectId: Long): Result<Unit> =
-            safeApiCallUnit(json) { apiService.closeProject(projectId) }
+            safeApiCallUnit { apiService.closeProject(projectId) }
     }

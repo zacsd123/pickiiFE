@@ -1,10 +1,12 @@
 package com.example.pickii.ui.mypage.mycomments
 
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyComment
 import com.example.pickii.domain.repository.MyPageActivityRepository
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.mycomments_toast_load_failed
 import com.example.pickii.ui.common.PagedFetchResult
 import com.example.pickii.ui.common.PagedListViewModel
+import org.jetbrains.compose.resources.StringResource
 
 /** 작성한 댓글 목록(4-6)을 조회한다. */
 class MyCommentsViewModel
@@ -12,7 +14,7 @@ class MyCommentsViewModel
         private val repository: MyPageActivityRepository
     ) : PagedListViewModel<MyComment, MyCommentsUiState>(
             initialState = MyCommentsUiState(),
-            loadFailureMessageRes = R.string.mycomments_toast_load_failed
+            loadFailureMessageRes = Res.string.mycomments_toast_load_failed
         ) {
         init {
             refresh()
@@ -33,7 +35,7 @@ class MyCommentsViewModel
             items: List<MyComment>,
             currentPage: Int,
             totalPages: Int,
-            toastMessageRes: Int?
+            toastMessageRes: StringResource?
         ): MyCommentsUiState =
             copy(
                 isLoading = isLoading,

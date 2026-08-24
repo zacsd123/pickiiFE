@@ -1,9 +1,12 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.CalendarApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.RecurringScheduleRequest
+import com.example.pickii.data.remote.dto.ScheduleCategoryCreatedDto
 import com.example.pickii.data.remote.dto.ScheduleCategoryDto
 import com.example.pickii.data.remote.dto.ScheduleCategoryUpsertRequest
+import com.example.pickii.data.remote.dto.ScheduleCreatedDto
 import com.example.pickii.data.remote.dto.ScheduleDto
 import com.example.pickii.data.remote.dto.SingleScheduleRequest
 import com.example.pickii.domain.model.CalendarSchedule
@@ -26,7 +29,6 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.number
-import kotlinx.serialization.json.Json
 
 /** API가 요구하는 필수 시작/종료 시간이 없는 "하루 종일" 일정에 사용하는 시간 범위. */
 private val ALL_DAY_START = LocalTime(0, 0)
@@ -41,8 +43,7 @@ private val TimeFormat =
 /** `7-1`~`7-9` API로 [CalendarRepository]를 구현한다. */
 class CalendarApiRepository
     constructor(
-        private val apiService: CalendarApiService,
-        private val json: Json
+        private val apiService: CalendarApiService
     ) : CalendarRepository {
         private val _schedules = MutableStateFlow<List<CalendarSchedule>>(emptyList())
         override val schedules: StateFlow<List<CalendarSchedule>> = _schedules.asStateFlow()
@@ -51,7 +52,7 @@ class CalendarApiRepository
         override val categories: StateFlow<List<ScheduleCategory>> = _categories.asStateFlow()
 
         override suspend fun loadSchedules(yearMonth: YearMonth): Result<Unit> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<List<ScheduleDto>>> {
                 apiService.getSchedules(yearMonth.year, yearMonth.month.number)
             }.map { envelope ->
                 val fetched = envelope.data.map { it.toDomain() }
@@ -59,37 +60,39 @@ class CalendarApiRepository
             }
 
         override suspend fun loadCategories(): Result<Unit> =
-            safeApiCall(json) { apiService.getCategories() }.map { envelope ->
+            safeApiCall<ApiEnvelope<List<ScheduleCategoryDto>>> { apiService.getCategories() }.map { envelope ->
                 _categories.value = envelope.data.map { it.toDomain() }
             }
 
         override suspend fun addSchedule(schedule: CalendarSchedule): Result<Unit> =
             if (schedule.isSingleDay) {
-                safeApiCall(json) { apiService.createSingleSchedule(schedule.toSingleRequest()) }
-                    .map { created -> _schedules.update { it + schedule.copy(id = created.data.scheduleId) } }
+                safeApiCall<ApiEnvelope<ScheduleCreatedDto>> {
+                    apiService.createSingleSchedule(schedule.toSingleRequest())
+                }.map { created -> _schedules.update { it + schedule.copy(id = created.data.scheduleId) } }
             } else {
-                safeApiCall(json) { apiService.createRecurringSchedule(schedule.toRecurringRequest()) }
-                    .map { created -> _schedules.update { it + schedule.copy(id = created.data.scheduleId) } }
+                safeApiCall<ApiEnvelope<ScheduleCreatedDto>> {
+                    apiService.createRecurringSchedule(schedule.toRecurringRequest())
+                }.map { created -> _schedules.update { it + schedule.copy(id = created.data.scheduleId) } }
             }
 
         override suspend fun updateSchedule(schedule: CalendarSchedule): Result<Unit> =
             if (schedule.isSingleDay) {
-                safeApiCallUnit(json) { apiService.updateSingleSchedule(schedule.id, schedule.toSingleRequest()) }
+                safeApiCallUnit { apiService.updateSingleSchedule(schedule.id, schedule.toSingleRequest()) }
                     .onSuccess { _schedules.update { current -> current.mergeById(listOf(schedule)) { it.id } } }
             } else {
-                safeApiCallUnit(json) { apiService.updateRecurringSchedule(schedule.id, schedule.toRecurringRequest()) }
+                safeApiCallUnit { apiService.updateRecurringSchedule(schedule.id, schedule.toRecurringRequest()) }
                     .onSuccess { _schedules.update { current -> current.mergeById(listOf(schedule)) { it.id } } }
             }
 
         override suspend fun deleteSchedule(scheduleId: Long): Result<Unit> =
-            safeApiCallUnit(json) { apiService.deleteSchedule(scheduleId) }
+            safeApiCallUnit { apiService.deleteSchedule(scheduleId) }
                 .onSuccess { _schedules.update { current -> current.filterNot { it.id == scheduleId } } }
 
         override suspend fun addCategory(
             name: String,
             color: ScheduleColorType
         ): Result<Unit> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<ScheduleCategoryCreatedDto>> {
                 apiService.createCategory(ScheduleCategoryUpsertRequest(title = name, color = color.toHex()))
             }.map { created ->
                 _categories.update { it + ScheduleCategory(id = created.data.categoryId, name = name, color = color) }
@@ -100,7 +103,7 @@ class CalendarApiRepository
             name: String,
             color: ScheduleColorType
         ): Result<Unit> =
-            safeApiCallUnit(json) {
+            safeApiCallUnit {
                 val request = ScheduleCategoryUpsertRequest(title = name, color = color.toHex())
                 apiService.updateCategory(categoryId, request)
             }.onSuccess {
@@ -110,7 +113,7 @@ class CalendarApiRepository
             }
 
         override suspend fun deleteCategory(categoryId: Long): Result<Unit> =
-            safeApiCallUnit(json) { apiService.deleteCategory(categoryId) }
+            safeApiCallUnit { apiService.deleteCategory(categoryId) }
                 .onSuccess {
                     _categories.update { current -> current.filterNot { it.id == categoryId } }
                     _schedules.update { current ->

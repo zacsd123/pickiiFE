@@ -1,13 +1,18 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.MeetingPollApiService
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ConfirmMeetingPollRequest
+import com.example.pickii.data.remote.dto.ConfirmMeetingPollResponseDto
 import com.example.pickii.data.remote.dto.CreateMeetingPollRequest
+import com.example.pickii.data.remote.dto.MeetingPollCreatedDto
 import com.example.pickii.data.remote.dto.MeetingPollDetailDto
 import com.example.pickii.data.remote.dto.MeetingPollSlotDto
 import com.example.pickii.data.remote.dto.RegisterScheduleDirectlyRequest
+import com.example.pickii.data.remote.dto.RegisterScheduleDirectlyResponseDto
 import com.example.pickii.data.remote.dto.ScheduleDto
 import com.example.pickii.data.remote.dto.SetProjectScheduleCategoryRequest
+import com.example.pickii.data.remote.dto.SubmitMeetingPollResponseDto
 import com.example.pickii.data.remote.dto.SubmitMeetingPollResponseRequest
 import com.example.pickii.data.remote.dto.UpdateAttendanceRequest
 import com.example.pickii.domain.model.MeetingPollCreated
@@ -28,7 +33,6 @@ import kotlinx.datetime.YearMonth
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.number
-import kotlinx.serialization.json.Json
 
 private val TimeFormat =
     LocalTime.Format {
@@ -40,8 +44,7 @@ private val TimeFormat =
 /** `7-C 팀 일정(회의 일정 조율)` API로 [MeetingPollRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
 class MeetingPollApiRepository
     constructor(
-        private val apiService: MeetingPollApiService,
-        private val json: Json
+        private val apiService: MeetingPollApiService
     ) : MeetingPollRepository {
         override suspend fun createPoll(
             projectId: Long,
@@ -54,7 +57,7 @@ class MeetingPollApiRepository
             deadlineHours: Int?,
             memberIds: Set<Long>
         ): Result<MeetingPollCreated> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<MeetingPollCreatedDto>> {
                 apiService.createPoll(
                     projectId,
                     CreateMeetingPollRequest(
@@ -77,13 +80,13 @@ class MeetingPollApiRepository
             }
 
         override suspend fun getPoll(pollId: Long): Result<MeetingPollDetail> =
-            safeApiCall(json) { apiService.getPoll(pollId) }.map { it.data.toDomain() }
+            safeApiCall<ApiEnvelope<MeetingPollDetailDto>> { apiService.getPoll(pollId) }.map { it.data.toDomain() }
 
         override suspend fun submitResponse(
             pollId: Long,
             unavailableSlotIds: List<Long>
         ): Result<Unit> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<SubmitMeetingPollResponseDto>> {
                 apiService.submitResponse(pollId, SubmitMeetingPollResponseRequest(unavailableSlotIds))
             }.map { }
 
@@ -92,29 +95,28 @@ class MeetingPollApiRepository
             slotId: Long,
             force: Boolean
         ): Result<Long> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<ConfirmMeetingPollResponseDto>> {
                 apiService.confirmPoll(pollId, ConfirmMeetingPollRequest(slotId = slotId, force = force))
             }.map { it.data.scheduleId }
 
-        override suspend fun cancelPoll(pollId: Long): Result<Unit> =
-            safeApiCallUnit(json) { apiService.cancelPoll(pollId) }
+        override suspend fun cancelPoll(pollId: Long): Result<Unit> = safeApiCallUnit { apiService.cancelPoll(pollId) }
 
         override suspend fun getTeamSchedules(
             projectId: Long,
             yearMonth: YearMonth
         ): Result<List<TeamSchedule>> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<List<ScheduleDto>>> {
                 apiService.getTeamSchedules(projectId, yearMonth.year, yearMonth.month.number)
             }.map { envelope -> envelope.data.map { it.toDomain() } }
 
         override suspend fun deleteTeamSchedule(scheduleId: Long): Result<Unit> =
-            safeApiCallUnit(json) { apiService.deleteTeamSchedule(scheduleId) }
+            safeApiCallUnit { apiService.deleteTeamSchedule(scheduleId) }
 
         override suspend fun updateAttendance(
             scheduleId: Long,
             attending: Boolean
         ): Result<Unit> =
-            safeApiCallUnit(json) {
+            safeApiCallUnit {
                 apiService.updateAttendance(scheduleId, UpdateAttendanceRequest(attending))
             }
 
@@ -125,7 +127,7 @@ class MeetingPollApiRepository
             startTime: LocalTime,
             endTime: LocalTime
         ): Result<Long> =
-            safeApiCall(json) {
+            safeApiCall<ApiEnvelope<RegisterScheduleDirectlyResponseDto>> {
                 apiService.registerScheduleDirectly(
                     projectId,
                     RegisterScheduleDirectlyRequest(
@@ -141,7 +143,7 @@ class MeetingPollApiRepository
             projectId: Long,
             categoryId: Long
         ): Result<Unit> =
-            safeApiCallUnit(json) {
+            safeApiCallUnit {
                 apiService.setProjectScheduleColor(projectId, SetProjectScheduleCategoryRequest(categoryId))
             }
 

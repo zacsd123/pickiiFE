@@ -24,14 +24,27 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.MyRecruitSummary
 import com.example.pickii.domain.model.RecruitStatus
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_button_applicants
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_button_close
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_button_delete
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_button_edit
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_button_reopen
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_close_confirm_title
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_delete_confirm_body
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_delete_confirm_title
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_empty
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_label_date
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_reopen_confirm_title
+import com.example.pickii.shared.generated.resources.mypage_my_recruits_title
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
@@ -45,6 +58,8 @@ import com.example.pickii.ui.theme.PickiiPaletteBlue
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -71,7 +86,7 @@ fun MyRecruitsScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -118,7 +133,7 @@ private fun MyRecruitsScreenContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         MyPageSectionHeader(
-            title = stringResource(R.string.mypage_my_recruits_title),
+            title = stringResource(Res.string.mypage_my_recruits_title),
             onBackClick = onBackClick,
             onNotificationClick = onNotificationClick
         )
@@ -126,7 +141,7 @@ private fun MyRecruitsScreenContent(
 
         when {
             uiState.isLoading -> LoadingIndicator()
-            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(R.string.mypage_my_recruits_empty))
+            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(Res.string.mypage_my_recruits_empty))
             else -> {
                 Column(modifier = Modifier.fillMaxSize()) {
                     uiState.items.forEach { recruit ->
@@ -158,18 +173,18 @@ private fun MyRecruitsScreenContent(
         val (title, body) =
             when (uiState.pendingAction) {
                 MyRecruitPendingAction.CLOSE ->
-                    stringResource(R.string.mypage_my_recruits_close_confirm_title) to ""
+                    stringResource(Res.string.mypage_my_recruits_close_confirm_title) to ""
                 MyRecruitPendingAction.REOPEN ->
-                    stringResource(R.string.mypage_my_recruits_reopen_confirm_title) to ""
+                    stringResource(Res.string.mypage_my_recruits_reopen_confirm_title) to ""
                 MyRecruitPendingAction.DELETE ->
-                    stringResource(R.string.mypage_my_recruits_delete_confirm_title) to
-                        stringResource(R.string.mypage_my_recruits_delete_confirm_body)
+                    stringResource(Res.string.mypage_my_recruits_delete_confirm_title) to
+                        stringResource(Res.string.mypage_my_recruits_delete_confirm_body)
             }
         ConfirmDialog(
             title = title,
             body = body,
-            confirmLabel = stringResource(R.string.common_button_confirm),
-            dismissLabel = stringResource(R.string.common_button_cancel),
+            confirmLabel = stringResource(Res.string.common_button_confirm),
+            dismissLabel = stringResource(Res.string.common_button_cancel),
             onConfirm = onConfirmAction,
             onDismiss = onDismissActionDialog
         )
@@ -212,7 +227,7 @@ private fun MyRecruitCard(
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = stringResource(R.string.mypage_my_recruits_label_date, recruit.createdAt.toFullDisplayString()),
+            text = stringResource(Res.string.mypage_my_recruits_label_date, recruit.createdAt.toFullDisplayString()),
             color = PickiiTextGray,
             fontSize = 12.sp
         )
@@ -220,27 +235,27 @@ private fun MyRecruitCard(
         Spacer(modifier = Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             CardActionButton(
-                stringResource(R.string.mypage_my_recruits_button_applicants),
+                stringResource(Res.string.mypage_my_recruits_button_applicants),
                 onApplicantsClick,
                 style = CardActionButtonStyle.BLACK
             )
             if (recruit.status != RecruitStatus.CLOSED) {
-                CardActionButton(stringResource(R.string.mypage_my_recruits_button_edit), onEditClick)
+                CardActionButton(stringResource(Res.string.mypage_my_recruits_button_edit), onEditClick)
             }
             if (recruit.status == RecruitStatus.CLOSED) {
                 CardActionButton(
-                    stringResource(R.string.mypage_my_recruits_button_reopen),
+                    stringResource(Res.string.mypage_my_recruits_button_reopen),
                     onReopenClick,
                     style = CardActionButtonStyle.PRIMARY
                 )
             } else {
                 CardActionButton(
-                    stringResource(R.string.mypage_my_recruits_button_close),
+                    stringResource(Res.string.mypage_my_recruits_button_close),
                     onCloseClick,
                     style = CardActionButtonStyle.DANGER
                 )
             }
-            CardActionButton(stringResource(R.string.mypage_my_recruits_button_delete), onDeleteClick)
+            CardActionButton(stringResource(Res.string.mypage_my_recruits_button_delete), onDeleteClick)
         }
     }
 }

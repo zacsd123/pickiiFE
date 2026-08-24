@@ -1,10 +1,14 @@
 package com.example.pickii.data.repository
 
 import com.example.pickii.data.remote.api.FeedbackApiService
+import com.example.pickii.data.remote.dto.AiFeedbackDto
+import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.FeedbackMemberDto
 import com.example.pickii.data.remote.dto.FeedbackProjectDto
+import com.example.pickii.data.remote.dto.FeedbackProjectMembersDto
 import com.example.pickii.data.remote.dto.FeedbackScoresDto
 import com.example.pickii.data.remote.dto.FeedbackSubmitRequest
+import com.example.pickii.data.remote.dto.PageEnvelope
 import com.example.pickii.domain.model.AiFeedback
 import com.example.pickii.domain.model.FeedbackProject
 import com.example.pickii.domain.model.FeedbackProjectMembers
@@ -17,25 +21,27 @@ import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.json.Json
 
 /** `4-9`~`4-12` API로 [FeedbackRepository]를 구현한다. */
 class FeedbackApiRepository
     constructor(
-        private val apiService: FeedbackApiService,
-        private val json: Json
+        private val apiService: FeedbackApiService
     ) : FeedbackRepository {
         override suspend fun getMyFeedbackProjects(
             page: Int,
             size: Int
         ): Result<FeedbackProjectPage> =
-            safeApiCall(json) { apiService.getMyFeedbackProjects(page, size) }.map { envelope ->
+            safeApiCall<ApiEnvelope<PageEnvelope<FeedbackProjectDto>>> {
+                apiService.getMyFeedbackProjects(page, size)
+            }.map { envelope ->
                 FeedbackProjectPage(items = envelope.data.content.map { it.toDomain() })
             }
 
         override suspend fun getProjectMembers(projectId: String): Result<FeedbackProjectMembers> {
             val id = projectId.toLongOrNull() ?: return Result.failure(invalidIdException(projectId))
-            return safeApiCall(json) { apiService.getProjectMembers(id) }.map { envelope ->
+            return safeApiCall<ApiEnvelope<FeedbackProjectMembersDto>> {
+                apiService.getProjectMembers(id)
+            }.map { envelope ->
                 val dto = envelope.data
                 FeedbackProjectMembers(
                     projectId = dto.projectId.toString(),
@@ -54,7 +60,7 @@ class FeedbackApiRepository
         ): Result<Unit> {
             val pid = projectId.toLongOrNull() ?: return Result.failure(invalidIdException(projectId))
             val rid = revieweeId.toLongOrNull() ?: return Result.failure(invalidIdException(revieweeId))
-            return safeApiCallUnit(json) {
+            return safeApiCallUnit {
                 apiService.submitFeedback(
                     FeedbackSubmitRequest(
                         projectId = pid,
@@ -76,7 +82,7 @@ class FeedbackApiRepository
 
         override suspend fun getAiFeedback(projectId: String): Result<AiFeedback> {
             val id = projectId.toLongOrNull() ?: return Result.failure(invalidIdException(projectId))
-            return safeApiCall(json) { apiService.getAiFeedback(id) }.map { envelope ->
+            return safeApiCall<ApiEnvelope<AiFeedbackDto>> { apiService.getAiFeedback(id) }.map { envelope ->
                 val dto = envelope.data
                 AiFeedback(
                     projectId = dto.projectId.toString(),

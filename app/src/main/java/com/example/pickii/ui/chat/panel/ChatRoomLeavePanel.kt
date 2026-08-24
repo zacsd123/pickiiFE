@@ -23,16 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_warning
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
 import com.example.pickii.ui.theme.PickiiNavyText
 import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
+import org.jetbrains.compose.resources.painterResource
 
 private val LeavePanelBackgroundColor = Color.White
 private val LeavePanelScrimColor = Color.Black.copy(alpha = 0.35f)
@@ -85,7 +86,7 @@ fun ChatRoomLeavePanel(
             Image(
                 painter =
                     painterResource(
-                        id = R.drawable.ic_warning
+                        resource = Res.drawable.ic_warning
                     ),
                 contentDescription = null,
                 modifier = Modifier.size(100.dp)

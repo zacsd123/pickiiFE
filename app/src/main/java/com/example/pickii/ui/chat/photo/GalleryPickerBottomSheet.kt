@@ -51,14 +51,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil3.compose.AsyncImage
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_check
+import com.example.pickii.shared.generated.resources.ic_close
 import com.example.pickii.ui.theme.PickiiBlackAlt
 import com.example.pickii.ui.theme.PickiiCharcoal
 import com.example.pickii.ui.theme.PickiiGray400
@@ -67,6 +68,7 @@ import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSurfaceGraySoft
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.painterResource
 
 private const val GALLERY_QUERY_LIMIT = 300
 private val GalleryGridHeight = 420.dp
@@ -284,7 +286,7 @@ private fun GalleryPickerHeader(
             Icon(
                 painter =
                     painterResource(
-                        id = if (hasSelection) R.drawable.ic_check else R.drawable.ic_close
+                        resource = if (hasSelection) Res.drawable.ic_check else Res.drawable.ic_close
                     ),
                 contentDescription = if (hasSelection) "완료" else "닫기",
                 tint = if (hasSelection) Color.White else PickiiGray700,
@@ -384,7 +386,7 @@ private fun GalleryPhotoCell(
         ) {
             if (selected) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_check),
+                    painter = painterResource(resource = Res.drawable.ic_check),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(12.dp)

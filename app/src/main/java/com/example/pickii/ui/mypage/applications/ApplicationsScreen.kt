@@ -22,14 +22,25 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pickii.R
 import com.example.pickii.domain.model.ApplyStatus
 import com.example.pickii.domain.model.MyApply
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.common_button_cancel
+import com.example.pickii.shared.generated.resources.common_button_confirm
+import com.example.pickii.shared.generated.resources.mypage_applications_button_cancel
+import com.example.pickii.shared.generated.resources.mypage_applications_button_chat
+import com.example.pickii.shared.generated.resources.mypage_applications_cancel_confirm_body
+import com.example.pickii.shared.generated.resources.mypage_applications_cancel_confirm_title
+import com.example.pickii.shared.generated.resources.mypage_applications_empty
+import com.example.pickii.shared.generated.resources.mypage_applications_label_date
+import com.example.pickii.shared.generated.resources.mypage_applications_title
+import com.example.pickii.shared.generated.resources.mypage_apply_status_accepted
+import com.example.pickii.shared.generated.resources.mypage_apply_status_rejected
+import com.example.pickii.shared.generated.resources.mypage_apply_status_waiting
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.EmptyStateMessage
 import com.example.pickii.ui.common.LoadingIndicator
@@ -42,6 +53,8 @@ import com.example.pickii.ui.theme.PickiiPaletteGreen
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -62,7 +75,7 @@ fun ApplicationsScreen(
     if (uiState.toastMessageRes != null) {
         val messageRes = uiState.toastMessageRes
         LaunchedEffect(messageRes) {
-            if (messageRes != null) Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+            if (messageRes != null) Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
             viewModel.onToastShown()
         }
     }
@@ -100,7 +113,7 @@ private fun ApplicationsScreenContent(
     Column(modifier = Modifier.fillMaxSize().background(PickiiPaletteBaseWhite).padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         MyPageSectionHeader(
-            title = stringResource(R.string.mypage_applications_title),
+            title = stringResource(Res.string.mypage_applications_title),
             onBackClick = onBackClick,
             onNotificationClick = onNotificationClick
         )
@@ -108,7 +121,7 @@ private fun ApplicationsScreenContent(
 
         when {
             uiState.isLoading -> LoadingIndicator()
-            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(R.string.mypage_applications_empty))
+            uiState.items.isEmpty() -> EmptyStateMessage(stringResource(Res.string.mypage_applications_empty))
             else -> {
                 Column(modifier = Modifier.fillMaxSize()) {
                     uiState.items.forEach { apply ->
@@ -135,10 +148,10 @@ private fun ApplicationsScreenContent(
 
     if (uiState.pendingCancelApplyId != null) {
         ConfirmDialog(
-            title = stringResource(R.string.mypage_applications_cancel_confirm_title),
-            body = stringResource(R.string.mypage_applications_cancel_confirm_body),
-            confirmLabel = stringResource(R.string.common_button_confirm),
-            dismissLabel = stringResource(R.string.common_button_cancel),
+            title = stringResource(Res.string.mypage_applications_cancel_confirm_title),
+            body = stringResource(Res.string.mypage_applications_cancel_confirm_body),
+            confirmLabel = stringResource(Res.string.common_button_confirm),
+            dismissLabel = stringResource(Res.string.common_button_cancel),
             onConfirm = onConfirmCancel,
             onDismiss = onDismissCancelDialog
         )
@@ -177,7 +190,7 @@ private fun ApplyCard(
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = stringResource(R.string.mypage_applications_label_date, apply.appliedAt.toFullDisplayString()),
+            text = stringResource(Res.string.mypage_applications_label_date, apply.appliedAt.toFullDisplayString()),
             color = PickiiTextGray,
             fontSize = 12.sp
         )
@@ -186,13 +199,13 @@ private fun ApplyCard(
             Spacer(modifier = Modifier.height(12.dp))
             if (apply.status == ApplyStatus.WAITING) {
                 CardActionButton(
-                    label = stringResource(R.string.mypage_applications_button_cancel),
+                    label = stringResource(Res.string.mypage_applications_button_cancel),
                     onClick = onCancelClick
                 )
             } else {
                 apply.chatRoomId?.let { chatRoomId ->
                     CardActionButton(
-                        label = stringResource(R.string.mypage_applications_button_chat),
+                        label = stringResource(Res.string.mypage_applications_button_chat),
                         onClick = { onChatClick(chatRoomId) }
                     )
                 }
@@ -221,9 +234,9 @@ private fun CardActionButton(
 @Composable
 private fun applyStatusLabel(status: ApplyStatus): String =
     when (status) {
-        ApplyStatus.WAITING -> stringResource(R.string.mypage_apply_status_waiting)
-        ApplyStatus.ACCEPTED -> stringResource(R.string.mypage_apply_status_accepted)
-        ApplyStatus.REJECTED -> stringResource(R.string.mypage_apply_status_rejected)
+        ApplyStatus.WAITING -> stringResource(Res.string.mypage_apply_status_waiting)
+        ApplyStatus.ACCEPTED -> stringResource(Res.string.mypage_apply_status_accepted)
+        ApplyStatus.REJECTED -> stringResource(Res.string.mypage_apply_status_rejected)
     }
 
 private fun applyStatusColor(status: ApplyStatus): Color =

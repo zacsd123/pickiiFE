@@ -32,15 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_document
 import com.example.pickii.ui.common.LevelAvatar
 import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
+import org.jetbrains.compose.resources.painterResource
 
 private val ApplicantDetailBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantDetailCardColor = Color(0xFFFEFFF2)
@@ -306,7 +307,7 @@ private fun ApplicantMessageCard(message: String) {
                 Image(
                     painter =
                         painterResource(
-                            id = R.drawable.ic_document
+                            resource = Res.drawable.ic_document
                         ),
                     contentDescription = "지원 메시지",
                     modifier = Modifier.size(16.dp)

@@ -3,16 +3,17 @@ package com.example.pickii.ui.chat
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
 
 private val ALLOWED_IMAGE_MIME_TYPES = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
 private const val MAX_IMAGE_BYTES = 10L * 1024 * 1024
-private const val IMAGE_PART_NAME = "image"
 private const val DEFAULT_IMAGE_EXTENSION = "jpg"
+
+/** [Context.toChatImagePart]가 만드는, Ktor 멀티파트 업로드에 필요한 최소 정보. */
+data class ChatImageUploadPart(
+    val fileName: String,
+    val contentType: String?,
+    val bytes: ByteArray
+)
 
 /** 채팅 이미지 업로드 실패 사유(8-4 Validation). */
 sealed interface ChatImageValidationError {
@@ -40,24 +41,12 @@ fun Context.validateChatImage(uri: Uri): ChatImageValidationError? {
     return null
 }
 
-/** 검증을 통과한 [uri]를 `"image"` 파트 이름의 [MultipartBody.Part]로 변환한다. */
-fun Context.toChatImagePart(uri: Uri): MultipartBody.Part {
-    val mimeType = contentResolver.getType(uri).orEmpty()
-    val mediaType = mimeType.toMediaTypeOrNull()
-    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: DEFAULT_IMAGE_EXTENSION
+/** 검증을 통과한 [uri]를 Ktor 멀티파트 업로드에 필요한 [ChatImageUploadPart]로 변환한다. */
+fun Context.toChatImagePart(uri: Uri): ChatImageUploadPart {
+    val mimeType = contentResolver.getType(uri)
+    val extension = mimeType?.let { MimeTypeMap.getSingleton().getExtensionFromMimeType(it) } ?: DEFAULT_IMAGE_EXTENSION
     val fileName = "chat_image.$extension"
+    val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
 
-    val cachedFile = File(cacheDir, fileName)
-    contentResolver.openInputStream(uri)?.use { input ->
-        cachedFile.outputStream().use { output -> input.copyTo(output) }
-    }
-
-    val requestBody =
-        if (cachedFile.exists()) {
-            cachedFile.asRequestBody(mediaType)
-        } else {
-            ByteArray(0).toRequestBody(mediaType)
-        }
-
-    return MultipartBody.Part.createFormData(IMAGE_PART_NAME, fileName, requestBody)
+    return ChatImageUploadPart(fileName = fileName, contentType = mimeType, bytes = bytes)
 }

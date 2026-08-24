@@ -14,7 +14,7 @@ private val jwtPayloadJson = Json { ignoreUnknownKeys = true }
 
 /**
  * JWT의 payload에서 subject(`sub`) 클레임만 읽는다. 서명 검증은 하지 않는다 — 서버가 발급해서
- * [com.example.pickii.data.remote.AuthInterceptor]가 그대로 얹어 보내는 토큰을 읽기만 하는
+ * `HttpClientFactory`의 Ktor `Auth` 플러그인이 그대로 얹어 보내는 토큰을 읽기만 하는
  * 용도라 위변조 여부는 문제되지 않는다.
  *
  * 소셜 로그인(1-10) 응답에는 memberId가 내려오지 않는다. 정상 로그인과 같은 인증 서버가 발급한

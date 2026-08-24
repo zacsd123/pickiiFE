@@ -33,11 +33,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pickii.R
+import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_chevron_down
+import com.example.pickii.shared.generated.resources.ic_chevron_up
+import com.example.pickii.shared.generated.resources.ic_close
+import com.example.pickii.shared.generated.resources.ic_delete
+import org.jetbrains.compose.resources.painterResource
 
 private val MeetingSheetBackgroundColor = Color(0xFFF9FCA8)
 private val MeetingCardBackgroundColor = Color.White
@@ -206,7 +210,7 @@ private fun MeetingManagementHeader(
             Image(
                 painter =
                     painterResource(
-                        id = R.drawable.ic_close
+                        resource = Res.drawable.ic_close
                     ),
                 contentDescription = "닫기",
                 modifier = Modifier.size(22.dp)
@@ -369,11 +373,11 @@ private fun MeetingSummaryContent(
         Image(
             painter =
                 painterResource(
-                    id =
+                    resource =
                         if (isExpanded) {
-                            R.drawable.ic_chevron_up
+                            Res.drawable.ic_chevron_up
                         } else {
-                            R.drawable.ic_chevron_down
+                            Res.drawable.ic_chevron_down
                         }
                 ),
             contentDescription =
@@ -433,7 +437,7 @@ private fun MeetingDeleteButton(onClick: () -> Unit) {
         Image(
             painter =
                 painterResource(
-                    id = R.drawable.ic_delete
+                    resource = Res.drawable.ic_delete
                 ),
             contentDescription = null,
             modifier = Modifier.size(19.dp)
