@@ -61,8 +61,8 @@ import kotlin.test.assertSame
 /**
  * Koin 4.1.1의 `Module.verify()`는 static 검사라 순환·런타임 문제를 놓칠 수 있다(JVM 리플렉션 기반
  * 타입 체크일 뿐, 실제로 인스턴스를 만들어보지 않는다) — 그래서 여기서는 실제 프로덕션 모듈
- * (`infraModule`/`networkModule`/`repositoryModule`/`calendarRepositoryModule`/`viewModelModule`)을
- * 그대로 실행해서 32개 ViewModel을 하나씩 진짜로 resolve해본다.
+ * (`infraModule`/`networkModule`/`repositoryModule`/`calendarRepositoryModule`/`viewModelModule`/
+ * `sharedModule`)을 그대로 실행해서 32개 ViewModel을 하나씩 진짜로 resolve해본다.
  *
  * `Context`는 Mockito로 만든다 — 실제 Android/Robolectric 없이 순수 JVM 테스트에서 `Context`
  * 타입이 필요한 생성자를 만족시키기 위함이고(`TokenStore` 등은 생성자에서 `Context`를 저장만 하고
@@ -107,7 +107,8 @@ class KoinGraphResolveTest : KoinTest {
                 networkModule,
                 repositoryModule,
                 calendarRepositoryModule,
-                viewModelModule
+                viewModelModule,
+                sharedModule
             )
         }
     }

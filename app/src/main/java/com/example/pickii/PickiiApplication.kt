@@ -8,6 +8,7 @@ import com.example.pickii.di.calendarRepositoryModule
 import com.example.pickii.di.infraModule
 import com.example.pickii.di.networkModule
 import com.example.pickii.di.repositoryModule
+import com.example.pickii.di.sharedModule
 import com.example.pickii.di.viewModelModule
 import com.example.pickii.util.debugRemainingValiditySeconds
 import com.kakao.sdk.common.KakaoSdk
@@ -29,7 +30,14 @@ class PickiiApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@PickiiApplication)
-            modules(infraModule, networkModule, repositoryModule, calendarRepositoryModule, viewModelModule)
+            modules(
+                infraModule,
+                networkModule,
+                repositoryModule,
+                calendarRepositoryModule,
+                viewModelModule,
+                sharedModule
+            )
         }
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY, loggingEnabled = BuildConfig.DEBUG)
         fcmTokenRegistrar.start()

@@ -31,12 +31,13 @@ import com.example.pickii.ui.recruitapply.RecruitApplyViewModel
 import com.example.pickii.ui.recruitdetail.RecruitDetailViewModel
 import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import com.example.pickii.ui.signup.SignupViewModel
-import com.example.pickii.ui.splash.SplashViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * 32개 ViewModel 전부를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
+ * 아직 app/에 남아있는 ViewModel 31개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
+ * commonMain으로 옮긴 화면의 ViewModel은 [com.example.pickii.di.sharedModule]에 따로 등록한다
+ * (SplashViewModel이 첫 사례).
  *
  * `SavedStateHandle`을 받는 5개(RecruitDetail/RecruitApply/RecruitForm/ApplicantList/MemberProfile)는
  * 여기서 따로 처리할 게 없다 — Koin의 Android `koinViewModel()`이 Hilt와 동일하게 SavedStateHandle을
@@ -46,7 +47,6 @@ import org.koin.dsl.module
  */
 val viewModelModule =
     module {
-        viewModel { SplashViewModel() }
         viewModel { LoginViewModel(sessionRepository = get(), profileRepository = get()) }
         viewModel { OnboardingViewModel(masterDataRepository = get(), profileRepository = get()) }
         viewModel { SignupViewModel(signupRepository = get(), sessionRepository = get(), profileRepository = get()) }

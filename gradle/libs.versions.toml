@@ -12,6 +12,8 @@ composeBom = "2026.02.01"
 appcompat = "1.7.1"
 coreSplashscreen = "1.0.1"
 lifecycleRuntimeCompose = "2.8.7"
+lifecycleMultiplatform = "2.9.4"
+jetbrainsLifecycleCompose = "2.9.3"
 navigationCompose = "2.9.2"
 desugarJdkLibs = "2.1.5"
 ktlintGradle = "14.2.0"
@@ -70,6 +72,10 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
+androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleMultiplatform" }
+jetbrains-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "jetbrainsLifecycleCompose" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }

@@ -28,7 +28,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellow
 import com.example.pickii.ui.theme.PickiiYellowLight
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 앱 진입 시 표시되는 스플래시 화면.

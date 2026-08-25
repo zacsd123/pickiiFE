@@ -1,13 +1,15 @@
 package com.example.pickii.di
 
+import com.example.pickii.ui.splash.SplashViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * Koin으로 옮길 바인딩을 담을 자리. 지금은 앱이 여전히 Hilt로 전체 DI 그래프를 구성하므로
- * 이 모듈은 아직 `Application`에 연결돼 있지 않다 — Login/Home을 실제로 이식하는 다음 단계에서
- * [com.example.pickii.domain.repository.SessionRepository] 등의 바인딩을 채우고 Hilt와 나란히(또는
- * 대체해) 연결한다.
+ * commonMain으로 옮긴 화면의 Koin 바인딩을 담는 모듈. Android는 [com.example.pickii.PickiiApplication]의
+ * `startKoin`에, iOS는 `initKoin()`에 각각 연결한다 — 두 플랫폼이 별도 프로세스라 Koin도 플랫폼별로
+ * 한 번씩 시작해야 한다(Android의 `viewModelModule` 등 아직 app/에 남은 나머지 바인딩과는 별개).
  */
 val sharedModule =
     module {
+        viewModel { SplashViewModel() }
     }
