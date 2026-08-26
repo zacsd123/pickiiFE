@@ -3,11 +3,8 @@ package com.example.pickii.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import com.example.pickii.util.supportsDynamicColor
 
 private val DarkColorScheme =
@@ -41,10 +38,8 @@ fun PickiiTheme(
 ) {
     val colorScheme =
         when {
-            dynamicColor && supportsDynamicColor() -> {
-                val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            }
+            dynamicColor && supportsDynamicColor() ->
+                dynamicColorScheme(darkTheme) ?: if (darkTheme) DarkColorScheme else LightColorScheme
 
             darkTheme -> DarkColorScheme
             else -> LightColorScheme
