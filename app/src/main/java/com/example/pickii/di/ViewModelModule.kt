@@ -24,17 +24,14 @@ import com.example.pickii.ui.mypage.settings.PasswordChangeViewModel
 import com.example.pickii.ui.mypage.settings.SettingsViewModel
 import com.example.pickii.ui.mypage.withdrawal.WithdrawalViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
-import com.example.pickii.ui.onboarding.OnboardingViewModel
-import com.example.pickii.ui.passwordreset.PasswordResetViewModel
 import com.example.pickii.ui.recruitapply.RecruitApplyViewModel
 import com.example.pickii.ui.recruitdetail.RecruitDetailViewModel
 import com.example.pickii.ui.recruitform.RecruitFormViewModel
-import com.example.pickii.ui.signup.SignupViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * 아직 app/에 남아있는 ViewModel 30개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
+ * 아직 app/에 남아있는 ViewModel 27개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
  * commonMain으로 옮긴 화면의 ViewModel은 [com.example.pickii.di.sharedModule]에 따로 등록한다
  * (SplashViewModel이 첫 사례).
  *
@@ -47,9 +44,6 @@ import org.koin.dsl.module
 val viewModelModule =
     module {
         viewModel { LoginViewModel(sessionRepository = get(), profileRepository = get()) }
-        viewModel { OnboardingViewModel(masterDataRepository = get(), profileRepository = get()) }
-        viewModel { SignupViewModel(signupRepository = get(), sessionRepository = get(), profileRepository = get()) }
-        viewModel { PasswordResetViewModel(signupRepository = get()) }
         viewModel {
             HomeViewModel(
                 recruitRepository = get(),

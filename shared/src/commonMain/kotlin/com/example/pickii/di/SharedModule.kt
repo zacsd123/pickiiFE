@@ -1,6 +1,9 @@
 package com.example.pickii.di
 
 import com.example.pickii.ui.navigation.MainNavigationViewModel
+import com.example.pickii.ui.onboarding.OnboardingViewModel
+import com.example.pickii.ui.passwordreset.PasswordResetViewModel
+import com.example.pickii.ui.signup.SignupViewModel
 import com.example.pickii.ui.splash.SplashViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -14,4 +17,7 @@ val sharedModule =
     module {
         viewModel { SplashViewModel() }
         viewModel { MainNavigationViewModel(sessionRepository = get()) }
+        viewModel { OnboardingViewModel(masterDataRepository = get(), profileRepository = get()) }
+        viewModel { SignupViewModel(signupRepository = get(), sessionRepository = get(), profileRepository = get()) }
+        viewModel { PasswordResetViewModel(signupRepository = get()) }
     }
