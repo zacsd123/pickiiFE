@@ -1,5 +1,6 @@
 package com.example.pickii.di
 
+import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.splash.SplashViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -12,4 +13,5 @@ import org.koin.dsl.module
 val sharedModule =
     module {
         viewModel { SplashViewModel() }
+        viewModel { MainNavigationViewModel(sessionRepository = get()) }
     }
