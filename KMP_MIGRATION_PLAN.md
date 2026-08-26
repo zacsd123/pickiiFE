@@ -78,7 +78,8 @@ Pickii/
   의도했던 "로그인/홈만 좁게" 범위가 아니라 Phase 2의 13개 서비스 전체 스윕(2026-08-24)으로 같이
   완료됨
 - [ ] `HomeScreen`, `HomeViewModel`, `LoginScreen`, `LoginViewModel` → `commonMain`으로 이동
-- [ ] `PickiiBottomNav`, `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 (Compose 테마는 대부분 그대로 포팅됨)
+- [x] `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 — Color.kt는 SplashScreen 카나리아(2026-08-25)에서 먼저 옮겨짐, Theme.kt/Type.kt는 이번(2026-08-26)에 이동. `dynamicDarkColorScheme`/`dynamicLightColorScheme`/`LocalContext`가 Android 전용 API라 commonMain에서 직접 못 불러 `dynamicColorScheme(darkTheme): ColorScheme?` expect/actual(androidMain은 실제 계산, iosMain은 `null`)로 감쌌음 — `supportsDynamicColor()` 하나만으로는 안 되고, 다이나믹 컬러 계산 자체를 expect/actual로 빼야 iOS 타깃이 컴파일됨. iOS 진입점(`MainViewController.kt`)이 `PickiiTheme { SplashScreen() }`을 그리도록 바꿔 시뮬레이터에서 테마 적용 확인(노란 그라디언트+Bold 타이포 정상 렌더링). 카운터/카카오 스파이크 화면(`SpikeScreen.kt`)은 목적을 다해 제거하고 그 자리를 이 카나리아가 대체함 — 관련 UI 테스트도 `SplashScreenUITests.swift`로 교체
+- [ ] `PickiiBottomNav`(`ui/common/`) → `commonMain`으로 이동 (남은 화면 이식과 함께, 아래 4-1 표 참고)
 - [ ] Mac에서 `iosApp` Xcode 프로젝트 생성, `ComposeUIViewController`로 진입점 연결
 - [ ] iOS 시뮬레이터에서 로그인 → 홈 화면까지 실제로 뜨는지 확인
 - [x] 카카오 로그인 iOS 연동 스파이크 — **통과(2026-08-22)**. 인터페이스+Swift 구현체 주입 방식으로 실제 로그인·토큰 획득까지 확인. 백엔드 연동/세션/토큰 갱신은 범위 밖, Phase 5에서 정식 연동 시 처리. 상세는 `PROGRESS_kmp-migration.md` 참고
@@ -171,6 +172,55 @@ Pickii/
 
 - [ ] 화면 이식할 때마다 Android/iOS 양쪽에서 실제 확인 (에뮬레이터만 보고 "됐다"고 판단하지 않기 — 이전 대화에서 나온 애니메이션 체감 이슈도 실기기 기준으로 재확인)
 
+#### 4-1. 남은 17개 영역 — androidx 의존성 전수 조사 (2026-08-26)
+
+Theme.kt 이식 이후 남은 영역(splash·theme 제외, `mypage`/`calendar`/`chat`는 하위 화면 포함 재귀 조사)이
+실제로 어떤 `androidx.*` import를 쓰는지 전부 grep으로 뽑고, 후보마다 로컬 Gradle 캐시의 klib 모듈
+메타데이터(`~/.gradle/caches/modules-2`)를 뒤져 iOS 타깃(`iosarm64`/`iossimulatorarm64`/`iosx64` 또는
+CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심스러운 것은 `shared`에 임시 probe 파일을
+만들어 `compileKotlinIosSimulatorArm64`/`compileDebugKotlin` 양쪽으로 실측 컴파일까지 돌려보고
+지웠다 — 이 프로젝트가 지금까지 해온 "문서 대신 실측" 방식 그대로.
+
+**이미 해결된 의존성 (컴파일 실측 완료, 그대로 옮기면 됨)**
+
+| androidx 심볼 | 실제 아티팩트/경로 | 상태 |
+|---|---|---|
+| `compose.foundation`/`material3`/`runtime`/`ui` | `org.jetbrains.compose.*` accessor | ✅ Theme/Splash 카나리아로 이미 증명됨 |
+| `androidx.compose.ui.tooling.preview.Preview` | `org.jetbrains.compose.ui:ui-tooling-preview` (좌표 직접 명시, 위 3번 패턴) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.compose.collectAsStateWithLifecycle`/`LocalLifecycleOwner` | `org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.3` (미러) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.ViewModel`/`viewModelScope` | `androidx.lifecycle:lifecycle-viewmodel:2.9.4` (미러 불필요, 진짜 멀티플랫폼) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.Lifecycle`/`LifecycleEventObserver` | 위 lifecycle-runtime-compose가 전이 의존성으로 물고 옴 | ✅ 오늘 probe로 iOS+Android 둘 다 실측 확인, 추가 선언 불필요 |
+| `androidx.compose.animation`(`.core`) — `AnimatedVisibility`/`animateColorAsState`/`animateDpAsState`/`spring` 등 | material3/foundation이 전이 의존성으로 물고 옴 | ✅ 오늘 probe로 iOS+Android 둘 다 실측 확인, **`compose.animation` accessor를 따로 안 붙여도 됨** |
+| `androidx.lifecycle.SavedStateHandle` | 🆕 `androidx.lifecycle:lifecycle-viewmodel-savedstate:2.9.4` (lifecycle-viewmodel과 같은 버전, 역시 진짜 멀티플랫폼 — iOS klib 존재 확인) | ✅ 오늘 `libs.versions.toml`/`shared/build.gradle.kts`에 추가 + iOS 컴파일 실측 완료(별도 커밋 필요) |
+
+**새 의존성이 필요했던 것 (오늘 추가 + 실측 완료, 실제 화면 카나리아는 아직)**
+
+| androidx 심볼 | 문제 | 해결 |
+|---|---|---|
+| `androidx.activity.compose.BackHandler` (`feedback`, `applicant`, `recruitapply`에서 뒤로가기 처리용으로 씀) | `androidx.activity`는 그룹 전체가 iOS 타깃이 아예 없음(Android Activity 전용 API) | 🆕 CMP가 자체 멀티플랫폼 대체재를 이미 제공: `androidx.compose.ui.backhandler.BackHandler` (`@OptIn(ExperimentalComposeUiApi::class)` 필요, 상위 API에서 이미 `NavigationEventHandler`로 deprecated 표시되지만 아직 동작함). **주의**: CMP의 `compose.ui` accessor는 Android 타깃에서 진짜 AndroidX `ui` 아티팩트로 치환되는데, 그 아티팩트엔 `ui-backhandler`가 없어서 iOS에서만 되고 Android에서는 `Unresolved reference`로 깨짐 — `org.jetbrains.compose.ui:ui-backhandler:<버전>` 좌표를 **accessor 말고 직접** 선언해야 두 플랫폼 다 됨(2번 패턴과 같은 종류의 함정, 아래 4-2에 정리) |
+
+**진짜 새 기능(라이브러리 교체가 아니라 플랫폼별 재구현, Phase 5 범위 — 변화 없음)**
+
+| androidx 심볼 | 영역 | 비고 |
+|---|---|---|
+| `androidx.activity.result.contract.ActivityResultContracts`, `androidx.core.content.FileProvider`/`ContextCompat`, `ContentResolver` | `chat/room`, `chat/photo`(`GalleryPickerBottomSheet`, `PhotoSourceBottomSheet`) | `androidx.activity`/`androidx.core` 그룹 자체가 iOS 아티팩트가 없음(Gradle 캐시에 iOS 변형 0개, 확인 완료) — 라이브러리 좌표 교체로 안 되고 `expect/actual` + iOS는 `PHPickerViewController` 직접 구현 필요. 원래 계획(Phase 5)과 동일한 결론, 채팅을 마지막에 두는 이유가 다시 확인됨 |
+
+**추가로 확인한 것(라이브러리 문제는 아니지만 이식 시 기계적으로 고쳐야 함)**
+- `org.koin.androidx.compose.koinViewModel`(Android 전용) → `org.koin.compose.viewmodel.koinViewModel`(멀티플랫폼, Splash에서 이미 씀)로 import 한 줄 교체 — 남은 17개 영역 중 거의 전부(30개 파일)가 이 상태. 새 의존성은 아니고 이식 시 빠뜨리기 쉬운 기계적 치환이라 체크리스트에 남김
+- 화면 자체는 `androidx.navigation.*`을 직접 import하지 않음(NavController는 전부 콜백 람다로만 전달받음) — Navigation-compose 자체의 iOS 실측은 `navigation`/`common`(NavHost)을 옮기는 마지막 단계에서 처리하면 됨
+
+#### 4-2. 배치 계획
+
+- **Batch 1 (이미 해결된 의존성만 사용, 바로 진행)**: `home`, `login`, `onboarding`, `signup`,
+  `passwordreset`, `notification`, `memberprofile`, `common`(`PickiiBottomNav` 등 — 거의 모든 화면이
+  참조하므로 먼저 옮기는 게 유리), `recruitdetail`, `recruitform`, `mypage/*`(8개), `calendar/*`(4개) —
+  총 14개 영역. 여러 개씩 묶어서 진행
+- **Batch 2 (새 의존성 붙이고 카나리아 검증 후 나머지)**: `ui-backhandler` 의존성은 이미 붙여놨으니(이번
+  조사에서 실측 완료), `feedback`을 카나리아로 먼저 이식해 `BackHandler` import 교체가 실제 화면에서도
+  문제없는지 확인한 뒤 `applicant`, `recruitapply` 진행
+- **Batch 3 (Phase 5와 함께, 별도 일정)**: `chat/*`(5개) — 카메라/갤러리 피커 `expect/actual` 설계가
+  먼저 끝나야 착수 가능. `navigation`(NavHost/`PickiiDestination`)은 나머지 18개를 다 옮긴 다음 마지막에
+
 ### Phase 5 — 플랫폼 전용 기능
 - [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
 - [ ] Firebase Messaging → GitLive SDK 또는 KMPNotifier로 교체, iOS APNs 인증서 발급 및 연동
@@ -201,6 +251,34 @@ Pickii/
 - [ ] Phase 7 — 배포
 
 ---
+
+## 5. 반복되는 함정 (KMP 마이그레이션 패턴)
+
+화면을 하나씩 옮길 때마다 매번 새로 부딪히는 게 아니라 이미 몇 번 확인된 패턴들. 새 화면에서 컴파일이
+안 되거나 iOS에서만 깨질 때 여기부터 의심할 것.
+
+1. **androidx 라이브러리는 iOS 타깃을 안 내는 경우가 많고, `org.jetbrains.androidx.*` 미러를 써야
+   한다.** Navigation(`org.jetbrains.androidx.navigation:navigation-compose`),
+   lifecycle-runtime-compose(`org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose`)에서 확인.
+   **단, 전부 그런 건 아니다** — `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`는 최근
+   버전(2.9.x)부터 `androidx.lifecycle` 그룹 자체가 진짜 멀티플랫폼이라 미러가 필요 없다(2026-08-26
+   확인). 새 androidx 라이브러리를 붙일 때마다 미러가 필요하다고 지레짐작하지 말고, 그룹 자체가 이미
+   멀티플랫폼인지부터 Gradle 캐시(`~/.gradle/caches/modules-2/files-2.1/<group>/<artifact>-iossimulatorarm64`
+   디렉터리 존재 여부)나 실제 iOS 컴파일로 먼저 확인할 것.
+2. **`compose.components.uiToolingPreview`는 Gradle accessor가 iOS를 안 잡아서 좌표를 문자열로 직접
+   박아야 한다** — `org.jetbrains.compose.ui:ui-tooling-preview:$버전`.
+3. **Kotlin/Native는 `init`으로 시작하는 top-level 함수를 Swift에 `doInit*`로 리네임한다**(ObjC
+   이니셜라이저 관례 회피). `initKoin()` → `doInitKoin()` — 문서에 없어서 헤더 까서 알아낸 것.
+4. **CMP accessor(`compose.ui` 등)는 Android 타깃에서 진짜 AndroidX 아티팩트로 치환되는데, 그 진짜
+   아티팩트엔 없고 CMP 전용 모듈에만 있는 것들이 있다** — 예: `androidx.compose.ui.backhandler.BackHandler`
+   (`org.jetbrains.compose.ui:ui-backhandler`)가 그렇다. 이런 건 iOS에서는 accessor 경유로 전이
+   의존성에 묻어와서 컴파일되는데 **Android에서는 `Unresolved reference`로 깨진다** — 2번 패턴과
+   똑같이 좌표를 직접 선언해야 두 플랫폼 다 된다. "iOS는 됐는데 Android가 깨진다"는 순서로도 이 문제가
+   나올 수 있다는 걸 기억할 것(지금까지는 반대 방향, "iOS가 깨진다"만 겪었음).
+5. **androidx 그룹인데 iOS 타깃이 전혀 없는 것도 있다** — `androidx.activity`, `androidx.core`
+   그룹은 통째로 Android 전용(Activity/Context에 강하게 묶인 API라 애초에 멀티플랫폼이 될 수 없음).
+   이런 건 좌표를 아무리 바꿔도 안 되고 `expect/actual`로 플랫폼별 재구현이 필요하다 — 카메라/갤러리
+   피커(`chat`)가 이 경우.
 
 ## 참고 자료
 
