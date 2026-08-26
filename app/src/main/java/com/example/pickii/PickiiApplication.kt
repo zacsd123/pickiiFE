@@ -5,12 +5,14 @@ import android.util.Log
 import com.example.pickii.data.local.TokenStore
 import com.example.pickii.data.local.pickiiApplicationContext
 import com.example.pickii.data.notification.FcmTokenRegistrar
-import com.example.pickii.di.calendarRepositoryModule
 import com.example.pickii.di.infraModule
 import com.example.pickii.di.networkModule
 import com.example.pickii.di.repositoryModule
+import com.example.pickii.di.sharedCalendarRepositoryModule
 import com.example.pickii.di.sharedInfraModule
 import com.example.pickii.di.sharedModule
+import com.example.pickii.di.sharedNetworkModule
+import com.example.pickii.di.sharedRepositoryModule
 import com.example.pickii.di.viewModelModule
 import com.example.pickii.util.debugRemainingValiditySeconds
 import com.kakao.sdk.common.KakaoSdk
@@ -37,9 +39,11 @@ class PickiiApplication : Application() {
                 infraModule,
                 networkModule,
                 repositoryModule,
-                calendarRepositoryModule,
                 viewModelModule,
                 sharedInfraModule,
+                sharedNetworkModule,
+                sharedRepositoryModule,
+                sharedCalendarRepositoryModule,
                 sharedModule
             )
         }

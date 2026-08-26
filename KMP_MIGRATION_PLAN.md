@@ -98,13 +98,23 @@ Pickii/
   Feedback, Calendar, MeetingPoll, Recruit, Chat(멀티파트 이미지 업로드 포함) 전부
 - [x] `data/remote/dto/*.kt`는 그대로 유지 (kotlinx.serialization 기반이라 손댈 것 거의 없음)
 - [x] `data/repository/*ApiRepository.kt` 13개 전부 새 API 서비스 연결로 교체 — 완료(2026-08-24)
-- [ ] `TokenStore`, `DeviceIdProvider`, `SavedMeetingScheduleStore` — DataStore는 유지, 파일 경로 생성부만 `expect/actual`
+- [x] `TokenStore`, `DeviceIdProvider`, `SavedMeetingScheduleStore` — shared/commonMain으로 이식 완료(2026-08-26).
+  DataStore는 `androidx.datastore:datastore-preferences`가 1.1.0부터 진짜 멀티플랫폼인 걸 실측 확인,
+  `PreferenceDataStoreFactory.createWithPath` + 파일 경로 생성부 expect/actual로 교체
 - [ ] `data/remote/socket/ChatStompClient.kt` — `krossbow-websocket-okhttp` → `krossbow-websocket-ktor`
   (Retrofit 제거 시점(2026-08-24)에는 손대지 않음 — OkHttpClient 싱글턴이 아직 이걸 위해 남아있음)
 - [x] `java.time` 사용처(`DateFormatter`, `DateTimeExt`, `ScheduleRecurrence` 등) → `kotlinx-datetime`으로 교체 — Phase 1 마무리하면서 앞당겨 완료(2026-08-22). 66개 파일 전환, 특성화 테스트 2개로 동작 동일함 검증. 발견한 이상한 점/개선 메모는 `PROGRESS_kmp-migration.md` 3번 참고
 - [x] Koin 모듈로 DI 전면 전환 완료 (`di/NetworkModule.kt`, `di/RepositoryModule.kt`, `di/CalendarRepositoryModule.kt`) —
   Hilt·KSP 완전 제거 및 Retrofit 계열(Retrofit/AuthInterceptor/TokenAuthenticator/okhttp-logging-interceptor)
-  전부 걷어낸 상태로 확인됨(2026-08-24)
+  전부 걷어낸 상태로 확인됨(2026-08-24). **정정(2026-08-26)**: 이 체크는 "Hilt를 걷어냈다"는 뜻으로는
+  맞지만, 그때 만든 4개 Koin 모듈이 전부 `app/`에만 있었고 실제 리포지토리 구현체(`data/repository/*.kt`
+  15개)도 전부 `app/`에 있어서 **iOS의 `initKoin()`은 이 시점까지 리포지토리를 하나도 못 찾는 상태였다**
+  — 컴파일은 되지만 실행하면 `NoDefinitionFoundException`으로 크래시(onboarding 카나리아로 실측
+  발견, Batch 1 진행 중). Chat/FCM 관련 2개(`ChatApiRepository`, FCM 토큰 조회)를 뺀 13개 리포지토리와
+  3개 Koin 모듈(`SharedNetworkModule`/`SharedRepositoryModule`/`SharedCalendarRepositoryModule`)을
+  shared로 옮기고 `initKoin()`/`PickiiApplication`이 전부 로드하도록 연결해서(2026-08-26)
+  onboarding이 iOS에서 실제로 백엔드 호출까지 도달하는 걸 확인함(당시 백엔드 자체가 내려가 있어서
+  UI 에러 상태까지만 확인 — 아래 참고)
 
 ### Phase 3 — 리소스 시스템 이식
 
@@ -302,6 +312,19 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
    나서야 캐시 문제가 아니라 진짜 이름 충돌이라는 걸 확인). shared 쪽 파일명을 `SharedInfraModule.kt`로
    바꾸니 바로 해결됨 — **app의 `di/*Module.kt`와 짝이 되는 shared 버전을 만들 때는 파일명 앞에
    `Shared`를 붙이는 걸 기본으로 할 것**(이미 `SharedModule.kt`가 이 관례를 따르고 있었음).
+9. **KMP `sourceSets { androidMain.dependencies { ... } }` 블록에서 `platform(...)`은 하드 에러다** —
+   `fun platform(notation: Any): Dependency`가 Kotlin 2.3에서 제거 예정으로 표시돼 있는데(KT-58759),
+   이 DSL 컨텍스트에서는 경고가 아니라 스크립트 컴파일 자체가 실패한다. `implementation(platform(libs.firebase.bom))`
+   같은 코드가 `shared/build.gradle.kts`에서 막혀서(app/build.gradle.kts에서는 같은 코드가 멀쩡히
+   동작함 — 진입점 DSL이 다름), BOM 없이 버전을 `libs.versions.toml`에 직접 명시하는 걸로 우회했다
+   (`firebase-messaging`, Firebase 리포지토리 이식 중 실측).
+10. **onboarding 카나리아로 리포지토리 레이어 DI를 실제로 검증하던 중, 백엔드 자체가 내려가 있는 걸
+    발견했다**(`pikiibackend-production.up.railway.app`가 모든 경로에서 Railway의
+    `{"status":"error","code":404,"message":"Application not found"}`를 반환 — 호스트 머신 `curl`로도
+    재현됨, 우리 Ktor/Darwin 코드 문제가 아님이 확인됨). iOS 화면이 "목록을 불러오지 못했어요" 에러
+    상태를 정상적으로 보여준 것 자체가 Ktor 엔진→Auth 플러그인→에러 파싱→ViewModel→UI로 이어지는
+    파이프라인이 iOS에서 끝까지 동작한다는 증거이긴 하지만, **실제 데이터가 로딩되는 것까지는 아직
+    확인 못 했다** — 백엔드가 다시 올라오면 재확인 필요.
 
 ## 참고 자료
 

@@ -1,58 +1,17 @@
 package com.example.pickii.di
 
 import android.content.Context
-import com.example.pickii.data.repository.AccountApiRepository
-import com.example.pickii.data.repository.ApplicantApiRepository
 import com.example.pickii.data.repository.ChatApiRepository
-import com.example.pickii.data.repository.FeedbackApiRepository
-import com.example.pickii.data.repository.MeetingPollApiRepository
-import com.example.pickii.data.repository.MyPageActivityApiRepository
-import com.example.pickii.data.repository.NotificationApiRepository
-import com.example.pickii.data.repository.NotificationSettingsApiRepository
-import com.example.pickii.data.repository.ProfileApiRepository
-import com.example.pickii.data.repository.ProjectApiRepository
-import com.example.pickii.data.repository.RecruitApiRepository
-import com.example.pickii.data.repository.RecruitAuthSessionRepository
-import com.example.pickii.data.repository.RecruitMasterDataRepository
-import com.example.pickii.data.repository.SignupApiRepository
-import com.example.pickii.domain.repository.AccountRepository
-import com.example.pickii.domain.repository.ApplicantRepository
 import com.example.pickii.domain.repository.ChatRepository
-import com.example.pickii.domain.repository.FeedbackRepository
-import com.example.pickii.domain.repository.MasterDataRepository
-import com.example.pickii.domain.repository.MeetingPollRepository
-import com.example.pickii.domain.repository.MyPageActivityRepository
-import com.example.pickii.domain.repository.NotificationRepository
-import com.example.pickii.domain.repository.NotificationSettingsRepository
-import com.example.pickii.domain.repository.ProfileRepository
-import com.example.pickii.domain.repository.ProjectRepository
-import com.example.pickii.domain.repository.RecruitRepository
-import com.example.pickii.domain.repository.SessionRepository
-import com.example.pickii.domain.repository.SignupRepository
 import org.koin.dsl.module
 
-/** Repository 인터페이스와 실제(백엔드 연동) 구현체를 연결하는 Koin 모듈 (Hilt `RepositoryModule`을 대체). */
+/**
+ * 13개 리포지토리 바인딩은 shared의 `sharedRepositoryModule`로 옮겨갔다. `ChatRepository`만 여기
+ * 남았다 — `ChatApiRepository`가 사진 업로드에 `android.content.Context`/`Uri`를 직접 써서
+ * iOS 쪽 `expect/actual` 재구현이 끝나야(Phase 5) 옮길 수 있다.
+ */
 val repositoryModule =
     module {
-        single<SessionRepository> {
-            RecruitAuthSessionRepository(
-                authApiService = get(),
-                tokenStore = get(),
-                deviceIdProvider = get(),
-                profileRepository = get(),
-                notificationRepository = get()
-            )
-        }
-        single<RecruitRepository> {
-            RecruitApiRepository(recruitApiService = get(), masterDataRepository = get())
-        }
-        single<MasterDataRepository> { RecruitMasterDataRepository(masterDataApiService = get()) }
-        single<SignupRepository> { SignupApiRepository(authApiService = get()) }
-        single<ProfileRepository> { ProfileApiRepository(profileApiService = get()) }
-        single<MyPageActivityRepository> { MyPageActivityApiRepository(apiService = get()) }
-        single<AccountRepository> { AccountApiRepository(authApiService = get()) }
-        single<NotificationSettingsRepository> { NotificationSettingsApiRepository(apiService = get()) }
-        single<FeedbackRepository> { FeedbackApiRepository(apiService = get()) }
         single<ChatRepository> {
             ChatApiRepository(
                 context = get<Context>(),
@@ -61,8 +20,4 @@ val repositoryModule =
                 projectRepository = get()
             )
         }
-        single<ApplicantRepository> { ApplicantApiRepository(apiService = get()) }
-        single<NotificationRepository> { NotificationApiRepository(apiService = get()) }
-        single<MeetingPollRepository> { MeetingPollApiRepository(apiService = get()) }
-        single<ProjectRepository> { ProjectApiRepository(apiService = get()) }
     }

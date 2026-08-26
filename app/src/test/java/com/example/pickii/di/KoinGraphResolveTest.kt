@@ -97,9 +97,11 @@ class KoinGraphResolveTest : KoinTest {
                 infraModule,
                 networkModule,
                 repositoryModule,
-                calendarRepositoryModule,
                 viewModelModule,
                 sharedInfraModule,
+                sharedNetworkModule,
+                sharedRepositoryModule,
+                sharedCalendarRepositoryModule,
                 sharedModule
             )
         }

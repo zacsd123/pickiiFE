@@ -9,6 +9,6 @@ import org.koin.core.context.startKoin
  */
 fun initKoin() {
     startKoin {
-        modules(sharedInfraModule, sharedModule)
+        modules(sharedInfraModule, sharedNetworkModule, sharedRepositoryModule, sharedCalendarRepositoryModule, sharedModule)
     }
 }

@@ -2,6 +2,7 @@ package com.example.pickii.data.repository
 
 import com.example.pickii.data.local.DeviceIdProvider
 import com.example.pickii.data.local.TokenStore
+import com.example.pickii.data.notification.currentFcmToken
 import com.example.pickii.data.remote.api.AuthApiService
 import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.LoginRequest
@@ -16,7 +17,6 @@ import com.example.pickii.domain.repository.SessionRepository
 import com.example.pickii.util.decodeJwtSubject
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 /**
  * `POST /auth/login`으로 실제 로그인을 수행하는 Repository.
@@ -131,7 +130,7 @@ class RecruitAuthSessionRepository
          * `DELETE /devices` 요청 자체가 401로 거부된다.
          */
         private suspend fun unregisterDeviceToken() {
-            val token = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull() ?: return
+            val token = currentFcmToken() ?: return
             notificationRepository.unregisterDevice(token)
         }
 

@@ -30,9 +30,11 @@ class KoinModuleVerifyTest {
                 infraModule,
                 networkModule,
                 repositoryModule,
-                calendarRepositoryModule,
                 viewModelModule,
-                sharedInfraModule
+                sharedInfraModule,
+                sharedNetworkModule,
+                sharedRepositoryModule,
+                sharedCalendarRepositoryModule
             )
         }.verify(extraTypes = listOf(Context::class, SavedStateHandle::class, HttpClientEngine::class))
     }
