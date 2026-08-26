@@ -279,6 +279,15 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
    그룹은 통째로 Android 전용(Activity/Context에 강하게 묶인 API라 애초에 멀티플랫폼이 될 수 없음).
    이런 건 좌표를 아무리 바꿔도 안 되고 `expect/actual`로 플랫폼별 재구현이 필요하다 — 카메라/갤러리
    피커(`chat`)가 이 경우.
+6. **Compose 안에도 Android에서만 컴파일되는 API가 있다** — 의존성 좌표 문제가 아니라 같은
+   `androidx.compose.ui` 패키지 안에서도 생성자/오버로드 단위로 플랫폼이 갈린다. 예:
+   `PlatformTextStyle(includeFontPadding = false)`는 Android 텍스트 렌더링의 폰트 패딩 보정용
+   레거시 개념이라 iOS엔 그 생성자가 없다(`PickiiTopBar.kt`의 알림 뱃지 숫자에서 실측, `common` 이식
+   중 발견). `expect fun noFontPaddingTextStyle(): PlatformTextStyle?`로 감싸고 androidMain은
+   실제 보정값을, iosMain은 `null`(iOS는 애초에 이 보정이 필요한 폰트 패딩 문제가 없음)을 반환하게
+   했다 — 시뮬레이터로 뱃지 숫자가 원 안에 중앙 정렬되는지 실제로 확인함. **이런 건 Android
+   컴파일은 그냥 통과하고 iOS 컴파일에서만 깨지므로, 화면을 옮길 때 iOS 컴파일을 배치 끝까지 미루지
+   말고 파일 단위로 자주 돌려볼 것.**
 
 ## 참고 자료
 
