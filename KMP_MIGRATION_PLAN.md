@@ -288,6 +288,20 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
    했다 — 시뮬레이터로 뱃지 숫자가 원 안에 중앙 정렬되는지 실제로 확인함. **이런 건 Android
    컴파일은 그냥 통과하고 iOS 컴파일에서만 깨지므로, 화면을 옮길 때 iOS 컴파일을 배치 끝까지 미루지
    말고 파일 단위로 자주 돌려볼 것.**
+7. **`kotlin.jvm.Volatile`(암묵 import)는 Android 전용이다** — `@Volatile`을 아무 import 없이 쓰면
+   기본으로 `kotlin.jvm.Volatile`이 잡히는데 이건 JVM 전용이라 iOS 컴파일이
+   `Unresolved reference 'Volatile'`로 깨진다. `import kotlin.concurrent.Volatile`(진짜
+   멀티플랫폼)을 명시하면 된다(`ActiveChatRoomTracker` 이식 중 실측 확인).
+8. **app와 shared에 같은 이름의 파일이 같은 패키지로 있으면 안 된다.** Kotlin은 파일의 top-level
+   선언을 `<파일명>Kt` facade 클래스로 컴파일하는데, `app/.../di/InfraModule.kt`와
+   `shared/.../di/InfraModule.kt`가 둘 다 `com.example.pickii.di.InfraModuleKt`로 컴파일되면서
+   컴파일 클래스패스에 같은 완전정규화 클래스명이 두 개(서로 다른 jar에서) 생겼다. `:app:compileDebugKotlin`
+   (메인 컴파일)은 우연히 통과했지만 `:app:testDebugUnitTest`(테스트 컴파일)에서는 shared 쪽
+   심볼(`sharedInfraModule`)이 `Unresolved reference`로 잡혔다 — 같은 프로젝트인데 컴파일 타입에 따라
+   결과가 달라서 원인 찾기 까다로웠다(`shared/build`, `.kotlin` 캐시, Gradle 설정 캐시까지 지워보고
+   나서야 캐시 문제가 아니라 진짜 이름 충돌이라는 걸 확인). shared 쪽 파일명을 `SharedInfraModule.kt`로
+   바꾸니 바로 해결됨 — **app의 `di/*Module.kt`와 짝이 되는 shared 버전을 만들 때는 파일명 앞에
+   `Shared`를 붙이는 걸 기본으로 할 것**(이미 `SharedModule.kt`가 이 관례를 따르고 있었음).
 
 ## 참고 자료
 

@@ -1,12 +1,8 @@
 package com.example.pickii.data.local
 
-import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
-
-private val Context.savedMeetingScheduleDataStore by preferencesDataStore(name = "pickii_saved_meeting_schedule_store")
 
 private val SAVED_SCHEDULE_IDS_KEY = stringSetPreferencesKey("saved_meeting_schedule_ids")
 
@@ -17,18 +13,18 @@ private val SAVED_SCHEDULE_IDS_KEY = stringSetPreferencesKey("saved_meeting_sche
  *
  * Koin 싱글턴(`di/InfraModule.kt`).
  */
-class SavedMeetingScheduleStore(
-    private val context: Context
-) {
+class SavedMeetingScheduleStore {
+    private val dataStore = preferencesDataStore("pickii_saved_meeting_schedule_store")
+
     suspend fun getSavedIds(): Set<Long> =
-        context.savedMeetingScheduleDataStore.data
+        dataStore.data
             .first()[SAVED_SCHEDULE_IDS_KEY]
             .orEmpty()
             .mapNotNull { it.toLongOrNull() }
             .toSet()
 
     suspend fun markSaved(scheduleId: Long) {
-        context.savedMeetingScheduleDataStore.edit { prefs ->
+        dataStore.edit { prefs ->
             val current = prefs[SAVED_SCHEDULE_IDS_KEY].orEmpty()
             prefs[SAVED_SCHEDULE_IDS_KEY] = current + scheduleId.toString()
         }

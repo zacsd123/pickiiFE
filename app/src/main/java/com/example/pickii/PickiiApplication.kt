@@ -3,11 +3,13 @@ package com.example.pickii
 import android.app.Application
 import android.util.Log
 import com.example.pickii.data.local.TokenStore
+import com.example.pickii.data.local.pickiiApplicationContext
 import com.example.pickii.data.notification.FcmTokenRegistrar
 import com.example.pickii.di.calendarRepositoryModule
 import com.example.pickii.di.infraModule
 import com.example.pickii.di.networkModule
 import com.example.pickii.di.repositoryModule
+import com.example.pickii.di.sharedInfraModule
 import com.example.pickii.di.sharedModule
 import com.example.pickii.di.viewModelModule
 import com.example.pickii.util.debugRemainingValiditySeconds
@@ -28,6 +30,7 @@ class PickiiApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        pickiiApplicationContext = this
         startKoin {
             androidContext(this@PickiiApplication)
             modules(
@@ -36,6 +39,7 @@ class PickiiApplication : Application() {
                 repositoryModule,
                 calendarRepositoryModule,
                 viewModelModule,
+                sharedInfraModule,
                 sharedModule
             )
         }

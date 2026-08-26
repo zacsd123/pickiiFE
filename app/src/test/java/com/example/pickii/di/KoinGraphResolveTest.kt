@@ -62,11 +62,11 @@ import kotlin.test.assertSame
  * Koin 4.1.1의 `Module.verify()`는 static 검사라 순환·런타임 문제를 놓칠 수 있다(JVM 리플렉션 기반
  * 타입 체크일 뿐, 실제로 인스턴스를 만들어보지 않는다) — 그래서 여기서는 실제 프로덕션 모듈
  * (`infraModule`/`networkModule`/`repositoryModule`/`calendarRepositoryModule`/`viewModelModule`/
- * `sharedModule`)을 그대로 실행해서 32개 ViewModel을 하나씩 진짜로 resolve해본다.
+ * `sharedInfraModule`/`sharedModule`)을 그대로 실행해서 32개 ViewModel을 하나씩 진짜로 resolve해본다.
  *
- * `Context`는 Mockito로 만든다 — 실제 Android/Robolectric 없이 순수 JVM 테스트에서 `Context`
- * 타입이 필요한 생성자를 만족시키기 위함이고(`TokenStore` 등은 생성자에서 `Context`를 저장만 하고
- * DataStore 파일 접근은 실제 메서드 호출 시점에만 일어나므로 mock으로 충분하다), `SavedStateHandle`은
+ * `Context`는 Mockito로 만든다 — 실제 Android/Robolectric 없이 순수 JVM 테스트에서 아직 app/에 남은
+ * `ChatApiRepository`의 `Context` 생성자 인자를 만족시키기 위함이고(실제로 쓰이는 시점은 아니라 mock으로
+ * 충분하다), `SavedStateHandle`은
  * postId/memberId를 미리 채워서 5개 ViewModel의 `requireNotNull(savedStateHandle[...])` 체크를
  * 통과시킨다(실제 앱에서는 Koin의 Android `koinViewModel()`이 자동으로 채워주는 값).
  *
@@ -83,20 +83,11 @@ class KoinGraphResolveTest : KoinTest {
         startKoin {
             modules(
                 module {
-                    single<Context> {
-                        // TokenStore/DeviceIdProvider/SavedMeetingScheduleStore가 물고 있는
-                        // `preferencesDataStore` 델리게이트는 프로퍼티 초기화 시점(=생성자 실행 중)에
-                        // `context.applicationContext.filesDir`로 파일 경로를 계산한다 — Mockito
-                        // 기본 mock은 이 두 메서드가 null을 반환해서 그대로 두면 NPE가 난다.
-                        val tempDir =
-                            kotlin.io.path
-                                .createTempDirectory(prefix = "koin-graph-resolve-test")
-                                .toFile()
-                        Mockito.mock(Context::class.java).also { context ->
-                            Mockito.`when`(context.applicationContext).thenReturn(context)
-                            Mockito.`when`(context.filesDir).thenReturn(tempDir)
-                        }
-                    }
+                    // ChatApiRepository(아직 app/에 남은 Chat 전용 구현체)가 Context를 물고 있어서
+                    // 필요하다 — TokenStore/DeviceIdProvider/SavedMeetingScheduleStore는
+                    // shared/commonMain으로 옮겨가며 Context 의존을 없앴다(파일 경로 생성은
+                    // preferencesDataStoreFilePath() expect/actual이 담당).
+                    single<Context> { Mockito.mock(Context::class.java) }
                     single {
                         SavedStateHandle(
                             mapOf(ARG_POST_ID to "test-post-id", ARG_MEMBER_ID to "test-member-id")
@@ -108,6 +99,7 @@ class KoinGraphResolveTest : KoinTest {
                 repositoryModule,
                 calendarRepositoryModule,
                 viewModelModule,
+                sharedInfraModule,
                 sharedModule
             )
         }

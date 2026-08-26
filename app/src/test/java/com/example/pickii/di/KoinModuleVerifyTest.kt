@@ -26,7 +26,14 @@ class KoinModuleVerifyTest {
     @Test
     fun `모든 모듈의 바인딩이 다 있다`() {
         module {
-            includes(infraModule, networkModule, repositoryModule, calendarRepositoryModule, viewModelModule)
+            includes(
+                infraModule,
+                networkModule,
+                repositoryModule,
+                calendarRepositoryModule,
+                viewModelModule,
+                sharedInfraModule
+            )
         }.verify(extraTypes = listOf(Context::class, SavedStateHandle::class, HttpClientEngine::class))
     }
 }
