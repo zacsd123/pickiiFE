@@ -1,6 +1,5 @@
 package com.example.pickii.domain.repository
 
-import android.net.Uri
 import com.example.pickii.domain.model.ChatMessagePage
 import com.example.pickii.domain.model.ChatRoomDetail
 import com.example.pickii.domain.model.ChatRoomSummaryPage
@@ -29,10 +28,19 @@ interface ChatRepository {
         size: Int
     ): Result<ChatMessagePage>
 
-    /** [imageUri]를 검증·업로드하고 서버가 저장한 이미지 URL을 반환한다. 실제 메시지 전송은 WebSocket으로 별도 발행해야 한다. */
+    /**
+     * 이미 검증·변환된 이미지 바이트를 업로드하고 서버가 저장한 이미지 URL을 반환한다. 실제 메시지
+     * 전송은 WebSocket으로 별도 발행해야 한다.
+     *
+     * `Uri`(Android 전용) 대신 순수 바이트를 받는다 — 검증(확장자/용량)과 플랫폼 피커 결과를
+     * 바이트로 바꾸는 작업은 호출부(Android는 `Context.toChatImagePart()`, iOS는 앞으로 만들
+     * `PHPickerViewController` 연동)가 담당한다.
+     */
     suspend fun uploadImage(
         chatRoomId: Long,
-        imageUri: Uri
+        fileName: String,
+        contentType: String?,
+        imageBytes: ByteArray
     ): Result<String>
 
     suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult>

@@ -5,10 +5,12 @@ import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.profile.ProfileViewModel
 import com.example.pickii.ui.navigation.ARG_MEMBER_ID
+import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
+import com.example.pickii.ui.recruitdetail.RecruitDetailViewModel
 import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import com.example.pickii.ui.signup.SignupViewModel
 import com.example.pickii.ui.splash.SplashViewModel
@@ -41,7 +43,11 @@ class IosKoinGraphResolveTest {
         // 등록한다 — Android KoinGraphResolveTest와 동일한 이유(KoinGraphResolveTest.kt 참고).
         loadKoinModules(
             module {
-                single { SavedStateHandle(mapOf(ARG_MEMBER_ID to "test-member-id")) }
+                single {
+                    SavedStateHandle(
+                        mapOf(ARG_MEMBER_ID to "test-member-id", ARG_POST_ID to "test-post-id")
+                    )
+                }
             }
         )
     }
@@ -63,6 +69,7 @@ class IosKoinGraphResolveTest {
         koin.get<NotificationViewModel>()
         koin.get<MemberProfileViewModel>()
         koin.get<ProfileViewModel>()
+        koin.get<RecruitDetailViewModel>()
         koin.get<RecruitFormViewModel>()
     }
 }

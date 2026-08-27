@@ -1,5 +1,6 @@
 package com.example.pickii.ui.chat
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +28,8 @@ import com.example.pickii.shared.generated.resources.chat_toast_generic_error
 import com.example.pickii.shared.generated.resources.chat_toast_leader_must_delegate
 import com.example.pickii.shared.generated.resources.chat_toast_project_closed
 import com.example.pickii.shared.generated.resources.chat_toast_send_invalid_file
+import com.example.pickii.ui.chat.toChatImagePart
+import com.example.pickii.ui.chat.validateChatImage
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.nowDateTime
 import com.example.pickii.util.parseIsoOffsetDateTime
@@ -62,7 +65,8 @@ class ChatRoomViewModel
         internal val calendarRepository: CalendarRepository,
         private val projectRepository: ProjectRepository,
         private val activeChatRoomTracker: ActiveChatRoomTracker,
-        internal val savedMeetingScheduleStore: SavedMeetingScheduleStore
+        internal val savedMeetingScheduleStore: SavedMeetingScheduleStore,
+        private val context: Context
     ) : ViewModel() {
         internal val _uiState = MutableStateFlow(ChatRoomUiState())
         val uiState: StateFlow<ChatRoomUiState> = _uiState.asStateFlow()
@@ -302,8 +306,15 @@ class ChatRoomViewModel
 
             viewModelScope.launch {
                 uris.forEach { uri ->
+                    val validationError = context.validateChatImage(uri)
+                    if (validationError != null) {
+                        emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_send_invalid_file))
+                        return@forEach
+                    }
+
+                    val part = context.toChatImagePart(uri)
                     chatRepository
-                        .uploadImage(roomId, uri)
+                        .uploadImage(roomId, part.fileName, part.contentType, part.bytes)
                         .onSuccess { imageUrl ->
                             chatStompClient.sendMessage(roomId, PublishChatMessage(type = "IMAGE", imageUrl = imageUrl))
                         }.onFailure {

@@ -61,12 +61,14 @@ import kotlin.test.assertSame
 /**
  * Koin 4.1.1의 `Module.verify()`는 static 검사라 순환·런타임 문제를 놓칠 수 있다(JVM 리플렉션 기반
  * 타입 체크일 뿐, 실제로 인스턴스를 만들어보지 않는다) — 그래서 여기서는 실제 프로덕션 모듈
- * (`infraModule`/`networkModule`/`repositoryModule`/`calendarRepositoryModule`/`viewModelModule`/
- * `sharedInfraModule`/`sharedModule`)을 그대로 실행해서 32개 ViewModel을 하나씩 진짜로 resolve해본다.
+ * (`infraModule`/`networkModule`/`viewModelModule`/`sharedInfraModule`/`sharedNetworkModule`/
+ * `sharedRepositoryModule`/`sharedCalendarRepositoryModule`/`sharedModule`)을 그대로 실행해서
+ * 32개 ViewModel을 하나씩 진짜로 resolve해본다.
  *
  * `Context`는 Mockito로 만든다 — 실제 Android/Robolectric 없이 순수 JVM 테스트에서 아직 app/에 남은
- * `ChatApiRepository`의 `Context` 생성자 인자를 만족시키기 위함이고(실제로 쓰이는 시점은 아니라 mock으로
- * 충분하다), `SavedStateHandle`은
+ * `ChatRoomViewModel`의 `Context` 생성자 인자를 만족시키기 위함이고(이미지 업로드 시점에만 실제로
+ * 쓰여서 mock으로 충분하다 — `ChatApiRepository`는 `uploadImage`가 바이트만 받도록 바뀌면서 더 이상
+ * Context가 필요 없어졌고 shared로 옮겨졌다), `SavedStateHandle`은
  * postId/memberId를 미리 채워서 5개 ViewModel의 `requireNotNull(savedStateHandle[...])` 체크를
  * 통과시킨다(실제 앱에서는 Koin의 Android `koinViewModel()`이 자동으로 채워주는 값).
  *
@@ -96,7 +98,6 @@ class KoinGraphResolveTest : KoinTest {
                 },
                 infraModule,
                 networkModule,
-                repositoryModule,
                 viewModelModule,
                 sharedInfraModule,
                 sharedNetworkModule,

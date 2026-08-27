@@ -7,7 +7,6 @@ import com.example.pickii.data.local.pickiiApplicationContext
 import com.example.pickii.data.notification.FcmTokenRegistrar
 import com.example.pickii.di.infraModule
 import com.example.pickii.di.networkModule
-import com.example.pickii.di.repositoryModule
 import com.example.pickii.di.sharedCalendarRepositoryModule
 import com.example.pickii.di.sharedInfraModule
 import com.example.pickii.di.sharedModule
@@ -38,7 +37,6 @@ class PickiiApplication : Application() {
             modules(
                 infraModule,
                 networkModule,
-                repositoryModule,
                 viewModelModule,
                 sharedInfraModule,
                 sharedNetworkModule,

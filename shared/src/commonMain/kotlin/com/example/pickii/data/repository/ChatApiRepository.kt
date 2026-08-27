@@ -1,7 +1,5 @@
 package com.example.pickii.data.repository
 
-import android.content.Context
-import android.net.Uri
 import com.example.pickii.data.remote.api.ChatApiService
 import com.example.pickii.data.remote.dto.ApiEnvelope
 import com.example.pickii.data.remote.dto.ChatImageUploadResponseDto
@@ -28,23 +26,16 @@ import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.ProjectRepository
 import com.example.pickii.domain.repository.SessionRepository
-import com.example.pickii.ui.chat.ChatImageValidationError
-import com.example.pickii.ui.chat.toChatImagePart
-import com.example.pickii.ui.chat.validateChatImage
 import com.example.pickii.util.network.safeApiCall
 import com.example.pickii.util.network.safeApiCallUnit
 import com.example.pickii.util.parseIsoOffsetDateTime
 import kotlinx.datetime.LocalDate
-
-private const val ERROR_CODE_INVALID_FILE_TYPE = "INVALID_FILE_TYPE"
-private const val ERROR_CODE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 /** 발신자 정보가 없는 시스템 메시지(예: 회의 조율 개설 알림)에 표시할 기본 발신자명. */
 private const val SYSTEM_SENDER_NICKNAME = "시스템"
 
 /** `8. Chat` REST API로 [ChatRepository]를 구현한다. DTO ↔ 도메인 매핑을 전담한다. */
 class ChatApiRepository(
-    private val context: Context,
     private val chatApiService: ChatApiService,
     private val sessionRepository: SessionRepository,
     private val projectRepository: ProjectRepository
@@ -98,21 +89,13 @@ class ChatApiRepository(
 
     override suspend fun uploadImage(
         chatRoomId: Long,
-        imageUri: Uri
-    ): Result<String> {
-        when (context.validateChatImage(imageUri)) {
-            ChatImageValidationError.InvalidFileType ->
-                return Result.failure(chatValidationException(ERROR_CODE_INVALID_FILE_TYPE, "허용되지 않는 파일 형식입니다."))
-            ChatImageValidationError.FileTooLarge ->
-                return Result.failure(chatValidationException(ERROR_CODE_FILE_TOO_LARGE, "파일 크기가 10MB를 초과했습니다."))
-            null -> Unit
-        }
-
-        val part = context.toChatImagePart(imageUri)
-        return safeApiCall<ApiEnvelope<ChatImageUploadResponseDto>> {
-            chatApiService.uploadImage(chatRoomId, part.fileName, part.contentType, part.bytes)
+        fileName: String,
+        contentType: String?,
+        imageBytes: ByteArray
+    ): Result<String> =
+        safeApiCall<ApiEnvelope<ChatImageUploadResponseDto>> {
+            chatApiService.uploadImage(chatRoomId, fileName, contentType, imageBytes)
         }.map { it.data.imageUrl }
-    }
 
     override suspend fun createDirectChatRoom(targetMemberId: Long): Result<DirectChatRoomResult> =
         safeApiCall<ApiEnvelope<CreateDirectChatRoomResponseDto>> {
@@ -210,12 +193,6 @@ class ChatApiRepository(
             createdAt = parseIsoOffsetDateTime(createdAt)
         )
 }
-
-private fun chatValidationException(
-    code: String,
-    message: String
-) = com.example.pickii.data.remote.dto
-    .ApiException(code, message)
 
 private fun String.toChatRoomType(): ChatRoomType =
     runCatching {

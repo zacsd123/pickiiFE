@@ -29,7 +29,6 @@ class KoinModuleVerifyTest {
             includes(
                 infraModule,
                 networkModule,
-                repositoryModule,
                 viewModelModule,
                 sharedInfraModule,
                 sharedNetworkModule,
