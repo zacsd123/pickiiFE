@@ -92,7 +92,7 @@ class SafeApiCallTest {
         }
 
     @Test
-    fun `safeApiCallUnit은 성공이면 Unit을, 실패면 ApiException을 담는다`() =
+    fun `safeApiCallUnit은 성공이면 Unit을 실패면 ApiException을 담는다`() =
         runTest {
             val okEngine = MockEngine { respond(content = "", status = HttpStatusCode.NoContent) }
             val okClient = buildClient(okEngine)

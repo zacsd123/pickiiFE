@@ -87,6 +87,10 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.ktor.client.mock)
+            // koin-core는 commonMain에 implementation으로만 있어서 테스트 소스셋엔 전이되지 않는다 —
+            // IosKoinGraphResolveTest(iosTest)가 org.koin.core.context.GlobalContext를 직접 써야 해서
+            // 명시적으로 추가했다.
+            implementation(libs.koin.core)
         }
     }
 }

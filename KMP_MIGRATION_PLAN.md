@@ -221,15 +221,26 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
 
 #### 4-2. 배치 계획
 
-- **Batch 1 (이미 해결된 의존성만 사용, 바로 진행)**: `home`, `login`, `onboarding`, `signup`,
-  `passwordreset`, `notification`, `memberprofile`, `common`(`PickiiBottomNav` 등 — 거의 모든 화면이
-  참조하므로 먼저 옮기는 게 유리), `recruitdetail`, `recruitform`, `mypage/*`(8개), `calendar/*`(4개) —
-  총 14개 영역. 여러 개씩 묶어서 진행
+- **Batch 1 (이미 해결된 의존성만 사용, 바로 진행)**: `home`, `onboarding`✅, `signup`✅,
+  `passwordreset`✅, `notification`, `memberprofile`, `common`✅(`PickiiBottomNav` 등 — 거의 모든 화면이
+  참조하므로 먼저 옮기는 게 유리), `recruitdetail`, `recruitform`, `mypage/*`(8개), `calendar/*`(4개).
+  **`login`은 이 배치에서 뺐다** — `LoginScreen.kt`가 `com.kakao.sdk.*`(Android Kakao SDK)와
+  `LocalContext`를 직접 참조해서 컴파일이 아예 안 됨(2026-08-26 실측). `KakaoAuthBridge` 추상화를
+  통한 실제 연동이 끝나야 옮길 수 있어서 Phase 5로 미뤘다(아래 참고)
 - **Batch 2 (새 의존성 붙이고 카나리아 검증 후 나머지)**: `ui-backhandler` 의존성은 이미 붙여놨으니(이번
   조사에서 실측 완료), `feedback`을 카나리아로 먼저 이식해 `BackHandler` import 교체가 실제 화면에서도
   문제없는지 확인한 뒤 `applicant`, `recruitapply` 진행
 - **Batch 3 (Phase 5와 함께, 별도 일정)**: `chat/*`(5개) — 카메라/갤러리 피커 `expect/actual` 설계가
-  먼저 끝나야 착수 가능. `navigation`(NavHost/`PickiiDestination`)은 나머지 18개를 다 옮긴 다음 마지막에
+  먼저 끝나야 착수 가능
+
+> [!IMPORTANT]
+> **`navigation`(NavHost/`PickiiDestination`) 이식은 `login`과 `chat/*` 둘 다 끝나야 가능하다.**
+> `MainActivity.kt`의 `PickiiNavHost`가 `LoginScreen`/`ChatRoute`를 포함한 19개 영역 전부를 직접
+> import해서 조립하기 때문에, NavHost 자체를 shared로 옮기려면 그 안에서 참조하는 화면 컴포저블이
+> 전부 shared에 있어야 한다. `login`은 Kakao 실연동(Phase 5), `chat`은 카메라/갤러리+WebSocket
+> 엔진 교체(Phase 5)에 각각 물려 있으므로, **결국 "화면 19개 영역 전부 이식"의 마지막 단계는 Phase 5
+> 완료 이후로 순서가 강제된다.** Batch 1~3(login·chat 제외 17개)을 끝내도 NavHost는 아직 못 옮긴다 —
+> "화면 다 옮겼는데 왜 NavHost가 안 되지" 하고 헷갈리지 않도록 여기 명시해둔다.
 
 ### Phase 5 — 플랫폼 전용 기능
 - [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
@@ -325,6 +336,23 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
     상태를 정상적으로 보여준 것 자체가 Ktor 엔진→Auth 플러그인→에러 파싱→ViewModel→UI로 이어지는
     파이프라인이 iOS에서 끝까지 동작한다는 증거이긴 하지만, **실제 데이터가 로딩되는 것까지는 아직
     확인 못 했다** — 백엔드가 다시 올라오면 재확인 필요.
+11. **`KoinGraphResolveTest`가 androidHostTest에만 있어서 iOS의 DI 그래프는 아무도 검증한 적이
+    없었다** — 항목 10의 리포지토리 DI 갭을 처음부터 못 잡은 근본 원인. `IosKoinGraphResolveTest`
+    (`shared/src/iosTest`)를 추가해서 `initKoin()`이 실제로 shared의 ViewModel 전부를 resolve하는지
+    iOS 타깃에서 직접 검증하게 했다 — 바인딩 하나를 일부러 빼고 실제로 `NoDefinitionFoundException`으로
+    실패하는 것까지 확인. 화면을 shared로 옮길 때마다 이 테스트에도 `get<...ViewModel>()` 줄을
+    추가할 것. 만들면서 나온 부산물(전부 처음으로 iOS 테스트 컴파일을 실제로 돌려봐서 드러남 —
+    이전엔 아무도 iOS 테스트를 컴파일한 적이 없었다):
+    - `org.koin.core.context.GlobalContext`가 iOS(Kotlin/Native) 타깃에서는 안 잡힌다 —
+      `org.koin.mp.KoinPlatformTools.defaultContext().get()`을 대신 써야 한다(Koin 4.1.1 실측).
+    - `koin-core`가 `commonMain`에 `implementation`으로만 선언돼 있으면 테스트 소스셋엔 전이되지
+      않는다 — `commonTest.dependencies`에 명시적으로 추가해야 했다.
+    - Kotlin/Native는 백틱 테스트 함수 이름에 **쉼표(,)**가 들어가면 심볼 이름 생성에 실패한다
+      (`SafeApiCallTest.kt`에서 실측) — Native 테스트 대상 함수 이름엔 쉼표를 피할 것(이니셜라이저
+      리네임 규칙과 같은 종류의 Kotlin/Native 심볼 제약).
+    - `HttpClientFactoryLoggingTest.kt`는 `System.setOut()`으로 표준출력을 가로채는 JVM 전용
+      기법을 써서 `commonTest`에 있으면 iOS 컴파일이 깨진다 — `androidHostTest`로 옮겼다(Android
+      전용 구현 디테일이라 이 위치가 맞다).
 
 ## 참고 자료
 
