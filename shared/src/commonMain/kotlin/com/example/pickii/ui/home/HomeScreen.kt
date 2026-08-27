@@ -77,7 +77,7 @@ import com.example.pickii.util.toCompactDisplayString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /** 필드/칩/버튼에 공통으로 사용하는 모서리 둥글기. */
 private val ChipCornerRadius = 20.dp

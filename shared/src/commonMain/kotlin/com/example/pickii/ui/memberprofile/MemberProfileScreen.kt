@@ -10,7 +10,7 @@ import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.mypage.profile.ProfileViewScreenContent
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /** 다른 회원의 프로필 조회 화면(10-1). 공고 작성자 닉네임 등에서 진입한다. */
 @Composable

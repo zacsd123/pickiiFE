@@ -1,6 +1,10 @@
 package com.example.pickii.di
 
+import com.example.pickii.ui.home.HomeViewModel
+import com.example.pickii.ui.memberprofile.MemberProfileViewModel
+import com.example.pickii.ui.mypage.profile.ProfileViewModel
 import com.example.pickii.ui.navigation.MainNavigationViewModel
+import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
 import com.example.pickii.ui.signup.SignupViewModel
@@ -20,4 +24,22 @@ val sharedModule =
         viewModel { OnboardingViewModel(masterDataRepository = get(), profileRepository = get()) }
         viewModel { SignupViewModel(signupRepository = get(), sessionRepository = get(), profileRepository = get()) }
         viewModel { PasswordResetViewModel(signupRepository = get()) }
+        viewModel {
+            HomeViewModel(
+                recruitRepository = get(),
+                masterDataRepository = get(),
+                notificationRepository = get(),
+                profileRepository = get(),
+                sessionRepository = get()
+            )
+        }
+        viewModel { NotificationViewModel(repository = get()) }
+        viewModel {
+            MemberProfileViewModel(
+                savedStateHandle = get(),
+                profileRepository = get(),
+                masterDataRepository = get()
+            )
+        }
+        viewModel { ProfileViewModel(profileRepository = get(), masterDataRepository = get()) }
     }

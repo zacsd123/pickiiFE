@@ -1,11 +1,19 @@
 package com.example.pickii.di
 
+import androidx.lifecycle.SavedStateHandle
+import com.example.pickii.ui.home.HomeViewModel
+import com.example.pickii.ui.memberprofile.MemberProfileViewModel
+import com.example.pickii.ui.mypage.profile.ProfileViewModel
+import com.example.pickii.ui.navigation.ARG_MEMBER_ID
 import com.example.pickii.ui.navigation.MainNavigationViewModel
+import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
 import com.example.pickii.ui.signup.SignupViewModel
 import com.example.pickii.ui.splash.SplashViewModel
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import org.koin.mp.KoinPlatformTools
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -27,6 +35,14 @@ class IosKoinGraphResolveTest {
     @BeforeTest
     fun setUp() {
         initKoin()
+        // SavedStateHandle을 받는 ViewModel(MemberProfileViewModel 등)은 Android koinViewModel()이
+        // Compose Navigation 스코프에서 자동으로 채워주는 값이라, 여기서는 테스트 전용으로 직접
+        // 등록한다 — Android KoinGraphResolveTest와 동일한 이유(KoinGraphResolveTest.kt 참고).
+        loadKoinModules(
+            module {
+                single { SavedStateHandle(mapOf(ARG_MEMBER_ID to "test-member-id")) }
+            }
+        )
     }
 
     @AfterTest
@@ -42,5 +58,9 @@ class IosKoinGraphResolveTest {
         koin.get<OnboardingViewModel>()
         koin.get<SignupViewModel>()
         koin.get<PasswordResetViewModel>()
+        koin.get<HomeViewModel>()
+        koin.get<NotificationViewModel>()
+        koin.get<MemberProfileViewModel>()
+        koin.get<ProfileViewModel>()
     }
 }

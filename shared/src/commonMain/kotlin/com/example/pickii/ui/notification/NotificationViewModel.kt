@@ -111,6 +111,11 @@ private fun LocalDateTime.toRelativeTimeText(): String {
         minutes < 60 -> "${minutes}분 전"
         minutes < 60 * 24 -> "${minutes / 60}시간 전"
         minutes < 60 * 24 * 7 -> "${minutes / (60 * 24)}일 전"
-        else -> "%04d.%02d.%02d".format(year, month.number, day)
+        else -> {
+            val yyyy = year.toString().padStart(4, '0')
+            val mm = month.number.toString().padStart(2, '0')
+            val dd = day.toString().padStart(2, '0')
+            "$yyyy.$mm.$dd"
+        }
     }
 }
