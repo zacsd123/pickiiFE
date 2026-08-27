@@ -7,6 +7,7 @@ import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
+import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import com.example.pickii.ui.signup.SignupViewModel
 import com.example.pickii.ui.splash.SplashViewModel
 import org.koin.core.module.dsl.viewModel
@@ -42,4 +43,12 @@ val sharedModule =
             )
         }
         viewModel { ProfileViewModel(profileRepository = get(), masterDataRepository = get()) }
+        viewModel {
+            RecruitFormViewModel(
+                savedStateHandle = get(),
+                recruitRepository = get(),
+                masterDataRepository = get(),
+                sessionRepository = get()
+            )
+        }
     }

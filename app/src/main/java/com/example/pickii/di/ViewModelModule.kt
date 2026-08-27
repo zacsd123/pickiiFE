@@ -22,12 +22,11 @@ import com.example.pickii.ui.mypage.settings.SettingsViewModel
 import com.example.pickii.ui.mypage.withdrawal.WithdrawalViewModel
 import com.example.pickii.ui.recruitapply.RecruitApplyViewModel
 import com.example.pickii.ui.recruitdetail.RecruitDetailViewModel
-import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * 아직 app/에 남아있는 ViewModel 23개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
+ * 아직 app/에 남아있는 ViewModel 22개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
  * commonMain으로 옮긴 화면의 ViewModel은 [com.example.pickii.di.sharedModule]에 따로 등록한다
  * (SplashViewModel이 첫 사례).
  *
@@ -71,14 +70,6 @@ val viewModelModule =
                 recruitRepository = get(),
                 sessionRepository = get(),
                 masterDataRepository = get()
-            )
-        }
-        viewModel {
-            RecruitFormViewModel(
-                savedStateHandle = get(),
-                recruitRepository = get(),
-                masterDataRepository = get(),
-                sessionRepository = get()
             )
         }
         viewModel {

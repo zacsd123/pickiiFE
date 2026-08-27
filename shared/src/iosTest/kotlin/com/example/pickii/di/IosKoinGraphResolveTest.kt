@@ -9,6 +9,7 @@ import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
+import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import com.example.pickii.ui.signup.SignupViewModel
 import com.example.pickii.ui.splash.SplashViewModel
 import org.koin.core.context.loadKoinModules
@@ -62,5 +63,6 @@ class IosKoinGraphResolveTest {
         koin.get<NotificationViewModel>()
         koin.get<MemberProfileViewModel>()
         koin.get<ProfileViewModel>()
+        koin.get<RecruitFormViewModel>()
     }
 }
