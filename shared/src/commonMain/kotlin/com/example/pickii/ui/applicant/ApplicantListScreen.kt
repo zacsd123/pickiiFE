@@ -58,7 +58,7 @@ import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGrayDarkText
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val ApplicantBackgroundColor = Color(0xFFF9FCA8)
 private val ApplicantCardColor = Color(0xFFFEFFF2)

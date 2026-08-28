@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.RecruitUiEvent
 import org.jetbrains.compose.resources.getString
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private enum class FeedbackScreenType {
     LIST,

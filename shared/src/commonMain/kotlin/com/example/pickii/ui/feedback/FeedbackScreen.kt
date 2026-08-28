@@ -1,6 +1,5 @@
 package com.example.pickii.ui.feedback
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pickii.shared.generated.resources.Res
@@ -30,6 +31,7 @@ import com.example.pickii.ui.feedback.component.WritableFeedbackCard
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FeedbackScreen(
     uiState: FeedbackUiState,

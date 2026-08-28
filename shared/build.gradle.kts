@@ -69,6 +69,10 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:${libs.versions.composeMultiplatform.get()}")
+            // CMP의 compose.ui accessor는 Android 타깃에서 진짜 androidx.compose.ui:ui로 치환되는데
+            // 그 아티팩트엔 ui-backhandler가 없어서, 좌표를 직접 명시해야 두 플랫폼 다 된다
+            // (KMP_MIGRATION_PLAN.md 5-4 참고).
+            implementation("org.jetbrains.compose.ui:ui-backhandler:${libs.versions.composeMultiplatform.get()}")
             implementation(libs.androidx.navigation.compose)
         }
         androidMain.dependencies {

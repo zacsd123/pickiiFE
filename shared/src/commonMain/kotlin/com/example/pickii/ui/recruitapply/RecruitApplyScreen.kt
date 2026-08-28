@@ -1,6 +1,5 @@
 package com.example.pickii.ui.recruitapply
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,7 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -78,7 +79,7 @@ import com.example.pickii.ui.theme.PickiiYellow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /** "전달 메시지"에 입력할 수 있는 최대 글자 수(화면 표시용, [RecruitApplyViewModel]과 동일한 값). */
 private const val MAX_MESSAGE_LENGTH = 300
@@ -101,6 +102,7 @@ private val SlotDotSize = 12.dp
  * @param onNavigateToLogin 로그인 화면으로 이동하는 콜백(현재 이 화면에서는 사용하지 않는다. 상세 화면에서 이미
  * 로그인 여부를 확인한 뒤에만 진입하므로, 예비로 시그니처만 맞춰 둔다)
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RecruitApplyScreen(
     onBackClick: () -> Unit = {},

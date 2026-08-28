@@ -1,6 +1,5 @@
 package com.example.pickii.ui.feedback
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,7 @@ data class FeedbackWriteInput(
 /** 서버가 요구하는 주관식 후기 최소 길이(4-10 명세: 30~500자). */
 private const val FEEDBACK_TEXT_MIN_LENGTH = 30
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FeedbackWriteScreen(
     projectTitle: String,

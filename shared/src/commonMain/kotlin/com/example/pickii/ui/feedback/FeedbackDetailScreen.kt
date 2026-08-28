@@ -1,6 +1,5 @@
 package com.example.pickii.ui.feedback
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +18,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +39,7 @@ private val FeedbackDetailCardColor = Color.White
 private val FeedbackDetailTextColor = PickiiTextDark
 private val FeedbackDetailBorderColor = Color(0xFFE4E4DF)
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FeedbackDetailScreen(
     uiState: FeedbackDetailUiState,

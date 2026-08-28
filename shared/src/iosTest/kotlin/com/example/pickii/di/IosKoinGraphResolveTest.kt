@@ -1,10 +1,12 @@
 package com.example.pickii.di
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.pickii.ui.applicant.ApplicantListViewModel
 import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
 import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
 import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
+import com.example.pickii.ui.feedback.FeedbackViewModel
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
@@ -25,6 +27,7 @@ import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
 import com.example.pickii.ui.passwordreset.PasswordResetViewModel
+import com.example.pickii.ui.recruitapply.RecruitApplyViewModel
 import com.example.pickii.ui.recruitdetail.RecruitDetailViewModel
 import com.example.pickii.ui.recruitform.RecruitFormViewModel
 import com.example.pickii.ui.signup.SignupViewModel
@@ -101,5 +104,8 @@ class IosKoinGraphResolveTest {
         koin.get<DailyCalendarViewModel>()
         koin.get<ScheduleEditorViewModel>()
         koin.get<ScheduleCategoryViewModel>()
+        koin.get<FeedbackViewModel>()
+        koin.get<RecruitApplyViewModel>()
+        koin.get<ApplicantListViewModel>()
     }
 }

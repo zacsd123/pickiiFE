@@ -227,9 +227,10 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
   **`login`은 이 배치에서 뺐다** — `LoginScreen.kt`가 `com.kakao.sdk.*`(Android Kakao SDK)와
   `LocalContext`를 직접 참조해서 컴파일이 아예 안 됨(2026-08-26 실측). `KakaoAuthBridge` 추상화를
   통한 실제 연동이 끝나야 옮길 수 있어서 Phase 5로 미뤘다(아래 참고)
-- **Batch 2 (새 의존성 붙이고 카나리아 검증 후 나머지)**: `ui-backhandler` 의존성은 이미 붙여놨으니(이번
-  조사에서 실측 완료), `feedback`을 카나리아로 먼저 이식해 `BackHandler` import 교체가 실제 화면에서도
-  문제없는지 확인한 뒤 `applicant`, `recruitapply` 진행
+- **Batch 2 (`feedback`/`applicant`/`recruitapply`, 2026-08-28 완료)** ✅: `ui-backhandler` 의존성을
+  첫 사용 커밋에 추가하고, `androidx.activity.compose.BackHandler` → `androidx.compose.ui.backhandler.BackHandler`
+  로 교체(둘 다 `@OptIn(ExperimentalComposeUiApi::class)` 필요 — 안 붙이면 컴파일 에러, 4-1의 예상과
+  일치). Android/iOS 컴파일·테스트·`IosKoinGraphResolveTest`·에뮬레이터/시뮬레이터 실기 렌더링까지 확인
 - **Batch 3 (Phase 5와 함께, 별도 일정)**: `chat/*`(5개) — 카메라/갤러리 피커 `expect/actual` 설계가
   먼저 끝나야 착수 가능
 
@@ -257,13 +258,18 @@ shared로 옮길 수 있다.**
 |---|---|---|
 | `login`(`LoginScreen.kt`, `LoginViewModel.kt`) | `com.kakao.sdk.*` 실연동 + `LocalContext` 직접 참조 | Phase 5 — `KakaoAuthBridge` 실연동 완료 시 |
 | `mypage/settings/SettingsScreen.kt` | "카카오 연동" 버튼이 `KakaoAuthClient.login(context)` 직접 호출(2026-08-27 발견) | Phase 5 — login과 동일 시점(같은 `KakaoAuthBridge`에 의존) |
-| `mypage/MyPageRoute.kt` | 미이식 `feedback`(`FeedbackRoute`) 참조 | `feedback` 이식 시(Batch 2) |
-| `feedback`, `applicant`, `recruitapply` | `BackHandler` — `ui-backhandler` 의존성은 붙였지만 실제 화면 카나리아 검증 전 | Batch 2 |
+| `mypage/MyPageRoute.kt` | `SettingsScreen.kt`(위 항목) import — `feedback` 이식(Batch 2)으로 그 이유는 없어졌지만, 여전히 app에 남은 `SettingsScreen.kt`를 참조해서 못 옮긴다 | Phase 5 — `SettingsScreen.kt`가 풀리는 시점과 동일 |
 | `chat/room`, `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`(5개 화면) + `ChatStompClient`(WebSocket) + `ChatRoomViewModel`의 `Uri`↔바이트 변환부 | `ActivityResultContracts`/`FileProvider`/`ContentResolver`/`Uri` 등 `androidx.activity`·`androidx.core` 전용 API + WebSocket 엔진, 카메라/갤러리 피커 iOS 재구현 필요 | Phase 5 |
 
 **주의**: `ChatRepository` 인터페이스와 `ChatApiRepository`(REST 구현체)는 이미 shared로 이식 완료
 (`uploadImage`가 바이트만 받도록 시그니처를 바꾼 덕분 — 위 ChatRepository 리팩터 참고). 위 표의 chat
-항목은 STOMP 실시간 송수신과 화면 자체, 사진 선택 UI에 한정된다.
+항목은 STOMP 실시간 송수신과 화면 자체, 사진 선택 UI에 한정된다. **정정(Batch 2, 2026-08-28)**: iOS 쪽에
+별도 스텁 구현체가 있는 게 아니다 — `sharedRepositoryModule`의 `ChatApiRepository` 단일 바인딩이
+Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphResolveTest`/시뮬레이터 실기 확인 둘 다
+`applicant`(`ChatRepository.createDirectChatRoom` 사용)에서 문제없이 resolve/렌더링됨을 확인했다.
+
+`feedback`/`applicant`/`recruitapply`는 Batch 2에서 이식 완료(`ui-backhandler` 의존성 포함) — 더 이상
+이 표에 없다.
 
 ### Phase 5 — 플랫폼 전용 기능
 - [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
