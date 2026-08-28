@@ -1,5 +1,9 @@
 package com.example.pickii.di
 
+import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
+import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
+import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
+import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
@@ -88,4 +92,8 @@ val sharedModule =
                 sessionRepository = get()
             )
         }
+        viewModel { MonthlyCalendarViewModel(calendarRepository = get(), notificationRepository = get()) }
+        viewModel { DailyCalendarViewModel(calendarRepository = get()) }
+        viewModel { ScheduleEditorViewModel(calendarRepository = get()) }
+        viewModel { ScheduleCategoryViewModel(calendarRepository = get()) }
     }

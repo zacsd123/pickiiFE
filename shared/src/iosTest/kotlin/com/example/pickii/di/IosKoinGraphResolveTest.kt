@@ -1,6 +1,10 @@
 package com.example.pickii.di
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
+import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
+import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
+import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
@@ -93,5 +97,9 @@ class IosKoinGraphResolveTest {
         koin.get<PasswordChangeViewModel>()
         koin.get<NotificationSettingsViewModel>()
         koin.get<WithdrawalViewModel>()
+        koin.get<MonthlyCalendarViewModel>()
+        koin.get<DailyCalendarViewModel>()
+        koin.get<ScheduleEditorViewModel>()
+        koin.get<ScheduleCategoryViewModel>()
     }
 }

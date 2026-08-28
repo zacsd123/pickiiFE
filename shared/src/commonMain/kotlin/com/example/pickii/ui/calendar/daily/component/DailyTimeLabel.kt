@@ -31,7 +31,7 @@ fun DailyTimeLabel(
 /**
  * 정수 시간을 00:00 형식으로 변환한다.
  */
-private fun formatHour(hour: Int): String = "%02d:00".format(hour)
+private fun formatHour(hour: Int): String = "${hour.toString().padStart(2, '0')}:00"
 
 @Preview(
     showBackground = true,

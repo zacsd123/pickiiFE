@@ -376,6 +376,19 @@ shared로 옮길 수 있다.**
     - `HttpClientFactoryLoggingTest.kt`는 `System.setOut()`으로 표준출력을 가로채는 JVM 전용
       기법을 써서 `commonTest`에 있으면 iOS 컴파일이 깨진다 — `androidHostTest`로 옮겼다(Android
       전용 구현 디테일이라 이 위치가 맞다).
+12. **`grep "^import android\."` 같은 import-기반 검사는 app 전용 wrapper를 경유한 Android SDK
+    의존을 못 잡는다**(2026-08-27, `mypage/settings/SettingsScreen.kt` 발견). 이 파일은
+    `com.kakao.sdk.*`를 직접 import하지 않고 `com.example.pickii.util.kakao.KakaoAuthClient`(자체
+    wrapper)를 통해서만 Kakao SDK를 쓰기 때문에 `import android\.`/`import com\.kakao\.` 패턴
+    어디에도 안 걸렸다. **화면을 옮기기 전에는 import 패턴 검사만으로 끝내지 말고, app에만 있는
+    wrapper 클래스 이름(`KakaoAuthClient`, `ChatStompClient`, `FcmTokenRegistrar` 등) 자체를 저장소
+    전체에서 검색해서 참조 화면을 역으로 찾을 것** — 4-3의 "app에 남는 것" 표가 이 방식으로 만들어졌다.
+13. **`String.format(...)`(수신자가 `String`인 vararg 버전)은 JVM 전용이라 iOS 컴파일이 깨진다**
+    (`NotificationViewModel.kt`에서 한 번, `calendar/daily/component/DailyTimeLabel.kt`의
+    `"%02d:00".format(hour)`에서 또 한 번 실측, 2026-08-27). `kotlinx.datetime`의
+    `LocalDate.format(DateTimeFormat)`/`LocalTime.format(...)`(수신자가 날짜/시간 타입)은 완전히
+    다른 함수라 이건 멀티플랫폼이라 안전 — 헷갈리지 말 것. `String.format`류는 발견 즉시
+    `padStart(n, '0')` 등 수동 문자열 조립으로 치환.
 
 ## 참고 자료
 

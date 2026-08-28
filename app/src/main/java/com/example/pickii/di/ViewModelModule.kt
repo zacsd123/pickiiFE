@@ -1,10 +1,6 @@
 package com.example.pickii.di
 
 import com.example.pickii.ui.applicant.ApplicantListViewModel
-import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
-import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
-import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
-import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
 import com.example.pickii.ui.chat.ChatListViewModel
 import com.example.pickii.ui.chat.ChatRoomViewModel
 import com.example.pickii.ui.feedback.FeedbackViewModel
@@ -14,7 +10,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * 아직 app/에 남아있는 ViewModel 10개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
+ * 아직 app/에 남아있는 ViewModel 6개를 등록하는 Koin 모듈 (Hilt `@HiltViewModel`을 대체).
  * commonMain으로 옮긴 화면의 ViewModel은 [com.example.pickii.di.sharedModule]에 따로 등록한다
  * (SplashViewModel이 첫 사례).
  *
@@ -44,10 +40,6 @@ val viewModelModule =
             )
         }
         viewModel { FeedbackViewModel(feedbackRepository = get()) }
-        viewModel { MonthlyCalendarViewModel(calendarRepository = get(), notificationRepository = get()) }
-        viewModel { DailyCalendarViewModel(calendarRepository = get()) }
-        viewModel { ScheduleEditorViewModel(calendarRepository = get()) }
-        viewModel { ScheduleCategoryViewModel(calendarRepository = get()) }
         viewModel { ChatListViewModel(chatRepository = get(), notificationRepository = get()) }
         viewModel {
             ChatRoomViewModel(
