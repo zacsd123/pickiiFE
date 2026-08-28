@@ -1,6 +1,5 @@
 package com.example.pickii.ui.mypage.settings
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.repository.AccountRepository
@@ -49,8 +48,8 @@ class SettingsViewModel
                 accountRepository
                     .linkSocialAccount("KAKAO", providerId)
                     .onSuccess { refreshSocialAccounts() }
-                    .onFailure {
-                        Log.e("SettingsViewModel", "linkSocialAccount failed", it)
+                    .onFailure { error ->
+                        println("SettingsViewModel: linkSocialAccount failed: $error")
                         onError()
                     }
             }

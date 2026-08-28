@@ -2,7 +2,18 @@ package com.example.pickii.di
 
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
+import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
+import com.example.pickii.ui.mypage.home.MyPageHomeViewModel
+import com.example.pickii.ui.mypage.mycomments.MyCommentsViewModel
+import com.example.pickii.ui.mypage.myrecruits.MyRecruitsViewModel
 import com.example.pickii.ui.mypage.profile.ProfileViewModel
+import com.example.pickii.ui.mypage.profile.edit.ProfileEditViewModel
+import com.example.pickii.ui.mypage.scraps.ScrapsViewModel
+import com.example.pickii.ui.mypage.settings.LogoutViewModel
+import com.example.pickii.ui.mypage.settings.NotificationSettingsViewModel
+import com.example.pickii.ui.mypage.settings.PasswordChangeViewModel
+import com.example.pickii.ui.mypage.settings.SettingsViewModel
+import com.example.pickii.ui.mypage.withdrawal.WithdrawalViewModel
 import com.example.pickii.ui.navigation.MainNavigationViewModel
 import com.example.pickii.ui.notification.NotificationViewModel
 import com.example.pickii.ui.onboarding.OnboardingViewModel
@@ -57,6 +68,23 @@ val sharedModule =
                 savedStateHandle = get(),
                 recruitRepository = get(),
                 masterDataRepository = get(),
+                sessionRepository = get()
+            )
+        }
+        viewModel { MyPageHomeViewModel(profileRepository = get(), notificationRepository = get()) }
+        viewModel { ProfileEditViewModel(profileRepository = get(), masterDataRepository = get()) }
+        viewModel { ApplicationsViewModel(repository = get()) }
+        viewModel { MyCommentsViewModel(repository = get()) }
+        viewModel { MyRecruitsViewModel(myPageActivityRepository = get(), recruitRepository = get()) }
+        viewModel { ScrapsViewModel(myPageActivityRepository = get(), recruitRepository = get()) }
+        viewModel { SettingsViewModel(accountRepository = get()) }
+        viewModel { LogoutViewModel(sessionRepository = get()) }
+        viewModel { PasswordChangeViewModel(accountRepository = get(), sessionRepository = get()) }
+        viewModel { NotificationSettingsViewModel(repository = get()) }
+        viewModel {
+            WithdrawalViewModel(
+                signupRepository = get(),
+                accountRepository = get(),
                 sessionRepository = get()
             )
         }

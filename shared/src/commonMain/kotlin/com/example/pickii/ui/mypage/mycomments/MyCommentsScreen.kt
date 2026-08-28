@@ -43,7 +43,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 작성한 댓글 화면(17번). 내가 쓴 댓글 목록과 "공고 글 바로가기".

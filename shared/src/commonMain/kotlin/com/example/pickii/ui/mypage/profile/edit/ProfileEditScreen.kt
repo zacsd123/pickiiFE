@@ -89,7 +89,7 @@ import com.example.pickii.ui.theme.PickiiYellowLight
 import kotlinx.datetime.YearMonth
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import com.example.pickii.ui.common.FieldLabel as CommonFieldLabel
 
 /** 모서리 둥글기(입력 필드 공통). */

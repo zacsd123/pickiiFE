@@ -54,7 +54,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 지원 현황 화면(16번). 내가 지원한 공고 목록, WAITING 상태만 취소 가능, ACCEPTED+채팅방 있으면 바로가기.

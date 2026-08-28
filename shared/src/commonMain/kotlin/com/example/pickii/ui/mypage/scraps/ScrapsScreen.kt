@@ -45,7 +45,7 @@ import com.example.pickii.util.toFullDisplayString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /** 스크랩한 공고 화면(17번). 목록에서 바로 스크랩 해제할 수 있다. */
 @Composable

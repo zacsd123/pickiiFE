@@ -59,7 +59,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.util.toFullDisplayString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 작성 공고 화면(17번). 내가 등록한 공고 목록과 지원자조회/수정/마감/추가모집/삭제 액션.

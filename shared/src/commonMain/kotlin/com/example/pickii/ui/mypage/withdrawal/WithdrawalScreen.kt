@@ -61,7 +61,7 @@ import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val FieldCornerRadius = 14.dp
 private val WithdrawWarningBackground = Color(0xFFFDECEA)

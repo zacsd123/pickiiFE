@@ -67,7 +67,7 @@ import com.example.pickii.ui.theme.PickiiYellowLight
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 마이페이지 홈. 프로필 요약(닉네임/레벨/경험치), 활동내역 5종, 설정 진입점을 보여준다.

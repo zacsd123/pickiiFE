@@ -3,7 +3,18 @@ package com.example.pickii.di
 import androidx.lifecycle.SavedStateHandle
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
+import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
+import com.example.pickii.ui.mypage.home.MyPageHomeViewModel
+import com.example.pickii.ui.mypage.mycomments.MyCommentsViewModel
+import com.example.pickii.ui.mypage.myrecruits.MyRecruitsViewModel
 import com.example.pickii.ui.mypage.profile.ProfileViewModel
+import com.example.pickii.ui.mypage.profile.edit.ProfileEditViewModel
+import com.example.pickii.ui.mypage.scraps.ScrapsViewModel
+import com.example.pickii.ui.mypage.settings.LogoutViewModel
+import com.example.pickii.ui.mypage.settings.NotificationSettingsViewModel
+import com.example.pickii.ui.mypage.settings.PasswordChangeViewModel
+import com.example.pickii.ui.mypage.settings.SettingsViewModel
+import com.example.pickii.ui.mypage.withdrawal.WithdrawalViewModel
 import com.example.pickii.ui.navigation.ARG_MEMBER_ID
 import com.example.pickii.ui.navigation.ARG_POST_ID
 import com.example.pickii.ui.navigation.MainNavigationViewModel
@@ -71,5 +82,16 @@ class IosKoinGraphResolveTest {
         koin.get<ProfileViewModel>()
         koin.get<RecruitDetailViewModel>()
         koin.get<RecruitFormViewModel>()
+        koin.get<MyPageHomeViewModel>()
+        koin.get<ProfileEditViewModel>()
+        koin.get<ApplicationsViewModel>()
+        koin.get<MyCommentsViewModel>()
+        koin.get<MyRecruitsViewModel>()
+        koin.get<ScrapsViewModel>()
+        koin.get<SettingsViewModel>()
+        koin.get<LogoutViewModel>()
+        koin.get<PasswordChangeViewModel>()
+        koin.get<NotificationSettingsViewModel>()
+        koin.get<WithdrawalViewModel>()
     }
 }

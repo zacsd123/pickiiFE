@@ -242,6 +242,29 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
 > 완료 이후로 순서가 강제된다.** Batch 1~3(login·chat 제외 17개)을 끝내도 NavHost는 아직 못 옮긴다 —
 > "화면 다 옮겼는데 왜 NavHost가 안 되지" 하고 헷갈리지 않도록 여기 명시해둔다.
 
+#### 4-3. 지금 app에 남기로 한 것 전부 (한 곳에 정리)
+
+`mypage/settings/SettingsScreen.kt`가 `KakaoAuthClient`(Android Kakao SDK 래퍼)를 직접 호출하는 걸
+발견(2026-08-27)한 뒤, "app 전용 래퍼를 경유해서 Android 전용 API를 쓰는" 케이스를 놓치기 쉽다는 게
+확인됐다(`grep "com\.kakao\."`로는 못 잡음 — `com.example.pickii.util.kakao.KakaoAuthClient`라는
+자체 wrapper 이름으로 참조하기 때문). 그래서 `KakaoAuthClient`/`ChatStompClient`/
+`FcmTokenRegistrar`/`FcmService`(app에 있는 다른 Android 전용 wrapper 전부) 참조를 저장소 전체
+(이미 이식된 shared 포함)에서 재검색해서 아래 목록이 빠짐없는지 확인했다. 새로 걸린 건 없었다 — 아래가
+현재 기준 app에 남는 것의 전부다. **이 목록이 전부 비워져야 NavHost(`PickiiNavHost`/`MainActivity`)를
+shared로 옮길 수 있다.**
+
+| 파일/영역 | 남는 이유 | 언제 풀리는지 |
+|---|---|---|
+| `login`(`LoginScreen.kt`, `LoginViewModel.kt`) | `com.kakao.sdk.*` 실연동 + `LocalContext` 직접 참조 | Phase 5 — `KakaoAuthBridge` 실연동 완료 시 |
+| `mypage/settings/SettingsScreen.kt` | "카카오 연동" 버튼이 `KakaoAuthClient.login(context)` 직접 호출(2026-08-27 발견) | Phase 5 — login과 동일 시점(같은 `KakaoAuthBridge`에 의존) |
+| `mypage/MyPageRoute.kt` | 미이식 `feedback`(`FeedbackRoute`) 참조 | `feedback` 이식 시(Batch 2) |
+| `feedback`, `applicant`, `recruitapply` | `BackHandler` — `ui-backhandler` 의존성은 붙였지만 실제 화면 카나리아 검증 전 | Batch 2 |
+| `chat/room`, `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`(5개 화면) + `ChatStompClient`(WebSocket) + `ChatRoomViewModel`의 `Uri`↔바이트 변환부 | `ActivityResultContracts`/`FileProvider`/`ContentResolver`/`Uri` 등 `androidx.activity`·`androidx.core` 전용 API + WebSocket 엔진, 카메라/갤러리 피커 iOS 재구현 필요 | Phase 5 |
+
+**주의**: `ChatRepository` 인터페이스와 `ChatApiRepository`(REST 구현체)는 이미 shared로 이식 완료
+(`uploadImage`가 바이트만 받도록 시그니처를 바꾼 덕분 — 위 ChatRepository 리팩터 참고). 위 표의 chat
+항목은 STOMP 실시간 송수신과 화면 자체, 사진 선택 UI에 한정된다.
+
 ### Phase 5 — 플랫폼 전용 기능
 - [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
 - [ ] Firebase Messaging → GitLive SDK 또는 KMPNotifier로 교체, iOS APNs 인증서 발급 및 연동
