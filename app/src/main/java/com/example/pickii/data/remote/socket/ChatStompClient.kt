@@ -6,6 +6,9 @@ import com.example.pickii.data.remote.dto.ApiError
 import com.example.pickii.data.remote.dto.ChatMessageDto
 import com.example.pickii.data.remote.dto.PublishChatMessage
 import com.example.pickii.data.remote.dto.PublishChatRead
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -15,9 +18,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.websocket.WebSockets
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.hildan.krossbow.stomp.StompClient

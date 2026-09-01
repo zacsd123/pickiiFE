@@ -46,22 +46,22 @@ private fun currentYearMonth(): YearMonth = today().let { YearMonth(it.year, it.
 
 /** 확정된 팀 일정(회의) 목록을 이번 달 기준으로 불러온다(7-15). 개인 채팅방(projectId 없음)은 건너뛴다. */
 internal fun ChatRoomViewModel.loadMeetings() {
-    val projectId = _uiState.value.projectId ?: return
+    val projectId = mutableUiState.value.projectId ?: return
     viewModelScope.launch {
         meetingPollRepository
             .getTeamSchedules(projectId, currentYearMonth())
             .onSuccess { schedules ->
-                _uiState.update { it.copy(meetings = schedules.map { schedule -> schedule.toUiModel() }) }
+                mutableUiState.update { it.copy(meetings = schedules.map { schedule -> schedule.toUiModel() }) }
             }
     }
 }
 
 /** 프로젝트 색상 지정(7-19)에 쓸 개인 캘린더 태그 목록을 불러온다(7-1, 개인 캘린더와 동일한 카테고리). */
 internal fun ChatRoomViewModel.loadScheduleCategories() {
-    if (_uiState.value.projectId == null) return
+    if (mutableUiState.value.projectId == null) return
     viewModelScope.launch {
         calendarRepository.loadCategories()
-        _uiState.update { it.copy(scheduleCategories = calendarRepository.categories.value) }
+        mutableUiState.update { it.copy(scheduleCategories = calendarRepository.categories.value) }
     }
 }
 
@@ -74,14 +74,14 @@ internal fun ChatRoomViewModel.loadScheduleCategories() {
  */
 internal fun ChatRoomViewModel.onSelectProjectColor(categoryId: Long?) {
     if (categoryId == null) {
-        _uiState.update { it.copy(selectedProjectCategoryId = null) }
+        mutableUiState.update { it.copy(selectedProjectCategoryId = null) }
         return
     }
-    val projectId = _uiState.value.projectId ?: return
+    val projectId = mutableUiState.value.projectId ?: return
     viewModelScope.launch {
         meetingPollRepository
             .setProjectScheduleColor(projectId, categoryId)
-            .onSuccess { _uiState.update { it.copy(selectedProjectCategoryId = categoryId) } }
+            .onSuccess { mutableUiState.update { it.copy(selectedProjectCategoryId = categoryId) } }
             .onFailure { emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error)) }
     }
 }
@@ -95,8 +95,8 @@ internal fun ChatRoomViewModel.onSelectProjectColor(categoryId: Long?) {
  * 각자 화면에 "회의 조율 등록" 카드로 렌더링된다(`ChatRoomViewModel.kt`의 `toUiModel()` 두 곳 참고).
  */
 internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
-    val roomId = _uiState.value.roomId
-    val projectId = _uiState.value.projectId
+    val roomId = mutableUiState.value.roomId
+    val projectId = mutableUiState.value.projectId
     if (projectId == null) {
         emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
@@ -115,7 +115,7 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
                 deadlineHours = meeting.deadlineHours,
                 memberIds = meeting.memberIds
             ).onSuccess { created ->
-                _uiState.update { it.copy(isActionMenuExpanded = false) }
+                mutableUiState.update { it.copy(isActionMenuExpanded = false) }
                 val noticeContent =
                     encodeMeetingNoticeMessage(
                         pollId = created.pollId,
@@ -139,8 +139,8 @@ internal fun ChatRoomViewModel.createMeetingPoll(meeting: QuickMeetingForm) {
  * (렌더링 조건 참고, `ChatRoomScreen.kt`), 세션이 바뀌어도 응답/종료 상태 자체는 숨겨지지 않는다.
  */
 internal fun ChatRoomViewModel.onAcknowledgeMeetingNotice(pollId: Long) {
-    if (pollId in _uiState.value.acknowledgedPollIds) return
-    _uiState.update { it.copy(acknowledgedPollIds = it.acknowledgedPollIds + pollId) }
+    if (pollId in mutableUiState.value.acknowledgedPollIds) return
+    mutableUiState.update { it.copy(acknowledgedPollIds = it.acknowledgedPollIds + pollId) }
 }
 
 /**
@@ -151,7 +151,7 @@ internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
     viewModelScope.launch {
         val now = currentYearMonth()
         (0..2).forEach { offset -> calendarRepository.loadSchedules(now.plus(offset, DateTimeUnit.MONTH)) }
-        _uiState.update { it.copy(myCalendarSchedules = calendarRepository.schedules.value) }
+        mutableUiState.update { it.copy(myCalendarSchedules = calendarRepository.schedules.value) }
     }
 }
 
@@ -160,7 +160,7 @@ internal fun ChatRoomViewModel.loadMyCalendarSchedulesForMeetingPicker() {
  * 본인 캘린더만 쓸 수 있음) 채팅방에 있는 각자가 이 버튼을 눌러야 한다 — 알려진 제약.
  */
 internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfirmedUiModel) {
-    if (confirmed.scheduleId in _uiState.value.savedMeetingScheduleIds) return
+    if (confirmed.scheduleId in mutableUiState.value.savedMeetingScheduleIds) return
     val start =
         Instant
             .fromEpochMilliseconds(
@@ -174,14 +174,14 @@ internal fun ChatRoomViewModel.onSaveMeetingToMyCalendar(confirmed: MeetingConfi
                 CalendarSchedule(
                     id = 0L,
                     title = confirmed.meetingTitle,
-                    categoryId = _uiState.value.selectedProjectCategoryId,
+                    categoryId = mutableUiState.value.selectedProjectCategoryId,
                     startDate = start.date,
                     endDate = end.date,
                     startTime = start.time,
                     endTime = end.time
                 )
             ).onSuccess {
-                _uiState.update {
+                mutableUiState.update {
                     it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + confirmed.scheduleId)
                 }
                 savedMeetingScheduleStore.markSaved(confirmed.scheduleId)
@@ -202,7 +202,7 @@ internal fun ChatRoomViewModel.ensurePollDetailsLoaded(messages: List<ChatMessag
     messages
         .mapNotNull { it.meetingNotice?.pollId }
         .distinct()
-        .filterNot { it in _uiState.value.pollDetails }
+        .filterNot { it in mutableUiState.value.pollDetails }
         .forEach { pollId -> loadPollDetail(pollId) }
 }
 
@@ -216,7 +216,7 @@ internal fun ChatRoomViewModel.ensurePollDetailsLoaded(messages: List<ChatMessag
 internal fun ChatRoomViewModel.loadPollDetail(pollId: Long) {
     viewModelScope.launch {
         meetingPollRepository.getPoll(pollId).onSuccess { poll ->
-            _uiState.update { state ->
+            mutableUiState.update { state ->
                 state.copy(
                     pollDetails = state.pollDetails + (pollId to poll),
                     myPollSelections =
@@ -243,7 +243,7 @@ internal fun ChatRoomViewModel.toggleMeetingPollSlot(
     pollId: Long,
     slotId: Long
 ) {
-    _uiState.update { state ->
+    mutableUiState.update { state ->
         val current = state.myPollSelections[pollId].orEmpty()
         val updated = if (slotId in current) current - slotId else current + slotId
         state.copy(myPollSelections = state.myPollSelections + (pollId to updated))
@@ -253,11 +253,11 @@ internal fun ChatRoomViewModel.toggleMeetingPollSlot(
 /** "회의 가능한 날짜 없음" — 선택을 한 번에 비우거나(없음 선언), 다시 전체 선택으로 되돌린다. */
 internal fun ChatRoomViewModel.toggleMeetingPollNoneAvailable(pollId: Long) {
     val allSlotIds =
-        _uiState.value.pollDetails[pollId]
+        mutableUiState.value.pollDetails[pollId]
             ?.slots
             ?.map { it.slotId }
             ?.toSet() ?: return
-    _uiState.update { state ->
+    mutableUiState.update { state ->
         val current = state.myPollSelections[pollId].orEmpty()
         val updated = if (current.isEmpty()) allSlotIds else emptySet()
         state.copy(myPollSelections = state.myPollSelections + (pollId to updated))
@@ -267,8 +267,8 @@ internal fun ChatRoomViewModel.toggleMeetingPollNoneAvailable(pollId: Long) {
 /** 카드2 "제출하기" — 가능하다고 체크한 슬롯을 뒤집어(전체 - 체크) 불가 슬롯 목록으로 제출한다(7-12,
  * API가 "불가능한 슬롯만" 받는다). */
 internal fun ChatRoomViewModel.submitMeetingPollResponse(pollId: Long) {
-    val poll = _uiState.value.pollDetails[pollId] ?: return
-    val myAvailableSlotIds = _uiState.value.myPollSelections[pollId].orEmpty()
+    val poll = mutableUiState.value.pollDetails[pollId] ?: return
+    val myAvailableSlotIds = mutableUiState.value.myPollSelections[pollId].orEmpty()
     val unavailableSlotIds = poll.slots.map { it.slotId }.filterNot { it in myAvailableSlotIds }
     viewModelScope.launch {
         meetingPollRepository
@@ -292,13 +292,13 @@ internal fun ChatRoomViewModel.onConfirmSlotClick(
 
 /** 미응답자가 있어도 그대로 확정한다. */
 internal fun ChatRoomViewModel.onForceConfirmConfirm() {
-    val (pollId, slotId) = _uiState.value.pendingForceConfirm ?: return
+    val (pollId, slotId) = mutableUiState.value.pendingForceConfirm ?: return
     confirmMeetingPollSlot(pollId, slotId, force = true)
 }
 
 /** 미응답자 확인 팝업을 닫는다. */
 internal fun ChatRoomViewModel.onForceConfirmDismiss() {
-    _uiState.update { it.copy(pendingForceConfirm = null) }
+    mutableUiState.update { it.copy(pendingForceConfirm = null) }
 }
 
 /** 진행 중인 조율을 취소한다(7-14, 프로젝트장 전용). 확정 전이면 그냥 취소, 확정 후라면 팀 일정도 함께 제거된다. */
@@ -326,14 +326,14 @@ private fun ChatRoomViewModel.confirmMeetingPollSlot(
     slotId: Long,
     force: Boolean
 ) {
-    _uiState.update { it.copy(pendingForceConfirm = null) }
-    val poll = _uiState.value.pollDetails[pollId]
+    mutableUiState.update { it.copy(pendingForceConfirm = null) }
+    val poll = mutableUiState.value.pollDetails[pollId]
     val slot = poll?.slots?.find { it.slotId == slotId }
     if (poll == null || slot == null) {
         emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
     }
-    val roomId = _uiState.value.roomId
+    val roomId = mutableUiState.value.roomId
 
     viewModelScope.launch {
         meetingPollRepository
@@ -356,7 +356,7 @@ private fun ChatRoomViewModel.confirmMeetingPollSlot(
                 loadMeetings()
             }.onFailure { error ->
                 if (!force && error is ApiException && error.code == ERROR_CODE_UNANSWERED_EXISTS) {
-                    _uiState.update { it.copy(pendingForceConfirm = pollId to slotId) }
+                    mutableUiState.update { it.copy(pendingForceConfirm = pollId to slotId) }
                 } else {
                     emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
@@ -374,7 +374,7 @@ internal fun ChatRoomViewModel.deleteMeeting(meetingId: Long) {
         meetingPollRepository
             .deleteTeamSchedule(meetingId)
             .onSuccess {
-                _uiState.update { current ->
+                mutableUiState.update { current ->
                     current.copy(meetings = current.meetings.filterNot { it.id == meetingId })
                 }
             }.onFailure {
@@ -405,12 +405,12 @@ internal fun ChatRoomViewModel.registerScheduleDirectly(
     startTime: LocalTime,
     endTime: LocalTime
 ) {
-    val projectId = _uiState.value.projectId
+    val projectId = mutableUiState.value.projectId
     if (projectId == null) {
         emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
         return
     }
-    val roomId = _uiState.value.roomId
+    val roomId = mutableUiState.value.roomId
 
     viewModelScope.launch {
         meetingPollRepository

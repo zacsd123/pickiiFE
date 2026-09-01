@@ -68,8 +68,8 @@ class ChatRoomViewModel
         internal val savedMeetingScheduleStore: SavedMeetingScheduleStore,
         private val context: Context
     ) : ViewModel() {
-        internal val _uiState = MutableStateFlow(ChatRoomUiState())
-        val uiState: StateFlow<ChatRoomUiState> = _uiState.asStateFlow()
+        internal val mutableUiState = MutableStateFlow(ChatRoomUiState())
+        val uiState: StateFlow<ChatRoomUiState> = mutableUiState.asStateFlow()
 
         private val _events = Channel<RecruitUiEvent>(Channel.BUFFERED)
         val events: Flow<RecruitUiEvent> = _events.receiveAsFlow()
@@ -88,22 +88,22 @@ class ChatRoomViewModel
          * 방 제목/종류도 항상 이 상세 조회로 채운다(목록 화면을 거치지 않고 딥링크로 들어와도 동작하도록).
          */
         fun initializeRoom(roomId: Long) {
-            if (_uiState.value.roomId == roomId) return
+            if (mutableUiState.value.roomId == roomId) return
             activeChatRoomTracker.onRoomEntered(roomId)
-            _uiState.value = ChatRoomUiState(roomId = roomId, isLoading = true)
+            mutableUiState.value = ChatRoomUiState(roomId = roomId, isLoading = true)
 
             // 되읽기 API가 없어(ChatRoomUiState.savedMeetingScheduleIds 참고) 기기에 저장해둔 목록으로 채워야
             // 채팅방을 나갔다 다시 들어와도 이미 저장한 일정에 "저장" 버튼이 다시 뜨지 않는다.
             viewModelScope.launch {
                 val savedIds = savedMeetingScheduleStore.getSavedIds()
-                _uiState.update { it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + savedIds) }
+                mutableUiState.update { it.copy(savedMeetingScheduleIds = it.savedMeetingScheduleIds + savedIds) }
             }
 
             viewModelScope.launch {
                 val detail =
                     chatRepository.getChatRoomDetail(roomId).getOrNull()
                 if (detail == null) {
-                    _uiState.update { it.copy(isLoading = false) }
+                    mutableUiState.update { it.copy(isLoading = false) }
                     emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                     return@launch
                 }
@@ -122,7 +122,7 @@ class ChatRoomViewModel
                         .sortedBy { it.createdAt }
                         .partitionConfirmedMeetings()
 
-                _uiState.update { state ->
+                mutableUiState.update { state ->
                     state
                         .applyDetail(detail)
                         .copy(
@@ -152,16 +152,16 @@ class ChatRoomViewModel
 
         /** 화면이 다시 보일 때(ON_RESUME) 확정된 회의 목록을 최신 상태로 갱신한다. */
         fun refreshMeetings() {
-            if (_uiState.value.projectId != null) loadMeetings()
+            if (mutableUiState.value.projectId != null) loadMeetings()
         }
 
         /** 스크롤을 위로 올렸을 때 이전 메시지를 커서 기반으로 이어서 불러온다. */
         fun loadMoreMessages() {
-            val state = _uiState.value
+            val state = mutableUiState.value
             val cursor = state.nextMessageCursor
             if (!state.hasMoreMessages || state.isLoadingMoreMessages || cursor == null) return
 
-            _uiState.update { it.copy(isLoadingMoreMessages = true) }
+            mutableUiState.update { it.copy(isLoadingMoreMessages = true) }
             viewModelScope.launch {
                 chatRepository
                     .getMessages(state.roomId, cursor = cursor, size = MESSAGE_PAGE_SIZE)
@@ -171,7 +171,7 @@ class ChatRoomViewModel
                                 .map { it.toUiModel() }
                                 .filterNot { it.isMeetingPollServerNotice() }
                                 .partitionConfirmedMeetings()
-                        _uiState.update { current ->
+                        mutableUiState.update { current ->
                             val merged =
                                 (current.messages + newMessages)
                                     .distinctBy { it.id }
@@ -186,7 +186,7 @@ class ChatRoomViewModel
                         }
                         ensurePollDetailsLoaded(newMessages)
                     }.onFailure {
-                        _uiState.update { it.copy(isLoadingMoreMessages = false) }
+                        mutableUiState.update { it.copy(isLoadingMoreMessages = false) }
                         emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_room_toast_load_more_failed))
                     }
             }
@@ -209,7 +209,7 @@ class ChatRoomViewModel
 
             viewModelScope.launch {
                 chatStompClient.incomingMessages.collect { dto ->
-                    if (_uiState.value.roomId != roomId) return@collect
+                    if (mutableUiState.value.roomId != roomId) return@collect
                     val newMessage = dto.toUiModel()
 
                     // 서버가 poll 개설/확정 시 자동으로 보내는 안내 문구는 이미 [MeetingProgressCard]와 내용이
@@ -219,13 +219,13 @@ class ChatRoomViewModel
                         val confirmed = newMessage.meetingConfirmed
                         if (newMessage.type == ChatMessageType.MEETING_CONFIRMED && confirmed != null) {
                             // 확정 브로드캐스트는 새 메시지로 쌓지 않고 원래 등록공지 카드가 쓸 상태로만 흡수한다.
-                            _uiState.update { state ->
+                            mutableUiState.update { state ->
                                 state.copy(
                                     confirmedMeetings = state.confirmedMeetings + (confirmed.pollId to confirmed)
                                 )
                             }
                         } else {
-                            _uiState.update { state ->
+                            mutableUiState.update { state ->
                                 if (state.messages.any { it.id == newMessage.id }) {
                                     state
                                 } else {
@@ -253,7 +253,7 @@ class ChatRoomViewModel
          * 메시지 입력값을 변경한다.
          */
         fun updateMessageInput(message: String) {
-            _uiState.update { currentState ->
+            mutableUiState.update { currentState ->
                 currentState.copy(
                     messageInput = message
                 )
@@ -264,7 +264,7 @@ class ChatRoomViewModel
          * 추가 기능 메뉴를 열거나 닫는다.
          */
         fun toggleActionMenu() {
-            _uiState.update { currentState ->
+            mutableUiState.update { currentState ->
                 currentState.copy(
                     isActionMenuExpanded = !currentState.isActionMenuExpanded
                 )
@@ -275,7 +275,7 @@ class ChatRoomViewModel
          * 채팅방 공지를 열거나 닫는다.
          */
         fun toggleNotice() {
-            _uiState.update { currentState ->
+            mutableUiState.update { currentState ->
                 currentState.copy(
                     isNoticeExpanded = !currentState.isNoticeExpanded
                 )
@@ -284,11 +284,11 @@ class ChatRoomViewModel
 
         /** 입력한 텍스트 메시지를 WebSocket으로 발행한다. 실제 말풍선은 서버가 되돌려주는 메시지로 렌더링된다. */
         fun sendMessage() {
-            val roomId = _uiState.value.roomId
-            val content = _uiState.value.messageInput.trim()
+            val roomId = mutableUiState.value.roomId
+            val content = mutableUiState.value.messageInput.trim()
             if (content.isBlank()) return
 
-            _uiState.update { it.copy(messageInput = "", isActionMenuExpanded = false) }
+            mutableUiState.update { it.copy(messageInput = "", isActionMenuExpanded = false) }
 
             viewModelScope.launch {
                 chatStompClient.sendMessage(roomId, PublishChatMessage(type = "TEXT", message = content))
@@ -301,8 +301,8 @@ class ChatRoomViewModel
          */
         fun sendImageMessages(uris: List<Uri>) {
             if (uris.isEmpty()) return
-            val roomId = _uiState.value.roomId
-            _uiState.update { it.copy(isActionMenuExpanded = false) }
+            val roomId = mutableUiState.value.roomId
+            mutableUiState.update { it.copy(isActionMenuExpanded = false) }
 
             viewModelScope.launch {
                 uris.forEach { uri ->
@@ -329,7 +329,7 @@ class ChatRoomViewModel
 
             val registeredAt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
 
-            _uiState.update { currentState ->
+            mutableUiState.update { currentState ->
                 currentState.copy(
                     noticeContent = content.trim(),
                     noticeWriter =
@@ -347,8 +347,8 @@ class ChatRoomViewModel
          * (미확정) 선택한 팀원에게 팀장 권한을 위임한다.
          */
         fun delegateLeader(memberId: Long) {
-            val roomId = _uiState.value.roomId
-            val projectId = _uiState.value.projectId ?: return
+            val roomId = mutableUiState.value.roomId
+            val projectId = mutableUiState.value.projectId ?: return
             viewModelScope.launch {
                 chatRepository
                     .delegateLeader(projectId, memberId)
@@ -361,8 +361,8 @@ class ChatRoomViewModel
          * (미확정) 선택한 팀원을 채팅방에서 내보낸다.
          */
         fun removeMember(memberId: Long) {
-            val roomId = _uiState.value.roomId
-            val projectId = _uiState.value.projectId ?: return
+            val roomId = mutableUiState.value.roomId
+            val projectId = mutableUiState.value.projectId ?: return
             viewModelScope.launch {
                 chatRepository
                     .removeMember(projectId, memberId)
@@ -373,8 +373,8 @@ class ChatRoomViewModel
 
         /** 프로젝트를 종료한다(6-4). 성공하면 방 상세를 다시 불러와 상태 뱃지("종료")를 반영한다. */
         fun closeProject() {
-            val roomId = _uiState.value.roomId
-            val projectId = _uiState.value.projectId ?: return
+            val roomId = mutableUiState.value.roomId
+            val projectId = mutableUiState.value.projectId ?: return
             viewModelScope.launch {
                 projectRepository
                     .closeProject(projectId)
@@ -387,7 +387,7 @@ class ChatRoomViewModel
 
         /** 채팅방 나가기를 시도한다. 성공하면 [ChatRoomNavigationEvent.LeftRoom]을 발행해 목록으로 돌아가게 한다. */
         fun leaveChatRoom() {
-            val roomId = _uiState.value.roomId
+            val roomId = mutableUiState.value.roomId
             viewModelScope.launch {
                 chatRepository
                     .leaveChatRoom(roomId)
@@ -406,13 +406,13 @@ class ChatRoomViewModel
 
         /** 이 채팅방의 알림 수신 여부를 서버에 반영한다(낙관적 갱신 후 실패 시 되돌린다). */
         fun updateNotificationSetting(enabled: Boolean) {
-            val roomId = _uiState.value.roomId
-            val previous = _uiState.value.isNotificationEnabled
-            _uiState.update { it.copy(isNotificationEnabled = enabled) }
+            val roomId = mutableUiState.value.roomId
+            val previous = mutableUiState.value.isNotificationEnabled
+            mutableUiState.update { it.copy(isNotificationEnabled = enabled) }
 
             viewModelScope.launch {
                 chatRepository.updateNotification(roomId, enabled).onFailure {
-                    _uiState.update { it.copy(isNotificationEnabled = previous) }
+                    mutableUiState.update { it.copy(isNotificationEnabled = previous) }
                     emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_generic_error))
                 }
             }
@@ -421,13 +421,13 @@ class ChatRoomViewModel
         override fun onCleared() {
             super.onCleared()
             chatStompClient.disconnectAsync()
-            activeChatRoomTracker.onRoomExited(_uiState.value.roomId)
+            activeChatRoomTracker.onRoomExited(mutableUiState.value.roomId)
         }
 
         private fun refreshDetail(roomId: Long) {
             viewModelScope.launch {
                 chatRepository.getChatRoomDetail(roomId).onSuccess { detail ->
-                    _uiState.update { it.applyDetail(detail) }
+                    mutableUiState.update { it.applyDetail(detail) }
                 }
             }
         }
