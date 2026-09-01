@@ -250,16 +250,18 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
 확인됐다(`grep "com\.kakao\."`로는 못 잡음 — `com.example.pickii.util.kakao.KakaoAuthClient`라는
 자체 wrapper 이름으로 참조하기 때문). 그래서 `KakaoAuthClient`/`ChatStompClient`/
 `FcmTokenRegistrar`/`FcmService`(app에 있는 다른 Android 전용 wrapper 전부) 참조를 저장소 전체
-(이미 이식된 shared 포함)에서 재검색해서 아래 목록이 빠짐없는지 확인했다. 새로 걸린 건 없었다 — 아래가
+(이미 이식된 shared 포함)에서 재검색해서 아래 목록이 빠짐없는지 확인했다. 새로 걸린 건 없었다.
+
+**갱신(2026-09-01)**: `login`/`mypage/settings/SettingsScreen.kt`/`mypage/MyPageRoute.kt`는
+`KakaoAuthBridge` 실연동 완료로 shared 이식 끝남(아래 4-1 세션 기록 참고) — 표에서 지웠다. 아래가
 현재 기준 app에 남는 것의 전부다. **이 목록이 전부 비워져야 NavHost(`PickiiNavHost`/`MainActivity`)를
 shared로 옮길 수 있다.**
 
 | 파일/영역 | 남는 이유 | 언제 풀리는지 |
 |---|---|---|
-| `login`(`LoginScreen.kt`, `LoginViewModel.kt`) | `com.kakao.sdk.*` 실연동 + `LocalContext` 직접 참조 | Phase 5 — `KakaoAuthBridge` 실연동 완료 시 |
-| `mypage/settings/SettingsScreen.kt` | "카카오 연동" 버튼이 `KakaoAuthClient.login(context)` 직접 호출(2026-08-27 발견) | Phase 5 — login과 동일 시점(같은 `KakaoAuthBridge`에 의존) |
-| `mypage/MyPageRoute.kt` | `SettingsScreen.kt`(위 항목) import — `feedback` 이식(Batch 2)으로 그 이유는 없어졌지만, 여전히 app에 남은 `SettingsScreen.kt`를 참조해서 못 옮긴다 | Phase 5 — `SettingsScreen.kt`가 풀리는 시점과 동일 |
 | `chat/room`, `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`(5개 화면) + `ChatStompClient`(WebSocket) + `ChatRoomViewModel`의 `Uri`↔바이트 변환부 | `ActivityResultContracts`/`FileProvider`/`ContentResolver`/`Uri` 등 `androidx.activity`·`androidx.core` 전용 API + WebSocket 엔진, 카메라/갤러리 피커 iOS 재구현 필요 | Phase 5 |
+| `data/notification/FcmTokenRegistrar.kt`, `FcmService.kt` | Firebase Cloud Messaging이 Android 전용(`FirebaseMessagingService` 상속) — iOS는 APNs로 별도 구현 필요 | Phase 5(플랫폼별 재구현, 라이브러리 교체 아님) |
+| `MainActivity.kt` | Android `Activity` 자체라 shared로 옮길 대상이 아님. 그 안의 `PickiiNavHost` 조립부는 `ChatRoute` import 때문에 아직 못 옮김(login/mypage는 이제 막힘 없음) | `PickiiNavHost` 분리는 chat 이식(Phase 5) 완료 시 — `MainActivity` 자체는 항상 app에 남음 |
 
 **주의**: `ChatRepository` 인터페이스와 `ChatApiRepository`(REST 구현체)는 이미 shared로 이식 완료
 (`uploadImage`가 바이트만 받도록 시그니처를 바꾼 덕분 — 위 ChatRepository 리팩터 참고). 위 표의 chat
