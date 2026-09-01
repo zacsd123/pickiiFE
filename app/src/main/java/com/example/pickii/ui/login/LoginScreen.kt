@@ -1,6 +1,5 @@
 package com.example.pickii.ui.login
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,9 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.account_recovery_button_reset_password
+import com.example.pickii.shared.generated.resources.ic_visibility
+import com.example.pickii.shared.generated.resources.ic_visibility_off
 import com.example.pickii.shared.generated.resources.login_auto_login
 import com.example.pickii.shared.generated.resources.login_brand
 import com.example.pickii.shared.generated.resources.login_button_kakao
@@ -67,6 +66,7 @@ import com.example.pickii.shared.generated.resources.login_placeholder_password
 import com.example.pickii.shared.generated.resources.login_title
 import com.example.pickii.ui.common.ConfirmDialog
 import com.example.pickii.ui.common.FieldLabel
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.theme.KakaoLabel
 import com.example.pickii.ui.theme.KakaoYellow
 import com.example.pickii.ui.theme.PickiiFieldBackground
@@ -74,6 +74,7 @@ import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
 import com.example.pickii.util.kakao.KakaoAuthClient
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 
@@ -106,6 +107,7 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
     val kakaoNotLinkedMessage = stringResource(Res.string.login_kakao_not_linked)
     val kakaoErrorMessage = stringResource(Res.string.login_kakao_error)
@@ -130,14 +132,19 @@ fun LoginScreen(
                             onNavigateHome = onNavigateHome,
                             onNavigateOnboarding = onNavigateOnboarding,
                             onNotLinked = {
-                                Toast.makeText(context, kakaoNotLinkedMessage, Toast.LENGTH_LONG).show()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = kakaoNotLinkedMessage,
+                                        duration = SnackbarDuration.Long
+                                    )
+                                }
                             },
                             onError = {
-                                Toast.makeText(context, kakaoErrorMessage, Toast.LENGTH_SHORT).show()
+                                scope.launch { snackbarHostState.showSnackbar(kakaoErrorMessage) }
                             }
                         )
                     }.onFailure {
-                        Toast.makeText(context, kakaoErrorMessage, Toast.LENGTH_SHORT).show()
+                        scope.launch { snackbarHostState.showSnackbar(kakaoErrorMessage) }
                     }
             }
         },
@@ -225,12 +232,14 @@ private fun LoginScreenContent(
                 trailingIcon = {
                     IconButton(onClick = onTogglePasswordVisibility) {
                         Icon(
-                            imageVector =
-                                if (uiState.isPasswordVisible) {
-                                    Icons.Filled.Visibility
-                                } else {
-                                    Icons.Filled.VisibilityOff
-                                },
+                            painter =
+                                painterResource(
+                                    if (uiState.isPasswordVisible) {
+                                        Res.drawable.ic_visibility
+                                    } else {
+                                        Res.drawable.ic_visibility_off
+                                    }
+                                ),
                             contentDescription = null,
                             tint = PickiiTextGray
                         )

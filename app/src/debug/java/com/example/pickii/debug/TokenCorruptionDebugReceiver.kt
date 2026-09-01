@@ -7,6 +7,7 @@ import android.util.Log
 import com.example.pickii.data.local.TokenStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -44,4 +45,14 @@ class TokenCorruptionDebugReceiver :
             }
         }
     }
+}
+
+/**
+ * [TokenStore]는 shared/commonMain으로 옮겨지면서 이 디버그 전용 메서드를 잃었다 — 이 파일이
+ * `app/src/debug` 소스셋 전용이라 릴리스 빌드에는 아예 포함되지 않으니, 여기서 공개 API
+ * (`saveTokens`)만으로 같은 동작을 재현한다.
+ */
+private suspend fun TokenStore.debugCorruptAccessToken() {
+    val refreshToken = refreshTokenFlow.first() ?: return
+    saveTokens(accessToken = "debug-corrupted-${System.currentTimeMillis()}", refreshToken = refreshToken)
 }

@@ -3,6 +3,7 @@ package com.example.pickii.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.domain.model.ChatRoomSummary
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.repository.ChatRepository
 import com.example.pickii.domain.repository.NotificationRepository
 import com.example.pickii.shared.generated.resources.Res
@@ -184,14 +185,16 @@ private fun ChatListTab.toChatRoomType(): ChatRoomType =
  * `lastMessage`만 비어 있으면 메시지가 없는 방이 아니라 마지막 메시지가 사진이라는 뜻이므로 클라이언트가
  * 대체 문구를 채운다.
  */
-private fun ChatRoomSummary.toPreviewUiModel(): ChatRoomPreviewUiModel =
-    ChatRoomPreviewUiModel(
+private fun ChatRoomSummary.toPreviewUiModel(): ChatRoomPreviewUiModel {
+    // 크로스 모듈 스마트캐스트가 안 먹어서(lastMessage가 이제 shared 모듈 프로퍼티) 로컬 val로 받는다.
+    val message = lastMessage
+    return ChatRoomPreviewUiModel(
         id = chatRoomId,
         type = type,
         roomName = title,
         lastMessage =
             when {
-                !lastMessage.isNullOrBlank() -> lastMessage.truncateForChatListPreview()
+                !message.isNullOrBlank() -> message.truncateForChatListPreview()
                 lastMessageAt != null -> "사진을 보냈습니다."
                 else -> ""
             },
@@ -200,6 +203,7 @@ private fun ChatRoomSummary.toPreviewUiModel(): ChatRoomPreviewUiModel =
         unreadCount = unreadCount,
         isNotificationEnabled = isNotificationEnabled
     )
+}
 
 private fun ChatListUiState.roomsOf(tab: ChatListTab): List<ChatRoomPreviewUiModel> =
     if (tab == ChatListTab.GROUP) groupChatRooms else directChatRooms

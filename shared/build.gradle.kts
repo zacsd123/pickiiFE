@@ -53,6 +53,11 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
@@ -63,10 +68,21 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:${libs.versions.composeMultiplatform.get()}")
+            // CMP의 compose.ui accessor는 Android 타깃에서 진짜 androidx.compose.ui:ui로 치환되는데
+            // 그 아티팩트엔 ui-backhandler가 없어서, 좌표를 직접 명시해야 두 플랫폼 다 된다
+            // (KMP_MIGRATION_PLAN.md 5-4 참고).
+            implementation("org.jetbrains.compose.ui:ui-backhandler:${libs.versions.composeMultiplatform.get()}")
+            implementation(libs.androidx.navigation.compose)
         }
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
+            // firebase-bom(33.7.0)이 app/build.gradle.kts에서 고정하는 버전과 같다 — KMP
+            // `androidMain.dependencies {}` 블록에서는 `platform(...)`이 Kotlin 2.3에서 제거
+            // 예정인 오버로드로 잡혀 빌드가 깨져서(KT-58759) BOM 없이 버전을 직접 명시했다.
+            implementation(libs.firebase.messaging)
+            implementation(libs.kotlinx.coroutines.play.services)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -75,6 +91,10 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.ktor.client.mock)
+            // koin-core는 commonMain에 implementation으로만 있어서 테스트 소스셋엔 전이되지 않는다 —
+            // IosKoinGraphResolveTest(iosTest)가 org.koin.core.context.GlobalContext를 직접 써야 해서
+            // 명시적으로 추가했다.
+            implementation(libs.koin.core)
         }
     }
 }

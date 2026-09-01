@@ -1,0 +1,25 @@
+This project bundles the following third-party assets.
+
+## Material Design Icons (Google)
+
+Source: https://github.com/google/material-design-icons
+License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+The following files under shared/src/commonMain/composeResources/drawable/ were
+converted from the "filled", "outlined", and "round" SVG icon sets published in
+the repository above (via the @material-design-icons/svg npm distribution) into
+Android vector drawable XML, with no changes to path data:
+
+ic_add.xml, ic_arrow_back.xml, ic_arrow_forward.xml, ic_arrow_upward.xml,
+ic_bookmark.xml, ic_bookmark_border.xml, ic_build.xml, ic_campaign.xml,
+ic_chat.xml, ic_chat_bubble_outline.xml, ic_chat_bubble_outline_outlined.xml,
+ic_check_filled.xml, ic_check_rounded.xml, ic_chevron_right_filled.xml,
+ic_close_filled.xml, ic_close_outlined.xml, ic_date_range.xml,
+ic_description.xml, ic_emoji_events.xml, ic_home.xml, ic_interests.xml,
+ic_lock.xml, ic_logout.xml, ic_menu.xml, ic_notifications.xml, ic_person.xml,
+ic_person_off_filled.xml, ic_person_rounded.xml, ic_photo_camera.xml,
+ic_photo_library.xml, ic_schedule_outlined.xml, ic_search.xml, ic_settings.xml,
+ic_visibility.xml, ic_visibility_off.xml, ic_workspace_premium.xml
+
+A copy of the Apache License, Version 2.0 is available at
+http://www.apache.org/licenses/LICENSE-2.0.txt

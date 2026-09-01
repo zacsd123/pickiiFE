@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.ic_chevron_right
 import com.example.pickii.shared.generated.resources.ic_close

@@ -78,7 +78,8 @@ Pickii/
   의도했던 "로그인/홈만 좁게" 범위가 아니라 Phase 2의 13개 서비스 전체 스윕(2026-08-24)으로 같이
   완료됨
 - [ ] `HomeScreen`, `HomeViewModel`, `LoginScreen`, `LoginViewModel` → `commonMain`으로 이동
-- [ ] `PickiiBottomNav`, `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 (Compose 테마는 대부분 그대로 포팅됨)
+- [x] `theme/Color.kt`·`Theme.kt`·`Type.kt` → `commonMain`으로 이동 — Color.kt는 SplashScreen 카나리아(2026-08-25)에서 먼저 옮겨짐, Theme.kt/Type.kt는 이번(2026-08-26)에 이동. `dynamicDarkColorScheme`/`dynamicLightColorScheme`/`LocalContext`가 Android 전용 API라 commonMain에서 직접 못 불러 `dynamicColorScheme(darkTheme): ColorScheme?` expect/actual(androidMain은 실제 계산, iosMain은 `null`)로 감쌌음 — `supportsDynamicColor()` 하나만으로는 안 되고, 다이나믹 컬러 계산 자체를 expect/actual로 빼야 iOS 타깃이 컴파일됨. iOS 진입점(`MainViewController.kt`)이 `PickiiTheme { SplashScreen() }`을 그리도록 바꿔 시뮬레이터에서 테마 적용 확인(노란 그라디언트+Bold 타이포 정상 렌더링). 카운터/카카오 스파이크 화면(`SpikeScreen.kt`)은 목적을 다해 제거하고 그 자리를 이 카나리아가 대체함 — 관련 UI 테스트도 `SplashScreenUITests.swift`로 교체
+- [ ] `PickiiBottomNav`(`ui/common/`) → `commonMain`으로 이동 (남은 화면 이식과 함께, 아래 4-1 표 참고)
 - [ ] Mac에서 `iosApp` Xcode 프로젝트 생성, `ComposeUIViewController`로 진입점 연결
 - [ ] iOS 시뮬레이터에서 로그인 → 홈 화면까지 실제로 뜨는지 확인
 - [x] 카카오 로그인 iOS 연동 스파이크 — **통과(2026-08-22)**. 인터페이스+Swift 구현체 주입 방식으로 실제 로그인·토큰 획득까지 확인. 백엔드 연동/세션/토큰 갱신은 범위 밖, Phase 5에서 정식 연동 시 처리. 상세는 `PROGRESS_kmp-migration.md` 참고
@@ -97,13 +98,23 @@ Pickii/
   Feedback, Calendar, MeetingPoll, Recruit, Chat(멀티파트 이미지 업로드 포함) 전부
 - [x] `data/remote/dto/*.kt`는 그대로 유지 (kotlinx.serialization 기반이라 손댈 것 거의 없음)
 - [x] `data/repository/*ApiRepository.kt` 13개 전부 새 API 서비스 연결로 교체 — 완료(2026-08-24)
-- [ ] `TokenStore`, `DeviceIdProvider`, `SavedMeetingScheduleStore` — DataStore는 유지, 파일 경로 생성부만 `expect/actual`
+- [x] `TokenStore`, `DeviceIdProvider`, `SavedMeetingScheduleStore` — shared/commonMain으로 이식 완료(2026-08-26).
+  DataStore는 `androidx.datastore:datastore-preferences`가 1.1.0부터 진짜 멀티플랫폼인 걸 실측 확인,
+  `PreferenceDataStoreFactory.createWithPath` + 파일 경로 생성부 expect/actual로 교체
 - [ ] `data/remote/socket/ChatStompClient.kt` — `krossbow-websocket-okhttp` → `krossbow-websocket-ktor`
   (Retrofit 제거 시점(2026-08-24)에는 손대지 않음 — OkHttpClient 싱글턴이 아직 이걸 위해 남아있음)
 - [x] `java.time` 사용처(`DateFormatter`, `DateTimeExt`, `ScheduleRecurrence` 등) → `kotlinx-datetime`으로 교체 — Phase 1 마무리하면서 앞당겨 완료(2026-08-22). 66개 파일 전환, 특성화 테스트 2개로 동작 동일함 검증. 발견한 이상한 점/개선 메모는 `PROGRESS_kmp-migration.md` 3번 참고
 - [x] Koin 모듈로 DI 전면 전환 완료 (`di/NetworkModule.kt`, `di/RepositoryModule.kt`, `di/CalendarRepositoryModule.kt`) —
   Hilt·KSP 완전 제거 및 Retrofit 계열(Retrofit/AuthInterceptor/TokenAuthenticator/okhttp-logging-interceptor)
-  전부 걷어낸 상태로 확인됨(2026-08-24)
+  전부 걷어낸 상태로 확인됨(2026-08-24). **정정(2026-08-26)**: 이 체크는 "Hilt를 걷어냈다"는 뜻으로는
+  맞지만, 그때 만든 4개 Koin 모듈이 전부 `app/`에만 있었고 실제 리포지토리 구현체(`data/repository/*.kt`
+  15개)도 전부 `app/`에 있어서 **iOS의 `initKoin()`은 이 시점까지 리포지토리를 하나도 못 찾는 상태였다**
+  — 컴파일은 되지만 실행하면 `NoDefinitionFoundException`으로 크래시(onboarding 카나리아로 실측
+  발견, Batch 1 진행 중). Chat/FCM 관련 2개(`ChatApiRepository`, FCM 토큰 조회)를 뺀 13개 리포지토리와
+  3개 Koin 모듈(`SharedNetworkModule`/`SharedRepositoryModule`/`SharedCalendarRepositoryModule`)을
+  shared로 옮기고 `initKoin()`/`PickiiApplication`이 전부 로드하도록 연결해서(2026-08-26)
+  onboarding이 iOS에서 실제로 백엔드 호출까지 도달하는 걸 확인함(당시 백엔드 자체가 내려가 있어서
+  UI 에러 상태까지만 확인 — 아래 참고)
 
 ### Phase 3 — 리소스 시스템 이식
 
@@ -152,7 +163,13 @@ Pickii/
   `getLinkIcon` 반환 타입 등)를 `StringResource`/`DrawableResource`로 재설계. 커밋은 문자열/드로어블
   두 개로 분리했지만 둘 다 완전히 적용된 상태에서만 전체 모듈이 컴파일됨(Kotlin 전체 모듈 컴파일
   특성상 진짜 독립적으로 빌드되는 분할은 불가능했음)
-- [ ] `material-icons-extended` import 경로 전환
+- [x] `material-icons-extended` 제거 — 완료(2026-08-25). 실사용 아이콘이 36개뿐인데 CMP 대응
+  아티팩트(`org.jetbrains.compose.material:material-icons-extended`)는 최신 버전이 1.7.3으로 CMP
+  버전(1.10.3)보다 3단계 뒤처져 있고, 이번 마이그레이션에서 klib ABI 불일치로 이미 세 번(Koin/Ktor/
+  Krossbow) 발목 잡혔던 전례가 있어 그 리스크를 다시 지지 않기로 하고 의존성 자체를 걷어냈다. Google
+  공식 material-design-icons(Apache 2.0) SVG를 소스로 36개를 Android 벡터 XML로 변환해
+  `composeResources/drawable`에 직접 추가하고, `Icons.Filled.X` 등 26개 파일의 64개 호출부를
+  `painterResource(Res.drawable.ic_x)`로 교체했다. 라이선스 출처는 저장소 루트 `NOTICE` 파일에 기록.
 
 ### Phase 4 — 화면 이식 (권장 순서)
 지금 구조가 이미 화면 단위(`ui/기능명/`)로 잘 나뉘어 있어서, 복잡도가 낮은 것부터 순서대로 옮기는 걸 권장합니다.
@@ -164,6 +181,95 @@ Pickii/
 5. **채팅 (마지막, 가장 어려움)**: `chat/room`(`ChatRoomScreen.kt` 46KB, `ChatRoomViewModel.kt` + `+MeetingPoll.kt` 합쳐 50KB — 프로젝트에서 가장 큰 화면), `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`. WebSocket 실시간성 + 사진 업로드(`CameraCaptureUtil`, `GalleryPickerBottomSheet`) + 회의 투표 카드까지 얽혀 있어 별도 일정으로 분리 권장
 
 - [ ] 화면 이식할 때마다 Android/iOS 양쪽에서 실제 확인 (에뮬레이터만 보고 "됐다"고 판단하지 않기 — 이전 대화에서 나온 애니메이션 체감 이슈도 실기기 기준으로 재확인)
+
+#### 4-1. 남은 17개 영역 — androidx 의존성 전수 조사 (2026-08-26)
+
+Theme.kt 이식 이후 남은 영역(splash·theme 제외, `mypage`/`calendar`/`chat`는 하위 화면 포함 재귀 조사)이
+실제로 어떤 `androidx.*` import를 쓰는지 전부 grep으로 뽑고, 후보마다 로컬 Gradle 캐시의 klib 모듈
+메타데이터(`~/.gradle/caches/modules-2`)를 뒤져 iOS 타깃(`iosarm64`/`iossimulatorarm64`/`iosx64` 또는
+CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심스러운 것은 `shared`에 임시 probe 파일을
+만들어 `compileKotlinIosSimulatorArm64`/`compileDebugKotlin` 양쪽으로 실측 컴파일까지 돌려보고
+지웠다 — 이 프로젝트가 지금까지 해온 "문서 대신 실측" 방식 그대로.
+
+**이미 해결된 의존성 (컴파일 실측 완료, 그대로 옮기면 됨)**
+
+| androidx 심볼 | 실제 아티팩트/경로 | 상태 |
+|---|---|---|
+| `compose.foundation`/`material3`/`runtime`/`ui` | `org.jetbrains.compose.*` accessor | ✅ Theme/Splash 카나리아로 이미 증명됨 |
+| `androidx.compose.ui.tooling.preview.Preview` | `org.jetbrains.compose.ui:ui-tooling-preview` (좌표 직접 명시, 위 3번 패턴) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.compose.collectAsStateWithLifecycle`/`LocalLifecycleOwner` | `org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.3` (미러) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.ViewModel`/`viewModelScope` | `androidx.lifecycle:lifecycle-viewmodel:2.9.4` (미러 불필요, 진짜 멀티플랫폼) | ✅ 기존 선언 그대로 |
+| `androidx.lifecycle.Lifecycle`/`LifecycleEventObserver` | 위 lifecycle-runtime-compose가 전이 의존성으로 물고 옴 | ✅ 오늘 probe로 iOS+Android 둘 다 실측 확인, 추가 선언 불필요 |
+| `androidx.compose.animation`(`.core`) — `AnimatedVisibility`/`animateColorAsState`/`animateDpAsState`/`spring` 등 | material3/foundation이 전이 의존성으로 물고 옴 | ✅ 오늘 probe로 iOS+Android 둘 다 실측 확인, **`compose.animation` accessor를 따로 안 붙여도 됨** |
+| `androidx.lifecycle.SavedStateHandle` | 🆕 `androidx.lifecycle:lifecycle-viewmodel-savedstate:2.9.4` (lifecycle-viewmodel과 같은 버전, 역시 진짜 멀티플랫폼 — iOS klib 존재 확인) | ✅ 오늘 `libs.versions.toml`/`shared/build.gradle.kts`에 추가 + iOS 컴파일 실측 완료(별도 커밋 필요) |
+
+**새 의존성이 필요했던 것 (오늘 추가 + 실측 완료, 실제 화면 카나리아는 아직)**
+
+| androidx 심볼 | 문제 | 해결 |
+|---|---|---|
+| `androidx.activity.compose.BackHandler` (`feedback`, `applicant`, `recruitapply`에서 뒤로가기 처리용으로 씀) | `androidx.activity`는 그룹 전체가 iOS 타깃이 아예 없음(Android Activity 전용 API) | 🆕 CMP가 자체 멀티플랫폼 대체재를 이미 제공: `androidx.compose.ui.backhandler.BackHandler` (`@OptIn(ExperimentalComposeUiApi::class)` 필요, 상위 API에서 이미 `NavigationEventHandler`로 deprecated 표시되지만 아직 동작함). **주의**: CMP의 `compose.ui` accessor는 Android 타깃에서 진짜 AndroidX `ui` 아티팩트로 치환되는데, 그 아티팩트엔 `ui-backhandler`가 없어서 iOS에서만 되고 Android에서는 `Unresolved reference`로 깨짐 — `org.jetbrains.compose.ui:ui-backhandler:<버전>` 좌표를 **accessor 말고 직접** 선언해야 두 플랫폼 다 됨(2번 패턴과 같은 종류의 함정, 아래 4-2에 정리) |
+
+**진짜 새 기능(라이브러리 교체가 아니라 플랫폼별 재구현, Phase 5 범위 — 변화 없음)**
+
+| androidx 심볼 | 영역 | 비고 |
+|---|---|---|
+| `androidx.activity.result.contract.ActivityResultContracts`, `androidx.core.content.FileProvider`/`ContextCompat`, `ContentResolver` | `chat/room`, `chat/photo`(`GalleryPickerBottomSheet`, `PhotoSourceBottomSheet`) | `androidx.activity`/`androidx.core` 그룹 자체가 iOS 아티팩트가 없음(Gradle 캐시에 iOS 변형 0개, 확인 완료) — 라이브러리 좌표 교체로 안 되고 `expect/actual` + iOS는 `PHPickerViewController` 직접 구현 필요. 원래 계획(Phase 5)과 동일한 결론, 채팅을 마지막에 두는 이유가 다시 확인됨 |
+
+**추가로 확인한 것(라이브러리 문제는 아니지만 이식 시 기계적으로 고쳐야 함)**
+- `org.koin.androidx.compose.koinViewModel`(Android 전용) → `org.koin.compose.viewmodel.koinViewModel`(멀티플랫폼, Splash에서 이미 씀)로 import 한 줄 교체 — 남은 17개 영역 중 거의 전부(30개 파일)가 이 상태. 새 의존성은 아니고 이식 시 빠뜨리기 쉬운 기계적 치환이라 체크리스트에 남김
+- 화면 자체는 `androidx.navigation.*`을 직접 import하지 않음(NavController는 전부 콜백 람다로만 전달받음) — Navigation-compose 자체의 iOS 실측은 `navigation`/`common`(NavHost)을 옮기는 마지막 단계에서 처리하면 됨
+
+#### 4-2. 배치 계획
+
+- **Batch 1 (이미 해결된 의존성만 사용, 바로 진행)**: `home`, `onboarding`✅, `signup`✅,
+  `passwordreset`✅, `notification`, `memberprofile`, `common`✅(`PickiiBottomNav` 등 — 거의 모든 화면이
+  참조하므로 먼저 옮기는 게 유리), `recruitdetail`, `recruitform`, `mypage/*`(8개), `calendar/*`(4개).
+  **`login`은 이 배치에서 뺐다** — `LoginScreen.kt`가 `com.kakao.sdk.*`(Android Kakao SDK)와
+  `LocalContext`를 직접 참조해서 컴파일이 아예 안 됨(2026-08-26 실측). `KakaoAuthBridge` 추상화를
+  통한 실제 연동이 끝나야 옮길 수 있어서 Phase 5로 미뤘다(아래 참고)
+- **Batch 2 (`feedback`/`applicant`/`recruitapply`, 2026-08-28 완료)** ✅: `ui-backhandler` 의존성을
+  첫 사용 커밋에 추가하고, `androidx.activity.compose.BackHandler` → `androidx.compose.ui.backhandler.BackHandler`
+  로 교체(둘 다 `@OptIn(ExperimentalComposeUiApi::class)` 필요 — 안 붙이면 컴파일 에러, 4-1의 예상과
+  일치). Android/iOS 컴파일·테스트·`IosKoinGraphResolveTest`·에뮬레이터/시뮬레이터 실기 렌더링까지 확인
+- **Batch 3 (Phase 5와 함께, 별도 일정)**: `chat/*`(5개) — 카메라/갤러리 피커 `expect/actual` 설계가
+  먼저 끝나야 착수 가능
+
+> [!IMPORTANT]
+> **`navigation`(NavHost/`PickiiDestination`) 이식은 `login`과 `chat/*` 둘 다 끝나야 가능하다.**
+> `MainActivity.kt`의 `PickiiNavHost`가 `LoginScreen`/`ChatRoute`를 포함한 19개 영역 전부를 직접
+> import해서 조립하기 때문에, NavHost 자체를 shared로 옮기려면 그 안에서 참조하는 화면 컴포저블이
+> 전부 shared에 있어야 한다. `login`은 Kakao 실연동(Phase 5), `chat`은 카메라/갤러리+WebSocket
+> 엔진 교체(Phase 5)에 각각 물려 있으므로, **결국 "화면 19개 영역 전부 이식"의 마지막 단계는 Phase 5
+> 완료 이후로 순서가 강제된다.** Batch 1~3(login·chat 제외 17개)을 끝내도 NavHost는 아직 못 옮긴다 —
+> "화면 다 옮겼는데 왜 NavHost가 안 되지" 하고 헷갈리지 않도록 여기 명시해둔다.
+
+#### 4-3. 지금 app에 남기로 한 것 전부 (한 곳에 정리)
+
+`mypage/settings/SettingsScreen.kt`가 `KakaoAuthClient`(Android Kakao SDK 래퍼)를 직접 호출하는 걸
+발견(2026-08-27)한 뒤, "app 전용 래퍼를 경유해서 Android 전용 API를 쓰는" 케이스를 놓치기 쉽다는 게
+확인됐다(`grep "com\.kakao\."`로는 못 잡음 — `com.example.pickii.util.kakao.KakaoAuthClient`라는
+자체 wrapper 이름으로 참조하기 때문). 그래서 `KakaoAuthClient`/`ChatStompClient`/
+`FcmTokenRegistrar`/`FcmService`(app에 있는 다른 Android 전용 wrapper 전부) 참조를 저장소 전체
+(이미 이식된 shared 포함)에서 재검색해서 아래 목록이 빠짐없는지 확인했다. 새로 걸린 건 없었다 — 아래가
+현재 기준 app에 남는 것의 전부다. **이 목록이 전부 비워져야 NavHost(`PickiiNavHost`/`MainActivity`)를
+shared로 옮길 수 있다.**
+
+| 파일/영역 | 남는 이유 | 언제 풀리는지 |
+|---|---|---|
+| `login`(`LoginScreen.kt`, `LoginViewModel.kt`) | `com.kakao.sdk.*` 실연동 + `LocalContext` 직접 참조 | Phase 5 — `KakaoAuthBridge` 실연동 완료 시 |
+| `mypage/settings/SettingsScreen.kt` | "카카오 연동" 버튼이 `KakaoAuthClient.login(context)` 직접 호출(2026-08-27 발견) | Phase 5 — login과 동일 시점(같은 `KakaoAuthBridge`에 의존) |
+| `mypage/MyPageRoute.kt` | `SettingsScreen.kt`(위 항목) import — `feedback` 이식(Batch 2)으로 그 이유는 없어졌지만, 여전히 app에 남은 `SettingsScreen.kt`를 참조해서 못 옮긴다 | Phase 5 — `SettingsScreen.kt`가 풀리는 시점과 동일 |
+| `chat/room`, `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`(5개 화면) + `ChatStompClient`(WebSocket) + `ChatRoomViewModel`의 `Uri`↔바이트 변환부 | `ActivityResultContracts`/`FileProvider`/`ContentResolver`/`Uri` 등 `androidx.activity`·`androidx.core` 전용 API + WebSocket 엔진, 카메라/갤러리 피커 iOS 재구현 필요 | Phase 5 |
+
+**주의**: `ChatRepository` 인터페이스와 `ChatApiRepository`(REST 구현체)는 이미 shared로 이식 완료
+(`uploadImage`가 바이트만 받도록 시그니처를 바꾼 덕분 — 위 ChatRepository 리팩터 참고). 위 표의 chat
+항목은 STOMP 실시간 송수신과 화면 자체, 사진 선택 UI에 한정된다. **정정(Batch 2, 2026-08-28)**: iOS 쪽에
+별도 스텁 구현체가 있는 게 아니다 — `sharedRepositoryModule`의 `ChatApiRepository` 단일 바인딩이
+Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphResolveTest`/시뮬레이터 실기 확인 둘 다
+`applicant`(`ChatRepository.createDirectChatRoom` 사용)에서 문제없이 resolve/렌더링됨을 확인했다.
+
+`feedback`/`applicant`/`recruitapply`는 Batch 2에서 이식 완료(`ui-backhandler` 의존성 포함) — 더 이상
+이 표에 없다.
 
 ### Phase 5 — 플랫폼 전용 기능
 - [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
@@ -188,13 +294,107 @@ Pickii/
 - [ ] Phase 0 — Mac/Apple Developer 계정 확보
 - [ ] Phase 1 — 로그인+홈 워킹 스켈레톤으로 전체 툴체인 검증
 - [ ] Phase 2 — Retrofit/Hilt/OkHttp 계열 전면 교체
-- [ ] Phase 3 — 리소스 시스템 이식
+- [x] Phase 3 — 리소스 시스템 이식
 - [ ] Phase 4 — 화면 19개 영역 순차 이식 (채팅은 마지막)
 - [ ] Phase 5 — 카카오 로그인·푸시·카메라 등 플랫폼 전용 기능
 - [ ] Phase 6 — QA
 - [ ] Phase 7 — 배포
 
 ---
+
+## 5. 반복되는 함정 (KMP 마이그레이션 패턴)
+
+화면을 하나씩 옮길 때마다 매번 새로 부딪히는 게 아니라 이미 몇 번 확인된 패턴들. 새 화면에서 컴파일이
+안 되거나 iOS에서만 깨질 때 여기부터 의심할 것.
+
+1. **androidx 라이브러리는 iOS 타깃을 안 내는 경우가 많고, `org.jetbrains.androidx.*` 미러를 써야
+   한다.** Navigation(`org.jetbrains.androidx.navigation:navigation-compose`),
+   lifecycle-runtime-compose(`org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose`)에서 확인.
+   **단, 전부 그런 건 아니다** — `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`는 최근
+   버전(2.9.x)부터 `androidx.lifecycle` 그룹 자체가 진짜 멀티플랫폼이라 미러가 필요 없다(2026-08-26
+   확인). 새 androidx 라이브러리를 붙일 때마다 미러가 필요하다고 지레짐작하지 말고, 그룹 자체가 이미
+   멀티플랫폼인지부터 Gradle 캐시(`~/.gradle/caches/modules-2/files-2.1/<group>/<artifact>-iossimulatorarm64`
+   디렉터리 존재 여부)나 실제 iOS 컴파일로 먼저 확인할 것.
+2. **`compose.components.uiToolingPreview`는 Gradle accessor가 iOS를 안 잡아서 좌표를 문자열로 직접
+   박아야 한다** — `org.jetbrains.compose.ui:ui-tooling-preview:$버전`.
+3. **Kotlin/Native는 `init`으로 시작하는 top-level 함수를 Swift에 `doInit*`로 리네임한다**(ObjC
+   이니셜라이저 관례 회피). `initKoin()` → `doInitKoin()` — 문서에 없어서 헤더 까서 알아낸 것.
+4. **CMP accessor(`compose.ui` 등)는 Android 타깃에서 진짜 AndroidX 아티팩트로 치환되는데, 그 진짜
+   아티팩트엔 없고 CMP 전용 모듈에만 있는 것들이 있다** — 예: `androidx.compose.ui.backhandler.BackHandler`
+   (`org.jetbrains.compose.ui:ui-backhandler`)가 그렇다. 이런 건 iOS에서는 accessor 경유로 전이
+   의존성에 묻어와서 컴파일되는데 **Android에서는 `Unresolved reference`로 깨진다** — 2번 패턴과
+   똑같이 좌표를 직접 선언해야 두 플랫폼 다 된다. "iOS는 됐는데 Android가 깨진다"는 순서로도 이 문제가
+   나올 수 있다는 걸 기억할 것(지금까지는 반대 방향, "iOS가 깨진다"만 겪었음).
+5. **androidx 그룹인데 iOS 타깃이 전혀 없는 것도 있다** — `androidx.activity`, `androidx.core`
+   그룹은 통째로 Android 전용(Activity/Context에 강하게 묶인 API라 애초에 멀티플랫폼이 될 수 없음).
+   이런 건 좌표를 아무리 바꿔도 안 되고 `expect/actual`로 플랫폼별 재구현이 필요하다 — 카메라/갤러리
+   피커(`chat`)가 이 경우.
+6. **Compose 안에도 Android에서만 컴파일되는 API가 있다** — 의존성 좌표 문제가 아니라 같은
+   `androidx.compose.ui` 패키지 안에서도 생성자/오버로드 단위로 플랫폼이 갈린다. 예:
+   `PlatformTextStyle(includeFontPadding = false)`는 Android 텍스트 렌더링의 폰트 패딩 보정용
+   레거시 개념이라 iOS엔 그 생성자가 없다(`PickiiTopBar.kt`의 알림 뱃지 숫자에서 실측, `common` 이식
+   중 발견). `expect fun noFontPaddingTextStyle(): PlatformTextStyle?`로 감싸고 androidMain은
+   실제 보정값을, iosMain은 `null`(iOS는 애초에 이 보정이 필요한 폰트 패딩 문제가 없음)을 반환하게
+   했다 — 시뮬레이터로 뱃지 숫자가 원 안에 중앙 정렬되는지 실제로 확인함. **이런 건 Android
+   컴파일은 그냥 통과하고 iOS 컴파일에서만 깨지므로, 화면을 옮길 때 iOS 컴파일을 배치 끝까지 미루지
+   말고 파일 단위로 자주 돌려볼 것.**
+7. **`kotlin.jvm.Volatile`(암묵 import)는 Android 전용이다** — `@Volatile`을 아무 import 없이 쓰면
+   기본으로 `kotlin.jvm.Volatile`이 잡히는데 이건 JVM 전용이라 iOS 컴파일이
+   `Unresolved reference 'Volatile'`로 깨진다. `import kotlin.concurrent.Volatile`(진짜
+   멀티플랫폼)을 명시하면 된다(`ActiveChatRoomTracker` 이식 중 실측 확인).
+8. **app와 shared에 같은 이름의 파일이 같은 패키지로 있으면 안 된다.** Kotlin은 파일의 top-level
+   선언을 `<파일명>Kt` facade 클래스로 컴파일하는데, `app/.../di/InfraModule.kt`와
+   `shared/.../di/InfraModule.kt`가 둘 다 `com.example.pickii.di.InfraModuleKt`로 컴파일되면서
+   컴파일 클래스패스에 같은 완전정규화 클래스명이 두 개(서로 다른 jar에서) 생겼다. `:app:compileDebugKotlin`
+   (메인 컴파일)은 우연히 통과했지만 `:app:testDebugUnitTest`(테스트 컴파일)에서는 shared 쪽
+   심볼(`sharedInfraModule`)이 `Unresolved reference`로 잡혔다 — 같은 프로젝트인데 컴파일 타입에 따라
+   결과가 달라서 원인 찾기 까다로웠다(`shared/build`, `.kotlin` 캐시, Gradle 설정 캐시까지 지워보고
+   나서야 캐시 문제가 아니라 진짜 이름 충돌이라는 걸 확인). shared 쪽 파일명을 `SharedInfraModule.kt`로
+   바꾸니 바로 해결됨 — **app의 `di/*Module.kt`와 짝이 되는 shared 버전을 만들 때는 파일명 앞에
+   `Shared`를 붙이는 걸 기본으로 할 것**(이미 `SharedModule.kt`가 이 관례를 따르고 있었음).
+9. **KMP `sourceSets { androidMain.dependencies { ... } }` 블록에서 `platform(...)`은 하드 에러다** —
+   `fun platform(notation: Any): Dependency`가 Kotlin 2.3에서 제거 예정으로 표시돼 있는데(KT-58759),
+   이 DSL 컨텍스트에서는 경고가 아니라 스크립트 컴파일 자체가 실패한다. `implementation(platform(libs.firebase.bom))`
+   같은 코드가 `shared/build.gradle.kts`에서 막혀서(app/build.gradle.kts에서는 같은 코드가 멀쩡히
+   동작함 — 진입점 DSL이 다름), BOM 없이 버전을 `libs.versions.toml`에 직접 명시하는 걸로 우회했다
+   (`firebase-messaging`, Firebase 리포지토리 이식 중 실측).
+10. **onboarding 카나리아로 리포지토리 레이어 DI를 실제로 검증하던 중, 백엔드 자체가 내려가 있는 걸
+    발견했다**(`pikiibackend-production.up.railway.app`가 모든 경로에서 Railway의
+    `{"status":"error","code":404,"message":"Application not found"}`를 반환 — 호스트 머신 `curl`로도
+    재현됨, 우리 Ktor/Darwin 코드 문제가 아님이 확인됨). iOS 화면이 "목록을 불러오지 못했어요" 에러
+    상태를 정상적으로 보여준 것 자체가 Ktor 엔진→Auth 플러그인→에러 파싱→ViewModel→UI로 이어지는
+    파이프라인이 iOS에서 끝까지 동작한다는 증거이긴 하지만, **실제 데이터가 로딩되는 것까지는 아직
+    확인 못 했다** — 백엔드가 다시 올라오면 재확인 필요.
+11. **`KoinGraphResolveTest`가 androidHostTest에만 있어서 iOS의 DI 그래프는 아무도 검증한 적이
+    없었다** — 항목 10의 리포지토리 DI 갭을 처음부터 못 잡은 근본 원인. `IosKoinGraphResolveTest`
+    (`shared/src/iosTest`)를 추가해서 `initKoin()`이 실제로 shared의 ViewModel 전부를 resolve하는지
+    iOS 타깃에서 직접 검증하게 했다 — 바인딩 하나를 일부러 빼고 실제로 `NoDefinitionFoundException`으로
+    실패하는 것까지 확인. 화면을 shared로 옮길 때마다 이 테스트에도 `get<...ViewModel>()` 줄을
+    추가할 것. 만들면서 나온 부산물(전부 처음으로 iOS 테스트 컴파일을 실제로 돌려봐서 드러남 —
+    이전엔 아무도 iOS 테스트를 컴파일한 적이 없었다):
+    - `org.koin.core.context.GlobalContext`가 iOS(Kotlin/Native) 타깃에서는 안 잡힌다 —
+      `org.koin.mp.KoinPlatformTools.defaultContext().get()`을 대신 써야 한다(Koin 4.1.1 실측).
+    - `koin-core`가 `commonMain`에 `implementation`으로만 선언돼 있으면 테스트 소스셋엔 전이되지
+      않는다 — `commonTest.dependencies`에 명시적으로 추가해야 했다.
+    - Kotlin/Native는 백틱 테스트 함수 이름에 **쉼표(,)**가 들어가면 심볼 이름 생성에 실패한다
+      (`SafeApiCallTest.kt`에서 실측) — Native 테스트 대상 함수 이름엔 쉼표를 피할 것(이니셜라이저
+      리네임 규칙과 같은 종류의 Kotlin/Native 심볼 제약).
+    - `HttpClientFactoryLoggingTest.kt`는 `System.setOut()`으로 표준출력을 가로채는 JVM 전용
+      기법을 써서 `commonTest`에 있으면 iOS 컴파일이 깨진다 — `androidHostTest`로 옮겼다(Android
+      전용 구현 디테일이라 이 위치가 맞다).
+12. **`grep "^import android\."` 같은 import-기반 검사는 app 전용 wrapper를 경유한 Android SDK
+    의존을 못 잡는다**(2026-08-27, `mypage/settings/SettingsScreen.kt` 발견). 이 파일은
+    `com.kakao.sdk.*`를 직접 import하지 않고 `com.example.pickii.util.kakao.KakaoAuthClient`(자체
+    wrapper)를 통해서만 Kakao SDK를 쓰기 때문에 `import android\.`/`import com\.kakao\.` 패턴
+    어디에도 안 걸렸다. **화면을 옮기기 전에는 import 패턴 검사만으로 끝내지 말고, app에만 있는
+    wrapper 클래스 이름(`KakaoAuthClient`, `ChatStompClient`, `FcmTokenRegistrar` 등) 자체를 저장소
+    전체에서 검색해서 참조 화면을 역으로 찾을 것** — 4-3의 "app에 남는 것" 표가 이 방식으로 만들어졌다.
+13. **`String.format(...)`(수신자가 `String`인 vararg 버전)은 JVM 전용이라 iOS 컴파일이 깨진다**
+    (`NotificationViewModel.kt`에서 한 번, `calendar/daily/component/DailyTimeLabel.kt`의
+    `"%02d:00".format(hour)`에서 또 한 번 실측, 2026-08-27). `kotlinx.datetime`의
+    `LocalDate.format(DateTimeFormat)`/`LocalTime.format(...)`(수신자가 날짜/시간 타입)은 완전히
+    다른 함수라 이건 멀티플랫폼이라 안전 — 헷갈리지 말 것. `String.format`류는 발견 즉시
+    `padStart(n, '0')` 등 수동 문자열 조립으로 치환.
 
 ## 참고 자료
 

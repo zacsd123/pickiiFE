@@ -1,6 +1,5 @@
 package com.example.pickii.ui.chat
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,12 +34,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.chat_direct_tab
 import com.example.pickii.shared.generated.resources.chat_empty_list
@@ -50,6 +49,7 @@ import com.example.pickii.shared.generated.resources.chat_title
 import com.example.pickii.shared.generated.resources.ic_notification_off
 import com.example.pickii.shared.generated.resources.ic_notification_on
 import com.example.pickii.shared.generated.resources.ic_profile
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiTopBar
@@ -81,7 +81,7 @@ fun ChatListRoute(
     viewModel: ChatListViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.refreshAll()
@@ -90,7 +90,7 @@ fun ChatListRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                snackbarHostState.showSnackbar(getString(event.messageRes))
         }
     }
 

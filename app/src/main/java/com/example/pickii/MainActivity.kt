@@ -21,10 +21,14 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +52,10 @@ import androidx.navigation.navArgument
 import com.example.pickii.ui.applicant.ApplicantRoute
 import com.example.pickii.ui.calendar.CalendarRoute
 import com.example.pickii.ui.chat.ChatRoute
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.LoginRequiredDialog
 import com.example.pickii.ui.common.PickiiBottomNav
+import com.example.pickii.ui.common.PickiiBottomNavOverlaySpacing
 import com.example.pickii.ui.common.PickiiBottomNavTab
 import com.example.pickii.ui.home.HomeScreen
 import com.example.pickii.ui.login.LoginScreen
@@ -281,305 +287,323 @@ private fun PickiiNavHost(
     // 바텀 네브바를 콘텐츠 위에 오버레이로 띄운다(Scaffold가 공간을 예약하지 않음). 배경이 없어 아이콘/인디케이터만
     // 떠 보이고, 각 최상위 탭 화면이 PickiiBottomNavOverlaySpacing만큼 스스로 하단 여백을 더해 마지막 콘텐츠가
     // 가려지지 않게 한다.
-    Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
-        NavHost(
-            navController = navController,
-            startDestination = PickiiDestination.Splash.route,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(
-                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal
-                        )
-                    ),
-            enterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
-            exitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
-            popExitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) }
-        ) {
-            composable(PickiiDestination.Splash.route) {
-                SplashScreen(
-                    onTimeout = {
-                        // 자동 로그인: 저장된 Access Token이 아직 유효하면 로그인 화면을 건너뛴다.
-                        val destination =
-                            if (isLoggedIn) PickiiDestination.Home.route else PickiiDestination.Login.route
-                        navController.navigate(destination) {
-                            popUpTo(PickiiDestination.Splash.route) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            composable(PickiiDestination.Login.route) {
-                LoginScreen(
-                    onNavigateHome = { navController.navigateToHomeClearingBackStack() },
-                    onNavigateOnboarding = {
-                        navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
-                    },
-                    onNavigateToPasswordReset = { navController.navigate(PickiiDestination.PasswordReset.route) },
-                    onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
-                    onGuestClick = { navController.navigateToHomeClearingBackStack() }
-                )
-            }
-
-            composable(PickiiDestination.PasswordReset.route) {
-                PasswordResetScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onComplete = { navController.popBackStack() }
-                )
-            }
-
-            composable(PickiiDestination.Signup.route) {
-                SignupScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onNavigateHome = { navController.navigateClearingBackStack(PickiiDestination.Home.route) },
-                    onNavigateOnboarding = {
-                        navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
-                    }
-                )
-            }
-
-            composable(PickiiDestination.Onboarding.route) {
-                OnboardingScreen(
-                    onFinished = { navController.navigateClearingBackStack(PickiiDestination.Home.route) }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.Home.route,
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
+    val snackbarHostState = remember { SnackbarHostState() }
+    CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+        Box(modifier = Modifier.fillMaxSize().background(PickiiYellowLight)) {
+            NavHost(
+                navController = navController,
+                startDestination = PickiiDestination.Splash.route,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(
+                            WindowInsets.safeDrawing.only(
+                                WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                            )
+                        ),
+                enterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+                exitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) },
+                popExitTransition = { fadeOut(animationSpec = tween(NAV_TRANSITION_DURATION_MS)) }
             ) {
-                HomeScreen(
-                    onRegisterPostClick = { navController.navigate(PickiiDestination.RecruitCreate.route) },
-                    onPostDetailClick = { postId ->
-                        navController.navigate(PickiiDestination.RecruitDetail(postId).route)
-                    },
-                    onPostApplyClick = { postId ->
-                        navController.navigate(PickiiDestination.RecruitApply(postId).route)
-                    },
-                    onNotificationClick = {
-                        navController.navigate(PickiiDestination.Notification.route) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
-            composable(PickiiDestination.Notification.route) {
-                NotificationRoute(
-                    onCloseClick = { navController.popBackStack() },
-                    onNotificationClick = { notification ->
-                        navigateForNotificationTap(
-                            navController = navController,
-                            type = notification.typeRaw,
-                            referenceType = notification.referenceType,
-                            referenceId = notification.referenceId,
-                            onSetPendingChatRoomId = { pendingChatRoomId = it },
-                            onSetPendingMyPageScreen = { pendingMyPageScreen = it }
-                        )
-                    }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.RecruitDetail.ROUTE,
-                arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
-            ) {
-                RecruitDetailScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onAuthorProfileClick = { authorId ->
-                        navController.navigate(PickiiDestination.MemberProfile(authorId).route)
-                    },
-                    onApplyClick = { postId -> navController.navigate(PickiiDestination.RecruitApply(postId).route) },
-                    onEditClick = { postId -> navController.navigate(PickiiDestination.RecruitEdit(postId).route) },
-                    onDeletedNavigateHome = {
-                        navController.popBackStack(
-                            PickiiDestination.Home.route,
-                            inclusive = false
-                        )
-                    },
-                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() },
-                    onNavigateToChatRoom = { roomId ->
-                        pendingChatRoomId = roomId
-                        navController.navigateToTab(PickiiDestination.Chat.route)
-                    }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.MemberProfile.ROUTE,
-                arguments = listOf(navArgument(ARG_MEMBER_ID) { type = NavType.StringType })
-            ) {
-                MemberProfileScreen(onBackClick = { navController.popBackStack() })
-            }
-
-            composable(
-                route = PickiiDestination.RecruitApply.ROUTE,
-                arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
-            ) {
-                RecruitApplyScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onGoHomeClick = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
-                    onViewApplicationStatusClick = {
-                        pendingMyPageScreen = MyPageScreenType.APPLICATIONS
-                        navController.navigateToTab(PickiiDestination.MyPage.route)
-                    },
-                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
-                )
-            }
-
-            composable(PickiiDestination.RecruitCreate.route) {
-                RecruitFormScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onSubmitComplete = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
-                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.RecruitEdit.ROUTE,
-                arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
-            ) {
-                RecruitFormScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onSubmitComplete = { navController.popBackStack() },
-                    onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.Chat.route,
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                ChatRoute(
-                    onTopLevelScreenChange = { isChatTopLevel = it },
-                    onNavigateToMemberProfile = { memberId ->
-                        navController.navigate(PickiiDestination.MemberProfile(memberId.toString()).route)
-                    },
-                    onNotificationBellClick = {
-                        navController.navigate(PickiiDestination.Notification.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    initialRoomId = pendingChatRoomId,
-                    onInitialRoomConsumed = { pendingChatRoomId = null }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.Calender.route,
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                CalendarRoute(
-                    onScheduleClick = { },
-                    onTopLevelScreenChange = { isCalendarTopLevel = it },
-                    onNotificationClick = {
-                        navController.navigate(PickiiDestination.Notification.route) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
-            composable(
-                route = PickiiDestination.MyPage.route,
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                MyPageRoute(
-                    onTopLevelScreenChange = { isMyPageTopLevel = it },
-                    onCreateProfileClick = { navController.navigate(PickiiDestination.OnboardingFromMyPage.route) },
-                    onNavigateToApplicantList = { postId ->
-                        navController.navigate(PickiiDestination.ApplicantList(postId).route)
-                    },
-                    onNavigateToRecruitEdit = { postId ->
-                        navController.navigate(PickiiDestination.RecruitEdit(postId).route)
-                    },
-                    onNavigateToRecruitDetail = { postId ->
-                        navController.navigate(PickiiDestination.RecruitDetail(postId).route)
-                    },
-                    onNavigateToChatRoom = { roomId ->
-                        pendingChatRoomId = roomId.toLongOrNull()
-                        navController.navigateToTab(PickiiDestination.Chat.route)
-                    },
-                    onLoggedOut = { navController.navigateToLoginClearingBackStack() },
-                    onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) },
-                    initialScreen = pendingMyPageScreen,
-                    onInitialScreenConsumed = { pendingMyPageScreen = null }
-                )
-            }
-
-            composable(PickiiDestination.OnboardingFromMyPage.route) {
-                OnboardingScreen(onFinished = { navController.popBackStack() })
-            }
-
-            composable(
-                route = PickiiDestination.ApplicantList.ROUTE,
-                arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
-            ) {
-                ApplicantRoute(
-                    onBackClick = { navController.popBackStack() },
-                    onNavigateToChatRoom = { roomId ->
-                        pendingChatRoomId = roomId.toLongOrNull()
-                        navController.navigateToTab(PickiiDestination.Chat.route)
-                    },
-                    onNavigateToMemberProfile = { memberId ->
-                        navController.navigate(PickiiDestination.MemberProfile(memberId).route)
-                    }
-                )
-            }
-        }
-
-        val tab = currentTab
-        if (isBottomNavVisible && tab != null) {
-            Box(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                PickiiBottomNav(
-                    selectedTab = tab,
-                    onTabSelect = { selectedTab ->
-                        when (selectedTab) {
-                            PickiiBottomNavTab.HOME -> {
-                                if (currentRoute != PickiiDestination.Home.route) {
-                                    navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
-                                }
-                            }
-                            PickiiBottomNavTab.CALENDAR -> {
-                                if (currentRoute != PickiiDestination.Calender.route) {
-                                    navController.navigateToTab(PickiiDestination.Calender.route)
-                                }
-                            }
-                            PickiiBottomNavTab.CHAT -> {
-                                if (!isLoggedIn) {
-                                    showChatLoginPrompt = true
-                                } else if (currentRoute != PickiiDestination.Chat.route) {
-                                    navController.navigateToTab(PickiiDestination.Chat.route)
-                                }
-                            }
-                            PickiiBottomNavTab.MY_PAGE -> {
-                                if (!isLoggedIn) {
-                                    showMyPageLoginPrompt = true
-                                } else if (currentRoute != PickiiDestination.MyPage.route) {
-                                    navController.navigateToTab(PickiiDestination.MyPage.route)
-                                }
+                composable(PickiiDestination.Splash.route) {
+                    SplashScreen(
+                        onTimeout = {
+                            // 자동 로그인: 저장된 Access Token이 아직 유효하면 로그인 화면을 건너뛴다.
+                            val destination =
+                                if (isLoggedIn) PickiiDestination.Home.route else PickiiDestination.Login.route
+                            navController.navigate(destination) {
+                                popUpTo(PickiiDestination.Splash.route) { inclusive = true }
                             }
                         }
-                    }
-                )
+                    )
+                }
+
+                composable(PickiiDestination.Login.route) {
+                    LoginScreen(
+                        onNavigateHome = { navController.navigateToHomeClearingBackStack() },
+                        onNavigateOnboarding = {
+                            navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
+                        },
+                        onNavigateToPasswordReset = { navController.navigate(PickiiDestination.PasswordReset.route) },
+                        onSignUpClick = { navController.navigate(PickiiDestination.Signup.route) },
+                        onGuestClick = { navController.navigateToHomeClearingBackStack() }
+                    )
+                }
+
+                composable(PickiiDestination.PasswordReset.route) {
+                    PasswordResetScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onComplete = { navController.popBackStack() }
+                    )
+                }
+
+                composable(PickiiDestination.Signup.route) {
+                    SignupScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onNavigateHome = { navController.navigateClearingBackStack(PickiiDestination.Home.route) },
+                        onNavigateOnboarding = {
+                            navController.navigateClearingBackStack(PickiiDestination.Onboarding.route)
+                        }
+                    )
+                }
+
+                composable(PickiiDestination.Onboarding.route) {
+                    OnboardingScreen(
+                        onFinished = { navController.navigateClearingBackStack(PickiiDestination.Home.route) }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.Home.route,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
+                    popEnterTransition = { EnterTransition.None },
+                    popExitTransition = { ExitTransition.None }
+                ) {
+                    HomeScreen(
+                        onRegisterPostClick = { navController.navigate(PickiiDestination.RecruitCreate.route) },
+                        onPostDetailClick = { postId ->
+                            navController.navigate(PickiiDestination.RecruitDetail(postId).route)
+                        },
+                        onPostApplyClick = { postId ->
+                            navController.navigate(PickiiDestination.RecruitApply(postId).route)
+                        },
+                        onNotificationClick = {
+                            navController.navigate(PickiiDestination.Notification.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+
+                composable(PickiiDestination.Notification.route) {
+                    NotificationRoute(
+                        onCloseClick = { navController.popBackStack() },
+                        onNotificationClick = { notification ->
+                            navigateForNotificationTap(
+                                navController = navController,
+                                type = notification.typeRaw,
+                                referenceType = notification.referenceType,
+                                referenceId = notification.referenceId,
+                                onSetPendingChatRoomId = { pendingChatRoomId = it },
+                                onSetPendingMyPageScreen = { pendingMyPageScreen = it }
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.RecruitDetail.ROUTE,
+                    arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+                ) {
+                    RecruitDetailScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onAuthorProfileClick = { authorId ->
+                            navController.navigate(PickiiDestination.MemberProfile(authorId).route)
+                        },
+                        onApplyClick = { postId ->
+                            navController.navigate(PickiiDestination.RecruitApply(postId).route)
+                        },
+                        onEditClick = { postId -> navController.navigate(PickiiDestination.RecruitEdit(postId).route) },
+                        onDeletedNavigateHome = {
+                            navController.popBackStack(
+                                PickiiDestination.Home.route,
+                                inclusive = false
+                            )
+                        },
+                        onNavigateToLogin = { navController.navigateToLoginClearingBackStack() },
+                        onNavigateToChatRoom = { roomId ->
+                            pendingChatRoomId = roomId
+                            navController.navigateToTab(PickiiDestination.Chat.route)
+                        }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.MemberProfile.ROUTE,
+                    arguments = listOf(navArgument(ARG_MEMBER_ID) { type = NavType.StringType })
+                ) {
+                    MemberProfileScreen(onBackClick = { navController.popBackStack() })
+                }
+
+                composable(
+                    route = PickiiDestination.RecruitApply.ROUTE,
+                    arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+                ) {
+                    RecruitApplyScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onGoHomeClick = { navController.popBackStack(PickiiDestination.Home.route, inclusive = false) },
+                        onViewApplicationStatusClick = {
+                            pendingMyPageScreen = MyPageScreenType.APPLICATIONS
+                            navController.navigateToTab(PickiiDestination.MyPage.route)
+                        },
+                        onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+                    )
+                }
+
+                composable(PickiiDestination.RecruitCreate.route) {
+                    RecruitFormScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onSubmitComplete = {
+                            navController.popBackStack(
+                                PickiiDestination.Home.route,
+                                inclusive = false
+                            )
+                        },
+                        onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.RecruitEdit.ROUTE,
+                    arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+                ) {
+                    RecruitFormScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onSubmitComplete = { navController.popBackStack() },
+                        onNavigateToLogin = { navController.navigateToLoginClearingBackStack() }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.Chat.route,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
+                    popEnterTransition = { EnterTransition.None },
+                    popExitTransition = { ExitTransition.None }
+                ) {
+                    ChatRoute(
+                        onTopLevelScreenChange = { isChatTopLevel = it },
+                        onNavigateToMemberProfile = { memberId ->
+                            navController.navigate(PickiiDestination.MemberProfile(memberId.toString()).route)
+                        },
+                        onNotificationBellClick = {
+                            navController.navigate(PickiiDestination.Notification.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        initialRoomId = pendingChatRoomId,
+                        onInitialRoomConsumed = { pendingChatRoomId = null }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.Calender.route,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
+                    popEnterTransition = { EnterTransition.None },
+                    popExitTransition = { ExitTransition.None }
+                ) {
+                    CalendarRoute(
+                        onScheduleClick = { },
+                        onTopLevelScreenChange = { isCalendarTopLevel = it },
+                        onNotificationClick = {
+                            navController.navigate(PickiiDestination.Notification.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+
+                composable(
+                    route = PickiiDestination.MyPage.route,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
+                    popEnterTransition = { EnterTransition.None },
+                    popExitTransition = { ExitTransition.None }
+                ) {
+                    MyPageRoute(
+                        onTopLevelScreenChange = { isMyPageTopLevel = it },
+                        onCreateProfileClick = { navController.navigate(PickiiDestination.OnboardingFromMyPage.route) },
+                        onNavigateToApplicantList = { postId ->
+                            navController.navigate(PickiiDestination.ApplicantList(postId).route)
+                        },
+                        onNavigateToRecruitEdit = { postId ->
+                            navController.navigate(PickiiDestination.RecruitEdit(postId).route)
+                        },
+                        onNavigateToRecruitDetail = { postId ->
+                            navController.navigate(PickiiDestination.RecruitDetail(postId).route)
+                        },
+                        onNavigateToChatRoom = { roomId ->
+                            pendingChatRoomId = roomId.toLongOrNull()
+                            navController.navigateToTab(PickiiDestination.Chat.route)
+                        },
+                        onLoggedOut = { navController.navigateToLoginClearingBackStack() },
+                        onNotificationClick = { navController.navigate(PickiiDestination.Notification.route) },
+                        initialScreen = pendingMyPageScreen,
+                        onInitialScreenConsumed = { pendingMyPageScreen = null }
+                    )
+                }
+
+                composable(PickiiDestination.OnboardingFromMyPage.route) {
+                    OnboardingScreen(onFinished = { navController.popBackStack() })
+                }
+
+                composable(
+                    route = PickiiDestination.ApplicantList.ROUTE,
+                    arguments = listOf(navArgument(ARG_POST_ID) { type = NavType.StringType })
+                ) {
+                    ApplicantRoute(
+                        onBackClick = { navController.popBackStack() },
+                        onNavigateToChatRoom = { roomId ->
+                            pendingChatRoomId = roomId.toLongOrNull()
+                            navController.navigateToTab(PickiiDestination.Chat.route)
+                        },
+                        onNavigateToMemberProfile = { memberId ->
+                            navController.navigate(PickiiDestination.MemberProfile(memberId).route)
+                        }
+                    )
+                }
             }
+
+            val tab = currentTab
+            if (isBottomNavVisible && tab != null) {
+                Box(
+                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PickiiBottomNav(
+                        selectedTab = tab,
+                        onTabSelect = { selectedTab ->
+                            when (selectedTab) {
+                                PickiiBottomNavTab.HOME -> {
+                                    if (currentRoute != PickiiDestination.Home.route) {
+                                        navController.popBackStack(PickiiDestination.Home.route, inclusive = false)
+                                    }
+                                }
+                                PickiiBottomNavTab.CALENDAR -> {
+                                    if (currentRoute != PickiiDestination.Calender.route) {
+                                        navController.navigateToTab(PickiiDestination.Calender.route)
+                                    }
+                                }
+                                PickiiBottomNavTab.CHAT -> {
+                                    if (!isLoggedIn) {
+                                        showChatLoginPrompt = true
+                                    } else if (currentRoute != PickiiDestination.Chat.route) {
+                                        navController.navigateToTab(PickiiDestination.Chat.route)
+                                    }
+                                }
+                                PickiiBottomNavTab.MY_PAGE -> {
+                                    if (!isLoggedIn) {
+                                        showMyPageLoginPrompt = true
+                                    } else if (currentRoute != PickiiDestination.MyPage.route) {
+                                        navController.navigateToTab(PickiiDestination.MyPage.route)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = PickiiBottomNavOverlaySpacing)
+            )
         }
     }
 }

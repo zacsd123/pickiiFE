@@ -1,24 +1,10 @@
 package com.example.pickii.ui.chat
 
 import com.example.pickii.domain.model.CalendarSchedule
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.model.MeetingPollDetail
+import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.domain.model.ScheduleCategory
-
-/**
- * 채팅방 종류를 나타낸다.
- */
-enum class ChatRoomType {
-    GROUP,
-    DIRECT
-}
-
-/**
- * 프로젝트 진행 상태를 나타낸다. 서버는 IN_PROGRESS/END 두 가지만 쓴다(API 6-4).
- */
-enum class ProjectStatus {
-    IN_PROGRESS,
-    END
-}
 
 /**
  * 프로젝트 상태를 화면 표시용 문구로 변환한다.

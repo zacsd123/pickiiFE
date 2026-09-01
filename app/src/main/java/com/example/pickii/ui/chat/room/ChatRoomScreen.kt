@@ -1,7 +1,6 @@
 package com.example.pickii.ui.chat
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -27,8 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -55,8 +52,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.pickii.domain.model.ChatRoomType
 import com.example.pickii.domain.model.MeetingPollDetail
+import com.example.pickii.domain.model.ProjectStatus
 import com.example.pickii.shared.generated.resources.Res
+import com.example.pickii.shared.generated.resources.ic_arrow_back
 import com.example.pickii.shared.generated.resources.ic_chat_room_menu
 import com.example.pickii.shared.generated.resources.ic_chevron_down
 import com.example.pickii.shared.generated.resources.ic_chevron_up
@@ -65,6 +65,7 @@ import com.example.pickii.shared.generated.resources.ic_meeting_manage
 import com.example.pickii.shared.generated.resources.ic_meeting_schedule
 import com.example.pickii.shared.generated.resources.ic_notice
 import com.example.pickii.ui.common.ConfirmDialog
+import com.example.pickii.ui.common.LocalSnackbarHostState
 import com.example.pickii.ui.common.OneShotEventEffect
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.ui.theme.PickiiDivider
@@ -133,7 +134,7 @@ fun ChatRoomRoute(
     viewModel: ChatRoomViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(roomId) {
@@ -154,7 +155,7 @@ fun ChatRoomRoute(
     OneShotEventEffect(flow = viewModel.events) { event ->
         when (event) {
             is RecruitUiEvent.ShowToast ->
-                Toast.makeText(context, getString(event.messageRes), Toast.LENGTH_SHORT).show()
+                snackbarHostState.showSnackbar(getString(event.messageRes))
         }
     }
 
@@ -727,7 +728,7 @@ private fun ChatRoomHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(Res.drawable.ic_arrow_back),
                     contentDescription = null,
                     tint = Color.Black
                 )
