@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -72,7 +71,8 @@ import com.example.pickii.ui.theme.KakaoYellow
 import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiTextGray
 import com.example.pickii.ui.theme.PickiiYellowLight
-import com.example.pickii.util.kakao.KakaoAuthClient
+import com.example.pickii.util.kakao.loginSuspending
+import com.example.pickii.util.kakao.rememberKakaoAuthBridge
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -106,7 +106,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val kakaoAuthBridge = rememberKakaoAuthBridge()
     val snackbarHostState = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
     val kakaoNotLinkedMessage = stringResource(Res.string.login_kakao_not_linked)
@@ -124,11 +124,11 @@ fun LoginScreen(
         onErrorDialogDismiss = viewModel::onErrorDialogDismiss,
         onKakaoLoginClick = {
             scope.launch {
-                KakaoAuthClient
-                    .login(context)
-                    .onSuccess { token ->
+                kakaoAuthBridge
+                    .loginSuspending()
+                    .onSuccess { accessToken ->
                         viewModel.onKakaoLoginClick(
-                            kakaoAccessToken = token.accessToken,
+                            kakaoAccessToken = accessToken,
                             onNavigateHome = onNavigateHome,
                             onNavigateOnboarding = onNavigateOnboarding,
                             onNotLinked = {

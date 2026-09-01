@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +70,9 @@ import com.example.pickii.ui.theme.PickiiFieldBackground
 import com.example.pickii.ui.theme.PickiiPaletteBaseWhite
 import com.example.pickii.ui.theme.PickiiPaletteRed
 import com.example.pickii.ui.theme.PickiiTextGray
-import com.example.pickii.util.kakao.KakaoAuthClient
+import com.example.pickii.util.kakao.getUserIdSuspending
+import com.example.pickii.util.kakao.loginSuspending
+import com.example.pickii.util.kakao.rememberKakaoAuthBridge
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
@@ -100,7 +101,7 @@ fun SettingsScreen(
 ) {
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val notificationUiState by notificationViewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val kakaoAuthBridge = rememberKakaoAuthBridge()
     val snackbarHostState = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
     val kakaoLinkErrorMessage = stringResource(Res.string.mypage_profile_social_link_error)
@@ -120,11 +121,11 @@ fun SettingsScreen(
         onPasswordChangeClick = onNavigateToPasswordChange,
         onLinkClick = {
             scope.launch {
-                KakaoAuthClient
-                    .login(context)
+                kakaoAuthBridge
+                    .loginSuspending()
                     .onSuccess {
-                        KakaoAuthClient
-                            .getUserId()
+                        kakaoAuthBridge
+                            .getUserIdSuspending()
                             .onSuccess { providerId ->
                                 settingsViewModel.onKakaoLinkConfirmed(
                                     providerId = providerId.toString(),
