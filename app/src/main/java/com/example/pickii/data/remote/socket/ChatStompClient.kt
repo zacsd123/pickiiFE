@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.websocket.WebSockets
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.hildan.krossbow.stomp.StompClient
@@ -22,7 +25,7 @@ import org.hildan.krossbow.stomp.conversions.kxserialization.StompSessionWithKxS
 import org.hildan.krossbow.stomp.conversions.kxserialization.convertAndSend
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.conversions.kxserialization.subscribe
-import org.hildan.krossbow.websocket.okhttp.OkHttpWebSocketClient
+import org.hildan.krossbow.websocket.ktor.KtorWebSocketClient
 
 enum class ChatConnectionState {
     DISCONNECTED,
@@ -49,7 +52,19 @@ class ChatStompClient(
     private val json: Json
 ) {
     private val scope = CoroutineScope(SupervisorJob())
-    private val stompClient = StompClient(OkHttpWebSocketClient(okHttpClient))
+
+    // krossbow-websocket-ktor는 Ktor 엔진이면 뭐든 받는 진짜 멀티플랫폼 아티팩트다(okhttp 전용 모듈과
+    // 달리 iOS klib이 있음 — 채팅 이식의 선행 조건). 지금은 ChatStompClient 자체가 아직 app에 남아있어서
+    // 엔진은 기존과 동일하게 OkHttp를 그대로 쓴다(주입받은 OkHttpClient를 재사용).
+    private val stompClient =
+        StompClient(
+            KtorWebSocketClient(
+                HttpClient(OkHttp) {
+                    engine { preconfigured = okHttpClient }
+                    install(WebSockets)
+                }
+            )
+        )
 
     private var session: StompSessionWithKxSerialization? = null
     private var subscriptionJob: Job? = null
