@@ -78,7 +78,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 설정 화면. 계정 설정(비밀번호 변경/카카오 연동·해제/로그아웃/회원탈퇴)과 알림 설정을 한 화면에서 보여준다(사진 목업 기준).

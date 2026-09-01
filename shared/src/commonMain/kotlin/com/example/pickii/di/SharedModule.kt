@@ -7,6 +7,7 @@ import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
 import com.example.pickii.ui.feedback.FeedbackViewModel
 import com.example.pickii.ui.home.HomeViewModel
+import com.example.pickii.ui.login.LoginViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
 import com.example.pickii.ui.mypage.home.MyPageHomeViewModel
@@ -40,6 +41,7 @@ import org.koin.dsl.module
 val sharedModule =
     module {
         viewModel { SplashViewModel() }
+        viewModel { LoginViewModel(sessionRepository = get(), profileRepository = get()) }
         viewModel { MainNavigationViewModel(sessionRepository = get()) }
         viewModel { OnboardingViewModel(masterDataRepository = get(), profileRepository = get()) }
         viewModel { SignupViewModel(signupRepository = get(), sessionRepository = get(), profileRepository = get()) }

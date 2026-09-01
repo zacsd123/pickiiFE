@@ -76,7 +76,7 @@ import com.example.pickii.util.kakao.rememberKakaoAuthBridge
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 /** 입력 필드와 버튼에 공통으로 사용하는 모서리 둥글기. */
 private val FieldCornerRadius = 14.dp
