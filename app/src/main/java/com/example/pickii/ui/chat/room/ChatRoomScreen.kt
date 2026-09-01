@@ -214,7 +214,7 @@ private fun ChatRoomScreen(
     onNoticeClick: () -> Unit,
     onNoticeRegister: (String) -> Unit,
     onMeetingSend: (QuickMeetingForm) -> Unit,
-    onSendImages: (List<Uri>) -> Unit,
+    onSendImages: (List<ChatImageUploadPart>) -> Unit,
     onLoadMoreMessages: () -> Unit,
     modifier: Modifier = Modifier,
     onDelegateLeader: (Long) -> Unit,
@@ -348,7 +348,7 @@ private fun ChatRoomScreen(
             pendingCameraUri = null
 
             if (isSaved && capturedUri != null) {
-                onSendImages(listOf(capturedUri))
+                onSendImages(listOf(context.toChatImagePart(capturedUri)))
             }
         }
 
@@ -664,7 +664,7 @@ private fun ChatRoomScreen(
                 },
                 onConfirm = { uris ->
                     activeSheet = ChatRoomSheet.None
-                    onSendImages(uris)
+                    onSendImages(uris.map { context.toChatImagePart(it) })
                 }
             )
         }

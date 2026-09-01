@@ -22,8 +22,7 @@ val viewModelModule =
                 calendarRepository = get(),
                 projectRepository = get(),
                 activeChatRoomTracker = get(),
-                savedMeetingScheduleStore = get(),
-                context = get()
+                savedMeetingScheduleStore = get()
             )
         }
     }

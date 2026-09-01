@@ -22,26 +22,23 @@ sealed interface ChatImageValidationError {
     data object FileTooLarge : ChatImageValidationError
 }
 
-/** 업로드 전 [uri]의 확장자(jpg/jpeg/png/gif/webp)와 크기(최대 10MB)를 검사한다. 문제없으면 null을 반환한다. */
-fun Context.validateChatImage(uri: Uri): ChatImageValidationError? {
-    val mimeType = contentResolver.getType(uri)
-    if (mimeType !in ALLOWED_IMAGE_MIME_TYPES) {
+/**
+ * [ChatImageUploadPart]의 확장자(jpg/jpeg/png/gif/webp)와 크기(최대 10MB)를 검사한다. 문제없으면
+ * null을 반환한다. `Uri`/`Context`가 필요 없는 순수 함수라 iOS 이식 시 그대로 재사용할 수 있다.
+ */
+fun ChatImageUploadPart.validate(): ChatImageValidationError? {
+    if (contentType !in ALLOWED_IMAGE_MIME_TYPES) {
         return ChatImageValidationError.InvalidFileType
     }
 
-    val sizeBytes =
-        runCatching {
-            contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }
-        }.getOrNull()
-
-    if (sizeBytes != null && sizeBytes > MAX_IMAGE_BYTES) {
+    if (bytes.size > MAX_IMAGE_BYTES) {
         return ChatImageValidationError.FileTooLarge
     }
 
     return null
 }
 
-/** 검증을 통과한 [uri]를 Ktor 멀티파트 업로드에 필요한 [ChatImageUploadPart]로 변환한다. */
+/** [uri]를 Ktor 멀티파트 업로드에 필요한 [ChatImageUploadPart]로 변환한다(검증은 [validate] 참고). */
 fun Context.toChatImagePart(uri: Uri): ChatImageUploadPart {
     val mimeType = contentResolver.getType(uri)
     val extension = mimeType?.let { MimeTypeMap.getSingleton().getExtensionFromMimeType(it) } ?: DEFAULT_IMAGE_EXTENSION

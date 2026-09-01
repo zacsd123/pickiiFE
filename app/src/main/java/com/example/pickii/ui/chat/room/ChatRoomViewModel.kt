@@ -1,7 +1,5 @@
 package com.example.pickii.ui.chat
 
-import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickii.BuildConfig
@@ -28,8 +26,6 @@ import com.example.pickii.shared.generated.resources.chat_toast_generic_error
 import com.example.pickii.shared.generated.resources.chat_toast_leader_must_delegate
 import com.example.pickii.shared.generated.resources.chat_toast_project_closed
 import com.example.pickii.shared.generated.resources.chat_toast_send_invalid_file
-import com.example.pickii.ui.chat.toChatImagePart
-import com.example.pickii.ui.chat.validateChatImage
 import com.example.pickii.ui.common.RecruitUiEvent
 import com.example.pickii.util.nowDateTime
 import com.example.pickii.util.parseIsoOffsetDateTime
@@ -65,8 +61,7 @@ class ChatRoomViewModel
         internal val calendarRepository: CalendarRepository,
         private val projectRepository: ProjectRepository,
         private val activeChatRoomTracker: ActiveChatRoomTracker,
-        internal val savedMeetingScheduleStore: SavedMeetingScheduleStore,
-        private val context: Context
+        internal val savedMeetingScheduleStore: SavedMeetingScheduleStore
     ) : ViewModel() {
         internal val mutableUiState = MutableStateFlow(ChatRoomUiState())
         val uiState: StateFlow<ChatRoomUiState> = mutableUiState.asStateFlow()
@@ -296,23 +291,23 @@ class ChatRoomViewModel
         }
 
         /**
-         * 갤러리에서 고르거나 카메라로 찍은 사진을 업로드한 뒤 WebSocket으로 이미지 메시지를 전송한다.
-         * 허용되지 않는 형식이거나 10MB를 초과하면 안내 토스트를 보여준다(8-4 Validation).
+         * 갤러리에서 고르거나 카메라로 찍은 사진(이미 [ChatImageUploadPart]로 변환된 상태 — 변환은
+         * `Context`가 있는 화면단에서 한다, [ChatRoomScreen] 참고)을 업로드한 뒤 WebSocket으로 이미지
+         * 메시지를 전송한다. 허용되지 않는 형식이거나 10MB를 초과하면 안내 토스트를 보여준다(8-4 Validation).
          */
-        fun sendImageMessages(uris: List<Uri>) {
-            if (uris.isEmpty()) return
+        fun sendImageMessages(images: List<ChatImageUploadPart>) {
+            if (images.isEmpty()) return
             val roomId = mutableUiState.value.roomId
             mutableUiState.update { it.copy(isActionMenuExpanded = false) }
 
             viewModelScope.launch {
-                uris.forEach { uri ->
-                    val validationError = context.validateChatImage(uri)
+                images.forEach { part ->
+                    val validationError = part.validate()
                     if (validationError != null) {
                         emitEvent(RecruitUiEvent.ShowToast(Res.string.chat_toast_send_invalid_file))
                         return@forEach
                     }
 
-                    val part = context.toChatImagePart(uri)
                     chatRepository
                         .uploadImage(roomId, part.fileName, part.contentType, part.bytes)
                         .onSuccess { imageUrl ->
