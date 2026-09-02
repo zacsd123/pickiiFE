@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ private val LeaveCancelButtonColor = Color(0xFFF3F4F6)
 /**
  * 채팅방 나가기 확인 패널을 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatRoomLeavePanel(
     isCurrentUserLeader: Boolean,

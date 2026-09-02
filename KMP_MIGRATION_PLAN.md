@@ -476,6 +476,47 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
        "모듈 하나가 통째로 빠지는" 시나리오까지 실제로 재현하고 잡히는 것 확인함
     
     세 번 다 원복 후 재통과까지 확인.
+15. **같은 패키지(`com.example.pickii.ui.chat`) 참조는 import 문이 없어서 import 기반 grep에
+    안 잡힌다 — 이번이 두 번째 사고다.** 첫 번째는 `mypage/settings/SettingsScreen.kt`가
+    `KakaoAuthClient`(app 전용 wrapper)를 같은 패키지라 import 없이 참조해서 뒤늦게 걸린 것
+    (12번). 두 번째는 `chat/panel/ChatRoomInfoPanel.kt`가 `chat/room/ChatRoomUiState.kt`(아직
+    미이식)를 역시 같은 패키지라 import 없이 참조해서, 파일을 옮기고 BackHandler까지 고친 뒤에야
+    컴파일 에러로 발견함(2026-09-03) — 사전 조사(`android.*` import, 래퍼 참조, `String.format`,
+    `PlatformTextStyle` 체크)를 전부 통과했는데도 놓쳤다. **`ui.chat`처럼 여러 하위 디렉터리가
+    같은 패키지를 공유하는 영역(현재 `chat/*` 전체가 이 상태 — `list`/`panel`/`photo`/`meeting`/
+    `room`이 물리적으로는 나뉘어 있지만 전부 `package com.example.pickii.ui.chat`)을 이식할 때는,
+    import grep만으로 끝내지 말고 옮기려는 파일이 참조하는 모든 타입 이름을 직접 눈으로 훑어서
+    그중 아직 이식 안 된 영역(`chat/room`, `chat/meeting`)에 정의된 게 있는지 확인할 것** — 가장
+    확실한 방법은 실제로 컴파일해서 `Unresolved reference`가 나는지 보는 것이고, 이번에도 결국
+    그렇게 잡혔다. 걸리면 (a) 그 타입이 순수하고 작으면 같이 옮기고(`ChatRoomMemberUiModel`처럼),
+    (b) 크고 그 영역 자체와 강하게 묶여 있으면(`ChatRoomUiState`처럼) 해당 파일은 이번 배치에서
+    빼고 원래 영역과 함께 이식하며, 파일 안에 섞여 있는 작은 재사용 가능한 조각(`toDisplayText()`
+    같은)만 따로 분리해서 옮긴다.
+16. **`androidx.compose.ui.backhandler.BackHandler`는 iOS에서 실제로 동작한다 — `UINavigationController`도
+    CMP 네비게이션 그래프(`org.jetbrains.androidx.navigation`)도 필요 없다(2026-09-03, 실기
+    확인).** `chat/panel` 이식 중 iOS 시뮬레이터에서 엣지 스와이프가 무반응이라 "NavHost 이식이
+    선행 조건 아니냐"는 의심이 나왔던 것을 소스 레벨로 조사 후 실기로 뒤집었다:
+    - **메커니즘**: `BackHandler` → `LocalNavigationEventDispatcherOwner`(컴포지션 로컬,
+      `ComposeUIViewController`가 씬 루트에서 자동 제공 — 우리가 따로 설정한 적 없음) →
+      `NavigationEventDispatcher` → `IosBackNavigationEventInput`(CMP 소스,
+      `JetBrains/compose-multiplatform-core`)이 실제 `UIScreenEdgePanGestureRecognizer`를
+      `UIWindow` 바로 아래 뷰에 직접 붙인다. 컴포지션 안에 활성화된(`enabled = true`)
+      `BackHandler`가 **하나라도** 있으면 이 recognizer가 자동으로 켜진다
+      (`onHasEnabledHandlersChanged`) — 백스택이나 "돌아갈 곳" 개념 자체가 없다.
+    - **검증 시 함정**: recognizer의 완료 판정 기준이 화면 폭의 30% 이상 이동 또는 충분한
+      속도(`BACK_GESTURE_SCREEN_SIZE = 0.3`, `BACK_GESTURE_VELOCITY = 100`, CMP 소스 상수)인데,
+      우리가 쓰는 구형 `BackHandler`(`PredictiveBackHandler`/`NavigationEventHandler`가 아닌
+      deprecated API)는 드래그를 따라오는 시각 피드백이 전혀 없다 — 그래서 "제스처 인식 자체가
+      안 됨"과 "인식은 됐지만 너무 짧아서 취소로 처리됨"이 사용자 입장에서 똑같이 아무 반응 없음으로
+      보인다. 실제로 짧은 테스트 스와이프 때문에 한 번 거짓 실패가 났었다 — **검증할 때는 반드시
+      화면 가장자리에서 폭의 1/3 이상 길게 끌 것.**
+    - **카나리아 설계 주의**: 화면을 단독으로 띄우는 카나리아로는 이 문제를 재현/검증할 수 없다
+      (패널만 단독으로 떠 있어도 스와이프 자체는 되지만, "짧아서 실패"인지 "카나리아 구조상
+      원래 안 됨"인지 구분이 안 됨). **호스트 화면(버튼) + 상태로 여는 오버레이** 구조로 카나리아를
+      만들어야 실제 사용 방식(`ChatRoomScreen` 안에서 패널이 오버레이로 뜨는 것)과 같은 조건이
+      되고, 검증하려던 것을 실제로 검증할 수 있다.
+    - **검증**: Android 3/3(버튼 탭 열기, 패널 뒤로가기 버튼, 시스템 뒤로가기) + iOS 엣지 스와이프
+      (여러 번 시도, 길게 끌기) 전부 통과 확인.
 
 ## 참고 자료
 

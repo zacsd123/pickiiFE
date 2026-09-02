@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ private val LeaderBadgeTextColor = Color(0xFF4A4F00)
 /**
  * 채팅방 팀원 목록 패널을 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatMemberListPanel(
     members: List<ChatRoomMemberUiModel>,
