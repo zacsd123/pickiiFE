@@ -5,6 +5,7 @@ import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
 import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
 import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
+import com.example.pickii.ui.chat.ChatListViewModel
 import com.example.pickii.ui.feedback.FeedbackViewModel
 import com.example.pickii.ui.home.HomeViewModel
 import com.example.pickii.ui.login.LoginViewModel
@@ -118,4 +119,5 @@ val sharedModule =
                 savedStateHandle = get()
             )
         }
+        viewModel { ChatListViewModel(chatRepository = get(), notificationRepository = get()) }
     }

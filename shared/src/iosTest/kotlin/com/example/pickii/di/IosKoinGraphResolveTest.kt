@@ -6,8 +6,10 @@ import com.example.pickii.ui.calendar.category.ScheduleCategoryViewModel
 import com.example.pickii.ui.calendar.daily.DailyCalendarViewModel
 import com.example.pickii.ui.calendar.editor.ScheduleEditorViewModel
 import com.example.pickii.ui.calendar.monthly.MonthlyCalendarViewModel
+import com.example.pickii.ui.chat.ChatListViewModel
 import com.example.pickii.ui.feedback.FeedbackViewModel
 import com.example.pickii.ui.home.HomeViewModel
+import com.example.pickii.ui.login.LoginViewModel
 import com.example.pickii.ui.memberprofile.MemberProfileViewModel
 import com.example.pickii.ui.mypage.applications.ApplicationsViewModel
 import com.example.pickii.ui.mypage.home.MyPageHomeViewModel
@@ -79,6 +81,7 @@ class IosKoinGraphResolveTest {
     fun `shared 모듈의 ViewModel 전부가 iOS Koin 그래프에서 resolve된다`() {
         val koin = KoinPlatformTools.defaultContext().get()
         koin.get<SplashViewModel>()
+        koin.get<LoginViewModel>()
         koin.get<MainNavigationViewModel>()
         koin.get<OnboardingViewModel>()
         koin.get<SignupViewModel>()
@@ -107,5 +110,6 @@ class IosKoinGraphResolveTest {
         koin.get<FeedbackViewModel>()
         koin.get<RecruitApplyViewModel>()
         koin.get<ApplicantListViewModel>()
+        koin.get<ChatListViewModel>()
     }
 }

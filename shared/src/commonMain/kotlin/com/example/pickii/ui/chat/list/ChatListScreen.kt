@@ -58,7 +58,7 @@ import com.example.pickii.ui.theme.PickiiSurfaceGrayMuted
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val ChatBackgroundColor = Color(0xFFF9FCA8)
 private val ChatPrimaryColor = Color(0xFF1B2130)
