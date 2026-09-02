@@ -1,7 +1,5 @@
 package com.example.pickii.ui.chat
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,15 +12,22 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -49,10 +53,15 @@ import com.example.pickii.ui.theme.PickiiSurfaceGray
 import com.example.pickii.util.today
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.char
-import kotlinx.datetime.number
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 private const val DIRECT_REGISTER_TITLE_MAX_LENGTH = 20
 private val DirectRegisterDateFormatter =
@@ -188,13 +197,13 @@ fun MeetingDirectRegisterBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DirectRegisterDateBox(
     date: LocalDate?,
     onDateChange: (LocalDate) -> Unit
 ) {
-    val context = LocalContext.current
-    val base = date ?: today()
+    var showDatePicker by remember { mutableStateOf(false) }
 
     Box(
         modifier =
@@ -203,15 +212,8 @@ private fun DirectRegisterDateBox(
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(PickiiSurfaceGray)
-                .clickable {
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth -> onDateChange(LocalDate(year, month + 1, dayOfMonth)) },
-                        base.year,
-                        base.month.number - 1,
-                        base.day
-                    ).show()
-                }.padding(horizontal = 14.dp),
+                .clickable { showDatePicker = true }
+                .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
@@ -220,8 +222,35 @@ private fun DirectRegisterDateBox(
             fontSize = 14.sp
         )
     }
+
+    if (showDatePicker) {
+        val datePickerState =
+            rememberDatePickerState(initialSelectedDateMillis = (date ?: today()).toEpochMillisUtc())
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.toLocalDateUtc()?.let(onDateChange)
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("취소")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DirectRegisterTimeBox(
     label: String,
@@ -229,7 +258,7 @@ private fun DirectRegisterTimeBox(
     modifier: Modifier = Modifier,
     onTimeChange: (LocalTime) -> Unit
 ) {
-    val context = LocalContext.current
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Box(
         modifier =
@@ -237,17 +266,45 @@ private fun DirectRegisterTimeBox(
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(PickiiSurfaceGray)
-                .clickable {
-                    TimePickerDialog(
-                        context,
-                        { _, hourOfDay, minute -> onTimeChange(LocalTime(hourOfDay, minute)) },
-                        time.hour,
-                        time.minute,
-                        true
-                    ).show()
-                }.padding(horizontal = 14.dp),
+                .clickable { showTimePicker = true }
+                .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(text = "$label ${time.format(DirectRegisterTimeFormatter)}", color = PickiiSlateDark, fontSize = 14.sp)
     }
+
+    if (showTimePicker) {
+        val timePickerState =
+            rememberTimePickerState(initialHour = time.hour, initialMinute = time.minute, is24Hour = true)
+
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onTimeChange(LocalTime(timePickerState.hour, timePickerState.minute))
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text("취소")
+                }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
+        )
+    }
 }
+
+/** 이 날짜의 UTC 자정 시각을 epoch millisecond로 변환한다([DatePicker] 초기값 용도). */
+@OptIn(ExperimentalTime::class)
+private fun LocalDate.toEpochMillisUtc(): Long = atTime(0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+
+/** [DatePicker]가 반환한 epoch millisecond를 UTC 기준 날짜로 변환한다. */
+@OptIn(ExperimentalTime::class)
+private fun Long.toLocalDateUtc(): LocalDate = Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.UTC).date

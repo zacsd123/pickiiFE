@@ -213,11 +213,12 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
 
 | androidx 심볼 | 영역 | 비고 |
 |---|---|---|
-| `androidx.activity.result.contract.ActivityResultContracts`, `androidx.core.content.FileProvider`/`ContextCompat`, `ContentResolver` | `chat/room`, `chat/photo`(`GalleryPickerBottomSheet`, `PhotoSourceBottomSheet`) | `androidx.activity`/`androidx.core` 그룹 자체가 iOS 아티팩트가 없음(Gradle 캐시에 iOS 변형 0개, 확인 완료) — 라이브러리 좌표 교체로 안 되고 `expect/actual` + iOS는 `PHPickerViewController` 직접 구현 필요. 원래 계획(Phase 5)과 동일한 결론, 채팅을 마지막에 두는 이유가 다시 확인됨 |
+| `androidx.activity.result.contract.ActivityResultContracts`, `androidx.core.content.FileProvider`/`ContextCompat`, `ContentResolver` | `chat/room`, `chat/photo`(`GalleryPickerBottomSheet`, `PhotoSourceBottomSheet`) | `androidx.activity`/`androidx.core` 그룹 자체가 iOS 아티팩트가 없음(Gradle 캐시에 iOS 변형 0개, 확인 완료) — 라이브러리 좌표 교체로 안 되고 `expect/actual` + iOS는 `PHPickerViewController` 직접 구현 필요. 원래 계획(Phase 5)과 동일한 결론, 채팅을 마지막에 두는 이유가 다시 확인됨. **결정(2026-09-02)**: iOS는 커스텀 PhotoKit 그리드가 아니라 `PHPickerViewController`(시스템 시트)로 간다 — 권한 프롬프트 자체가 없어지는 게 결정적. `~/.konan`의 실제 Kotlin/Native 2.2.10 배포본에 `platform.PhotosUI` klib이 `PHPickerViewController`/`PHPickerConfiguration`/`PHPickerViewControllerDelegateProtocol` 심볼까지 포함해서 존재함을 확인(strings로 실측) — PhotosUI는 Apple 시스템 프레임워크라 Kakao SDK(SPM 전용 서드파티)와 달리 Swift 브릿지 없이 `iosMain`에서 cinterop으로 직접 씀. 착수 전 probe 컴파일로 실사용 가능 여부 최종 확인 예정 |
 
 **추가로 확인한 것(라이브러리 문제는 아니지만 이식 시 기계적으로 고쳐야 함)**
 - `org.koin.androidx.compose.koinViewModel`(Android 전용) → `org.koin.compose.viewmodel.koinViewModel`(멀티플랫폼, Splash에서 이미 씀)로 import 한 줄 교체 — 남은 17개 영역 중 거의 전부(30개 파일)가 이 상태. 새 의존성은 아니고 이식 시 빠뜨리기 쉬운 기계적 치환이라 체크리스트에 남김
 - 화면 자체는 `androidx.navigation.*`을 직접 import하지 않음(NavController는 전부 콜백 람다로만 전달받음) — Navigation-compose 자체의 iOS 실측은 `navigation`/`common`(NavHost)을 옮기는 마지막 단계에서 처리하면 됨
+- **`chat/meeting`의 `android.app.DatePickerDialog`/`TimePickerDialog`(재판정, 2026-09-02)**: 새 라이브러리도 `expect/actual`도 필요 없다 — `ScheduleDateTimeSection.kt`가 이미 커밋 `1523031`(2026-08-25)에서 증명한 것과 동일한 패턴(`android.app.TimePickerDialog` → `compose.material3`의 `TimePicker`+`AlertDialog`)을 그대로 적용하면 된다. 실제 대상은 3곳: `MeetingDirectRegisterBottomSheet.kt`의 `DatePickerDialog`+`TimePickerDialog`(둘 다 legacy), `MeetingFormSections.kt`의 `TimePickerDialog`(legacy) — 같은 파일의 `DatePickerDialog`는 이미 `compose.material3` 버전이라 손댈 것 없음. UX 변화는 1523031과 동일(OS 스피너 → Material3 다이얼/캘린더 그리드)
 
 #### 4-2. 배치 계획
 
@@ -231,8 +232,19 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
   첫 사용 커밋에 추가하고, `androidx.activity.compose.BackHandler` → `androidx.compose.ui.backhandler.BackHandler`
   로 교체(둘 다 `@OptIn(ExperimentalComposeUiApi::class)` 필요 — 안 붙이면 컴파일 에러, 4-1의 예상과
   일치). Android/iOS 컴파일·테스트·`IosKoinGraphResolveTest`·에뮬레이터/시뮬레이터 실기 렌더링까지 확인
-- **Batch 3 (Phase 5와 함께, 별도 일정)**: `chat/*`(5개) — 카메라/갤러리 피커 `expect/actual` 설계가
-  먼저 끝나야 착수 가능
+- **Batch 3 (Phase 5와 함께, 진행 중)**: `chat/*`(5개). 설계 결정 완료(2026-09-02, 아래 순서로 진행):
+  1. `chat/meeting`의 legacy `DatePickerDialog`/`TimePickerDialog` 3곳을 `1523031` 패턴으로 교체(설계
+     결정 아님, 기계적 치환)
+  2. `platform.PhotosUI` probe 컴파일(15분, `ui-backhandler` 때와 같은 패턴)
+  3. probe 통과하면 `PHPickerViewController` 기반 iOS 갤러리 피커 구현(`expect/actual`)
+  4. `chat/photo` → `chat/list` → `chat/panel` → `chat/meeting` → `chat/room` 순서로 이식
+  5. `ChatStompClient`를 Krossbow `websocket-ktor` 엔진으로 교체
+  6. `PickiiNavHost`를 `MainActivity.kt`에서 분리해 shared로
+
+  `KakaoAuthBridgeHolder`(전역 var) → Koin 전환은 별도 우선순위 낮은 작업으로 미룸 — 지금 안 해도
+  막히는 게 없고(`iOSApp.swift`의 `init()`에서 Koin이 홀더 설정보다 먼저 시작되긴 하지만, 타이밍
+  제약 자체가 Koin을 막는 게 아니라서 지금 방식도 정상 동작함), FCM/APNs 작업으로 `iOSApp.swift`를
+  다시 열 때 같이 처리하기로 함
 
 > [!IMPORTANT]
 > **`navigation`(NavHost/`PickiiDestination`) 이식은 `login`과 `chat/*` 둘 다 끝나야 가능하다.**
@@ -257,6 +269,13 @@ CMP의 `uikit*`) 아티팩트가 실제로 존재하는지 확인했다. 의심�
 현재 기준 app에 남는 것의 전부다. **이 목록이 전부 비워져야 NavHost(`PickiiNavHost`/`MainActivity`)를
 shared로 옮길 수 있다.**
 
+**재확인(2026-09-02)**: `app/src/main/java/com/example/pickii/ui/*` 디렉터리를 전수 조사 —
+`chat/`(36개 파일) 딱 하나만 실제 파일이 남아있고 나머지(splash/onboarding/signup/passwordreset/
+notification/memberprofile/common/mypage/recruitdetail/recruitform/applicant/recruitapply/
+calendar/feedback/theme/navigation/home) 전부 빈 디렉터리 확인. `MainActivity.kt`의
+`com.example.pickii.ui.*` import도 `chat.*` 제외 전부 shared 참조로 확인. **아래 표가 사실상
+"chat 하나만 남았다"는 뜻 — 채팅 이식 완료 시 이 표 전체가 비고 NavHost 분리로 바로 넘어간다.**
+
 | 파일/영역 | 남는 이유 | 언제 풀리는지 |
 |---|---|---|
 | `chat/room`, `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`(5개 화면) + `ChatStompClient`(WebSocket) + `ChatRoomViewModel`의 `Uri`↔바이트 변환부 | `ActivityResultContracts`/`FileProvider`/`ContentResolver`/`Uri` 등 `androidx.activity`·`androidx.core` 전용 API + WebSocket 엔진, 카메라/갤러리 피커 iOS 재구현 필요 | Phase 5 |
@@ -274,7 +293,8 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
 이 표에 없다.
 
 ### Phase 5 — 플랫폼 전용 기능
-- [ ] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영)
+- [x] 카카오 로그인 iOS 정식 연동 (Phase 1 스파이크 결과 반영) — 완료(2026-09-01), `KakaoAuthBridge`
+  실연동으로 `login`/`SettingsScreen.kt`/`MyPageRoute.kt` shared 이식까지 끝남(4-3 참고)
 - [ ] Firebase Messaging → GitLive SDK 또는 KMPNotifier로 교체, iOS APNs 인증서 발급 및 연동
 - [ ] 카메라/갤러리 피커 iOS 구현체 작성 (`PHPickerViewController` 연동)
 - [ ] iOS 앱 아이콘, 런치 스크린, `Info.plist` 권한 문구(카메라/사진 라이브러리 접근 등) 설정
