@@ -1,6 +1,5 @@
 package com.example.pickii.ui.chat
 
-import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,22 +16,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -192,15 +195,16 @@ internal fun MeetingTimeRangeSection(
 }
 
 /**
- * 자정 기준 분을 시:분으로 표시하고, 클릭하면 네이티브 시간 선택기를 연다.
+ * 자정 기준 분을 시:분으로 표시하고, 클릭하면 시간 선택 다이얼로그를 연다.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimeOfDayBox(
     minuteOfDay: Int,
     modifier: Modifier = Modifier,
     onMinuteOfDayChange: (Int) -> Unit
 ) {
-    val context = LocalContext.current
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Box(
         modifier =
@@ -208,21 +212,48 @@ private fun TimeOfDayBox(
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(PickiiSurfaceGray)
-                .clickable {
-                    TimePickerDialog(
-                        context,
-                        { _, hourOfDay, minute -> onMinuteOfDayChange(hourOfDay * 60 + minute) },
-                        minuteOfDay / 60,
-                        minuteOfDay % 60,
-                        true
-                    ).show()
-                }.padding(horizontal = 14.dp),
+                .clickable { showTimePicker = true }
+                .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            text = "%02d:%02d".format(minuteOfDay / 60, minuteOfDay % 60),
+            text = "${(minuteOfDay / 60).toString().padStart(
+                2,
+                '0'
+            )}:${(minuteOfDay % 60).toString().padStart(2, '0')}",
             color = PickiiSlateDark,
             fontSize = 14.sp
+        )
+    }
+
+    if (showTimePicker) {
+        val timePickerState =
+            rememberTimePickerState(
+                initialHour = minuteOfDay / 60,
+                initialMinute = minuteOfDay % 60,
+                is24Hour = true
+            )
+
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onMinuteOfDayChange(timePickerState.hour * 60 + timePickerState.minute)
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text("취소")
+                }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
         )
     }
 }
