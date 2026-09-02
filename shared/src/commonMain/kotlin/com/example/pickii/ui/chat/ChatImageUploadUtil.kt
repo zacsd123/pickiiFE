@@ -1,14 +1,9 @@
 package com.example.pickii.ui.chat
 
-import android.content.Context
-import android.net.Uri
-import android.webkit.MimeTypeMap
-
 private val ALLOWED_IMAGE_MIME_TYPES = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
 private const val MAX_IMAGE_BYTES = 10L * 1024 * 1024
-private const val DEFAULT_IMAGE_EXTENSION = "jpg"
 
-/** [Context.toChatImagePart]가 만드는, Ktor 멀티파트 업로드에 필요한 최소 정보. */
+/** 갤러리에서 고르거나 카메라로 찍은 사진을 Ktor 멀티파트 업로드용으로 변환한 결과. */
 data class ChatImageUploadPart(
     val fileName: String,
     val contentType: String?,
@@ -24,7 +19,7 @@ sealed interface ChatImageValidationError {
 
 /**
  * [ChatImageUploadPart]의 확장자(jpg/jpeg/png/gif/webp)와 크기(최대 10MB)를 검사한다. 문제없으면
- * null을 반환한다. `Uri`/`Context`가 필요 없는 순수 함수라 iOS 이식 시 그대로 재사용할 수 있다.
+ * null을 반환한다. 플랫폼 API가 필요 없는 순수 함수라 Android/iOS 양쪽에서 그대로 재사용한다.
  */
 fun ChatImageUploadPart.validate(): ChatImageValidationError? {
     if (contentType !in ALLOWED_IMAGE_MIME_TYPES) {
@@ -36,14 +31,4 @@ fun ChatImageUploadPart.validate(): ChatImageValidationError? {
     }
 
     return null
-}
-
-/** [uri]를 Ktor 멀티파트 업로드에 필요한 [ChatImageUploadPart]로 변환한다(검증은 [validate] 참고). */
-fun Context.toChatImagePart(uri: Uri): ChatImageUploadPart {
-    val mimeType = contentResolver.getType(uri)
-    val extension = mimeType?.let { MimeTypeMap.getSingleton().getExtensionFromMimeType(it) } ?: DEFAULT_IMAGE_EXTENSION
-    val fileName = "chat_image.$extension"
-    val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-
-    return ChatImageUploadPart(fileName = fileName, contentType = mimeType, bytes = bytes)
 }
