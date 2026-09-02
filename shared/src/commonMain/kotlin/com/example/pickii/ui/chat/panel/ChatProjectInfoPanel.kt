@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,7 @@ private val ProjectInfoHighlightColor = Color(0xFFF4F7A6)
 /**
  * 채팅방 프로젝트 정보를 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatProjectInfoPanel(
     projectInfo: ChatProjectInfoUiModel,

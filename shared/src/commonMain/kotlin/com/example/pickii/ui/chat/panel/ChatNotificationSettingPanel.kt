@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,7 @@ private enum class NotificationMuteTime(
 /**
  * 채팅방 알람 설정 패널을 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatNotificationSettingPanel(
     initialNotificationEnabled: Boolean,

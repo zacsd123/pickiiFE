@@ -1,6 +1,7 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -32,36 +33,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pickii.ui.common.BackHeader
 import com.example.pickii.ui.common.SlideInSidePanelScaffold
-import com.example.pickii.ui.theme.PickiiBlackSoft
 import com.example.pickii.ui.theme.PickiiGray400
 import com.example.pickii.ui.theme.PickiiNavyText
 import com.example.pickii.ui.theme.PickiiSurfaceGrayLight
 
-private val LeaderDelegationPanelBackgroundColor = Color.White
-private val LeaderDelegationPanelScrimColor =
-    Color.Black.copy(alpha = 0.35f)
-
-private val LeaderDelegationPrimaryTextColor = PickiiNavyText
-private val LeaderDelegationSecondaryTextColor = PickiiGray400
-private val LeaderDelegationDividerColor = PickiiSurfaceGrayLight
-private val LeaderDelegationSelectedColor = Color(0xFFF7F8FA)
-private val LeaderDelegationButtonColor = PickiiBlackSoft
-private val LeaderDelegationButtonTextColor = Color(0xFFF2F77F)
+private val MemberRemovalPanelBackgroundColor = Color.White
+private val MemberRemovalPanelScrimColor = Color.Black.copy(alpha = 0.35f)
+private val MemberRemovalPrimaryTextColor = PickiiNavyText
+private val MemberRemovalSecondaryTextColor = PickiiGray400
+private val MemberRemovalDividerColor = PickiiSurfaceGrayLight
+private val MemberRemovalSelectedColor = Color(0xFFFFF4F3)
+private val MemberRemovalButtonColor = Color(0xFFD23B32)
+private val MemberRemovalDisabledButtonColor = Color(0xFFE2E3E7)
 
 /**
- * 팀장 권한을 위임할 팀원을 선택하는 패널을 표시한다.
+ * 채팅방에서 내보낼 팀원을 선택하는 패널을 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ChatLeaderDelegationPanel(
+fun ChatMemberRemovalPanel(
     members: List<ChatRoomMemberUiModel>,
     onBackClick: () -> Unit,
-    onDelegateClick: (Long) -> Unit
+    onRemoveClick: (Long) -> Unit
 ) {
     var selectedMemberId by rememberSaveable {
         mutableStateOf<Long?>(null)
     }
 
-    val delegatableMembers =
+    val removableMembers =
         members.filterNot { member ->
             member.isLeader
         }
@@ -73,26 +72,26 @@ fun ChatLeaderDelegationPanel(
 
     SlideInSidePanelScaffold(
         onScrimClick = onBackClick,
-        scrimColor = LeaderDelegationPanelScrimColor,
-        panelBackgroundColor = LeaderDelegationPanelBackgroundColor
+        scrimColor = MemberRemovalPanelScrimColor,
+        panelBackgroundColor = MemberRemovalPanelBackgroundColor
     ) {
-        LeaderDelegationHeader(
+        MemberRemovalHeader(
             onBackClick = onBackClick
         )
 
         HorizontalDivider(
-            color = LeaderDelegationDividerColor
+            color = MemberRemovalDividerColor
         )
 
         Text(
-            text = "팀장 권한을 위임할 팀원을 선택하세요",
+            text = "내보낼 팀원을 선택하세요",
             modifier =
                 Modifier.padding(
                     start = 24.dp,
                     top = 18.dp,
                     bottom = 8.dp
                 ),
-            color = LeaderDelegationSecondaryTextColor,
+            color = MemberRemovalSecondaryTextColor,
             fontSize = 13.sp
         )
 
@@ -100,12 +99,12 @@ fun ChatLeaderDelegationPanel(
             modifier = Modifier.weight(1f)
         ) {
             items(
-                items = delegatableMembers,
+                items = removableMembers,
                 key = { member ->
                     member.memberId
                 }
             ) { member ->
-                LeaderDelegationMemberItem(
+                MemberRemovalItem(
                     member = member,
                     isSelected = selectedMemberId == member.memberId,
                     onClick = {
@@ -115,35 +114,35 @@ fun ChatLeaderDelegationPanel(
             }
         }
 
-        LeaderDelegationButton(
+        MemberRemovalButton(
             isEnabled = selectedMemberId != null,
             onClick = {
-                selectedMemberId?.let(onDelegateClick)
+                selectedMemberId?.let(onRemoveClick)
             }
         )
     }
 }
 
 /**
- * 팀장 위임 패널의 상단 영역을 표시한다.
+ * 팀원 내보내기 패널의 상단 영역을 표시한다.
  */
 @Composable
-private fun LeaderDelegationHeader(onBackClick: () -> Unit) {
+private fun MemberRemovalHeader(onBackClick: () -> Unit) {
     BackHeader(
-        title = "팀장 위임",
+        title = "팀원 내보내기",
         onBackClick = onBackClick,
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
-        titleColor = LeaderDelegationPrimaryTextColor,
+        titleColor = MemberRemovalPrimaryTextColor,
         spacing = 8.dp,
         iconTouchSize = 40.dp
     )
 }
 
 /**
- * 팀장 위임 후보 한 명을 표시한다.
+ * 내보내기 대상 팀원 한 명을 표시한다.
  */
 @Composable
-private fun LeaderDelegationMemberItem(
+private fun MemberRemovalItem(
     member: ChatRoomMemberUiModel,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -158,7 +157,7 @@ private fun LeaderDelegationMemberItem(
                     .background(
                         color =
                             if (isSelected) {
-                                LeaderDelegationSelectedColor
+                                MemberRemovalSelectedColor
                             } else {
                                 Color.Transparent
                             }
@@ -176,7 +175,7 @@ private fun LeaderDelegationMemberItem(
                         .clip(CircleShape)
                         .background(
                             color =
-                                createDelegationProfileColor(
+                                createRemovalProfileColor(
                                     memberId = member.memberId
                                 )
                         ),
@@ -188,7 +187,7 @@ private fun LeaderDelegationMemberItem(
                             .firstOrNull()
                             ?.toString()
                             .orEmpty(),
-                    color = LeaderDelegationPrimaryTextColor,
+                    color = MemberRemovalPrimaryTextColor,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -201,7 +200,7 @@ private fun LeaderDelegationMemberItem(
             Text(
                 text = member.name,
                 modifier = Modifier.weight(1f),
-                color = LeaderDelegationPrimaryTextColor,
+                color = MemberRemovalPrimaryTextColor,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -212,12 +211,12 @@ private fun LeaderDelegationMemberItem(
                         Modifier
                             .size(26.dp)
                             .clip(CircleShape)
-                            .background(LeaderDelegationButtonColor),
+                            .background(MemberRemovalButtonColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "✓",
-                        color = LeaderDelegationButtonTextColor,
+                        color = Color.White,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -226,16 +225,16 @@ private fun LeaderDelegationMemberItem(
         }
 
         HorizontalDivider(
-            color = LeaderDelegationDividerColor
+            color = MemberRemovalDividerColor
         )
     }
 }
 
 /**
- * 팀장 위임 실행 버튼을 표시한다.
+ * 팀원 내보내기 실행 버튼을 표시한다.
  */
 @Composable
-private fun LeaderDelegationButton(
+private fun MemberRemovalButton(
     isEnabled: Boolean,
     onClick: () -> Unit
 ) {
@@ -251,9 +250,9 @@ private fun LeaderDelegationButton(
                 .background(
                     color =
                         if (isEnabled) {
-                            LeaderDelegationButtonColor
+                            MemberRemovalButtonColor
                         } else {
-                            Color(0xFFD1D3D8)
+                            MemberRemovalDisabledButtonColor
                         }
                 ).clickable(
                     enabled = isEnabled,
@@ -262,13 +261,8 @@ private fun LeaderDelegationButton(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "위임하기",
-            color =
-                if (isEnabled) {
-                    LeaderDelegationButtonTextColor
-                } else {
-                    Color.White
-                },
+            text = "내보내기",
+            color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
@@ -278,7 +272,7 @@ private fun LeaderDelegationButton(
 /**
  * 팀원별 임시 프로필 배경색을 반환한다.
  */
-private fun createDelegationProfileColor(memberId: Long): Color {
+private fun createRemovalProfileColor(memberId: Long): Color {
     val colors =
         listOf(
             Color(0xFFC9B7FF),
