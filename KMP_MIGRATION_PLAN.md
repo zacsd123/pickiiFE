@@ -518,6 +518,47 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
     - **검증**: Android 3/3(버튼 탭 열기, 패널 뒤로가기 버튼, 시스템 뒤로가기) + iOS 엣지 스와이프
       (여러 번 시도, 길게 끌기) 전부 통과 확인.
 
+17. **`java.text.SimpleDateFormat` / `java.util.Date` / `java.util.Locale`도 `String.format`과
+    똑같이 JVM 전용이라 commonMain/iosMain에서 컴파일 자체가 안 된다(2026-09-03,
+    `chat/meeting` 이식 중 발견).** 지금까지 훑기 체크리스트에 `String.format`만 있어서 놓칠 뻔했다.
+    - **증상**: `formatMeetingDate(millis: Long) = SimpleDateFormat("yyyy.MM.dd",
+      Locale.getDefault()).format(Date(millis))` 형태로 밀리초를 문자열로 조립하는 코드가
+      `MeetingConfirmBottomSheet.kt`/`MeetingFormSections.kt`에 남아 있었다. `String.format`은
+      안 썼지만 결과적으로 같은 부류의 블로커.
+    - **대체 방법**: 새 포맷 로직을 만들지 않고 기존 관례 2개를 그대로 재사용한다.
+      1) `RecruitFormScreen.kt`의 `Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date`
+         패턴 — Material3 `DatePickerState`/`DateRangePickerState`가 주는 millis는 UTC 자정
+         기준이라 `TimeZone.UTC`로 변환해야 한다(디바이스 로컬 타임존으로 변환하면 서비스 대상
+         타임존이 UTC보다 뒤(음수 오프셋)일 때 날짜가 하루 밀릴 수 있다 — 한국(UTC+9)은 항상 앞으로만
+         밀리므로 우연히 안전했을 뿐).
+      2) `util/DateFormatter.kt`의 `LocalDate.toDisplayString()` — `"yyyy.MM.dd"`와 동일한
+         `"YYYY.MM.DD"` 포맷, 한 자리 월/일도 0을 채운다(`monthNumber()`/`day()` 기본 동작).
+    - **교체 전 반드시 확인할 것**: ①0 채움이 실제로 같은지 `commonTest`로 확인(예:
+      `LocalDate(2026,1,5).toDisplayString() == "2026.01.05"`, `shared/src/commonTest/.../util/DateFormatterTest.kt`),
+      ②옛 코드와 새 코드가 같은 millis에 대해 같은 문자열을 내는지 JVM 전용 특성화 테스트로
+      비교(한 자리 월/일, 12월 31일, 윤년 2월 29일 — `SimpleDateFormat`은 JVM에서만 도니까
+      `androidHostTest`에만 넣을 수 있다, `DateFormatterCharacterizationTest.kt`). 둘 다 통과를
+      확인한 뒤에 옛 코드를 지운다 — java.time → kotlinx-datetime 전환 때 쓴 것과 같은 방식.
+    - **같은 배치에서 또 발견 — 체크리스트가 아직도 완전하지 않았다**: `grep "String.format"`은
+      `"%02d".format(x)`처럼 리시버 문법으로 쓴 `kotlin.text.format` 확장 함수(이것도 JVM 전용,
+      `java.lang.String.format` 래핑)를 못 잡는다 — 문자열 "String.format"이 코드에 안 남기
+      때문이다. 컴파일이 최종 확인 수단이라는 원칙(15번)이 여기서도 그대로 적용됐다 —
+      `git mv` 직후 `:shared:compileKotlinIosSimulatorArm64`에서 `MeetingConfirmBottomSheet.kt`의
+      `"%02d:%02d ~ %02d:%02d".format(...)`가 `Unresolved reference 'format'`으로 걸렸다.
+      같은 배치의 `MeetingFormSections.kt`가 이미 쓰고 있던 `padStart(2, '0')` 패턴으로 교체.
+      같은 배치에서 JVM 전용 API 유형이 두 번 연속(`SimpleDateFormat`류, `.format()` 확장) 새로
+      나왔다는 건 개별 API 이름을 나열하는 체크리스트로는 못 따라간다는 뜻이다.
+    - **훑기 체크리스트 갱신(최종)**: `android.*` import / 앱 전용 래퍼 참조 / `PlatformTextStyle`에
+      더해, 이식 전 훑기에서 다음을 검색할 것:
+      - `.format(` (확장 함수 형태 포함 — `String.format(...)`뿐 아니라 `"...".format(...)`도
+        같이 잡힌다. 매칭된 것마다 리시버가 `kotlinx.datetime`의 `DateTimeFormat` 객체(안전)인지
+        문자열 포맷 패턴(위험, JVM 전용)인지 하나씩 확인)
+      - `java.text.` / `java.util.`(`SimpleDateFormat`, `Date`, `Locale`, `Calendar` 등)
+      - `java.time.`(kotlinx-datetime 전환에서 남은 게 있는지)
+      - **위 개별 검색으로도 못 미더우면 `grep "java\."`로 전체를 한 번 훑어 놓치는 게 없는지
+        확인**할 것 — 이식 전 훑기의 마지막 안전망으로, 매번 하지는 않더라도 날짜/시간/텍스트
+        포맷팅이 있는 화면(chat/meeting류)에서는 필수로 돌릴 것.
+
 ## 참고 자료
 
 - [Compose Multiplatform for iOS is Now Stable](https://medium.com/@rushabhprajapati20/compose-multiplatform-for-ios-is-now-stable-bf4e2fc35596)

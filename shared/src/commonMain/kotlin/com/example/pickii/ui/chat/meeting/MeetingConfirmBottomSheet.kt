@@ -30,10 +30,12 @@ import com.example.pickii.shared.generated.resources.Res
 import com.example.pickii.shared.generated.resources.ic_arrow_back
 import com.example.pickii.ui.theme.PickiiCharcoal
 import com.example.pickii.ui.theme.PickiiGraySecondary
+import com.example.pickii.util.toDisplayString
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,12 +113,10 @@ fun MeetingConfirmBottomSheet(
                 MeetingConfirmRow(
                     label = "탐색 시간대",
                     value =
-                        "%02d:%02d ~ %02d:%02d".format(
-                            meeting.dayStartMinuteOfDay / 60,
-                            meeting.dayStartMinuteOfDay % 60,
-                            meeting.dayEndMinuteOfDay / 60,
-                            meeting.dayEndMinuteOfDay % 60
-                        )
+                        "${(meeting.dayStartMinuteOfDay / 60).toString().padStart(2, '0')}:" +
+                            "${(meeting.dayStartMinuteOfDay % 60).toString().padStart(2, '0')} ~ " +
+                            "${(meeting.dayEndMinuteOfDay / 60).toString().padStart(2, '0')}:" +
+                            (meeting.dayEndMinuteOfDay % 60).toString().padStart(2, '0')
                 )
 
                 MeetingConfirmRow(
@@ -249,8 +249,6 @@ private fun formatMeetingDuration(minutes: Int): String =
         else -> "${minutes}분"
     }
 
+@OptIn(ExperimentalTime::class)
 private fun formatMeetingDate(dateMillis: Long): String =
-    SimpleDateFormat(
-        "yyyy.MM.dd",
-        Locale.getDefault()
-    ).format(Date(dateMillis))
+    Instant.fromEpochMilliseconds(dateMillis).toLocalDateTime(TimeZone.UTC).date.toDisplayString()

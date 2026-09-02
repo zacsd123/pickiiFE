@@ -49,11 +49,9 @@ import com.example.pickii.ui.theme.PickiiGraySecondary
 import com.example.pickii.ui.theme.PickiiGraySlate
 import com.example.pickii.ui.theme.PickiiSlateDark
 import com.example.pickii.ui.theme.PickiiSurfaceGray
+import com.example.pickii.util.toDisplayString
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -597,8 +595,6 @@ private fun SectionTitle(
 /**
  * 밀리초 날짜를 화면에 표시할 문자열로 변환한다.
  */
+@OptIn(ExperimentalTime::class)
 private fun formatMeetingDate(millis: Long): String =
-    SimpleDateFormat(
-        "yyyy.MM.dd",
-        Locale.getDefault()
-    ).format(Date(millis))
+    Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date.toDisplayString()
