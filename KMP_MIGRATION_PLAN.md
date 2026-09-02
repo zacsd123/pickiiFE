@@ -181,6 +181,7 @@ Pickii/
 5. **채팅 (마지막, 가장 어려움)**: `chat/room`(`ChatRoomScreen.kt` 46KB, `ChatRoomViewModel.kt` + `+MeetingPoll.kt` 합쳐 50KB — 프로젝트에서 가장 큰 화면), `chat/list`, `chat/panel`, `chat/meeting`, `chat/photo`. WebSocket 실시간성 + 사진 업로드(`CameraCaptureUtil`, `GalleryPickerBottomSheet`) + 회의 투표 카드까지 얽혀 있어 별도 일정으로 분리 권장
 
 - [ ] 화면 이식할 때마다 Android/iOS 양쪽에서 실제 확인 (에뮬레이터만 보고 "됐다"고 판단하지 않기 — 이전 대화에서 나온 애니메이션 체감 이슈도 실기기 기준으로 재확인)
+- [ ] iOS 카나리아는 **이번에 옮긴 화면**을 직접 띄워야 한다 — 이미 검증된 다른 화면을 재탕하지 말 것. `IosKoinGraphResolveTest`는 "등록된 게 resolve되는가"만 잡고 "등록 자체가 없는가"는 못 잡는데(§5 14번), 그 구멍을 메우는 게 바로 이 렌더링 단계다 — 등록이 없으면 화면 진입 즉시 `NoDefinitionFoundException`으로 죽는다
 
 #### 4-1. 남은 17개 영역 — androidx 의존성 전수 조사 (2026-08-26)
 
@@ -417,22 +418,64 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
     `LocalDate.format(DateTimeFormat)`/`LocalTime.format(...)`(수신자가 날짜/시간 타입)은 완전히
     다른 함수라 이건 멀티플랫폼이라 안전 — 헷갈리지 말 것. `String.format`류는 발견 즉시
     `padStart(n, '0')` 등 수동 문자열 조립으로 치환.
-14. **`IosKoinGraphResolveTest`(11번)는 손으로 유지하는 목록이라 이미 한 번 새어나갔다** —
+14. **`IosKoinGraphResolveTest`(11번)가 손으로 유지하는 목록이었던 문제 — 해결함(2026-09-03)**.
     `LoginViewModel`이 `sharedModule`엔 등록됐는데(2026-09-01, 다른 환경의 Kakao 실연동 작업)
-    이 테스트엔 추가가 안 됐던 걸 `chat/list` 이식 중 발견(2026-09-03). Koin
-    `checkModules`/`org.koin.test.verify.verify()`로 자동화(등록된 정의를 열거해서 전부
-    resolve하는 방식)할 수 있는지 조사했으나 **iOS(Kotlin/Native)에서 못 쓴다** — 실제
+    이 테스트엔 추가가 안 됐던 걸 `chat/list` 이식 중 발견한 게 계기. Koin
+    `checkModules`/`org.koin.test.verify.verify()`는 실제로 **iOS(Kotlin/Native)에서 못 쓴다** —
     `koin-test-jvm-4.1.1.jar`를 열어 확인한 결과 `org.koin.test.check.CheckModulesKt`,
-    `org.koin.test.verify.*`(`Verification`, `VerifyModuleKt` 등) 클래스 전부 `koin-test-jvm`
-    아티팩트에만 있고, 멀티플랫폼 `koin-test`(iosArm64/iosSimulatorArm64/iosX64 variant가 실제로
-    있는 진짜 KMP 아티팩트)에는 없다 — 둘 다 JVM 리플렉션(생성자 파라미터 타입 조회 등)에
-    의존하는데 Kotlin/Native는 그 수준의 리플렉션 자체가 없어서 원천적으로 안 됨. 그래서 손목록
-    유지가 지금 유일한 선택지 — **화면을 shared로 옮길 때마다 `SharedModule.kt` 등록과
-    `IosKoinGraphResolveTest.kt`의 `koin.get<...ViewModel>()` 줄을 반드시 같이 추가할 것**(Android
-    쪽 `KoinGraphResolveTest.kt`는 `viewModelModule`+`sharedModule`을 합쳐서 도는 구조라 이 문제가
-    없음 — iOS 쪽만 특별히 취약함). 가드가 진짜 작동하는지는 `sharedModule`에서 바인딩 하나를
-    일부러 빼고 `NoDefinitionFoundException`으로 실패하는 것까지 실측 확인함(2026-09-03,
-    `FeedbackViewModel`로 재현).
+    `org.koin.test.verify.*` 클래스 전부 `koin-test-jvm`에만 있고 진짜 멀티플랫폼인
+    `koin-test`(iosArm64 등 klib 있음)엔 없음 — 둘 다 JVM 리플렉션(생성자 파라미터 타입 조회) 기반이라
+    Kotlin/Native엔 그 수준의 리플렉션이 없어서 원천적으로 안 됨. **다만 "손목록이 유일한 선택지"는
+    틀린 결론이었다** — `checkModules`가 리플렉션을 쓰는 진짜 이유는 파라미터 있는 정의의 생성자
+    인자를 "합성"해야 해서고, 우리가 필요한 건 그게 아니라 "이미 등록된 정의를 전부 한 번씩
+    resolve"뿐이었다. Koin은 이걸 위한 저수준 API를 실제로 공개하고 있다(리플렉션 아님, 등록
+    구조 순회일 뿐):
+    - `Koin.instanceRegistry`(`@KoinInternalApi` opt-in만 필요, JVM 전용 아님) →
+      `.instances: Map<String, InstanceFactory<*>>`
+    - `InstanceFactory.beanDefinition.primaryType: KClass<*>` — 정의 시점에 이미 알던 타입,
+      런타임 타입 조회 아님
+    - `Koin.get(clazz: KClass<*>, qualifier: Qualifier?, parameters: (() -> ParametersHolder)?): T`
+      — reified 없이 `KClass`를 직접 받는 non-reified 오버로드
+    
+    이 세 개를 조합하면 등록된 `BeanDefinition`을 순회하며 `koin.get<Any>(type, null, null)`로
+    전부 resolve하는 테스트를 짤 수 있고, `:shared:compileTestKotlinIosSimulatorArm64`/
+    `:shared:iosSimulatorArm64Test`로 실측 컴파일·실행까지 통과함을 확인했다(iOS 전용 API가 아니라
+    `koin-core` 공개 API라 원리상 당연하지만, 실제로 켜본 게 처음이라 확인이 필요했음).
+    `IosKoinGraphResolveTest.kt`를 이 방식으로 완전히 교체 — 손목록(`koin.get<XxxViewModel>()`
+    한 줄씩)이 사라졌고, `sharedModule`에 새 바인딩을 추가하면 이 테스트가 **아무것도 안 고쳐도**
+    자동으로 같이 커버한다(`LoginViewModel` 종류의 사고가 구조적으로 다시 안 생김).
+
+    **모듈 목록도 손으로 안 짠다** — 테스트의 `setUp()`은 `initKoin()`을 직접 부르고,
+    `initKoin()`은 `iOSApp.swift`의 `init()`이 부르는 것과 완전히 같은 함수
+    (`InitKoinKt.doInitKoin()`)다. 그래서 "앱이 실제로 시작하는 그래프"와 "테스트가 검사하는
+    그래프"가 정의상 같다 — 손목록이 정의 단위에서 모듈 단위로만 옮겨간 게 아닌지 우려가 있었는데
+    (모듈 하나가 새로 추가됐는데 테스트엔 안 들어가면 그 모듈 전체가 무검증이 되는 시나리오),
+    애초에 모듈 목록 자체가 테스트 안에 따로 없어서 이 시나리오 자체가 성립하지 않는다.
+
+    **한계 1**: "resolve되는가"만 보지 "애초에 등록조차 안 됐는가"는 여전히 못 잡는다(손목록
+    방식도 원래 이 부분은 못 잡았음 — 동일 선상). **이 구멍은 테스트가 아니라 화면 이식 절차의
+    카나리아 렌더링 단계가 메운다** — 화면을 shared로 옮길 때마다 카나리아는 반드시 **이번에
+    옮긴 화면**을 띄워야 한다(다른 이미 검증된 화면을 재탕해서 "컴파일 되니 됐다"고 넘기면 안 됨).
+    등록 자체가 없으면 그 화면에 진입하는 순간 `NoDefinitionFoundException`으로 죽으므로, 렌더링
+    확인이 곧 "등록 누락 없음"의 증거다. 정리하면: **등록은 됐는데 resolve가 깨지는 경우 →
+    `IosKoinGraphResolveTest`가 잡음. 등록 자체가 없는 경우 → 카나리아 렌더링이 잡음.** 이 두
+    개가 합쳐야 이 클래스의 DI 결함을 전부 커버한다.
+
+    **한계 2**: `koin.get<Any>(type, qualifier = null, parameters = null)`로 파라미터 없이
+    호출한다 — 지금은 `sharedModule`에 `parametersOf`를 쓰는 정의가 하나도 없어서 전부 통과하지만,
+    나중에 파라미터 있는 정의가 추가되면 이 순회에서 진짜 결함이 아닌데도 실패한다. 그때는 그
+    타입을 순회에서 제외하거나 더미 파라미터를 넘기도록 손봐야 한다.
+
+    가드가 진짜 작동하는지 **세 번** 실측 확인(2026-09-03):
+    1. `sharedModule`에서 `FeedbackViewModel` 자체 등록을 빼고 → 자동 순회가 그 항목을 애초에
+       안 보므로 통과(예상대로, 한계 1과 일치)
+    2. 대신 `FeedbackRepository`(의존 체인의 일부) 등록을 빼고 재실행 →
+       `NoDefinitionFoundException`으로 정확히 `FeedbackViewModel` 생성 실패 확인 → 원복
+    3. `initKoin()` 자체에서 `sharedCalendarRepositoryModule`을 빼고 재실행 →
+       `MonthlyCalendarViewModel`(`CalendarRepository` 의존)에서 정확히 실패 확인 → 원복 —
+       "모듈 하나가 통째로 빠지는" 시나리오까지 실제로 재현하고 잡히는 것 확인함
+    
+    세 번 다 원복 후 재통과까지 확인.
 
 ## 참고 자료
 
