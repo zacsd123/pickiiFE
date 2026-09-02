@@ -417,6 +417,22 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
     `LocalDate.format(DateTimeFormat)`/`LocalTime.format(...)`(수신자가 날짜/시간 타입)은 완전히
     다른 함수라 이건 멀티플랫폼이라 안전 — 헷갈리지 말 것. `String.format`류는 발견 즉시
     `padStart(n, '0')` 등 수동 문자열 조립으로 치환.
+14. **`IosKoinGraphResolveTest`(11번)는 손으로 유지하는 목록이라 이미 한 번 새어나갔다** —
+    `LoginViewModel`이 `sharedModule`엔 등록됐는데(2026-09-01, 다른 환경의 Kakao 실연동 작업)
+    이 테스트엔 추가가 안 됐던 걸 `chat/list` 이식 중 발견(2026-09-03). Koin
+    `checkModules`/`org.koin.test.verify.verify()`로 자동화(등록된 정의를 열거해서 전부
+    resolve하는 방식)할 수 있는지 조사했으나 **iOS(Kotlin/Native)에서 못 쓴다** — 실제
+    `koin-test-jvm-4.1.1.jar`를 열어 확인한 결과 `org.koin.test.check.CheckModulesKt`,
+    `org.koin.test.verify.*`(`Verification`, `VerifyModuleKt` 등) 클래스 전부 `koin-test-jvm`
+    아티팩트에만 있고, 멀티플랫폼 `koin-test`(iosArm64/iosSimulatorArm64/iosX64 variant가 실제로
+    있는 진짜 KMP 아티팩트)에는 없다 — 둘 다 JVM 리플렉션(생성자 파라미터 타입 조회 등)에
+    의존하는데 Kotlin/Native는 그 수준의 리플렉션 자체가 없어서 원천적으로 안 됨. 그래서 손목록
+    유지가 지금 유일한 선택지 — **화면을 shared로 옮길 때마다 `SharedModule.kt` 등록과
+    `IosKoinGraphResolveTest.kt`의 `koin.get<...ViewModel>()` 줄을 반드시 같이 추가할 것**(Android
+    쪽 `KoinGraphResolveTest.kt`는 `viewModelModule`+`sharedModule`을 합쳐서 도는 구조라 이 문제가
+    없음 — iOS 쪽만 특별히 취약함). 가드가 진짜 작동하는지는 `sharedModule`에서 바인딩 하나를
+    일부러 빼고 `NoDefinitionFoundException`으로 실패하는 것까지 실측 확인함(2026-09-03,
+    `FeedbackViewModel`로 재현).
 
 ## 참고 자료
 
