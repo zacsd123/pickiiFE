@@ -1,6 +1,5 @@
 package com.example.pickii.ui.chat
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -18,6 +17,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +53,7 @@ private val PanelDividerColor = PickiiDivider
 /**
  * 채팅방 우측 정보 패널을 표시한다.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatRoomInfoPanel(
     uiState: ChatRoomUiState,

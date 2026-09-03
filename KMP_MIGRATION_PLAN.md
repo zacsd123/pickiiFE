@@ -559,6 +559,49 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
         확인**할 것 — 이식 전 훑기의 마지막 안전망으로, 매번 하지는 않더라도 날짜/시간/텍스트
         포맷팅이 있는 화면(chat/meeting류)에서는 필수로 돌릴 것.
 
+18. **`./gradlew :shared:iosSimulatorArm64Test`가 실제로 쓰는 시뮬레이터는 그동안 canary 설치에 쓰던
+    디바이스와 다를 수 있다(2026-09-03, chat/room 0단계 WebSocket 스파이크 중 발견).** iOS
+    시뮬레이터 TLS 실패를 조사하며 그동안 수동으로 install/launch해온 "iPhone 17"(`C87328AC-...`)을
+    `xcrun simctl erase`로 초기화했는데도 재현됐다 — `--info` 로그(`Starting process ... Command:
+    /usr/bin/xcrun simctl spawn --standalone <UDID> .../test.kexe ...`)를 까보니 Kotlin/Native
+    테스트 러너가 실제로 쓴 건 전혀 다른 디바이스 "iPhone 17 Pro"(`25FCCBF1-...`)였다. **디바이스를
+    지목해서 디버깅할 때는(초기화, 시계 확인 등) 반드시 `--info` 로그로 실제 UDID를 먼저 확인할
+    것** — 여러 시뮬레이터가 동시에 booted 상태면 어느 게 테스트 러너가 쓰는 것인지 짐작하면 안 된다.
+    (참고: `xcrun simctl spawn <UDID> <바이너리>`는 절대경로가 필요하다 — `echo`처럼 셸 빌트인은
+    "No such file or directory"로 실패하지만 `/bin/date`처럼 실제 실행파일 경로는 된다.)
+
+19. **Ktor `WebSockets` 플러그인은 Darwin 엔진에서 실제로 동작한다(2026-09-03, chat/room 이식
+    0단계 스파이크에서 확인) — 다만 이 개발 환경의 iOS 시뮬레이터는 TLS(HTTPS/WSS) 자체가 원인
+    불명으로 막혀 있어, 검증은 비TLS `ws://`로 우회해서 했다.**
+    - **막힌 것**: `HttpClient(Darwin)`으로 `https://www.apple.com`, `https://postman-echo.com`
+      등 서로 다른 CA(Let's Encrypt, DigiCert)를 쓰는 호스트에 GET을 보내도 전부
+      `NSURLErrorDomain Code=-1202`(`errSSLXCertChainInvalid`, -9807)로 실패. 클럭 대조(호스트
+      `date` vs `xcrun simctl spawn <udid> /bin/date`, 초 단위까지 일치), 호스트 자체 `curl` 대조
+      (정상), 시뮬레이터 초기화(`xcrun simctl erase`+재부팅) 전부 시도했지만 원인 불명이었다.
+      **원인 확정(2026-09-03, chat/room A배치 카나리아로 실측)**: 순수 xctest 바이너리(`simctl spawn
+      --standalone`)에서만 나는 문제였다. 같은 기기(`C87328AC-...`, "iPhone 17")에 일반 앱을
+      `simctl install`+`launch`로 띄우고 `HttpClient(httpClientEngine().create())`로
+      `https://www.apple.com`을 GET했더니 **정상 200 응답**. 즉 **일반 앱 실행 경로의 iOS
+      HTTPS는 이 환경에서 처음부터 문제없었다** — `iosSimulatorArm64Test`(Kotlin/Native 단위
+      테스트, `simctl spawn --standalone`으로 실행됨)만 TLS 인증서 체인 검증이 깨진다. **따라서
+      HTTPS가 필요한 iOS 동작 검증은 단위 테스트로 대신할 수 없고, 반드시 앱을 실제로 빌드+설치해서
+      확인해야 한다** — 백엔드 재가동 후의 iOS 검증 계획은 이 전제로 세울 것(대조군으로 다른
+      시뮬레이터에 추가 설치할 필요는 없음, 실행 방식 차이로 이미 원인이 갈렸음).
+    - **검증 방법(우회)**: 외부 의존 없이 stdlib만으로 RFC 6455 WebSocket 핸드셰이크+프레임을 직접
+      구현한 로컬 에코 서버(Python, `ws_echo_server.py`, 세션 종료 시 삭제)를 `127.0.0.1:8765`에
+      띄우고 `ws://127.0.0.1:8765/`로 연결 — iOS 시뮬레이터는 호스트와 네트워크 스택을 공유하므로
+      `127.0.0.1`이 그대로 호스트를 가리킨다. `HttpClient(Darwin) { install(WebSockets) }`로 연결,
+      텍스트 프레임 송신 → 동일 문자열 수신 확인, 성공.
+    - **결론**: WebSockets 플러그인·Darwin 엔진 조합 자체는 문제없다 — C1(`ChatStompClient`를
+      `httpClientEngine()` expect/actual로 옮기는 작업) 계획을 바꿀 이유 없음. 이 환경의 TLS 문제는
+      xctest 바이너리 한정이라는 게 확정됐으므로(위 항목), 실제 STOMP(`wss://`) 연결도 앱을 실제로
+      띄워서 확인하면 된다 — 백엔드 재가동 후 일반 앱 실행으로 검증할 것, 단위 테스트로는 시도하지
+      말 것.
+    - **`runTest`(kotlinx-coroutines-test)로 실제 네트워크 I/O를 기다릴 때 주의**: 가상 시간
+      스케줄러가 `withTimeout`을 즉시 만료시켜버린다(실측: 15초 타임아웃이 0초 만에 뜸). 에러
+      메시지가 알려주는 대로 `withContext(Dispatchers.Default.limitedParallelism(1))`로 감싸야
+      실제 시간이 흐른다.
+
 ## 참고 자료
 
 - [Compose Multiplatform for iOS is Now Stable](https://medium.com/@rushabhprajapati20/compose-multiplatform-for-ios-is-now-stable-bf4e2fc35596)
