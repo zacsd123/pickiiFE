@@ -330,6 +330,26 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
 화면을 하나씩 옮길 때마다 매번 새로 부딪히는 게 아니라 이미 몇 번 확인된 패턴들. 새 화면에서 컴파일이
 안 되거나 iOS에서만 깨질 때 여기부터 의심할 것.
 
+> **원칙: 검색은 예고편이고, 진짜 검사는 컴파일이다.** `android.*` import, `.format(`,
+> `java.text.`/`java.util.` 같은 훑기 체크리스트는 배치마다 계속 늘려왔지만(15, 17, 21번 항목),
+> chat/room B배치 하나에서만도 훑기가 못 잡는 새 유형이 4개 나왔다(아래). 체크리스트를 더 늘리는
+> 방식으로는 못 따라간다 — 검색은 "알려진 패턴 중 몇 개가 있는지"를 미리 보여주는 예고편일 뿐,
+> "이 파일이 진짜 컴파일되는지"는 컴파일만이 답한다. **그래서 `git mv`(패키지 유지) 직후
+> `:shared:compileKotlinIosSimulatorArm64`를 즉시 돌리는 걸 이식 절차의 필수 단계로 승격한다 —
+> 훑기 결과가 깨끗하다는 이유로 이 단계를 건너뛰지 말 것.** 지금까지 컴파일로만 잡힌 유형들:
+> - **`java.` 명시 import** — `SimpleDateFormat`, `Date`, `Locale`(17번).
+> - **암묵 import** — `System.currentTimeMillis()`처럼 `java.lang.*`이라 import 줄 자체가 없는
+>   것(21번). `grep "java\."`로 원천적으로 못 잡는다.
+> - **JVM 전용 stdlib 확장** — `Map.toSortedMap()`(`java.util.TreeMap` 기반, 21번),
+>   `String.format(...)`/`"...".format(...)`(17번). 이름도 시그니처도 평범한 Kotlin 표준 라이브러리
+>   함수처럼 보여서 코드만 봐서는 JVM 전용인지 구분이 안 된다.
+> - **`internal` 가시성** — 같은 Kotlin 패키지라도 `app`↔`shared`처럼 Gradle 모듈이 다르면 안
+>   보인다(20번). 컴파일 자체는 되는(`Unresolved reference`가 아니라 `Cannot access`) 다른 종류의
+>   실패라 더 헷갈린다.
+> - **소스셋 배치** — 라이브러리가 `androidMain`에만 선언돼 있어서(예: `coil-compose`) iOS 컴파일
+>   자체가 안 되는 경우(22번). `:shared:compileAndroidMain`만 돌리면 이런 문제는 절대 못 잡는다 —
+>   **Android 컴파일 성공을 "이식 준비 끝"으로 착각하지 말 것**(21번에서도 같은 교훈 반복 확인).
+
 1. **androidx 라이브러리는 iOS 타깃을 안 내는 경우가 많고, `org.jetbrains.androidx.*` 미러를 써야
    한다.** Navigation(`org.jetbrains.androidx.navigation:navigation-compose`),
    lifecycle-runtime-compose(`org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose`)에서 확인.
@@ -601,6 +621,88 @@ Android/iOS 양쪽에 그대로 쓰이는 진짜 구현체이고, `IosKoinGraphR
       스케줄러가 `withTimeout`을 즉시 만료시켜버린다(실측: 15초 타임아웃이 0초 만에 뜸). 에러
       메시지가 알려주는 대로 `withContext(Dispatchers.Default.limitedParallelism(1))`로 감싸야
       실제 시간이 흐른다.
+
+20. **`internal`은 같은 Kotlin 패키지라도 Gradle 모듈이 다르면 안 보인다(2026-09-03, chat/room
+    B배치에서 발견).** `ChatMessageBubbles.kt`/`ChatMeetingPollCards.kt`를 `app`에서 `shared`로
+    옮겼는데(패키지는 그대로 `com.example.pickii.ui.chat`), `internal fun`으로 선언된
+    `MyChatMessage`/`OtherChatMessage`/`MyImageMessage`/`OtherImageMessage`/`MeetingProgressCard`/
+    `DirectMeetingCard`를 여전히 app에 남아있는 `ChatRoomScreen.kt`가 호출하는 지점에서
+    `:app:compileDebugKotlin`이 "Cannot access ... it is internal in file"로 실패했다. `internal`은
+    "같은 모듈"(컴파일 단위) 안에서만 보이는 거라, 같은 패키지여도 `shared`↔`app`처럼 모듈이
+    갈리면 못 본다 — 지금까지 옮긴 파일들은 우연히 `internal` 심볼을 안 썼거나 호출부까지 같이
+    옮겨서 안 걸렸을 뿐이다. **§5 15번(같은 패키지 숨은 참조)의 변형 — 컴파일로만 잡힌다는 점은
+    같지만, "참조 자체가 안 보임"이 아니라 "보이는데 접근이 막힘"이라 에러 메시지가 다르다("Cannot
+    access", "Unresolved reference"가 아님).** 고치는 법: 아직 app에 호출부가 남아있는 동안은
+    이 배치의 이식 대상 함수에서 `internal`을 떼서 기본(public) 가시성으로 바꾼다 — 나중에
+    호출부(`ChatRoomScreen.kt`, C3)까지 shared로 넘어오면 다시 `internal`로 좁혀도 되지만 급하지
+    않다.
+21. **`System.currentTimeMillis()`처럼 `java.lang.*` 암묵 import를 쓰는 코드는 `java.` 문자열
+    검색으로 못 잡는다(2026-09-03, chat/room B배치에서 발견).** `System`/`Math`/`Thread`/`Runtime`
+    같은 `java.lang` 클래스는 JVM/Android Kotlin에서 import 없이 바로 쓸 수 있어서(`kotlin.*`처럼
+    암묵적으로 import됨), 17번 항목의 `java.text.`/`java.util.` 검색이나 `grep "java\."`로 전혀
+    안 걸린다. `:shared:compileAndroidMain`은 성공하지만(Android는 JVM이라 `java.lang.System`이
+    실제로 있음) `:shared:compileKotlinIosSimulatorArm64`에서만 `Unresolved reference 'System'`으로
+    걸린다 — **Android 컴파일 성공을 "이식 준비 끝"의 신호로 보면 안 되고, 반드시 iOS 컴파일까지
+    돌려야 잡힌다는 걸 다시 확인시켜준 사례**(4종 검증에 iOS 컴파일이 포함된 이유). 이식 전 훑기에
+    `\b(System|Math|Thread|Runtime)\.`도 검색 목록에 추가할 것. 대체: `Clock.System.now()
+    .toEpochMilliseconds()`(`kotlin.time.Clock`, `@OptIn(ExperimentalTime::class)` 필요) —
+    `util/Now.kt`의 `nowDateTime()`과 같은 `kotlin.time.Clock` 계열.
+    - **같은 배치에서 같은 종류로 하나 더**: `Map<K, V>.toSortedMap()`도 내부적으로
+      `java.util.TreeMap`을 쓰는 JVM 전용 stdlib 확장이라(문자열 `java.`가 코드에 안 남으니 훑기로
+      못 잡음) `:shared:compileAndroidMain`은 통과하고 iOS 컴파일에서만
+      `Unresolved reference 'toSortedMap'`으로 걸렸다(`ChatMeetingPollCards.kt`, `poll.slots
+      .groupBy { it.startAt.date }.toSortedMap()`). 대체: 정렬이 필요한 게 진짜 목적이면
+      `.toList().sortedBy { it.first }`(`List<Pair<K, V>>`, `forEach { (k, v) -> ... }`로 그대로
+      구조 분해됨) — `LocalDate` 등 `Comparable`만 구현돼 있으면 된다.
+
+22. **`coil3-compose`(`AsyncImage`)는 iOS 컴파일까지는 되지만, 원격(`http(s)://`) 이미지 로딩은
+    iOS에서 아직 안 될 수 있다(2026-09-03, chat/room B배치, 미해결로 남김).**
+    `ChatMessageBubbles.kt`를 shared로 옮기며 `implementation(libs.coil.compose)`를
+    `androidMain`에서 `commonMain`으로 옮겼더니 컴파일 자체는 문제없었다(coil3는 진짜
+    멀티플랫폼 아티팩트라 iOS klib이 있음) — 여기까지는 STOMP/Ktor 엔진과 같은 패턴. 다만
+    `coil-network-okhttp`(현재 `app/build.gradle.kts`에만 있음, JVM 전용)에 대응하는 iOS용 네트워크
+    페처(예: `coil-network-ktor3`, Ktor 기반이라 진짜 멀티플랫폼)를 아직 추가/설정하지 않았고,
+    앱 어디에도 커스텀 `SingletonImageLoader.Factory`가 없어 완전히 기본값에 의존한다. **결과:
+    로컬 URI(예: 갤러리에서 방금 고른 사진)는 될 수 있지만, 서버 `imageUrl`(원격 URL) 로딩은
+    iOS에서 안 될 가능성이 높다 — 아직 실기 확인 안 함.** 이번 B배치 카나리아는 이미지 메시지를
+    포함하지 않아 이 문제를 가리지 않는다(의도적 축소, 아래 항목 확인). 카메라(§5 항목,
+    `supportsCameraCapture()`)와 같은 부류의 후속 과제로 남긴다 — chat/photo의 갤러리 피커가
+    이미 실사진을 다루므로, 실제 채팅 이미지 표시(원격 URL)를 검증할 때 STOMP처럼
+    `httpClientEngine()`을 재사용하는 네트워크 페처 설정이 필요할 것으로 예상.
+
+## 6. 화면 이식 절차 (배치 하나당 표준 순서)
+
+지금까지 chat/list, chat/panel, chat/meeting, chat/room A/B 배치에서 반복적으로 확인된 순서.
+매번 처음부터 협의하지 말고 이 순서를 그대로 따를 것 — 특히 **커밋 직전 단계(9번)를 스킵하는 실수가
+5번 중 3번 났다**(2026-09-03, chat/room B배치 이후 사용자 피드백). 캐너리 원복은 코드 변경이므로
+"원복했다"와 "원복한 상태로 빌드가 통과한다"는 별개다 — 반드시 재검증한다.
+
+1. **이식 전 훑기**: `android.*` import, `.format(`, `java.text.`/`java.util.`, `PlatformTextStyle`,
+   `\b(System|Math|Thread|Runtime)\.`, 앱 전용 래퍼/유틸 참조. 걸리는 게 있으면 옮기지 말고 먼저
+   보고.
+2. **`git mv`** — 패키지 선언은 그대로 둔다(디렉터리만 `app/.../X` → `shared/.../X`).
+3. **`:shared:compileAndroidMain` 즉시 실행** — §5 원칙대로, 훑기가 깨끗해도 건너뛰지 않는다.
+   같은 패키지 숨은 참조(§5 15번)와 `internal` 모듈 경계(§5 20번)는 여기서만 잡힌다.
+4. **`:shared:compileKotlinIosSimulatorArm64` 즉시 실행** — Android 컴파일 성공은 "이식 준비 끝"의
+   신호가 아니다(§5 21, 22번). `System.*`/`toSortedMap()`/소스셋 배치 문제는 iOS 컴파일에서만
+   잡힌다.
+5. import 교체(`BackHandler`, `koinViewModel` 등), ViewModel이 있으면 Koin 등록을
+   `viewModelModule` → `sharedModule`로 이동.
+6. **검증 4종**: `ktlintFormat` → `:app:assembleDebug :app:testDebugUnitTest` →
+   `:shared:compileKotlinIosSimulatorArm64 :shared:iosSimulatorArm64Test`.
+7. 캐너리 작성 — 이번 배치에서 옮긴 화면을 실제 사용 구조와 같은 모양으로(단독 렌더링 금지, §5
+   16번 카나리아 설계 주의 참고). `MainViewController.kt`(iOS)/`MainActivity.kt`(Android)의 Splash
+   진입점을 임시로 교체.
+8. **빌드 + 양쪽 설치 → 정지**. 스크린샷·탭·스와이프는 하지 않는다 — 확인 항목과 통과 기준만
+   적어서 사용자에게 넘긴다. 사용자 확인 후 다음 단계로.
+9. **커밋 직전, 반드시 이 순서로**(스킵 금지):
+   1. 캐너리 파일 삭제, `MainViewController.kt`/`MainActivity.kt`를 `git checkout --`으로 원복.
+   2. `git diff`로 두 진입점 파일이 빈 diff인지 확인.
+   3. **검증 4종을 처음부터 다시 실행**(6번과 동일한 4개 명령) — 원복한 상태 자체가 빌드되는지는
+      별도 확인 사항이다, "원복했다"만으로 끝내지 않는다.
+   4. `git add`로 이번 배치 파일만 스테이징.
+   5. `git diff --cached --stat`을 사용자에게 보여주고 확인 받는다.
+   6. 확인 후 커밋 → push 여부 확인.
 
 ## 참고 자료
 

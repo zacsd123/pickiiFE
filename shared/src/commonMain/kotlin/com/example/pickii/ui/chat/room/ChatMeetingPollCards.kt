@@ -59,6 +59,7 @@ import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -71,7 +72,7 @@ import kotlin.time.Instant
  */
 @Suppress("LongParameterList")
 @Composable
-internal fun MeetingProgressCard(
+fun MeetingProgressCard(
     meetingNotice: MeetingNoticeUiModel,
     pollDetail: MeetingPollDetail?,
     isAcknowledged: Boolean,
@@ -89,12 +90,12 @@ internal fun MeetingProgressCard(
     onSaveClick: () -> Unit
 ) {
     val status = pollDetail?.status
-    var nowMillis by remember(meetingNotice.pollId) { mutableStateOf(System.currentTimeMillis()) }
+    var nowMillis by remember(meetingNotice.pollId) { mutableStateOf(Clock.System.now().toEpochMilliseconds()) }
     val currentStatus by rememberUpdatedState(status)
 
     LaunchedEffect(meetingNotice.pollId, meetingNotice.deadlineMillis) {
         while (currentStatus == null || currentStatus == MeetingPollStatus.COLLECTING) {
-            nowMillis = System.currentTimeMillis()
+            nowMillis = Clock.System.now().toEpochMilliseconds()
             if (nowMillis >= meetingNotice.deadlineMillis) break
             delay(1000)
         }
@@ -167,7 +168,9 @@ private fun remainingTimeText(
     val hour = remain / 1000 / 3600
     val minute = (remain / 1000 % 3600) / 60
     val second = remain / 1000 % 60
-    return "%02d:%02d:%02d".format(hour, minute, second)
+    return "${hour.toString().padStart(2, '0')}:" +
+        "${minute.toString().padStart(2, '0')}:" +
+        second.toString().padStart(2, '0')
 }
 
 /** 등록 공지 단계 본문. */
@@ -392,7 +395,7 @@ private fun ResponseBody(
     val showForm = !poll.myResponded
     val allSlotIds = poll.slots.map { it.slotId }.toSet()
     val isNoneAvailableSelected = allSlotIds.isNotEmpty() && mySelection.isEmpty()
-    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toSortedMap()
+    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toList().sortedBy { it.first }
     var expandedDates by remember { mutableStateOf(setOf<LocalDate>()) }
 
     Text(text = "[회의 일정 조율]", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -514,7 +517,7 @@ private fun AggregationBody(
     isCurrentUserLeader: Boolean,
     onConfirmClick: (Long) -> Unit
 ) {
-    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toSortedMap()
+    val slotsByDate = poll.slots.groupBy { it.startAt.date }.toList().sortedBy { it.first }
     var expandedDates by remember { mutableStateOf(setOf<LocalDate>()) }
     val canConfirm = isCurrentUserLeader
 
@@ -634,7 +637,7 @@ private fun MeetingPollHeatmapChip(
  * 수정 가능).
  */
 @Composable
-internal fun DirectMeetingCard(
+fun DirectMeetingCard(
     meetingConfirmed: MeetingConfirmedUiModel,
     participantNames: List<String>,
     isSaved: Boolean,

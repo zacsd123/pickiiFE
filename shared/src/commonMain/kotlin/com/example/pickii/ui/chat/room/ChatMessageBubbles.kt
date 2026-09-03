@@ -30,7 +30,7 @@ private val OtherMessageColor = Color(0xFFF9FCA8)
  * 현재 사용자가 보낸 메시지를 표시한다. 시각/읽음 표시는 연속된 내 메시지 묶음의 마지막에만 보여준다.
  */
 @Composable
-internal fun MyChatMessage(
+fun MyChatMessage(
     message: ChatMessageUiModel,
     isLastOfRun: Boolean
 ) {
@@ -87,7 +87,7 @@ internal fun MyChatMessage(
  * 상대방이 보낸 메시지를 표시한다. 시각은 연속된 상대 메시지 묶음의 마지막에만 보여준다.
  */
 @Composable
-internal fun OtherChatMessage(
+fun OtherChatMessage(
     message: ChatMessageUiModel,
     isFirstOfRun: Boolean,
     isLastOfRun: Boolean
@@ -157,7 +157,7 @@ private val ChatImageBubbleSize = 160.dp
  * 현재 사용자가 보낸 사진 메시지를 표시한다.
  */
 @Composable
-internal fun MyImageMessage(
+fun MyImageMessage(
     message: ChatMessageUiModel,
     imageUri: String,
     isLastOfRun: Boolean
@@ -210,7 +210,7 @@ internal fun MyImageMessage(
  * 상대방이 보낸 사진 메시지를 표시한다.
  */
 @Composable
-internal fun OtherImageMessage(
+fun OtherImageMessage(
     message: ChatMessageUiModel,
     imageUri: String,
     isFirstOfRun: Boolean,
